@@ -14,6 +14,80 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
 
+const ROLE_WEIGHTS = {
+  'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
+  'HR / People Ops': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.15, achievements: 0.25, culturalRoleFit: 0.10 },
+  'Sales / BD': { skillsMatch: 0.20, experienceFit: 0.30, education: 0.10, achievements: 0.30, culturalRoleFit: 0.10 },
+  'Leadership / C-Suite': { skillsMatch: 0.20, experienceFit: 0.25, education: 0.10, achievements: 0.35, culturalRoleFit: 0.10 },
+  'Operations / Generalist': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.20, achievements: 0.20, culturalRoleFit: 0.10 },
+} as const;
+
+function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) {
+  const dimensions = screeningResult.scorecard.dimensions;
+  const roleType = jobRequirements.role_type || 'Operations / Generalist';
+  const roleWeights = (ROLE_WEIGHTS as any)[roleType] || ROLE_WEIGHTS['Operations / Generalist'];
+  
+  let weightedSum = 0;
+  weightedSum += (dimensions.skillsMatch?.score || 0) * roleWeights.skillsMatch;
+  weightedSum += (dimensions.experienceFit?.score || 0) * roleWeights.experienceFit;
+  weightedSum += (dimensions.education?.score || 0) * roleWeights.education;
+  weightedSum += (dimensions.achievements?.score || 0) * roleWeights.achievements;
+  weightedSum += (dimensions.culturalRoleFit?.score || 0) * roleWeights.culturalRoleFit;
+
+  let penaltySum = (dimensions.redFlags?.totalPenalty || 0);
+
+  // KO-4: 3 or more dimensions score < 50 => -15pt penalty
+  const lowScoresCount = [
+    dimensions.skillsMatch?.score,
+    dimensions.experienceFit?.score,
+    dimensions.education?.score,
+    dimensions.achievements?.score,
+    dimensions.culturalRoleFit?.score
+  ].filter(s => (s || 0) < 50).length;
+
+  if (lowScoresCount >= 3) {
+    penaltySum += 15;
+    // Add to red flags if not present
+    if (!dimensions.redFlags.flags.some((f: any) => f.label === 'Cross-Dimension Weakness')) {
+      dimensions.redFlags.flags.push({
+        label: 'Cross-Dimension Weakness',
+        severity: 'medium',
+        penalty: 15,
+        rationale: '3 or more dimensions scored below 50, triggering KO-4 penalty.'
+      });
+    }
+  }
+
+  const finalScore = Math.max(0, Math.min(100, Math.round(weightedSum - penaltySum)));
+  
+  // Auto-Reject Logic (PDF Decision Bands)
+  let recommendationStatus = screeningResult.scorecard.recommendation.status;
+  if (finalScore < 40 || (dimensions.skillsMatch?.score || 0) < 40) {
+    recommendationStatus = 'rejected';
+  }
+
+  return {
+    ...screeningResult,
+    scorecard: {
+      ...screeningResult.scorecard,
+      compositeScore: finalScore,
+      recommendation: {
+        ...screeningResult.scorecard.recommendation,
+        status: recommendationStatus
+      },
+      dimensions: {
+        ...dimensions,
+        redFlags: {
+          ...dimensions.redFlags,
+          totalPenalty: penaltySum
+        }
+      },
+      integrityScore: screeningResult.scorecard.integrityScore || 100,
+      proctoringEvents: screeningResult.scorecard.proctoringEvents || []
+    }
+  };
+}
+
 async function hashString(str: string) {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
@@ -1296,7 +1370,7 @@ function Dashboard() {
     e.stopPropagation();
     if (!auth.currentUser || !profile) return;
     
-    const ok = await confirm('Delete this job and all its candidates? This cannot be undone.');
+    const ok = await confirm('Security: Terminate this talent pipeline and purge all associated candidate records?');
     if (!ok) return;
     
     try {
@@ -1312,10 +1386,10 @@ function Dashboard() {
       snap.docs.forEach(d => batch.delete(d.ref));
       
       await batch.commit();
-      notify('Job and candidates associated have been removed.', 'success');
+      notify('Campaign terminated and purged.', 'success');
     } catch (err) {
       console.error('Delete Job Error:', err);
-      notify('Delete failed. You might not have permissions or there was a network error.', 'error');
+      notify('Termination failed matching security protocol.', 'error');
       handleFirestoreError(err, OperationType.DELETE, `jobs/${id}`);
     }
   };
@@ -1345,16 +1419,16 @@ function Dashboard() {
   }, [profile]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+    <div className="space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tight">Active Campaigns</h1>
-          <p className="text-slate-500 max-w-2xl text-sm sm:text-lg leading-relaxed font-medium">
-            Managing autonomous talent pipelines with zero-bias AI orchestration.
+          <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Active Pipelines</h1>
+          <p className="text-slate-500 max-w-2xl text-xs sm:text-lg leading-relaxed font-black uppercase tracking-widest opacity-60">
+            Autonomous Talent Orchestration
           </p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={() => navigate('/jobs/new')} className="w-full sm:w-auto h-14 px-8 shadow-2xl shadow-indigo-500/20 text-xs font-black uppercase tracking-widest rounded-2xl">
+          <Button onClick={() => navigate('/jobs/new')} className="w-full sm:w-auto h-12 sm:h-14 px-8 shadow-2xl shadow-indigo-500/20 text-[10px] font-black uppercase tracking-widest rounded-2xl">
             <Plus className="w-4 h-4 mr-2" /> Initialize Opening
           </Button>
         </div>
@@ -1367,16 +1441,16 @@ function Dashboard() {
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <Card className="p-16 text-center bg-white border-dashed border-2 border-slate-200 rounded-[3rem]">
+        <Card className="p-12 sm:p-20 text-center bg-white border-dashed border-2 border-slate-200 rounded-[3rem]">
           <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
             <Briefcase className="w-10 h-10 text-indigo-600" />
           </div>
-          <h3 className="text-2xl font-black mb-2">Workspace Empty</h3>
+          <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Workspace Empty</h3>
           <p className="text-slate-500 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
-          <Button onClick={() => navigate('/jobs/new')} size="lg" className="rounded-2xl h-14">Post Your First Job</Button>
+          <Button onClick={() => navigate('/jobs/new')} size="lg" className="rounded-2xl h-14 font-black uppercase tracking-widest text-xs">Post Your First Job</Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-12">
           {jobs.map(job => (
             <motion.div
               key={job.id}
@@ -1401,7 +1475,7 @@ function Dashboard() {
                    </div>
                    <div className="flex justify-between items-start">
                      <div className="flex-1 min-w-0">
-                       <h3 className="text-2xl font-black mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 tracking-tight leading-tight">{job.title}</h3>
+                       <h3 className="text-2xl font-black mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 tracking-tighter leading-tight uppercase">{job.title}</h3>
                        <p className="text-[10px] text-slate-400 mb-8 flex items-center gap-1.5 font-black uppercase tracking-widest">
                          <Clock className="w-3 h-3" /> Initialized {formatDate(job.createdAt)}
                        </p>
@@ -1452,7 +1526,7 @@ function NewJob() {
       const text = await extractTextFromFile(file);
       setDescription(text);
     } catch (err: any) {
-      notify(err.message || 'Error reading file', 'error');
+      notify(err.message || 'Error processing protocol document', 'error');
     } finally {
       setParsingFile(false);
     }
@@ -1474,63 +1548,73 @@ function NewJob() {
           createdAt: serverTimestamp(),
           status: 'active'
         });
-        notify('Job created successfully!', 'success');
+        notify('Job campaign initialized.', 'success');
         navigate(`/jobs/${docRef.id}`);
       } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, 'jobs');
       }
     } catch (err) {
       console.error(err);
-      notify('Failed to create job. Please try again.', 'error');
+      notify('Failed to initialize sequence.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Create New Job</h1>
-        <p className="text-slate-500 text-lg">Input your JD and AI will extract requirements automatically.</p>
+    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col gap-4">
+        <Button variant="ghost" className="-ml-2 w-fit px-0" onClick={() => navigate('/')}>
+          <ChevronRight className="w-4 h-4 rotate-180 mr-2" /> Back to Dashboard
+        </Button>
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Initialize Campaign</h1>
+          <p className="text-slate-500 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and our neural engine will decompose the assessment matrix automatically.</p>
+        </div>
       </div>
 
-      <Card className="p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-semibold mb-2">Job Title</label>
+      <Card className="p-6 sm:p-10 border-slate-100 shadow-2xl shadow-indigo-100/20 rounded-[2.5rem] bg-white/80 backdrop-blur-xl">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Campaign Title</label>
             <input
               required
               type="text"
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
-              placeholder="e.g. Senior Software Engineer"
+              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all font-bold text-slate-900 placeholder:text-slate-300"
+              placeholder="e.g. Senior Staff Engineer (Cloud Infrastructure)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          <div>
-            <div className="flex justify-between items-end mb-2">
-              <label className="block text-sm font-semibold">Job Description</label>
-              <label className="text-xs font-bold text-indigo-600 hover:text-indigo-500 cursor-pointer flex items-center gap-1 group">
-                <Plus className="w-3 h-3 group-hover:scale-110 transition-transform" />
+          <div className="space-y-2">
+            <div className="flex justify-between items-center px-1 mb-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Requirement Context</label>
+              <label className="text-[10px] font-black text-indigo-600 hover:text-indigo-500 cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full border border-indigo-100 transition-all hover:scale-105 uppercase tracking-widest">
+                <Plus className="w-3.5 h-3.5" />
                 <span>Upload PDF/DOCX</span>
-                <input type="file" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile} />
+                <input type="file" theme-target-id="job-file-input" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile} />
               </label>
             </div>
             <textarea
               required
-              rows={10}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm leading-relaxed"
-              placeholder={parsingFile ? "Reading file content..." : "Paste the full job description here..."}
+              rows={12}
+              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all text-sm leading-relaxed font-medium min-h-[300px] custom-scrollbar"
+              placeholder={parsingFile ? "Decrypting document layers..." : "Paste the full mission brief / job description here..."}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={parsingFile}
             />
-            <p className="mt-2 text-xs text-slate-400">Our AI will analyze technical skills, experience requirements, and cultural fit markers.</p>
+            <div className="flex items-center gap-2 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100/50 mt-4">
+              <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+              <p className="text-[10px] sm:text-xs text-indigo-700 font-bold leading-relaxed italic">
+                Our AI Agent will extract technical benchmarks, soft-skill markers, and cultural alignment indicators to build the D6 scorecard automatically.
+              </p>
+            </div>
           </div>
-          <div className="pt-4 flex gap-3">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => navigate('/')}>Cancel</Button>
-            <Button type="submit" variant="secondary" className="flex-1" disabled={loading || parsingFile}>
-              {loading ? 'Analyzing JD...' : 'Generate Requirements'}
+          <div className="pt-6 flex flex-col sm:flex-row gap-4">
+            <Button type="button" variant="outline" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl order-2 sm:order-1" onClick={() => navigate('/')}>Abandon Sequence</Button>
+            <Button type="submit" variant="secondary" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 order-1 sm:order-2" disabled={loading || parsingFile}>
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Activate Analysis'}
             </Button>
           </div>
         </form>
@@ -1672,15 +1756,11 @@ function JobDetail() {
             return;
           }
 
-          const screeningResult = await screenCandidate(text, job.requirements);
+          const rawScreeningResult = await screenCandidate(text, job.requirements);
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
           
           await addDoc(collection(db, 'candidates'), {
             ...screeningResult,
-            scorecard: {
-              ...screeningResult.scorecard,
-              integrityScore: screeningResult.scorecard.integrityScore || 100,
-              proctoringEvents: []
-            },
             jobId,
             organizationId: profile.organizationId,
             createdBy: auth.currentUser.uid,
@@ -1803,7 +1883,9 @@ function JobDetail() {
 
     setRetryingScreening(candidate.id);
     try {
-      const screeningResult = await screenCandidate(candidate.resumeText || '', job?.requirements || '');
+      const rawScreeningResult = await screenCandidate(candidate.resumeText || '', job?.requirements || '');
+      const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job?.requirements);
+      
       await updateDoc(doc(db, 'candidates', candidate.id), {
         ...screeningResult,
         status: 'processed',
@@ -2809,12 +2891,11 @@ function CandidateDetail() {
     doc.text('2. AI Screening Analytics', 20, currentY);
     
     const dimensionRows = [
-      { key: 'technicalCompetency', label: 'Technical Competency' },
-      { key: 'communicationSkills', label: 'Communication' },
-      { key: 'leadershipTeamBonding', label: 'Leadership' },
-      { key: 'cultureFit', label: 'Culture Fit' },
-      { key: 'problemSolving', label: 'Problem Solving' },
-      { key: 'domainExpertise', label: 'Domain Expertise' },
+      { key: 'skillsMatch', label: 'Skills Match (D1)' },
+      { key: 'experienceFit', label: 'Experience Fit (D2)' },
+      { key: 'education', label: 'Education (D3)' },
+      { key: 'achievements', label: 'Achievements (D4)' },
+      { key: 'culturalRoleFit', label: 'Cultural Fit (D5)' },
     ].map(dimInfo => {
       const dim = candidate.scorecard.dimensions[dimInfo.key as keyof typeof candidate.scorecard.dimensions] as any;
       return [dimInfo.label, dim ? `${dim.score}/100` : 'N/A', dim ? dim.rationale : 'Dimension not assessed'];
@@ -2824,7 +2905,7 @@ function CandidateDetail() {
       startY: currentY + 5,
       head: [['Dimension', 'Score', 'Rationale']],
       body: [
-        ['Overall Composite Match', `${candidate.scorecard.compositeScore}/100`, 'Comprehensive fit score calculated across all D6 dimensions.'],
+        ['Overall Composite Match', `${candidate.scorecard.compositeScore}/100`, 'Weighted fit score adjusted for role type and penalties.'],
         ...dimensionRows
       ],
       columnStyles: {
@@ -3373,8 +3454,8 @@ function CandidateDetail() {
                   <Info className="w-4 h-4 text-slate-400 cursor-help" />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-slate-700 pointer-events-none">
                     <p className="leading-relaxed">
-                      <span className="font-black text-indigo-400 block mb-1 uppercase tracking-widest">D6 Scoring Architecture</span>
-                      Comprehensive evaluation across Technical Competency, Communication Skills, Leadership & Team Bonding, Culture Fit, Problem Solving, and Domain Expertise. The match score is a weighted composite of these metrics.
+                      <span className="font-black text-indigo-400 block mb-1 uppercase tracking-widest">D6+ Scoring Architecture</span>
+                      Proprietary v2.0 weighted scoring system. Evaluates 5 core dimensions using adaptive role weights, chronological audit penalties, and signal density analysis.
                     </p>
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900" />
                   </div>
@@ -3389,15 +3470,76 @@ function CandidateDetail() {
                   {candidate.scorecard.integrityScore || 100}/100
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400">Signal Density:</span>
+                <span className={cn(
+                  "text-sm font-black px-2 py-1 rounded-lg",
+                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-indigo-100 text-indigo-700" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-slate-100 text-slate-700" : "bg-red-100 text-red-700"
+                )}>
+                  {candidate.scorecard.dimensions?.signalDensity?.score || '--'}/100
+                </span>
+                {candidate.scorecard.dimensions?.signalDensity?.rationale && (
+                  <div className="group relative">
+                    <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-900 text-white text-[8px] font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-slate-700 pointer-events-none">
+                      {candidate.scorecard.dimensions.signalDensity.rationale}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="space-y-6">
               {[
-                { id: 'D1', key: 'technicalCompetency', label: 'Technical Competency', weight: 'High', icon: Terminal, color: 'indigo', description: 'Evaluation of hard skills, tech stack alignment, and deep coding/engineering proficiency.' },
-                { id: 'D2', key: 'communicationSkills', label: 'Communication Skills', weight: 'High', icon: MessageSquare, color: 'blue', description: 'Clarity of thought, articulation of complex ideas, and professional responsiveness.' },
-                { id: 'D3', key: 'leadershipTeamBonding', label: 'Leadership & Team Bonding', weight: 'Med', icon: Users, color: 'purple', description: 'Ability to guide others, mentor, and foster a healthy collaborative environment.' },
-                { id: 'D4', key: 'cultureFit', label: 'Culture Fit & Alignment', weight: 'Med', icon: Heart, color: 'rose', description: 'Shared values, organizational mission alignment, and behavioral suitability.' },
-                { id: 'D5', key: 'problemSolving', label: 'Problem Solving Analysis', weight: 'High', icon: Brain, color: 'emerald', description: 'First-principles thinking, troubleshooting capacity, and logic under pressure.' },
-                { id: 'D6', key: 'domainExpertise', label: 'Domain & Experience', weight: 'Med', icon: Award, color: 'amber', description: 'Industry-specific knowledge, specialized experience, and market context.' },
+                { 
+                  id: 'D1', 
+                  key: 'skillsMatch', 
+                  label: 'Skills Match', 
+                  weight: '30-35%', 
+                  icon: Terminal, 
+                  color: 'indigo', 
+                  description: 'Semantic overlap between resume skills and JD requirements.',
+                  calculationDetail: 'Uses TF-IDF and semantic embedding cosine similarity to compare resume keywords against mandatory and preferred skill lists.'
+                },
+                { 
+                  id: 'D2', 
+                  key: 'experienceFit', 
+                  label: 'Experience Fit', 
+                  weight: '25-30%', 
+                  icon: Briefcase, 
+                  color: 'blue', 
+                  description: 'Relevant years, title proximity, and industry alignment analysis.',
+                  calculationDetail: 'Analyses years of experience vs requirements, title seniority (IC vs Manager), and industry relevance. Seniority gaps are heavily penalized.'
+                },
+                { 
+                  id: 'D3', 
+                  key: 'education', 
+                  label: 'Education', 
+                  weight: '10-20%', 
+                  icon: BookOpen, 
+                  color: 'emerald', 
+                  description: 'Degree level match, field relevance, and institution tiering.',
+                  calculationDetail: 'Matches degree levels (Bachelor, Master, PhD) and field of study. Considers institution rank and equivalent experience offsets.'
+                },
+                { 
+                  id: 'D4', 
+                  key: 'achievements', 
+                  label: 'Achievements', 
+                  weight: '20-35%', 
+                  icon: Award, 
+                  color: 'amber', 
+                  description: 'Quantified professional outcomes, scale signals, and impact statements.',
+                  calculationDetail: 'Extracts impact statements with quantified numbers (%, $, scale). Looks for awards, promotions, and significant project ownership.'
+                },
+                { 
+                  id: 'D5', 
+                  key: 'culturalRoleFit', 
+                  label: 'Cultural / Role Fit', 
+                  weight: '5-10%', 
+                  icon: Brain, 
+                  color: 'rose', 
+                  description: 'Tenure patterns, growth trajectory, and career consistency.',
+                  calculationDetail: 'Evaluates job-hopping signals (<1yr avg tenure), consistency of career path, and alignment with organizational scale and values.'
+                },
               ].map((dimInfo) => {
                 const dim = scorecard?.dimensions?.[dimInfo.key as keyof typeof scorecard.dimensions] as any;
                 const Icon = dimInfo.icon;
@@ -3447,7 +3589,19 @@ function CandidateDetail() {
                               <Icon className="w-5 h-5" />
                             </div>
                             <div>
-                              <h3 className="font-black text-slate-900 uppercase tracking-tight">{dimInfo.label}</h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-black text-slate-900 uppercase tracking-tight">{dimInfo.label}</h3>
+                                <div className="group/info relative">
+                                  <Info className="w-3.5 h-3.5 text-slate-300 hover:text-indigo-400 transition-colors cursor-help" />
+                                  <div className="absolute bottom-full left-0 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50 shadow-xl border border-slate-700 pointer-events-none">
+                                    <p className="leading-relaxed">
+                                      <span className="font-black text-indigo-400 block mb-1 uppercase tracking-widest">{dimInfo.label} PROTOCOL</span>
+                                      {dimInfo.calculationDetail}
+                                    </p>
+                                    <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-slate-900" />
+                                  </div>
+                                </div>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <p className="text-[10px] text-slate-400 font-medium italic">{dimInfo.description}</p>
                                 <span className={cn(
@@ -5231,7 +5385,16 @@ export default function App() {
       await signInWithPopup(auth, new GoogleAuthProvider());
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
-        console.log('Sign-in popup closed by user.');
+        process.env.NODE_ENV === 'development' && console.log('Sign-in popup closed by user.');
+        return;
+      }
+      if (error.code === 'auth/popup-blocked') {
+        notify('Sign-in popup was blocked by your browser. Please allow popups for this site and try again.', 'error');
+        return;
+      }
+      if (error.code === 'auth/cancelled-popup-request') {
+        // This often happens in iframe environments if multiple clicks occur or browser cancels
+        notify('Authentication was cancelled or blocked. Please ensure popups are enabled and try standard login.', 'info');
         return;
       }
       if (error.code === 'auth/unauthorized-domain') {

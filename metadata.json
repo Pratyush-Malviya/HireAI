@@ -2,5 +2,5 @@
   "name": "HireAI",
   "description": "Multi-tenant recruitment intelligence SaaS platform featuring AI-automated resume screening, D6 scoring engine, HireAI voice interviews, and professional footprint analysis.",
   "requestFramePermissions": ["microphone", "camera"],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

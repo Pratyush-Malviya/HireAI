@@ -29,6 +29,7 @@ export interface JobRequirements {
   required_education: string;
   preferred_industries: string[];
   role_seniority: string;
+  role_type: string;
   location_requirement: string;
   keywords: string[];
 }
@@ -70,12 +71,16 @@ export interface Scorecard {
     summary: string;
   };
   dimensions: {
-    technicalCompetency: DimensionScore;
-    communicationSkills: DimensionScore;
-    leadershipTeamBonding: DimensionScore;
-    cultureFit: DimensionScore;
-    problemSolving: DimensionScore;
-    domainExpertise: DimensionScore;
+    skillsMatch: DimensionScore;
+    experienceFit: DimensionScore;
+    education: DimensionScore;
+    achievements: DimensionScore;
+    culturalRoleFit: DimensionScore;
+    signalDensity?: {
+      score: number;
+      rationale: string;
+      analysis: string;
+    };
     redFlags: {
       flags: { label: string; severity: 'low' | 'medium' | 'high'; penalty: number; rationale: string }[];
       totalPenalty: number;

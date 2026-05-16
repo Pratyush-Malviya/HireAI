@@ -25,10 +25,14 @@ const JOB_PARSING_SCHEMA = {
     required_education: { type: Type.STRING },
     preferred_industries: { type: Type.ARRAY, items: { type: Type.STRING } },
     role_seniority: { type: Type.STRING },
+    role_type: { 
+      type: Type.STRING, 
+      enum: ["Technical / Engineering", "HR / People Ops", "Sales / BD", "Leadership / C-Suite", "Operations / Generalist"] 
+    },
     location_requirement: { type: Type.STRING },
     keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
   },
-  required: ["must_have_skills", "min_experience_years", "required_education"],
+  required: ["must_have_skills", "min_experience_years", "required_education", "role_type"],
 };
 
 const CITATION_SCHEMA = {
@@ -79,12 +83,19 @@ const CANDIDATE_SCREENING_SCHEMA = {
         dimensions: {
           type: Type.OBJECT,
           properties: {
-            technicalCompetency: DIMENSION_SCHEMA,
-            communicationSkills: DIMENSION_SCHEMA,
-            leadershipTeamBonding: DIMENSION_SCHEMA,
-            cultureFit: DIMENSION_SCHEMA,
-            problemSolving: DIMENSION_SCHEMA,
-            domainExpertise: DIMENSION_SCHEMA,
+            skillsMatch: DIMENSION_SCHEMA,
+            experienceFit: DIMENSION_SCHEMA,
+            education: DIMENSION_SCHEMA,
+            achievements: DIMENSION_SCHEMA,
+            culturalRoleFit: DIMENSION_SCHEMA,
+            signalDensity: {
+              type: Type.OBJECT,
+              properties: {
+                score: { type: Type.NUMBER },
+                rationale: { type: Type.STRING },
+                analysis: { type: Type.STRING }
+              }
+            },
             redFlags: {
               type: Type.OBJECT,
               properties: {
@@ -123,8 +134,14 @@ const CANDIDATE_SCREENING_SCHEMA = {
 export async function parseJobDescription(text: string) {
   const ai = getAiInstance();
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: `Analyze the following job description and extract key requirements in a structured format:
+    model: "gemini-3.1-pro-preview",
+    contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
+    
+    FOCUS AREAS:
+    - Must-have skills: Technical stack primitives.
+    - Nice-to-have skills: Ecosystem add-ons.
+    - Quantitative markers: Years of experience, degree types.
+    - Contextual markers: Seniority, location, industry.
     
     JOB DESCRIPTION:
     ${text}`,
@@ -148,40 +165,37 @@ export async function parseJobDescription(text: string) {
 export async function screenCandidate(resumeText: string, jobRequirements: any) {
   const ai = getAiInstance();
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: `You are an elite Technical Recruiter and Talent Analyst. Your task is to perform a deep-dive screening of the candidate based on their resume against the specific job requirements provided.
+    model: "gemini-3.1-pro-preview",
+    contents: `You are a Principal Talent Solutions Architect and Adversarial Talent Auditor. 
+    Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements.
+    
+    SCORING PROTOCOL (D6+ v2.0):
+    Analyze and score the candidate on 5 core dimensions (Each 0-100):
+    1. skillsMatch (D1): Keyword overlap + semantic similarity. Must-have match = full score. Nice-to-have = partial.
+    2. experienceFit (D2): Years of relevant exp, title proximity (IC vs Mgr), industry alignment.
+    3. education (D3): Degree level match, field relevance, institution tier.
+    4. achievements (D4): Quantified outcomes (%, $, numbers), awards, scale signals.
+    5. culturalRoleFit (D5): Tenure patterns (job-hopping), growth trajectory consistency.
 
-SCORING ALGORITHM REQUIREMENTS:
-1. compositeScore (0-100): Calculated as a weighted average:
-   - Technical Competency (40%)
-   - Problem Solving & Logic (20%)
-   - Communication & Clarity (15%)
-   - Domain Expertise (15%)
-   - Leadership/Culture Fit (10%)
-2. integrityScore (0-100): Initialized at 100. Deduct points for:
-   - Date gaps > 6 months unexplained (-15 per gap)
-   - Overlapping full-time roles at different companies (-30)
-   - Vague "buzzword-only" descriptions without specific outcomes (-10)
-   - Skills listed without supporting project evidence in work history (-10)
-3. RED FLAGS: Be aggressive in identifying mismatch signals or resume inconsistencies.
+    SIGNAL REQUIREMENTS:
+    - Identify specific "Penalties" (e.g., gaps > 12mo, job-hopping < 1yr avg tenure, resume < 300 words).
+    - Identify specific "Bonuses" (e.g., exact match on 5+ keywords, referral, previous hire from tier-1 firms).
+    - Detect "Red Flags" with severity levels.
 
-D6 SCORING DIMENSIONS:
-technicalCompetency, communicationSkills, leadershipTeamBonding, cultureFit, problemSolving, domainExpertise.
-
-SPEED & DEPTH MANDATE:
-- Max 2 sentences per dimension.
-- Must provide evidence-based rationales.
-- If a skill is "must-have" and missing, trigger a "rejected" or "potential" status immediately.
-
-JOB REQUIREMENTS:
-${JSON.stringify(jobRequirements, null, 2)}
-
-CANDIDATE RESUME:
-${resumeText}
-
-Return raw valid JSON matching the requested schema. Ensure all fields are populated.`,
+    MANDATE: 
+    - Be a strict filter. 
+    - Calculate a base compositeScore using these dimensions.
+    - Provide deep rationales and citations for every claim.
+    
+    JOB REQUIREMENTS:
+    ${JSON.stringify(jobRequirements, null, 2)}
+    
+    CANDIDATE RESUME:
+    ${resumeText}
+    
+    Return ONLY valid JSON matching the schema precisely.`,
     config: {
-      temperature: 0,
+      temperature: 0.1,
       responseMimeType: "application/json",
       responseSchema: CANDIDATE_SCREENING_SCHEMA,
     },
@@ -204,16 +218,38 @@ Return raw valid JSON matching the requested schema. Ensure all fields are popul
 
 export async function researchCandidate(candidateName: string, role: string, company: string, details: string) {
   const ai = getAiInstance();
-  const prompt = `Conduct targeted professional research for: ${candidateName}. 
-  Role: ${role} at ${company}. Context: ${details}
+  const prompt = `You are an elite Professional Intelligence Agent specializing in executive-level background verification and deep-signal talent research.
   
-  CORE MISSION: Find professional signals (LinkedIn, GitHub, Media, Portfolios).
-  SPEED MANDATE: Max 300 words. Focus on high-signal findings and verified links.
+  MISSION: Conduct a comprehensive, multi-source professional audit of the candidate: ${candidateName}.
+  CURRENT TARGET: ${role} at ${company}.
+  KNOWN CONTEXT: ${details}
   
-  Return raw objective data with citations.`;
+  RESOURCES TO SCAN:
+  1. Professional Identity: Highly specific LinkedIn profile data, recent posts, and professional endorsements.
+  2. Technical Footprint: GitHub repository activity, Stack Overflow contributions, or meaningful Open Source impact.
+  3. Thought Leadership: White papers, medium/personal blog posts, YouTube conference talks, or Podcast appearances.
+  4. Public Recognition: Press releases, awards, patent filings, or verified media mentions.
+  5. Portfolios: Personal websites or design portfolios.
+  
+  ACCURACY PROTOCOL:
+  - Verify if the current target role matches public records.
+  - Cross-reference listed skills with actual public output (e.g., if they claim Rust expertise, find Rust code).
+  - Look for "hidden gems" (exceptional projects or achievements not typically detailed in resumes).
+  
+  OUTPUT STRUCTURE:
+  ### Executive Summary
+  (Concise overview of professional stature and reputation)
+  
+  ### High-Signal Findings
+  (Bullet points of verified achievements, public artifacts, or technical evidence)
+  
+  ### Risk & Verification Notes
+  (Any discrepancies found or markers of exceptional integrity)
+  
+  MANDATE: Be objective, data-driven, and prioritize verified links over general descriptions. Max 500 words.`;
 
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-3.1-pro-preview",
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }],
