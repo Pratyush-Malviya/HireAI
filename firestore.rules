@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == "malviya.pratyush26@gmail.com";
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserOrg() {
+      let data = getUserData();
+      return data.keys().hasAll(['organizationId']) ? data.organizationId : null;
+    }
+
+    function isInOrg(orgId) {
+      return isSignedIn() && (isSuperAdmin() || getUserOrg() == orgId);
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      let data = getUserData();
+      return isSignedIn() && (
+        isSuperAdmin() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (data.keys().hasAll(['role']) && (data.role == "admin" || data.role == "owner"))
+      );
+    }
+
+    function isValidOrganization(data) {
+      return data.keys().hasAll(['name', 'createdAt', 'createdBy', 'status'])
+        && data.name is string && data.name.size() <= 200
+        && data.createdBy == request.auth.uid
+        && data.status in ['active', 'suspended'];
+    }
+
+    // Organizations collection
+    match /organizations/{organizationId} {
+      // Allow get for any signed in user so they can see names when invited
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && (isSuperAdmin() || organizationId == getUserOrg());
+      allow create: if isSignedIn() && isValidOrganization(incoming());
+      allow update: if isSignedIn() && (isSuperAdmin() || (organizationId == getUserOrg() && isAdmin()));
+    }
+
+    // Users collection
+    match /users/{uid} {
+      allow read: if isSignedIn() && (isSuperAdmin() || uid == request.auth.uid || (existing().keys().hasAll(['organizationId']) && getUserOrg() == existing().organizationId));
+      allow create: if isSignedIn() && uid == request.auth.uid;
+      allow update: if isSignedIn() && (isSuperAdmin() || uid == request.auth.uid || (existing().keys().hasAll(['organizationId']) && getUserOrg() == existing().organizationId && isAdmin()));
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin();
+    }
+
+    // Job rules
+    match /jobs/{jobId} {
+      allow read: if isSignedIn() && (isSuperAdmin() || existing().organizationId == getUserOrg());
+      allow create: if isSignedIn() && isInOrg(incoming().organizationId) && incoming().createdBy == request.auth.uid;
+      allow update, delete: if isSignedIn() && (isSuperAdmin() || (existing().organizationId == getUserOrg() && isAdmin()));
+    }
+
+    // Candidate rules
+    match /candidates/{candidateId} {
+      allow read: if isSignedIn() && (isSuperAdmin() || existing().organizationId == getUserOrg() || existing().email == request.auth.token.email);
+      allow create: if isSignedIn() && isInOrg(incoming().organizationId) && isValidCandidate(incoming());
+      allow update: if isSignedIn() && (
+        isSuperAdmin() || 
+        (existing().organizationId == getUserOrg() && isAdmin() && isValidCandidate(incoming())) ||
+        (existing().email == request.auth.token.email && (incoming().diff(existing()).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']) && isValidCandidate(incoming())))
+      );
+      allow delete: if isSignedIn() && (isSuperAdmin() || (existing().organizationId == getUserOrg() && isAdmin()));
+    }
+
+    // Interview rules
+    match /interviews/{interviewId} {
+      allow read, list: if isSignedIn() && (
+        isSuperAdmin() || 
+        existing().organizationId == getUserOrg() ||
+        get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.email == request.auth.token.email
+      );
+      allow create: if isSignedIn() && isInOrg(incoming().organizationId) && isValidInterview(incoming());
+      allow update: if isSignedIn() && (
+        isSuperAdmin() || 
+        (existing().organizationId == getUserOrg() && isAdmin() && isValidInterview(incoming())) ||
+        (get(/databases/$(database)/documents/candidates/$(existing().candidateId)).data.email == request.auth.token.email && 
+         incoming().diff(existing()).affectedKeys().hasAny(['messages', 'completed', 'feedback', 'completedAt']) &&
+         isValidInterview(incoming()))
+      );
+    }
+
+    function isValidInterview(data) {
+      return data.keys().hasAll(['candidateId', 'jobId', 'messages', 'startedAt', 'completed'])
+        && data.candidateId is string
+        && data.jobId is string
+        && data.messages is list;
+    }
+
+    function isValidCandidate(data) {
+      return data.keys().hasAll(['jobId', 'fullName', 'createdAt', 'status'])
+        && data.jobId is string
+        && data.fullName is string && data.fullName.size() <= 200
+        && data.status in ['processed', 'shortlisted', 'rejected']
+        && (data.keys().hasAny(['scorecard']) ? data.scorecard is map : true);
+    }
+  }
+}
