@@ -15,11 +15,11 @@ import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
 
 const ROLE_WEIGHTS = {
-  'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
-  'HR / People Ops': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.15, achievements: 0.25, culturalRoleFit: 0.10 },
-  'Sales / BD': { skillsMatch: 0.20, experienceFit: 0.30, education: 0.10, achievements: 0.30, culturalRoleFit: 0.10 },
-  'Leadership / C-Suite': { skillsMatch: 0.20, experienceFit: 0.25, education: 0.10, achievements: 0.35, culturalRoleFit: 0.10 },
-  'Operations / Generalist': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.20, achievements: 0.20, culturalRoleFit: 0.10 },
+  'Technical / Engineering': { skillsMatch: 0.30, experienceFit: 0.20, education: 0.10, achievements: 0.20, culturalRoleFit: 0.10, communicationSkills: 0.10 },
+  'HR / People Ops': { skillsMatch: 0.20, experienceFit: 0.20, education: 0.15, achievements: 0.20, culturalRoleFit: 0.10, communicationSkills: 0.15 },
+  'Sales / BD': { skillsMatch: 0.15, experienceFit: 0.25, education: 0.10, achievements: 0.25, culturalRoleFit: 0.10, communicationSkills: 0.15 },
+  'Leadership / C-Suite': { skillsMatch: 0.15, experienceFit: 0.20, education: 0.10, achievements: 0.30, culturalRoleFit: 0.10, communicationSkills: 0.15 },
+  'Operations / Generalist': { skillsMatch: 0.20, experienceFit: 0.20, education: 0.15, achievements: 0.15, culturalRoleFit: 0.10, communicationSkills: 0.20 },
 } as const;
 
 function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) {
@@ -33,6 +33,7 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
   weightedSum += (dimensions.education?.score || 0) * roleWeights.education;
   weightedSum += (dimensions.achievements?.score || 0) * roleWeights.achievements;
   weightedSum += (dimensions.culturalRoleFit?.score || 0) * roleWeights.culturalRoleFit;
+  weightedSum += (dimensions.communicationSkills?.score || 0) * roleWeights.communicationSkills;
 
   let penaltySum = (dimensions.redFlags?.totalPenalty || 0);
 
@@ -42,7 +43,8 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
     dimensions.experienceFit?.score,
     dimensions.education?.score,
     dimensions.achievements?.score,
-    dimensions.culturalRoleFit?.score
+    dimensions.culturalRoleFit?.score,
+    dimensions.communicationSkills?.score
   ].filter(s => (s || 0) < 50).length;
 
   if (lowScoresCount >= 3) {
@@ -2896,6 +2898,7 @@ function CandidateDetail() {
       { key: 'education', label: 'Education (D3)' },
       { key: 'achievements', label: 'Achievements (D4)' },
       { key: 'culturalRoleFit', label: 'Cultural Fit (D5)' },
+      { key: 'communicationSkills', label: 'Communication (D6)' },
     ].map(dimInfo => {
       const dim = candidate.scorecard.dimensions[dimInfo.key as keyof typeof candidate.scorecard.dimensions] as any;
       return [dimInfo.label, dim ? `${dim.score}/100` : 'N/A', dim ? dim.rationale : 'Dimension not assessed'];
@@ -3539,6 +3542,16 @@ function CandidateDetail() {
                   color: 'rose', 
                   description: 'Tenure patterns, growth trajectory, and career consistency.',
                   calculationDetail: 'Evaluates job-hopping signals (<1yr avg tenure), consistency of career path, and alignment with organizational scale and values.'
+                },
+                { 
+                  id: 'D6', 
+                  key: 'communicationSkills', 
+                  label: 'Communication Skills', 
+                  weight: '10-20%', 
+                  icon: MessageSquare, 
+                  color: 'purple', 
+                  description: 'Clarity of thought, professional articulation, and narrative quality.',
+                  calculationDetail: 'Assesses the readability and structure of the resume, the clarity of achievement descriptions, and overall professional storytelling ability.'
                 },
               ].map((dimInfo) => {
                 const dim = scorecard?.dimensions?.[dimInfo.key as keyof typeof scorecard.dimensions] as any;
