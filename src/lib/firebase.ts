@@ -13,10 +13,13 @@ try {
     localCache: persistentLocalCache({ 
       tabManager: persistentMultipleTabManager(),
     }),
+    experimentalForceLongPolling: true,
   }, firebaseConfig.firestoreDatabaseId);
 } catch (error) {
   console.warn("Firestore persistence failed to initialize, falling back to memory cache:", error);
-  firestore = initializeFirestore(app, {}, firebaseConfig.firestoreDatabaseId);
+  firestore = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+  }, firebaseConfig.firestoreDatabaseId);
 }
 
 export const db = firestore;

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, ArrowUpRight, Check, Menu, X, FileText, Download, Share2, ClipboardCheck } from 'lucide-react';
-import { useEffect, useState, createContext, useContext, useRef, Component, useCallback, useMemo } from 'react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X } from 'lucide-react';
+import { useEffect, useState, createContext, useContext, useRef, Component } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -15,11 +15,11 @@ import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
 
 const ROLE_WEIGHTS = {
-  'Technical / Engineering': { skillsMatch: 0.30, experienceFit: 0.20, education: 0.10, achievements: 0.20, culturalRoleFit: 0.10, communicationSkills: 0.10 },
-  'HR / People Ops': { skillsMatch: 0.20, experienceFit: 0.20, education: 0.15, achievements: 0.20, culturalRoleFit: 0.10, communicationSkills: 0.15 },
-  'Sales / BD': { skillsMatch: 0.15, experienceFit: 0.25, education: 0.10, achievements: 0.25, culturalRoleFit: 0.10, communicationSkills: 0.15 },
-  'Leadership / C-Suite': { skillsMatch: 0.15, experienceFit: 0.20, education: 0.10, achievements: 0.30, culturalRoleFit: 0.10, communicationSkills: 0.15 },
-  'Operations / Generalist': { skillsMatch: 0.20, experienceFit: 0.20, education: 0.15, achievements: 0.15, culturalRoleFit: 0.10, communicationSkills: 0.20 },
+  'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
+  'HR / People Ops': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.15, achievements: 0.25, culturalRoleFit: 0.10 },
+  'Sales / BD': { skillsMatch: 0.20, experienceFit: 0.30, education: 0.10, achievements: 0.30, culturalRoleFit: 0.10 },
+  'Leadership / C-Suite': { skillsMatch: 0.20, experienceFit: 0.25, education: 0.10, achievements: 0.35, culturalRoleFit: 0.10 },
+  'Operations / Generalist': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.20, achievements: 0.20, culturalRoleFit: 0.10 },
 } as const;
 
 function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) {
@@ -33,7 +33,6 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
   weightedSum += (dimensions.education?.score || 0) * roleWeights.education;
   weightedSum += (dimensions.achievements?.score || 0) * roleWeights.achievements;
   weightedSum += (dimensions.culturalRoleFit?.score || 0) * roleWeights.culturalRoleFit;
-  weightedSum += (dimensions.communicationSkills?.score || 0) * roleWeights.communicationSkills;
 
   let penaltySum = (dimensions.redFlags?.totalPenalty || 0);
 
@@ -43,8 +42,7 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
     dimensions.experienceFit?.score,
     dimensions.education?.score,
     dimensions.achievements?.score,
-    dimensions.culturalRoleFit?.score,
-    dimensions.communicationSkills?.score
+    dimensions.culturalRoleFit?.score
   ].filter(s => (s || 0) < 50).length;
 
   if (lowScoresCount >= 3) {
@@ -1130,6 +1128,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
       console.log(`Clean up finished. Total records removed: ${totalDeleted}`);
       notify(`Database cleared. ${totalDeleted} records removed.`, 'success');
       navigate('/');
+      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       console.error('Global Clear Error:', err);
       notify('Failed to clear database: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
@@ -1162,7 +1161,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 <Search className="w-5 h-5 text-white" />
               </div>
               <span className={cn("font-display font-black text-2xl tracking-tighter uppercase", user ? "text-white" : "text-slate-950")}>
-                HireFlow OS
+                HireAI
               </span>
             </Link>
             
@@ -1194,7 +1193,6 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
               <nav className="hidden md:flex items-center gap-2 overflow-x-auto whitespace-nowrap lg:gap-6 scrollbar-none">
                 <Link to="/" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Dashboard</Link>
                 <Link to="/jobs/new" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Post Job</Link>
-                <Link to="/settings" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Settings</Link>
                 {isUserAdmin && (
                   <Link to="/admin" className="text-[10px] font-black text-indigo-400 hover:text-indigo-300 transition-all uppercase tracking-[0.15em] flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 shrink-0">
                     <Shield className="w-3 h-3" /> System Admin
@@ -1443,16 +1441,13 @@ function Dashboard() {
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <Card className="p-12 sm:p-24 text-center bg-white border-dashed border-2 border-slate-200 rounded-[3.5rem] relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative z-10">
-            <div className="w-24 h-24 bg-indigo-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-6 duration-500">
-              <Zap className="w-12 h-12 text-indigo-600 fill-indigo-600" />
-            </div>
-            <h3 className="text-3xl font-black mb-3 uppercase tracking-tight text-slate-900">Initialize HireFlow Flow</h3>
-            <p className="text-slate-500 mb-12 max-w-sm mx-auto font-medium text-lg">No active pipelines detected. Launch your first 2026-grade autonomous talent acquisition flow now.</p>
-            <Button onClick={() => navigate('/jobs/new')} size="lg" className="rounded-2xl h-16 px-12 font-black uppercase tracking-[0.2em] text-xs bg-slate-900 shadow-2xl shadow-indigo-200 transition-all hover:-translate-y-1">Launch First Flow</Button>
+        <Card className="p-12 sm:p-20 text-center bg-white border-dashed border-2 border-slate-200 rounded-[3rem]">
+          <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <Briefcase className="w-10 h-10 text-indigo-600" />
           </div>
+          <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Workspace Empty</h3>
+          <p className="text-slate-500 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
+          <Button onClick={() => navigate('/jobs/new')} size="lg" className="rounded-2xl h-14 font-black uppercase tracking-widest text-xs">Post Your First Job</Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-12">
@@ -1695,7 +1690,7 @@ function JobDetail() {
     });
 
     return () => { unsubJob(); unsubCandidates(); };
-  }, [jobId, profile]);
+  }, [jobId]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -1715,17 +1710,18 @@ function JobDetail() {
       startTime: Date.now()
     });
 
-    // Process sequentially to respect rate limits (5 RPM for preview models)
+    // Process in small batches to avoid rate limits
     const BATCH_SIZE = 1;
     const filesArray = Array.from(files);
     
     for (let i = 0; i < filesArray.length; i += BATCH_SIZE) {
-      // Add cooldown between screening calls
-      if (i > 0) {
-        await new Promise(resolve => setTimeout(resolve, 8000));
-      }
-      
       const currentBatch = filesArray.slice(i, i + BATCH_SIZE);
+      
+      // Delay between batches to respect rate limits
+      if (i > 0) {
+        // Longer delay to be safe
+        await new Promise(resolve => setTimeout(resolve, 3500));
+      }
       
       await Promise.all(currentBatch.map(async (file, batchIdx) => {
         const actualIdx = i + batchIdx;
@@ -1833,15 +1829,15 @@ function JobDetail() {
     });
 
     try {
-      const BATCH_SIZE = 1; // Sequential processing to respect Search tiers
+      const BATCH_SIZE = 1; // Research is more intensive, process one by one
       for (let i = 0; i < candidatesToResearch.length; i += BATCH_SIZE) {
-        // Add a 15s cooldown between research calls to avoid 429s (Search is more restricted)
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 15000));
-        }
-
         const currentBatch = candidatesToResearch.slice(i, i + BATCH_SIZE);
         
+        if (i > 0) {
+          // Extra long delay for research because it uses Search tools which have tighter limits
+          await new Promise(resolve => setTimeout(resolve, 6000));
+        }
+
         await Promise.all(currentBatch.map(async (c, batchIdx) => {
           const actualIdx = i + batchIdx;
           setUploadProgress(prev => prev ? ({ 
@@ -2161,10 +2157,16 @@ function JobDetail() {
                     ) : (
                       <div className="w-2.5 h-2.5 rounded-full bg-slate-700" />
                     )}
-                    <span className="text-xs font-bold truncate text-slate-300 italic">{file.name}</span>
+                    <div className="overflow-hidden">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white truncate">{file.name}</p>
+                      {file.message && (
+                        <p className={`text-[8px] font-bold uppercase tracking-tighter truncate ${file.message.includes('limit') ? 'text-amber-400 animate-pulse' : 'text-slate-500'}`}>
+                          {file.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {file.message && <span className="text-[10px] font-bold text-slate-500">{file.message}</span>}
                     <span className={cn(
                       "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border",
                       file.status === 'processing' ? "text-indigo-400 border-indigo-500/30 bg-indigo-500/10" :
@@ -2225,9 +2227,9 @@ function JobDetail() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Candidates by Role</h4>
-                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                    {['All', ...uniqueRoles].map(role => (
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Role</h4>
+                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                    {['All', ...Array.from(new Set(candidates.map(c => c.currentRole)))].slice(0, 5).map(role => (
                       <label key={role} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
@@ -2251,138 +2253,103 @@ function JobDetail() {
 
         {/* Main Content */}
         <div className="lg:col-span-9 space-y-8">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div>
-                  <h2 className="text-2xl font-black">Candidates ({filteredCandidates.length})</h2>
-                  <p className="text-slate-500 text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
-                </div>
-                {candidates.length > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest mt-1"
-                    onClick={clearJobCandidates}
-                    disabled={clearing}
-                  >
-                    {clearing ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Trash2 className="w-3 h-3 mr-2" />}
-                    Clear Pipeline
-                  </Button>
-                )}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-black">Candidates ({filteredCandidates.length})</h2>
+                <p className="text-slate-500 text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                {candidates.length > 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100 font-black uppercase tracking-widest text-[10px] h-9"
-                    onClick={handleResearchAll}
-                    disabled={researchingAll || uploading}
+              {candidates.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest mt-1"
+                  onClick={clearJobCandidates}
+                  disabled={clearing}
+                >
+                  {clearing ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Trash2 className="w-3 h-3 mr-2" />}
+                  Clear Pipeline
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {candidates.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100 font-black uppercase tracking-widest text-[10px] h-9"
+                  onClick={handleResearchAll}
+                  disabled={researchingAll || uploading}
+                >
+                  {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Globe className="w-3 h-3 mr-2" />}
+                  Research Pipeline
+                </Button>
+              )}
+              <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 px-2 border-r border-slate-200 h-7">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort</span>
+                  <select 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
+                    value={sortBy} 
+                    onChange={(e) => setSortBy(e.target.value)}
                   >
-                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Globe className="w-3 h-3 mr-2" />}
-                    Research Pipeline
-                  </Button>
-                )}
-                <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                  <div className="flex items-center gap-2 px-2 border-r border-slate-200 h-7">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort</span>
-                    <select 
-                      className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
-                      value={sortBy} 
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      <option>Score</option>
-                      <option>Integrity</option>
-                      <option>Recent</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2 px-2 border-r border-slate-200 h-7">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
-                    <select 
-                      className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
-                      value={statusFilter} 
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                      <option>All</option>
-                      <option value="shortlisted">Shortlisted (80+)</option>
-                      <option value="processed">Ready to Invite</option>
-                      <option value="rejected">Rejected (under 40)</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2 px-2 h-7">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</span>
-                    <select 
-                      className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[80px] sm:max-w-[120px] truncate" 
-                      value={roleFilter} 
-                      onChange={(e) => setRoleFilter(e.target.value)}
-                    >
-                      <option>All</option>
-                      {uniqueRoles.map(role => (
-                        <option key={role} value={role}>{role}</option>
-                      ))}
-                    </select>
-                  </div>
+                    <option>Score</option>
+                    <option>Integrity</option>
+                    <option>Recent</option>
+                  </select>
                 </div>
-                <div className="relative group flex-1 min-w-[200px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                  <input 
-                    type="text" 
-                    placeholder="Search candidates..." 
-                    className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all w-full"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-9 shrink-0">
-                  <button 
-                    onClick={() => setViewMode('list')} 
-                    className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "bg-white shadow-sm text-indigo-600" : "text-slate-400 hover:text-slate-600")}
+                <div className="flex items-center gap-2 px-2 border-r border-slate-200 h-7">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
+                  <select 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
+                    value={statusFilter} 
+                    onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <List className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => setViewMode('grid')} 
-                    className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "bg-white shadow-sm text-indigo-600" : "text-slate-400 hover:text-slate-600")}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
+                    <option>All</option>
+                    <option value="shortlisted">Shortlisted (80+)</option>
+                    <option value="processed">Ready to Invite</option>
+                    <option value="rejected">Rejected (under 40)</option>
+                  </select>
                 </div>
+                <div className="flex items-center gap-2 px-2 h-7">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</span>
+                  <select 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[80px] sm:max-w-[120px] truncate" 
+                    value={roleFilter} 
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                  >
+                    <option>All</option>
+                    {uniqueRoles.map(role => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="relative group flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Search candidates..." 
+                  className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-9 shrink-0">
+                <button 
+                  onClick={() => setViewMode('list')} 
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "bg-white shadow-sm text-indigo-600" : "text-slate-400 hover:text-slate-600")}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setViewMode('grid')} 
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "bg-white shadow-sm text-indigo-600" : "text-slate-400 hover:text-slate-600")}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
               </div>
             </div>
-
-            {uniqueRoles.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Quick Filter by Job Role</span>
-                <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none -mx-1 px-1">
-                  <button 
-                    onClick={() => setRoleFilter('All')}
-                    className={cn(
-                      "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-2 transition-all shadow-sm active:scale-95",
-                      roleFilter === 'All' 
-                        ? "bg-slate-900 text-white border-slate-900 shadow-slate-900/10" 
-                        : "bg-white text-slate-500 border-slate-100 hover:border-slate-300 hover:bg-slate-50"
-                    )}
-                  >
-                    All Applied Roles
-                  </button>
-                  {uniqueRoles.map(role => (
-                    <button 
-                      key={role}
-                      onClick={() => setRoleFilter(role)}
-                      className={cn(
-                        "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-2 transition-all shadow-sm active:scale-95",
-                        roleFilter === role 
-                          ? "bg-indigo-600 text-white border-indigo-600 shadow-indigo-600/10" 
-                          : "bg-white text-slate-500 border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30"
-                      )}
-                    >
-                      {role}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {filteredCandidates.length === 0 ? (
@@ -2946,7 +2913,6 @@ function CandidateDetail() {
       { key: 'education', label: 'Education (D3)' },
       { key: 'achievements', label: 'Achievements (D4)' },
       { key: 'culturalRoleFit', label: 'Cultural Fit (D5)' },
-      { key: 'communicationSkills', label: 'Communication (D6)' },
     ].map(dimInfo => {
       const dim = candidate.scorecard.dimensions[dimInfo.key as keyof typeof candidate.scorecard.dimensions] as any;
       return [dimInfo.label, dim ? `${dim.score}/100` : 'N/A', dim ? dim.rationale : 'Dimension not assessed'];
@@ -3133,15 +3099,6 @@ function CandidateDetail() {
            )}
 
            <div className="grid grid-cols-2 lg:flex gap-2">
-              <Button 
-                variant="brand" 
-                className="bg-indigo-600 hover:bg-slate-900 shadow-xl shadow-indigo-200 text-xs py-2 h-10 px-6 font-black uppercase tracking-widest rounded-xl transition-all hover:-translate-y-1 flex-1 lg:flex-none"
-                onClick={() => navigate(`/candidates/${candidate.id}/offer`)}
-              >
-                <FileText className="w-3.5 h-3.5 mr-2" />
-                Release Offer
-              </Button>
-
              {candidate.interviewStatus === 'completed' ? (
                <Button variant="secondary" className="flex-1 bg-green-600 hover:bg-green-700 text-xs py-2 h-auto" onClick={() => navigate(`/interview/${candidate.id}`)}>
                  <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
@@ -3600,16 +3557,6 @@ function CandidateDetail() {
                   description: 'Tenure patterns, growth trajectory, and career consistency.',
                   calculationDetail: 'Evaluates job-hopping signals (<1yr avg tenure), consistency of career path, and alignment with organizational scale and values.'
                 },
-                { 
-                  id: 'D6', 
-                  key: 'communicationSkills', 
-                  label: 'Communication Skills', 
-                  weight: '10-20%', 
-                  icon: MessageSquare, 
-                  color: 'purple', 
-                  description: 'Clarity of thought, professional articulation, and narrative quality.',
-                  calculationDetail: 'Assesses the readability and structure of the resume, the clarity of achievement descriptions, and overall professional storytelling ability.'
-                },
               ].map((dimInfo) => {
                 const dim = scorecard?.dimensions?.[dimInfo.key as keyof typeof scorecard.dimensions] as any;
                 const Icon = dimInfo.icon;
@@ -3845,310 +3792,6 @@ function CandidateDetail() {
   );
 }
 
-
-function OfferGeneration() {
-  const { candidateId } = useParams();
-  const { profile, organization } = useProfile();
-  const [candidate, setCandidate] = useState<Candidate | null>(null);
-  const [job, setJob] = useState<Job | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const navigate = useNavigate();
-  const { notify } = useNotification();
-
-  // Offer fields
-  const [salary, setSalary] = useState('');
-  const [currency, setCurrency] = useState('INR');
-  const [startDate, setStartDate] = useState('');
-  const [benefits, setBenefits] = useState('');
-  const [expiryDays, setExpiryDays] = useState('7');
-
-  useEffect(() => {
-    if (!candidateId || !profile) return;
-    const fetchRef = async () => {
-      const cSnap = await getDoc(doc(db, 'candidates', candidateId));
-      if (cSnap.exists()) {
-        const c = { id: cSnap.id, ...cSnap.data() } as Candidate;
-        setCandidate(c);
-        const jSnap = await getDoc(doc(db, 'jobs', c.jobId));
-        if (jSnap.exists()) setJob({ id: jSnap.id, ...jSnap.data() } as Job);
-      }
-      setLoading(false);
-    };
-    fetchRef();
-  }, [candidateId, profile]);
-
-  const handleGenerateOffer = async () => {
-    if (!candidate || !job) return;
-    setGenerating(true);
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      
-      // Header with Org Branding
-      doc.setFillColor(15, 23, 42);
-      doc.rect(0, 0, pageWidth, 40, 'F');
-      
-      doc.setFontSize(24);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text(organization?.name || 'HireFlow OS', 20, 25);
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(200, 200, 200);
-      doc.text('Job Offer Letter | Autonomous Recruitment Protocol', 20, 33);
-      
-      // Date
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 55);
-      
-      // Recipient
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(0, 0, 0);
-      doc.text(`To: ${candidate.fullName}`, 20, 70);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Email: ${candidate.email}`, 20, 76);
-      
-      // Content
-      doc.setFontSize(11);
-      doc.text(`Dear ${candidate.fullName.split(' ')[0]},`, 20, 95);
-      
-      const body = `We are pleased to offer you the position of ${job.title} at ${organization?.name || 'our organization'}. After a rigorous autonomous evaluation of your professional footprints and high-signal interview performance, we are confident that you will be a valuable asset to our team.`;
-      const splitBody = doc.splitTextToSize(body, pageWidth - 40);
-      doc.text(splitBody, 20, 105);
-      
-      // Terms
-      doc.setFont('helvetica', 'bold');
-      doc.text('Key Terms of Employment:', 20, 135);
-      
-      autoTable(doc, {
-        startY: 140,
-        head: [['Component', 'Detail']],
-        body: [
-          ['Position', job.title],
-          ['Annual Base Salary', `${currency} ${salary}`],
-          ['Expected Start Date', startDate],
-          ['Benefits', benefits || 'Standard Corporate Benefits Pack'],
-          ['Offer Expiry', `This offer is valid for ${expiryDays} days from the date of issue.`]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [79, 70, 229] }
-      });
-      
-      let finalY = (doc as any).lastAutoTable.finalY + 20;
-      
-      doc.text('Next Steps:', 20, finalY);
-      doc.setFont('helvetica', 'normal');
-      doc.text('To accept this offer, please sign and return a copy of this letter. We look forward to having you join us.', 20, finalY + 8);
-      
-      finalY += 30;
-      doc.text('Sincerely,', 20, finalY);
-      doc.setFont('helvetica', 'bold');
-      doc.text('The Hiring Team', 20, finalY + 8);
-      doc.text(organization?.name || 'HireFlow OS', 20, finalY + 14);
-
-      doc.save(`OfferLetter_${candidate.fullName.replace(/\s+/g, '_')}.pdf`);
-      
-      notify('Autonomous Offer Letter generated and downloaded.', 'success');
-      navigate(`/candidates/${candidate.id}`);
-    } catch (err) {
-      console.error(err);
-      notify('Failed to generate offer letter.', 'error');
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  if (loading) return <div>Loading protocol...</div>;
-  if (!candidate || !job) return <div>Candidate or Job context missing.</div>;
-
-  return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-4">
-        <Button variant="ghost" className="-ml-2 w-fit px-0" onClick={() => navigate(`/candidates/${candidateId}`)}>
-          <ChevronRight className="w-4 h-4 rotate-180 mr-2" /> Back to Profile
-        </Button>
-        <div>
-          <h1 className="text-3xl font-black uppercase tracking-tight mb-2">Offer Configuration</h1>
-          <p className="text-slate-500 text-sm font-medium italic">Compose terms for {candidate.fullName} based on AI-verified benchmark data.</p>
-        </div>
-      </div>
-
-      <Card className="p-10 border-slate-100 shadow-2xl shadow-indigo-100/20 rounded-[2.5rem] bg-white overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -translate-y-16 translate-x-16" />
-        
-        <div className="space-y-8 relative z-10">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base Salary</label>
-              <input 
-                type="text" 
-                value={salary} 
-                onChange={(e) => setSalary(e.target.value)}
-                placeholder="e.g. 24,00,000"
-                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Currency</label>
-              <select 
-                value={currency} 
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold"
-              >
-                <option value="INR">INR (₹)</option>
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Expected Start Date</label>
-            <input 
-              type="date" 
-              value={startDate} 
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Additional Benefits & Perks</label>
-            <textarea 
-              rows={4}
-              value={benefits}
-              onChange={(e) => setBenefits(e.target.value)}
-              placeholder="e.g. Health Insurance, ESOPs (Tier 1), Performance Bonus, Remote Setup Allowance..."
-              className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold resize-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Offer Validity (Days)</label>
-            <input 
-              type="number" 
-              value={expiryDays} 
-              onChange={(e) => setExpiryDays(e.target.value)}
-              className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold"
-            />
-          </div>
-
-          <Button 
-            className="w-full h-16 bg-slate-900 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl hover:shadow-indigo-500/20 transition-all hover:-translate-y-1"
-            onClick={handleGenerateOffer}
-            disabled={generating || !salary || !startDate}
-          >
-            {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Generate & Release Branded Offer'}
-          </Button>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-function OrganizationSettings() {
-  const { profile, organization, refreshProfile } = useProfile();
-  const [loading, setLoading] = useState(false);
-  const { notify } = useNotification();
-  const navigate = useNavigate();
-
-  const [orgName, setOrgName] = useState(organization?.name || '');
-  const [domain, setDomain] = useState(organization?.domain || '');
-
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!organization) return;
-    setLoading(true);
-    try {
-      await updateDoc(doc(db, 'organizations', organization.id), {
-        name: orgName,
-        domain
-      });
-      await refreshProfile();
-      notify('Organization protocol updated.', 'success');
-    } catch (err) {
-       console.error(err);
-       notify('Update failed.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-20 animate-in fade-in duration-700">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-8 border-b border-slate-100">
-        <div>
-          <h1 className="text-4xl font-black uppercase tracking-tighter mb-2">Command Center</h1>
-          <p className="text-slate-500 font-medium">Manage your HireFlow OS organization and white-label parameters.</p>
-        </div>
-        <Button variant="ghost" className="text-slate-400 font-black uppercase tracking-widest text-[10px]" onClick={() => navigate('/')}>
-          Exit Protocol
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-1 space-y-4">
-           <h3 className="text-lg font-black uppercase tracking-tight">Org Profile</h3>
-           <p className="text-xs text-slate-500 font-medium">Basic identity for your autonomous recruitment agency.</p>
-        </div>
-        <div className="lg:col-span-2">
-          <Card className="p-8 border-slate-100 shadow-xl shadow-slate-100/50 rounded-[2.5rem]">
-            <form onSubmit={handleUpdate} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Legal Name</label>
-                <input 
-                  type="text" 
-                  value={orgName} 
-                  onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Official Domain</label>
-                <input 
-                  type="text" 
-                  value={domain} 
-                  onChange={(e) => setDomain(e.target.value)}
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 font-bold"
-                  placeholder="recruit.agency.o"
-                />
-              </div>
-              <Button type="submit" disabled={loading} className="w-full h-14 bg-indigo-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl">
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sync Profile Changes'}
-              </Button>
-            </form>
-          </Card>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 pt-12 border-t border-slate-100">
-        <div className="lg:col-span-1 space-y-4">
-           <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
-             White-Label <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">Coming Soon</span>
-           </h3>
-           <p className="text-xs text-slate-500 font-medium">Customize branding, colors, and dashboard experience for your clients.</p>
-        </div>
-        <div className="lg:col-span-2 opacity-50 grayscale pointer-events-none">
-          <Card className="p-8 border-slate-100 bg-slate-50 rounded-[2.5rem]">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl" />
-              <div className="flex-1 h-12 bg-white rounded-xl border-2 border-slate-100" />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-               {[1,2,3,4,5,6].map(i => <div key={i} className="h-4 bg-white rounded-full w-full" />)}
-            </div>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function SuperAdminPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations') || 'overview';
@@ -4202,6 +3845,7 @@ function SuperAdminPanel() {
         }
       }
       notify('Full Platform Reset Complete.', 'success');
+      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       notify('Failed to nuclear reset platform: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
       console.error('Nuclear Reset Error:', err);
@@ -5313,7 +4957,7 @@ function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 border border-indigo-100 mb-8 sm:mb-10 backdrop-blur-md shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="text-[10px] font-black text-indigo-900 uppercase tracking-[0.25em]">HireFlow OS: The 2026 Standard for Talent</span>
+            <span className="text-[10px] font-black text-indigo-900 uppercase tracking-[0.25em]">The 2026 Standard for Talent</span>
           </div>
           <h1 className="text-5xl sm:text-7xl md:text-[8rem] lg:text-[9.5rem] font-display font-black text-slate-950 tracking-tighter leading-[0.8] mb-10 sm:mb-12 uppercase drop-shadow-sm">
             AUTONOMOUS <br />
@@ -5641,21 +5285,21 @@ export default function App() {
   const [confirmState, setConfirmState] = useState<{ msg: string; resolve: (val: boolean) => void } | null>(null);
   const [notifications, setNotifications] = useState<{ id: string; msg: string; type: 'success' | 'error' | 'info' }[]>([]);
 
-  const confirm = useCallback((msg: string): Promise<boolean> => {
+  const confirm = (msg: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setConfirmState({ msg, resolve });
     });
-  }, []);
+  };
 
-  const notify = useCallback((msg: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const notify = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).slice(2);
     setNotifications(prev => [...prev, { id, msg, type }]);
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 4000);
-  }, []);
+  };
 
-  const refreshProfile = useCallback(async () => {
+  const refreshProfile = async () => {
     if (!auth.currentUser) return;
     try {
       const profileDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
@@ -5672,17 +5316,9 @@ export default function App() {
     } catch (err) {
       console.error('Failed to refresh profile:', err);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    // Suppress benign WebSocket errors that are common in this environment
-    const handleRejection = (e: PromiseRejectionEvent) => {
-      if (e.reason?.message?.includes('WebSocket') || e.reason?.message?.includes('failed to connect')) {
-        e.preventDefault();
-      }
-    };
-    window.addEventListener('unhandledrejection', handleRejection);
-
     testConnection();
     const timeout = setTimeout(() => {
       setLoading(false);
@@ -5695,6 +5331,7 @@ export default function App() {
         let retries = 3;
         while (retries > 0) {
           try {
+            // Super Admin override
             if (u.email === 'malviya.pratyush26@gmail.com') {
               setIsAdmin(true);
             }
@@ -5711,20 +5348,24 @@ export default function App() {
               }
             }
             
+            // System Admins collection (Super Admins)
             const adminDoc = await getDoc(doc(db, 'admins', u.uid));
             if (adminDoc.exists()) {
               setIsAdmin(true);
             }
-            break; 
+            break; // Success
           } catch (err) {
             console.warn(`Profile/Admin check attempt ${4 - retries} failed:`, err);
             retries--;
             if (retries === 0) {
+              console.error('Final attempt of profile check failed:', err);
+              // Handle permanent offline state
               if (err instanceof Error && err.message.includes('offline')) {
-                setLoading(false);
+                // We're already initialized but apparently offline
+                setLoading(false); // Let the app load anyway so they can see the offline state or error boundary
               }
             } else {
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retry
             }
           }
         }
@@ -5738,35 +5379,8 @@ export default function App() {
     return () => {
       clearTimeout(timeout);
       unsub();
-      window.removeEventListener('unhandledrejection', handleRejection);
     };
   }, []);
-
-  const handleSignIn = useCallback(async () => {
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') return;
-      if (error.code === 'auth/popup-blocked') {
-        notify('Sign-in popup blocked. Please allow popups.', 'error');
-        return;
-      }
-      console.error('Sign-in error:', error);
-      notify('Failed to sign in.', 'error');
-    }
-  }, [notify]);
-
-  const notificationContextValue = useMemo(() => ({ 
-    confirm, 
-    notify, 
-    signIn: handleSignIn 
-  }), [confirm, notify, handleSignIn]);
-
-  const profileContextValue = useMemo(() => ({ 
-    profile, 
-    organization, 
-    refreshProfile 
-  }), [profile, organization, refreshProfile]);
 
   if (loading) return (
     <div className="h-screen bg-slate-950 flex flex-col items-center justify-center gap-6">
@@ -5783,10 +5397,36 @@ export default function App() {
     </div>
   );
 
+  const handleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') {
+        process.env.NODE_ENV === 'development' && console.log('Sign-in popup closed by user.');
+        return;
+      }
+      if (error.code === 'auth/popup-blocked') {
+        notify('Sign-in popup was blocked by your browser. Please allow popups for this site and try again.', 'error');
+        return;
+      }
+      if (error.code === 'auth/cancelled-popup-request') {
+        // This often happens in iframe environments if multiple clicks occur or browser cancels
+        notify('Authentication was cancelled or blocked. Please ensure popups are enabled and try standard login.', 'info');
+        return;
+      }
+      if (error.code === 'auth/unauthorized-domain') {
+        notify(`Authorized Domain Missing: Please add "${window.location.hostname}" to your Authorized Domains in Firebase Console > Authentication > Settings.`, 'error');
+        return;
+      }
+      console.error('Sign-in error:', error);
+      notify('Failed to sign in. Please try again.', 'error');
+    }
+  };
+
   return (
     <Router>
-      <NotificationContext.Provider value={notificationContextValue}>
-        <ProfileContext.Provider value={profileContextValue}>
+      <NotificationContext.Provider value={{ confirm, notify, signIn: handleSignIn }}>
+        <ProfileContext.Provider value={{ profile, organization, refreshProfile }}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
               <Routes>
@@ -5800,8 +5440,6 @@ export default function App() {
                     <Route path="/jobs/new" element={<NewJob />} />
                     <Route path="/jobs/:jobId" element={<JobDetail />} />
                     <Route path="/candidates/:candidateId" element={<CandidateDetail />} />
-                    <Route path="/candidates/:candidateId/offer" element={<OfferGeneration />} />
-                    <Route path="/settings" element={<OrganizationSettings />} />
                     <Route path="/admin" element={<SuperAdminPanel />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </>
@@ -5812,52 +5450,54 @@ export default function App() {
             )}
           </Layout>
 
-          <Modal 
-            isOpen={!!confirmState} 
-            onClose={() => confirmState?.resolve(false)} 
-            title="Security Confirmation"
-          >
-            <div className="space-y-6">
-              <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
-                <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
-                <p className="text-sm font-bold text-slate-700 leading-relaxed">
-                  {confirmState?.msg}
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => { confirmState?.resolve(false); setConfirmState(null); }}>
-                  Cancel
-                </Button>
-                <Button variant="secondary" className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => { confirmState?.resolve(true); setConfirmState(null); }}>
-                  Confirm Action
-                </Button>
-              </div>
+          {/* ... existing modals ... */}
+        <Modal 
+          isOpen={!!confirmState} 
+          onClose={() => confirmState?.resolve(false)} 
+          title="Security Confirmation"
+        >
+          <div className="space-y-6">
+            <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
+              <p className="text-sm font-bold text-slate-700 leading-relaxed">
+                {confirmState?.msg}
+              </p>
             </div>
-          </Modal>
-
-          <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
-            <AnimatePresence>
-              {notifications.map(n => (
-                <motion.div
-                  key={n.id}
-                  initial={{ opacity: 0, x: 20, scale: 0.9 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                  className={cn(
-                    "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
-                    n.type === 'success' ? "bg-white border-green-100 text-green-700" :
-                    n.type === 'error' ? "bg-white border-red-100 text-red-700" : "bg-white border-slate-100 text-slate-700"
-                  )}
-                >
-                  {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
-                   n.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
-                  <span className="text-sm font-black uppercase tracking-tight">{n.msg}</span>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => { confirmState?.resolve(false); setConfirmState(null); }}>
+                Cancel
+              </Button>
+              <Button variant="secondary" className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => { confirmState?.resolve(true); setConfirmState(null); }}>
+                Confirm Action
+              </Button>
+            </div>
           </div>
-        </ProfileContext.Provider>
-      </NotificationContext.Provider>
-    </Router>
-  );
+        </Modal>
+
+        {/* Toast Notification Layer */}
+        <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+          <AnimatePresence>
+            {notifications.map(n => (
+              <motion.div
+                key={n.id}
+                initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                className={cn(
+                  "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
+                  n.type === 'success' ? "bg-white border-green-100 text-green-700" :
+                  n.type === 'error' ? "bg-white border-red-100 text-red-700" : "bg-white border-slate-100 text-slate-700"
+                )}
+              >
+                {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
+                 n.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
+                <span className="text-sm font-black uppercase tracking-tight">{n.msg}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </ProfileContext.Provider>
+    </NotificationContext.Provider>
+  </Router>
+);
 }

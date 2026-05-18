@@ -76,7 +76,6 @@ export interface Scorecard {
     education: DimensionScore;
     achievements: DimensionScore;
     culturalRoleFit: DimensionScore;
-    communicationSkills: DimensionScore;
     signalDensity?: {
       score: number;
       rationale: string;

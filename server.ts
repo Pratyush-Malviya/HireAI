@@ -156,46 +156,65 @@ app.post("/api/calendar/schedule", async (req, res) => {
 });
 
 // AI Proxy Routes
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+const ai = new GoogleGenAI({ 
+  apiKey: process.env.GEMINI_API_KEY || '',
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
-/**
- * Enhanced retry mechanism with exponential backoff and jitter
- */
-async function withRetry<T>(fn: () => Promise<T>, maxRetries = 6, initialDelay = 5000): Promise<T> {
+async function generateContentWithRetry(params: any, maxRetries = 5, initialDelay = 2000) {
   let lastError: any;
-  for (let i = 0; i < maxRetries; i++) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await fn();
+      return await ai.models.generateContent(params);
     } catch (error: any) {
       lastError = error;
-      const isRetryableError = 
-        error?.status === "RESOURCE_EXHAUSTED" || 
-        error?.code === 429 || 
-        error?.status === "UNAVAILABLE" ||
-        error?.code === 503 ||
-        error?.message?.includes("quota") ||
-        error?.message?.includes("429") ||
-        error?.message?.includes("503") ||
-        error?.message?.includes("demand");
-
-      if (!isRetryableError || i === maxRetries - 1) throw error;
-
-      // Extract specific retry delay if provided in error details (Gemini API format)
-      let delayOverride = 0;
-      if (error?.details) {
-        const retryInfo = error.details.find((d: any) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
-        if (retryInfo?.retryDelay) {
-          // Format is usually "5s"
-          delayOverride = parseFloat(retryInfo.retryDelay) * 1000;
+      
+      // Handle the SDK's specialized error structure
+      const errorText = error.message || String(error);
+      let errorData: any = {};
+      try {
+        // Many errors come as JSON strings in the message property
+        if (errorText.includes('{')) {
+          const jsonStart = errorText.indexOf('{');
+          const jsonEnd = errorText.lastIndexOf('}') + 1;
+          errorData = JSON.parse(errorText.substring(jsonStart, jsonEnd));
         }
+      } catch (e) {
+        // Fallback to simple string check
       }
 
-      // Exponential backoff: initialDelay * 2^i + jitter
-      const exponentialDelay = initialDelay * Math.pow(2, i) + Math.random() * 2000;
-      const delay = Math.max(delayOverride, exponentialDelay);
+      const status = error.status || error.code || errorData?.error?.code || errorData?.status;
+      const message = errorData?.error?.message || errorText;
+      const isRateLimit = status === 429 || status === 'RESOURCE_EXHAUSTED' || message?.includes('quota');
       
-      console.warn(`[AI Retry] ${error?.status || 'Error'} hit. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      if (isRateLimit && attempt < maxRetries) {
+        // Don't retry if it looks like a hard daily quota limit
+        if (message?.includes('PerDay') && !message?.includes('retry in')) {
+          console.log('Daily quota exceeded. Stopping retries.');
+          throw error;
+        }
+
+        let delay = initialDelay * Math.pow(3, attempt); // More aggressive exponential backoff
+        
+        // Extract retry seconds from message
+        const retryMatch = message?.match(/retry in ([\d.]+)s/);
+        if (retryMatch) {
+          const waitTime = parseFloat(retryMatch[1]);
+          delay = Math.max(delay, (waitTime + 2) * 1000); // Add buffer
+        }
+        
+        // Cap maximum delay to 90 seconds
+        delay = Math.min(delay, 90000);
+
+        console.log(`Rate limit hit on attempt ${attempt + 1}. Retrying in ${Math.round(delay)}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
     }
   }
   throw lastError;
@@ -274,7 +293,6 @@ const CANDIDATE_SCREENING_SCHEMA = {
             education: DIMENSION_SCHEMA,
             achievements: DIMENSION_SCHEMA,
             culturalRoleFit: DIMENSION_SCHEMA,
-            communicationSkills: DIMENSION_SCHEMA,
             signalDensity: {
               type: Type.OBJECT,
               properties: {
@@ -323,11 +341,9 @@ app.post("/api/ai/parse-job", async (req, res) => {
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: "AI Key missing" });
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `You are a Senior Technical Analyst. 
-      [TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in ${new Date().getFullYear()} or earlier are VALID past or present dates.]
-      Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
+    const response = await generateContentWithRetry({
+      model: "gemini-flash-latest",
+      contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
       
       FOCUS AREAS:
       - Must-have skills: Technical stack primitives.
@@ -341,15 +357,17 @@ app.post("/api/ai/parse-job", async (req, res) => {
         responseMimeType: "application/json",
         responseSchema: JOB_PARSING_SCHEMA,
       },
-    }));
+    });
 
     const rawText = response.text || "";
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     const jsonString = jsonMatch ? jsonMatch[0] : rawText.trim();
     res.json(JSON.parse(jsonString));
-  } catch (error) {
+  } catch (error: any) {
     console.error("Parse Job Error:", error);
-    res.status(500).json({ error: "Job parsing failed: " + (error as any)?.message });
+    const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
+    const message = isRateLimit ? "AI Rate limit reached. Job analysis is queued for retry or was suspended." : "Job parsing failed";
+    res.status(isRateLimit ? 429 : 500).json({ error: message });
   }
 });
 
@@ -358,21 +376,19 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: "AI Key missing" });
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const response = await generateContentWithRetry({
+      model: "gemini-flash-latest",
       contents: `You are a Principal Talent Solutions Architect and Adversarial Talent Auditor. 
-      [TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in the year ${new Date().getFullYear()} or earlier are VALID past or present dates. DO NOT flag ${new Date().getFullYear()} as in the future or an integrity issue.]
       Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements.
       
       SCORING PROTOCOL (D6+ v2.0):
-      Analyze and score the candidate on 6 core dimensions (Each 0-100):
+      Analyze and score the candidate on 5 core dimensions (Each 0-100):
       1. skillsMatch (D1): Keyword overlap + semantic similarity. Must-have match = full score. Nice-to-have = partial.
       2. experienceFit (D2): Years of relevant exp, title proximity (IC vs Mgr), industry alignment.
       3. education (D3): Degree level match, field relevance, institution tier.
       4. achievements (D4): Quantified outcomes (%, $, numbers), awards, scale signals.
       5. culturalRoleFit (D5): Tenure patterns (job-hopping), growth trajectory consistency.
-      6. communicationSkills (D6): Clarity of thought, professional articulation, and narrative quality.
-
+  
       SIGNAL REQUIREMENTS:
       - Identify specific "Penalties" (e.g., gaps > 12mo, job-hopping < 1yr avg tenure, resume < 300 words).
       - Identify specific "Bonuses" (e.g., exact match on 5+ keywords, referral, previous hire from tier-1 firms).
@@ -395,15 +411,17 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
         responseMimeType: "application/json",
         responseSchema: CANDIDATE_SCREENING_SCHEMA,
       },
-    }), 5); // Increased retries for heavy screening target
+    });
 
     const rawText = response.text || "";
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     const jsonString = jsonMatch ? jsonMatch[0] : rawText.trim();
     res.json(JSON.parse(jsonString));
-  } catch (error) {
+  } catch (error: any) {
     console.error("Screen Candidate Error:", error);
-    res.status(500).json({ error: "Candidate screening failed: " + (error as any)?.message });
+    const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
+    const message = isRateLimit ? "AI Model limit reached. Candidate evaluation paused." : "Candidate screening failed";
+    res.status(isRateLimit ? 429 : 500).json({ error: message });
   }
 });
 
@@ -413,7 +431,6 @@ app.post("/api/ai/research-candidate", async (req, res) => {
 
   try {
     const prompt = `You are an elite Professional Intelligence Agent specializing in executive-level background verification and deep-signal talent research.
-    [TEMPORAL CONTEXT: The current date is ${new Date().toISOString()}. The current year is ${new Date().getFullYear()}. Any dates in ${new Date().getFullYear()} or earlier are VALID past or present dates.]
     
     MISSION: Conduct a comprehensive, multi-source professional audit of the candidate: ${candidateName}.
     CURRENT TARGET: ${role} at ${company}.
@@ -443,14 +460,14 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     
     MANDATE: Be objective, data-driven, and prioritize verified links over general descriptions. Max 500 words.`;
 
-    const response = await withRetry(() => ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+    const response = await generateContentWithRetry({
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
         temperature: 0,
       },
-    }), 6, 8000); // Higher retries and longer delay for search-based research as it's slower and prone to spikes
+    });
 
     const text = response.text || "";
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
@@ -466,9 +483,11 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       sources,
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Research Candidate Error:", error);
-    res.status(500).json({ error: "Candidate research failed: " + (error as any)?.message });
+    const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
+    const message = isRateLimit ? "AI Search limit reached. Background research paused." : "Candidate research failed";
+    res.status(isRateLimit ? 429 : 500).json({ error: message });
   }
 });
 
@@ -477,13 +496,12 @@ app.post("/api/ai/chat", async (req, res) => {
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: "AI Key missing" });
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
-      model: "gemini-3-flash-preview", 
+    const response = await generateContentWithRetry({
+      model: "gemini-flash-latest", 
       contents: [
         { 
           role: "user", 
           parts: [{ text: `SYSTEM INSTRUCTIONS:
-[TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in the year ${new Date().getFullYear()} or earlier are VALID past or present dates.]
 You are "HireAI Assistant", an intelligent AI Recruiter for ${company}. 
 You are conducting a 1st-level professional screening interview with ${candidateName} for the position of ${role}.
 JOB DESCRIPTION: ${jd}
@@ -497,12 +515,14 @@ END with: "Thank you for your time, ${candidateName}. We have gathered sufficien
         { role: "model", parts: [{ text: "Understood. I am HireAI Assistant. I will follow the protocol strictly." }] },
         ...history.map((h: any) => ({ role: h.role, parts: [{ text: h.text }] }))
       ],
-    }));
+    });
 
     res.json({ text: response.text || "" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Chat Error:", error);
-    res.status(500).json({ error: "AI reasoning failed: " + (error as any)?.message });
+    const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
+    const message = isRateLimit ? "AI Chat limit reached. Please wait a moment." : "AI reasoning failed";
+    res.status(isRateLimit ? 429 : 500).json({ error: message });
   }
 });
 
@@ -511,20 +531,18 @@ app.post("/api/ai/summarize", async (req, res) => {
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: "AI Key missing" });
 
   try {
-    const response = await withRetry(() => ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `You are an elite principal technical recruiter with 20 years of experience. 
-      [TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in the year ${new Date().getFullYear()} or earlier are VALID past or present dates.]
-      Analyze the following interview transcript and provide a highly detailed, objective evaluation.
+    const response = await generateContentWithRetry({
+      model: "gemini-flash-latest",
+      contents: `You are an elite principal technical recruiter with 20 years of experience. Analyze the following interview transcript and provide a highly detailed, objective evaluation.
       
       EVALUATION DEPTH MANDATE:
       - Technical Proficiency: Probe for specific mentions of architecture, trade-offs, and edge cases.
       - Nuance Capture: Detect hesitation, confidence level, and "learned vs practiced" knowledge.
       - Integrity Check: Identify if responses seem generic or contextually rich.
- 
+
       TRANSCRIPT:
       ${JSON.stringify(history)}
- 
+
       RESPONSE SCHEMA:
       {
         "rating": number (Weighted average of the categories below 0-100),
@@ -544,25 +562,22 @@ app.post("/api/ai/summarize", async (req, res) => {
       config: {
         responseMimeType: "application/json",
       }
-    }));
+    });
 
     const result = JSON.parse(response.text || "{}");
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error("AI Summary Error:", error);
-    res.status(500).json({ error: "Summarization failed: " + (error as any)?.message });
+    const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
+    const message = isRateLimit ? "AI Summarization limit reached." : "Summarization failed";
+    res.status(isRateLimit ? 429 : 500).json({ error: message });
   }
 });
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { 
-        middlewareMode: true,
-        hmr: {
-          overlay: false
-        }
-      },
+      server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
