@@ -6,11 +6,21 @@ export async function parseJobDescription(text: string) {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to parse job description");
+    let errorMessage = "Failed to parse job description";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch (e) {
+      errorMessage = `Server Error (${response.status}): ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (e) {
+    throw new Error("Malformed response from server during job parsing");
+  }
 }
 
 export async function screenCandidate(resumeText: string, jobRequirements: any) {
@@ -21,11 +31,21 @@ export async function screenCandidate(resumeText: string, jobRequirements: any) 
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to screen candidate");
+    let errorMessage = "Failed to screen candidate";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch (e) {
+      errorMessage = `Server Error (${response.status}): ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (e) {
+    throw new Error("Malformed response from server during screening");
+  }
 }
 
 export async function researchCandidate(candidateName: string, role: string, company: string, details: string) {
@@ -36,9 +56,19 @@ export async function researchCandidate(candidateName: string, role: string, com
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to research candidate");
+    let errorMessage = "Failed to research candidate";
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch (e) {
+      errorMessage = `Server Error (${response.status}): ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (e) {
+    throw new Error("Malformed response from server during research");
+  }
 }

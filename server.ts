@@ -161,7 +161,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 /**
  * Enhanced retry mechanism with exponential backoff and jitter
  */
-async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, initialDelay = 1000): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 6, initialDelay = 5000): Promise<T> {
   let lastError: any;
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -180,8 +180,20 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, initialDelay =
 
       if (!isRetryableError || i === maxRetries - 1) throw error;
 
+      // Extract specific retry delay if provided in error details (Gemini API format)
+      let delayOverride = 0;
+      if (error?.details) {
+        const retryInfo = error.details.find((d: any) => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo');
+        if (retryInfo?.retryDelay) {
+          // Format is usually "5s"
+          delayOverride = parseFloat(retryInfo.retryDelay) * 1000;
+        }
+      }
+
       // Exponential backoff: initialDelay * 2^i + jitter
-      const delay = initialDelay * Math.pow(2, i) + Math.random() * 1000;
+      const exponentialDelay = initialDelay * Math.pow(2, i) + Math.random() * 2000;
+      const delay = Math.max(delayOverride, exponentialDelay);
+      
       console.warn(`[AI Retry] ${error?.status || 'Error'} hit. Retrying in ${Math.round(delay)}ms... (Attempt ${i + 1}/${maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
@@ -313,7 +325,9 @@ app.post("/api/ai/parse-job", async (req, res) => {
   try {
     const response = await withRetry(() => ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
+      contents: `You are a Senior Technical Analyst. 
+      [TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in ${new Date().getFullYear()} or earlier are VALID past or present dates.]
+      Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
       
       FOCUS AREAS:
       - Must-have skills: Technical stack primitives.
@@ -347,6 +361,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const response = await withRetry(() => ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `You are a Principal Talent Solutions Architect and Adversarial Talent Auditor. 
+      [TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in the year ${new Date().getFullYear()} or earlier are VALID past or present dates. DO NOT flag ${new Date().getFullYear()} as in the future or an integrity issue.]
       Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements.
       
       SCORING PROTOCOL (D6+ v2.0):
@@ -398,6 +413,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
 
   try {
     const prompt = `You are an elite Professional Intelligence Agent specializing in executive-level background verification and deep-signal talent research.
+    [TEMPORAL CONTEXT: The current date is ${new Date().toISOString()}. The current year is ${new Date().getFullYear()}. Any dates in ${new Date().getFullYear()} or earlier are VALID past or present dates.]
     
     MISSION: Conduct a comprehensive, multi-source professional audit of the candidate: ${candidateName}.
     CURRENT TARGET: ${role} at ${company}.
@@ -434,7 +450,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
         tools: [{ googleSearch: {} }],
         temperature: 0,
       },
-    }));
+    }), 6, 8000); // Higher retries and longer delay for search-based research as it's slower and prone to spikes
 
     const text = response.text || "";
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
@@ -467,6 +483,7 @@ app.post("/api/ai/chat", async (req, res) => {
         { 
           role: "user", 
           parts: [{ text: `SYSTEM INSTRUCTIONS:
+[TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in the year ${new Date().getFullYear()} or earlier are VALID past or present dates.]
 You are "HireAI Assistant", an intelligent AI Recruiter for ${company}. 
 You are conducting a 1st-level professional screening interview with ${candidateName} for the position of ${role}.
 JOB DESCRIPTION: ${jd}
@@ -496,7 +513,9 @@ app.post("/api/ai/summarize", async (req, res) => {
   try {
     const response = await withRetry(() => ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `You are an elite principal technical recruiter with 20 years of experience. Analyze the following interview transcript and provide a highly detailed, objective evaluation.
+      contents: `You are an elite principal technical recruiter with 20 years of experience. 
+      [TEMPORAL CONTEXT: The current date is ${new Date().toLocaleDateString()}. The current year is ${new Date().getFullYear()}. Any dates in the year ${new Date().getFullYear()} or earlier are VALID past or present dates.]
+      Analyze the following interview transcript and provide a highly detailed, objective evaluation.
       
       EVALUATION DEPTH MANDATE:
       - Technical Proficiency: Probe for specific mentions of architecture, trade-offs, and edge cases.
