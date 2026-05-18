@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, ArrowUpRight, Check, Menu, X, FileText, Download, Share2, ClipboardCheck } from 'lucide-react';
-import { useEffect, useState, createContext, useContext, useRef, Component } from 'react';
+import { useEffect, useState, createContext, useContext, useRef, Component, useCallback, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -1130,7 +1130,6 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
       console.log(`Clean up finished. Total records removed: ${totalDeleted}`);
       notify(`Database cleared. ${totalDeleted} records removed.`, 'success');
       navigate('/');
-      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       console.error('Global Clear Error:', err);
       notify('Failed to clear database: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
@@ -1696,7 +1695,7 @@ function JobDetail() {
     });
 
     return () => { unsubJob(); unsubCandidates(); };
-  }, [jobId]);
+  }, [jobId, profile]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -4203,7 +4202,6 @@ function SuperAdminPanel() {
         }
       }
       notify('Full Platform Reset Complete.', 'success');
-      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       notify('Failed to nuclear reset platform: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
       console.error('Nuclear Reset Error:', err);
@@ -5643,21 +5641,21 @@ export default function App() {
   const [confirmState, setConfirmState] = useState<{ msg: string; resolve: (val: boolean) => void } | null>(null);
   const [notifications, setNotifications] = useState<{ id: string; msg: string; type: 'success' | 'error' | 'info' }[]>([]);
 
-  const confirm = (msg: string): Promise<boolean> => {
+  const confirm = useCallback((msg: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setConfirmState({ msg, resolve });
     });
-  };
+  }, []);
 
-  const notify = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const notify = useCallback((msg: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).slice(2);
     setNotifications(prev => [...prev, { id, msg, type }]);
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }, 4000);
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!auth.currentUser) return;
     try {
       const profileDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
@@ -5674,7 +5672,7 @@ export default function App() {
     } catch (err) {
       console.error('Failed to refresh profile:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     testConnection();
@@ -5689,7 +5687,6 @@ export default function App() {
         let retries = 3;
         while (retries > 0) {
           try {
-            // Super Admin override
             if (u.email === 'malviya.pratyush26@gmail.com') {
               setIsAdmin(true);
             }
@@ -5706,24 +5703,20 @@ export default function App() {
               }
             }
             
-            // System Admins collection (Super Admins)
             const adminDoc = await getDoc(doc(db, 'admins', u.uid));
             if (adminDoc.exists()) {
               setIsAdmin(true);
             }
-            break; // Success
+            break; 
           } catch (err) {
             console.warn(`Profile/Admin check attempt ${4 - retries} failed:`, err);
             retries--;
             if (retries === 0) {
-              console.error('Final attempt of profile check failed:', err);
-              // Handle permanent offline state
               if (err instanceof Error && err.message.includes('offline')) {
-                // We're already initialized but apparently offline
-                setLoading(false); // Let the app load anyway so they can see the offline state or error boundary
+                setLoading(false);
               }
             } else {
-              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 2000));
             }
           }
         }
@@ -5740,6 +5733,32 @@ export default function App() {
     };
   }, []);
 
+  const handleSignIn = useCallback(async () => {
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch (error: any) {
+      if (error.code === 'auth/popup-closed-by-user') return;
+      if (error.code === 'auth/popup-blocked') {
+        notify('Sign-in popup blocked. Please allow popups.', 'error');
+        return;
+      }
+      console.error('Sign-in error:', error);
+      notify('Failed to sign in.', 'error');
+    }
+  }, [notify]);
+
+  const notificationContextValue = useMemo(() => ({ 
+    confirm, 
+    notify, 
+    signIn: handleSignIn 
+  }), [confirm, notify, handleSignIn]);
+
+  const profileContextValue = useMemo(() => ({ 
+    profile, 
+    organization, 
+    refreshProfile 
+  }), [profile, organization, refreshProfile]);
+
   if (loading) return (
     <div className="h-screen bg-slate-950 flex flex-col items-center justify-center gap-6">
       <div className="relative">
@@ -5755,36 +5774,10 @@ export default function App() {
     </div>
   );
 
-  const handleSignIn = async () => {
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        process.env.NODE_ENV === 'development' && console.log('Sign-in popup closed by user.');
-        return;
-      }
-      if (error.code === 'auth/popup-blocked') {
-        notify('Sign-in popup was blocked by your browser. Please allow popups for this site and try again.', 'error');
-        return;
-      }
-      if (error.code === 'auth/cancelled-popup-request') {
-        // This often happens in iframe environments if multiple clicks occur or browser cancels
-        notify('Authentication was cancelled or blocked. Please ensure popups are enabled and try standard login.', 'info');
-        return;
-      }
-      if (error.code === 'auth/unauthorized-domain') {
-        notify(`Authorized Domain Missing: Please add "${window.location.hostname}" to your Authorized Domains in Firebase Console > Authentication > Settings.`, 'error');
-        return;
-      }
-      console.error('Sign-in error:', error);
-      notify('Failed to sign in. Please try again.', 'error');
-    }
-  };
-
   return (
     <Router>
-      <NotificationContext.Provider value={{ confirm, notify, signIn: handleSignIn }}>
-        <ProfileContext.Provider value={{ profile, organization, refreshProfile }}>
+      <NotificationContext.Provider value={notificationContextValue}>
+        <ProfileContext.Provider value={profileContextValue}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
               <Routes>
@@ -5810,54 +5803,52 @@ export default function App() {
             )}
           </Layout>
 
-          {/* ... existing modals ... */}
-        <Modal 
-          isOpen={!!confirmState} 
-          onClose={() => confirmState?.resolve(false)} 
-          title="Security Confirmation"
-        >
-          <div className="space-y-6">
-            <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
-              <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
-              <p className="text-sm font-bold text-slate-700 leading-relaxed">
-                {confirmState?.msg}
-              </p>
+          <Modal 
+            isOpen={!!confirmState} 
+            onClose={() => confirmState?.resolve(false)} 
+            title="Security Confirmation"
+          >
+            <div className="space-y-6">
+              <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
+                <p className="text-sm font-bold text-slate-700 leading-relaxed">
+                  {confirmState?.msg}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => { confirmState?.resolve(false); setConfirmState(null); }}>
+                  Cancel
+                </Button>
+                <Button variant="secondary" className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => { confirmState?.resolve(true); setConfirmState(null); }}>
+                  Confirm Action
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => { confirmState?.resolve(false); setConfirmState(null); }}>
-                Cancel
-              </Button>
-              <Button variant="secondary" className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => { confirmState?.resolve(true); setConfirmState(null); }}>
-                Confirm Action
-              </Button>
-            </div>
-          </div>
-        </Modal>
+          </Modal>
 
-        {/* Toast Notification Layer */}
-        <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
-          <AnimatePresence>
-            {notifications.map(n => (
-              <motion.div
-                key={n.id}
-                initial={{ opacity: 0, x: 20, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                className={cn(
-                  "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
-                  n.type === 'success' ? "bg-white border-green-100 text-green-700" :
-                  n.type === 'error' ? "bg-white border-red-100 text-red-700" : "bg-white border-slate-100 text-slate-700"
-                )}
-              >
-                {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
-                 n.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
-                <span className="text-sm font-black uppercase tracking-tight">{n.msg}</span>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      </ProfileContext.Provider>
-    </NotificationContext.Provider>
-  </Router>
-);
+          <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+            <AnimatePresence>
+              {notifications.map(n => (
+                <motion.div
+                  key={n.id}
+                  initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                  className={cn(
+                    "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
+                    n.type === 'success' ? "bg-white border-green-100 text-green-700" :
+                    n.type === 'error' ? "bg-white border-red-100 text-red-700" : "bg-white border-slate-100 text-slate-700"
+                  )}
+                >
+                  {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
+                   n.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
+                  <span className="text-sm font-black uppercase tracking-tight">{n.msg}</span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </ProfileContext.Provider>
+      </NotificationContext.Provider>
+    </Router>
+  );
 }

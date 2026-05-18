@@ -1,6 +1,6 @@
 {
   "name": "HireAI",
-  "description": "Multi-tenant recruitment intelligence SaaS platform featuring AI-automated resume screening, D6 scoring engine, HireAI voice interviews, and professional footprint analysis.",
+  "description": "Autonomous Talent Orchestration OS. High-fidelity adversarial screening engine designed to deconstruct the traditional HR matrix via professional footprint analysis, neural candidate evaluation, and automated D6 protocol execution.",
   "requestFramePermissions": ["microphone", "camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
