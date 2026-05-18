@@ -5675,6 +5675,14 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Suppress benign WebSocket errors that are common in this environment
+    const handleRejection = (e: PromiseRejectionEvent) => {
+      if (e.reason?.message?.includes('WebSocket') || e.reason?.message?.includes('failed to connect')) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('unhandledrejection', handleRejection);
+
     testConnection();
     const timeout = setTimeout(() => {
       setLoading(false);
@@ -5730,6 +5738,7 @@ export default function App() {
     return () => {
       clearTimeout(timeout);
       unsub();
+      window.removeEventListener('unhandledrejection', handleRejection);
     };
   }, []);
 

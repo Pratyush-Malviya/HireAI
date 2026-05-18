@@ -18,7 +18,10 @@ export default defineConfig(({mode}) => {
     server: {
       strictPort: true,
       port: 3000,
-      hmr: false,
+      hmr: {
+        timeout: 30000,
+        overlay: false,
+      },
       watch: null,
     },
   };
