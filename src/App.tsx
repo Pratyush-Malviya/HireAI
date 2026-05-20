@@ -2074,10 +2074,10 @@ function JobDetail() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
-          { label: 'Total', count: stats.total, percent: 100, color: 'text-indigo-500' },
-          { label: 'Pending', count: stats.pending, percent: Math.round((stats.pending / (stats.total || 1)) * 100), color: 'text-blue-500' },
-          { label: 'Passed', count: stats.passed, percent: Math.round((stats.passed / (stats.total || 1)) * 100), color: 'text-green-500' },
-          { label: 'Failed', count: stats.failed, percent: Math.round((stats.failed / (stats.total || 1)) * 100), color: 'text-red-500' },
+          { label: 'Total Scanned', count: stats.total, percent: 100, color: 'text-indigo-500' },
+          { label: 'Ready to Invite', count: stats.pending, percent: Math.round((stats.pending / (stats.total || 1)) * 100), color: 'text-blue-500' },
+          { label: 'Passed Match (80+)', count: stats.passed, percent: Math.round((stats.passed / (stats.total || 1)) * 100), color: 'text-green-500' },
+          { label: 'Low Match (<40)', count: stats.failed, percent: Math.round((stats.failed / (stats.total || 1)) * 100), color: 'text-red-500' },
         ].map(s => (
           <Card key={s.label} className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between border-slate-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="text-center sm:text-left mb-2 sm:mb-0">

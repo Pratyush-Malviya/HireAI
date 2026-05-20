@@ -165,9 +165,10 @@ const ai = new GoogleGenAI({
   }
 });
 
-async function generateContentWithRetry(params: any, maxRetries = 5, initialDelay = 2000) {
+async function generateContentWithRetry(params: any, maxRetries = 3, initialDelay = 1000) {
   const modelsToTry = [
     params.model,
+    "gemini-flash-latest",
     "gemini-3.5-flash",
     "gemini-3.1-flash-lite"
   ].filter((m, i, arr) => m && arr.indexOf(m) === i); // Deduplicate & filter undefined
@@ -177,6 +178,19 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
   for (const currentModel of modelsToTry) {
     const modelParams = { ...params, model: currentModel };
     
+    // Automatically set thinking level to "MINIMAL" on gemini-3.1-flash-lite to skip reasoning delay
+    if (currentModel === "gemini-3.1-flash-lite") {
+      modelParams.config = {
+        ...modelParams.config,
+        thinkingConfig: {
+          thinkingLevel: "MINIMAL",
+          ...modelParams.config?.thinkingConfig
+        }
+      };
+    }
+
+    const hasMoreModels = modelsToTry.indexOf(currentModel) < modelsToTry.length - 1;
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Sending API request using model: ${currentModel} (attempt ${attempt + 1}/${maxRetries + 1})`);
@@ -203,47 +217,41 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
         const isRateLimit = status === 429 || status === 'RESOURCE_EXHAUSTED' || message?.includes('quota');
         const isUnavailable = status === 503 || status === 'UNAVAILABLE' || message?.includes('demand') || message?.includes('temporary') || message?.includes('overloaded');
         
-        const hasMoreModels = modelsToTry.indexOf(currentModel) < modelsToTry.length - 1;
-
         if (isRateLimit || isUnavailable) {
-          // If a rate limit or service unavailability (503) is hit, retry the current model up to 3 times before swapping if we have fallback models,
-          // or try up to maxRetries if this is the last available model.
-          const maxAttemptsBeforeSwap = hasMoreModels ? 2 : maxRetries;
+          if (hasMoreModels) {
+            // Swap to next model immediately to avoid waiting-delay loops
+            console.warn(`Model ${currentModel} rate-limited or unavailable. Swapping immediately to next model.`);
+            break; // Break current retry loop to go to next model immediately
+          }
 
-          if (attempt < maxAttemptsBeforeSwap) {
-            // Don't retry on same model if it's a hard daily quota limit
+          // If this is the final model and we have retries left, do short delay with jitter
+          if (attempt < maxRetries) {
             if (message?.includes('PerDay') && !message?.includes('retry in')) {
-              console.log('Daily quota exceeded. Swapping/stopping retries.');
+              console.log('Daily quota exceeded. Swapping/stopping.');
+              throw error;
             } else {
-              let delay = initialDelay * Math.pow(2, attempt); // Exponential backoff: 2s, 4s, 8s, ...
+              let delay = initialDelay * Math.pow(2, attempt); // 1s, 2s, 4s
               
-              // Extract retry seconds from message
               const retryMatch = message?.match(/retry in ([\d.]+)s/);
               if (retryMatch) {
                 const waitTime = parseFloat(retryMatch[1]);
-                delay = Math.max(delay, (waitTime + 2) * 1000); // Add buffer
+                delay = Math.max(delay, (waitTime + 0.5) * 1000); // minimal buffer
               }
               
-              // Add simple random jitter (+0-1500ms) to prevent thundering herd
-              const jitter = Math.random() * 1500;
-              delay = Math.min(delay + jitter, 15000); // Keep capped at 15s to avoid timeout
+              const jitter = Math.random() * 500;
+              delay = Math.min(delay + jitter, 8000); // capped lower to prevent long delays
 
-              console.log(`Transient limit/unavailability on model ${currentModel} (Status: ${status}). Retrying same model in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxAttemptsBeforeSwap + 1})...`);
+              console.log(`Transient limit on final model ${currentModel}. Retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries + 1})...`);
               await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
           }
-
-          if (hasMoreModels) {
-            console.warn(`Model ${currentModel} exhausted, rate-limited, or unavailable after ${attempt + 1} attempts. Swapping to fallback model.`);
-            break; // Break the inner loop, proceeds to the next model in the outer loop
-          }
         }
         
-        // If the specified model isn't supported, not found, or returns a bad request (e.g. 404, 400), swap to next model immediately if available
+        // If the specified model isn't supported, not found, or bad request, swap immediately
         if (hasMoreModels && (status === 404 || status === 400 || errorText.includes('not found') || errorText.includes('does not exist') || errorText.includes('not supported') || errorText.includes('invalid'))) {
           console.warn(`Model ${currentModel} returned error: ${errorText} (Status: ${status}). Falling back immediately.`);
-          break; // Try next fallback model
+          break; // Try next model
         }
 
         throw error;
@@ -265,7 +273,7 @@ const JOB_PARSING_SCHEMA = {
     role_seniority: { type: Type.STRING },
     role_type: { 
       type: Type.STRING, 
-      enum: ["Technical / Engineering", "HR / People Ops", "Sales / BD", "Leadership / C-Suite", "Operations / Generalist"] 
+      description: "Role category. Must be one of: 'Technical / Engineering', 'HR / People Ops', 'Sales / BD', 'Leadership / C-Suite', 'Operations / Generalist'"
     },
     location_requirement: { type: Type.STRING },
     keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -287,7 +295,7 @@ const DIMENSION_SCHEMA = {
   properties: {
     score: { type: Type.NUMBER },
     rationale: { type: Type.STRING },
-    confidence: { type: Type.STRING, enum: ["HIGH", "MED", "LOW"] },
+    confidence: { type: Type.STRING, description: "Confidence level. Expected: 'HIGH', 'MED', or 'LOW'" },
     citations: { type: Type.ARRAY, items: CITATION_SCHEMA },
     weight: { type: Type.NUMBER }
   }
@@ -314,7 +322,7 @@ const CANDIDATE_SCREENING_SCHEMA = {
           type: Type.OBJECT,
           properties: {
             fitHeader: { type: Type.STRING },
-            status: { type: Type.STRING, enum: ["perfect", "strong", "potential", "rejected"] },
+            status: { type: Type.STRING, description: "Match recommendation status. Expected: 'perfect', 'strong', 'potential', 'rejected'" },
             summary: { type: Type.STRING }
           }
         },
@@ -343,7 +351,7 @@ const CANDIDATE_SCREENING_SCHEMA = {
                     type: Type.OBJECT,
                     properties: {
                       label: { type: Type.STRING },
-                      severity: { type: Type.STRING, enum: ["low", "medium", "high"] },
+                      severity: { type: Type.STRING, description: "Severity of flag. Expected: 'low', 'medium', or 'high'" },
                       penalty: { type: Type.NUMBER },
                       rationale: { type: Type.STRING }
                     }
@@ -395,7 +403,19 @@ app.post("/api/ai/parse-job", async (req, res) => {
     const rawText = response.text || "";
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     const jsonString = jsonMatch ? jsonMatch[0] : rawText.trim();
-    res.json(JSON.parse(jsonString));
+    const result = JSON.parse(jsonString);
+
+    if (result && typeof result.role_type === 'string') {
+      const rtList = ["Technical / Engineering", "HR / People Ops", "Sales / BD", "Leadership / C-Suite", "Operations / Generalist"];
+      const matched = rtList.find(r => r.toLowerCase().replace(/[^a-z]/g, '') === result.role_type.toLowerCase().replace(/[^a-z]/g, ''));
+      if (matched) {
+        result.role_type = matched;
+      } else {
+        result.role_type = "Operations / Generalist";
+      }
+    }
+
+    res.json(result);
   } catch (error: any) {
     console.error("Parse Job Error:", error);
     const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
@@ -449,7 +469,66 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const rawText = response.text || "";
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     const jsonString = jsonMatch ? jsonMatch[0] : rawText.trim();
-    res.json(JSON.parse(jsonString));
+    const result = JSON.parse(jsonString);
+
+    // Normalize enums safely
+    if (result.scorecard) {
+      if (result.scorecard.recommendation && typeof result.scorecard.recommendation.status === 'string') {
+        const val = result.scorecard.recommendation.status.toLowerCase();
+        if (["perfect", "strong", "potential", "rejected"].includes(val)) {
+          result.scorecard.recommendation.status = val;
+        } else if (val.includes("reject")) {
+          result.scorecard.recommendation.status = "rejected";
+        } else if (val.includes("perfect")) {
+          result.scorecard.recommendation.status = "perfect";
+        } else if (val.includes("strong")) {
+          result.scorecard.recommendation.status = "strong";
+        } else {
+          result.scorecard.recommendation.status = "potential";
+        }
+      }
+
+      if (result.scorecard.dimensions) {
+        const dims = result.scorecard.dimensions;
+        for (const dimName of ['skillsMatch', 'experienceFit', 'education', 'achievements', 'culturalRoleFit']) {
+          if (dims[dimName]) {
+            if (typeof dims[dimName].confidence === 'string') {
+              const val = dims[dimName].confidence.toUpperCase();
+              if (["HIGH", "MED", "LOW"].includes(val)) {
+                dims[dimName].confidence = val;
+              } else if (val.includes("HI")) {
+                dims[dimName].confidence = "HIGH";
+              } else if (val.includes("LO")) {
+                dims[dimName].confidence = "LOW";
+              } else {
+                dims[dimName].confidence = "MED";
+              }
+            } else {
+              dims[dimName].confidence = "MED";
+            }
+          }
+        }
+
+        if (dims.redFlags && Array.isArray(dims.redFlags.flags)) {
+          dims.redFlags.flags.forEach((flag: any) => {
+            if (flag && typeof flag.severity === 'string') {
+              const val = flag.severity.toLowerCase();
+              if (["low", "medium", "high"].includes(val)) {
+                flag.severity = val;
+              } else if (val.includes("hi")) {
+                flag.severity = "high";
+              } else if (val.includes("lo")) {
+                flag.severity = "low";
+              } else {
+                flag.severity = "medium";
+              }
+            }
+          });
+        }
+      }
+    }
+
+    res.json(result);
   } catch (error: any) {
     console.error("Screen Candidate Error:", error);
     const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
