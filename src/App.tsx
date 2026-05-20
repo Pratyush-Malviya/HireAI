@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -13,6 +13,7 @@ import { extractTextFromFile } from './services/fileService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const ROLE_WEIGHTS = {
   'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
@@ -1248,6 +1249,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
               <nav className="hidden md:flex items-center gap-2 overflow-x-auto whitespace-nowrap lg:gap-6 scrollbar-none">
                 <Link to="/" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Dashboard</Link>
                 <Link to="/jobs/new" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Post Job</Link>
+                <Link to="/org-admin" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">HR Admin</Link>
                 {isUserAdmin && (
                   <Link to="/admin" className="text-[10px] font-black text-indigo-400 hover:text-indigo-300 transition-all uppercase tracking-[0.15em] flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 shrink-0">
                     <Shield className="w-3 h-3" /> System Admin
@@ -1359,6 +1361,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                   <>
                     <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-white uppercase tracking-tighter">Dashboard</Link>
                     <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-white uppercase tracking-tighter">Post Job</Link>
+                    <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-white uppercase tracking-tighter">HR Admin</Link>
                     {isUserAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-indigo-400 uppercase tracking-tighter">System Admin</Link>
                     )}
@@ -3946,6 +3949,562 @@ function CandidateDetail() {
   );
 }
 
+function MetricCard({ 
+  label, 
+  val, 
+  desc, 
+  icon: Icon, 
+  iconColor, 
+  iconBg 
+}: { 
+  label: string; 
+  val: string | number; 
+  desc: string; 
+  icon: any; 
+  iconColor: string; 
+  iconBg: string; 
+}) {
+  return (
+    <Card className="p-6 bg-white/80 backdrop-blur-sm border border-slate-100 hover:border-indigo-500/20 transition-all shadow-sm">
+      <div className="flex justify-between items-start mb-4">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-snug">{label}</p>
+          <p className="text-4xl font-black text-slate-900 tracking-tight leading-none truncate">{val}</p>
+        </div>
+        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", iconBg, iconColor)}>
+          <Icon className="w-5 h-5 font-bold" />
+        </div>
+      </div>
+      <p className="text-xs text-slate-500 leading-relaxed font-medium mt-auto">{desc}</p>
+    </Card>
+  );
+}
+
+function OrgAdminPanel() {
+  const { profile, organization } = useProfile();
+  const [loading, setLoading] = useState(true);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // Filters State
+  const [dateRange, setDateRange] = useState<string>('30');
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('all');
+  const [workingHoursStart, setWorkingHoursStart] = useState<string>('09:00');
+  const [workingHoursEnd, setWorkingHoursEnd] = useState<string>('18:00');
+
+  const isSuperAdmin = auth.currentUser?.email === 'malviya.pratyush26@gmail.com';
+
+  // Set default selected organization once profile is loaded
+  useEffect(() => {
+    if (profile?.organizationId) {
+      setSelectedOrgId(profile.organizationId);
+    }
+  }, [profile]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (!auth.currentUser) return;
+
+        let jobsList: Job[] = [];
+        let candidatesList: Candidate[] = [];
+        let orgsList: Organization[] = [];
+
+        if (isSuperAdmin) {
+          const [jobsSnap, candidatesSnap, orgsSnap] = await Promise.all([
+            getDocs(collection(db, 'jobs')),
+            getDocs(collection(db, 'candidates')),
+            getDocs(collection(db, 'organizations'))
+          ]);
+          jobsList = jobsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Job));
+          candidatesList = candidatesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Candidate));
+          orgsList = orgsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Organization));
+        } else if (profile?.organizationId) {
+          const orgId = profile.organizationId;
+          const [jobsSnap, candidatesSnap] = await Promise.all([
+            getDocs(query(collection(db, 'jobs'), where('organizationId', '==', orgId))),
+            getDocs(query(collection(db, 'candidates'), where('organizationId', '==', orgId)))
+          ]);
+          jobsList = jobsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Job));
+          candidatesList = candidatesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Candidate));
+          
+          if (organization) {
+            orgsList = [organization];
+          } else {
+            const orgDoc = await getDoc(doc(db, 'organizations', orgId));
+            if (orgDoc.exists()) {
+              orgsList = [{ id: orgDoc.id, ...orgDoc.data() } as Organization];
+            }
+          }
+        }
+
+        setJobs(jobsList);
+        setCandidates(candidatesList);
+        setOrganizations(orgsList);
+      } catch (err) {
+        console.error('Error loading metrics data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [profile, organization, isSuperAdmin]);
+
+  const getCandidateDate = (c: Candidate): Date => {
+    if (c.createdAt) {
+      if (typeof c.createdAt.toDate === 'function') {
+        return c.createdAt.toDate();
+      }
+      if (c.createdAt.seconds) {
+        return new Date(c.createdAt.seconds * 1000);
+      }
+      return new Date(c.createdAt);
+    }
+    return new Date();
+  };
+
+  const filteredCandidates = candidates.filter(c => {
+    // 1. Organization filter
+    if (isSuperAdmin) {
+      if (selectedOrgId !== 'all' && c.organizationId !== selectedOrgId) {
+        return false;
+      }
+    } else {
+      if (c.organizationId !== profile?.organizationId) {
+        return false;
+      }
+    }
+
+    // 2. Date Range filter
+    if (dateRange !== 'all') {
+      const now = new Date();
+      const cutoffDate = new Date();
+      cutoffDate.setDate(now.getDate() - parseInt(dateRange));
+      const cDate = getCandidateDate(c);
+      if (cDate < cutoffDate) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  const filteredJobs = jobs.filter(j => {
+    // 1. Organization filter
+    if (isSuperAdmin) {
+      if (selectedOrgId !== 'all' && j.organizationId !== selectedOrgId) {
+        return false;
+      }
+    } else {
+      if (j.organizationId !== profile?.organizationId) {
+        return false;
+      }
+    }
+
+    // 2. Date Range filter
+    if (dateRange !== 'all') {
+      const now = new Date();
+      const cutoffDate = new Date();
+      cutoffDate.setDate(now.getDate() - parseInt(dateRange));
+      
+      const getJobDate = (job: Job): Date => {
+        if (job.createdAt) {
+          if (typeof job.createdAt.toDate === 'function') {
+            return job.createdAt.toDate();
+          }
+          if (job.createdAt.seconds) {
+            return new Date(job.createdAt.seconds * 1000);
+          }
+          return new Date(job.createdAt);
+        }
+        return new Date();
+      };
+
+      const jDate = getJobDate(j);
+      if (jDate < cutoffDate) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  const resumesScreened = filteredCandidates.length;
+  const completedInterviews = filteredCandidates.filter(c => c.interviewStatus === 'completed');
+  const interviewsConducted = completedInterviews.length;
+  const totalJobsAdded = filteredJobs.length;
+
+  let workingHoursCount = 0;
+  let outsideHoursCount = 0;
+
+  completedInterviews.forEach(c => {
+    const cDate = getCandidateDate(c);
+    const hour = cDate.getHours();
+    const minute = cDate.getMinutes();
+    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+    if (timeStr >= workingHoursStart && timeStr <= workingHoursEnd) {
+      workingHoursCount++;
+    } else {
+      outsideHoursCount++;
+    }
+  });
+
+  const workingHoursPercent = interviewsConducted > 0 ? (workingHoursCount / interviewsConducted) * 100 : 0;
+  const outsideHoursPercent = interviewsConducted > 0 ? (outsideHoursCount / interviewsConducted) * 100 : 0;
+
+  const daysCount = dateRange === 'all' ? 30 : parseInt(dateRange);
+  const dailyData: { date: string; interviews: number; resumes: number }[] = [];
+  
+  const start = new Date();
+  start.setDate(start.getDate() - daysCount + 1);
+
+  for (let i = 0; i < daysCount; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    
+    let dayInterviews = 0;
+    let dayResumes = 0;
+    
+    filteredCandidates.forEach(c => {
+      const cDate = getCandidateDate(c);
+      const cDateStr = cDate.toISOString().slice(0, 10);
+      if (cDateStr === dateStr) {
+        dayResumes++;
+        if (c.interviewStatus === 'completed') {
+          dayInterviews++;
+        }
+      }
+    });
+
+    dailyData.push({
+      date: dateStr,
+      interviews: dayInterviews,
+      resumes: dayResumes,
+    });
+  }
+
+  const pieData = interviewsConducted > 0 ? [
+    { name: 'During Working Hours', value: workingHoursCount, color: '#10b981' },
+    { name: 'Outside Working Hours', value: outsideHoursCount, color: '#f97316' }
+  ] : [
+    { name: 'No Data', value: 1, color: '#cbd5e1' }
+  ];
+
+  const activeOrgName = isSuperAdmin 
+    ? (selectedOrgId === 'all' ? 'KaraX' : (organizations.find(o => o.id === selectedOrgId)?.name || 'KaraX'))
+    : (organization?.name || 'KaraX');
+
+  if (loading) {
+    return (
+      <div className="h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Metrics Panel...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <Modal
+        isOpen={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filters"
+      >
+        <div className="space-y-6">
+          <p className="text-slate-500 text-xs">
+            Adjust the date range, working hours, and organization for HR Agent metrics.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date range</label>
+              <select
+                value={dateRange}
+                onChange={e => setDateRange(e.target.value)}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-sm"
+              >
+                <option value="7">7 Days</option>
+                <option value="30">30 Days</option>
+                <option value="90">90 Days</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</label>
+              {isSuperAdmin ? (
+                <select
+                  value={selectedOrgId}
+                  onChange={e => setSelectedOrgId(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-sm"
+                >
+                  <option value="all">All Organizations</option>
+                  {organizations.map(org => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="w-full bg-slate-100/50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-400 select-none text-sm">
+                  {organization?.name || 'My Organization'}
+                </div>
+              )}
+            </div>
+
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                Working hours 
+                <span className="cursor-help text-slate-300 hover:text-slate-500">
+                  <Info className="w-3.5 h-3.5" />
+                </span>
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <input
+                    type="time" 
+                    value={workingHoursStart}
+                    onChange={e => setWorkingHoursStart(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-sm"
+                  />
+                </div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">to</span>
+                <div className="relative flex-1">
+                  <input
+                    type="time" 
+                    value={workingHoursEnd}
+                    onChange={e => setWorkingHoursEnd(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t border-slate-150">
+            <Button
+              variant="outline"
+              className="px-6 h-11 text-[10px] font-black uppercase tracking-widest"
+              onClick={() => setFiltersOpen(false)}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Admin Panel Header Block */}
+      <div className="bg-white rounded-[2rem] border border-slate-105 p-8 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 relative">
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+              <span className="text-indigo-600">◀</span>
+              <span>{activeOrgName} Admin Panel</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight">
+              Manage everything about {activeOrgName}.ai
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Sub Header for Metrics Panel */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-6">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-1">
+            HR Agent Metrics Dashboard
+          </h2>
+          <p className="text-slate-500 text-xs sm:text-sm">
+            Monitor interview activity, resume screening throughput, and working-hours efficiency from a single admin view.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => setFiltersOpen(true)}
+          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shrink-0 shadow-sm rounded-xl"
+        >
+          <Filter className="w-4 h-4 text-slate-500" />
+          Filters
+        </Button>
+      </div>
+
+      {/* Metric Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <MetricCard
+          label="Total Jobs Added"
+          val={totalJobsAdded}
+          desc="Jobs added to screen resumes in the selected range"
+          icon={Briefcase}
+          iconBg="bg-indigo-50"
+          iconColor="text-indigo-600"
+        />
+        <MetricCard
+          label="Interviews Conducted"
+          val={interviewsConducted}
+          desc="Completed interview activity in the selected range"
+          icon={Video}
+          iconBg="bg-teal-50"
+          iconColor="text-teal-700"
+        />
+        <MetricCard
+          label="Resumes Screened"
+          val={resumesScreened}
+          desc="Candidates evaluated through resume screening"
+          icon={FileText}
+          iconBg="bg-blue-50"
+          iconColor="text-blue-600"
+        />
+        <MetricCard
+          label="Working Hours Interviews"
+          val={`${workingHoursPercent.toFixed(1)}%`}
+          desc={`${workingHoursCount} interviews during working hours`}
+          icon={Clock}
+          iconBg="bg-emerald-50"
+          iconColor="text-emerald-600"
+        />
+        <MetricCard
+          label="Outside Working Hours"
+          val={`${outsideHoursPercent.toFixed(1)}%`}
+          desc={`${outsideHoursCount} interviews outside working hours`}
+          icon={Calendar}
+          iconBg="bg-orange-50"
+          iconColor="text-orange-600"
+        />
+      </div>
+
+      {/* Visual Analytics Block */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+        {/* Daily Trend */}
+        <div className="lg:col-span-2">
+          <Card className="p-6 bg-white border border-slate-100 shadow-sm rounded-3xl h-full flex flex-col justify-between">
+            <div className="mb-6">
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Activity Trend</h3>
+              <p className="text-xs text-slate-400">
+                Daily trend for interviews conducted and resumes screened in the selected range.
+              </p>
+            </div>
+
+            <div className="flex-1 min-h-[300px] flex items-center justify-center">
+              {filteredCandidates.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#94a3b8"
+                      fontSize={10}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => {
+                        try {
+                          const parts = v.split('-');
+                          return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : v;
+                        } catch {
+                          return v;
+                        }
+                      }}
+                    />
+                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                      labelStyle={{ fontWeight: 'bold', color: '#1e293b', fontSize: '12px' }}
+                      itemStyle={{ fontSize: '11px' }}
+                    />
+                    <Bar dataKey="resumes" name="Resumes Screened" fill="#4f46e5" radius={[4, 4, 0, 0]} barSize={14} />
+                    <Bar dataKey="interviews" name="Interviews Conducted" fill="#06b6d4" radius={[4, 4, 0, 0]} barSize={14} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center py-12 flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 mb-3">
+                    <FileText className="w-8 h-8" />
+                  </div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">No Activity Data</p>
+                  <p className="text-[10px] text-slate-400 italic">No candidates/interviews available in the selected range.</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+
+        {/* Working Hours Split */}
+        <div className="lg:col-span-1">
+          <Card className="p-6 bg-white border border-slate-100 shadow-sm rounded-3xl h-full flex flex-col justify-between">
+            <div className="mb-6">
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Working Hours Distribution</h3>
+              <p className="text-xs text-slate-400">
+                Percentage split between interviews held during and outside working hours.
+              </p>
+            </div>
+
+            <div className="flex-1 min-h-[200px] flex items-center justify-center">
+              {interviewsConducted > 0 ? (
+                <div className="w-full flex flex-col items-center">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                        itemStyle={{ fontSize: '11px', fontWeight: 'bold' }}
+                        formatter={(value) => `${value} interviews`}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  <div className="w-full mt-4 space-y-2">
+                    <div className="flex items-center justify-between p-2.5 bg-green-50/50 rounded-xl border border-green-100/40">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-[#10b981]" />
+                        <span className="text-xs font-black uppercase text-slate-600 tracking-tight">Working Hours</span>
+                      </div>
+                      <span className="text-xs font-black text-green-700">{workingHoursPercent.toFixed(1)}% <span className="text-slate-400 font-medium font-mono text-[10px]">({workingHoursCount})</span></span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-orange-50/50 rounded-xl border border-orange-100/40">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-[#f97316]" />
+                        <span className="text-xs font-black uppercase text-slate-600 tracking-tight">Outside Working Hours</span>
+                      </div>
+                      <span className="text-xs font-black text-orange-700">{outsideHoursPercent.toFixed(1)}% <span className="text-slate-400 font-medium font-mono text-[10px]">({outsideHoursCount})</span></span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 mb-3">
+                    <Clock className="w-8 h-8" />
+                  </div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">No Completed Interviews</p>
+                  <p className="text-[10px] text-slate-400 italic font-medium">Completed interviews are required to view working hours split.</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SuperAdminPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations') || 'overview';
@@ -5594,6 +6153,7 @@ export default function App() {
                     <Route path="/jobs/new" element={<NewJob />} />
                     <Route path="/jobs/:jobId" element={<JobDetail />} />
                     <Route path="/candidates/:candidateId" element={<CandidateDetail />} />
+                    <Route path="/org-admin" element={<OrgAdminPanel />} />
                     <Route path="/admin" element={<SuperAdminPanel />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </>
