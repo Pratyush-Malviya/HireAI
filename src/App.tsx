@@ -1714,7 +1714,7 @@ function JobDetail() {
   } | null>(null);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
-  const { profile } = useProfile();
+  const { profile, organization } = useProfile();
 
   // Debounce search query
   useEffect(() => {
@@ -2007,7 +2007,8 @@ function JobDetail() {
           candidateEmail: candidate.email,
           candidateName: candidate.fullName,
           interviewLink: link,
-          jobTitle: job?.title || 'Applied Position'
+          jobTitle: job?.title || 'Applied Position',
+          customSmtp: organization?.emailSettings || null
         })
       });
 
@@ -2765,7 +2766,7 @@ function JobDetail() {
 
 function CandidateDetail() {
   const { candidateId } = useParams();
-  const { profile } = useProfile();
+  const { profile, organization } = useProfile();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [job, setJob] = useState<Job | null>(null);
   const [interview, setInterview] = useState<any>(null);
@@ -2828,7 +2829,8 @@ function CandidateDetail() {
           candidateEmail: candidate.email,
           candidateName: candidate.fullName,
           interviewLink: link,
-          jobTitle: job?.title || 'Applied Position'
+          jobTitle: job?.title || 'Applied Position',
+          customSmtp: organization?.emailSettings || null
         })
       });
 
@@ -4822,6 +4824,11 @@ function SuperAdminPanel() {
   const [onboardModalOpen, setOnboardModalOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgDomain, setNewOrgDomain] = useState('');
+  const [newOrgIndustry, setNewOrgIndustry] = useState('Technology');
+  const [newOrgCompanySize, setNewOrgCompanySize] = useState('11-50');
+  const [newOrgLocation, setNewOrgLocation] = useState('');
+  const [newOrgPhone, setNewOrgPhone] = useState('');
+  const [newOrgDescription, setNewOrgDescription] = useState('');
   const [onboarding, setOnboarding] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkOrgNames, setBulkOrgNames] = useState('');
@@ -4883,6 +4890,11 @@ function SuperAdminPanel() {
       const orgRef = await addDoc(collection(db, 'organizations'), {
         name: newOrgName.trim(),
         domain: newOrgDomain.trim() || null,
+        industry: newOrgIndustry,
+        companySize: newOrgCompanySize,
+        location: newOrgLocation.trim(),
+        phone: newOrgPhone.trim(),
+        description: newOrgDescription.trim(),
         createdAt: serverTimestamp(),
         createdBy: auth.currentUser?.uid,
         status: 'active'
@@ -4892,6 +4904,11 @@ function SuperAdminPanel() {
         id: orgRef.id,
         name: newOrgName.trim(),
         domain: newOrgDomain.trim() || undefined,
+        industry: newOrgIndustry,
+        companySize: newOrgCompanySize,
+        location: newOrgLocation.trim() || undefined,
+        phone: newOrgPhone.trim() || undefined,
+        description: newOrgDescription.trim() || undefined,
         createdAt: new Date(),
         createdBy: auth.currentUser?.uid || '',
         status: 'active'
@@ -4903,6 +4920,11 @@ function SuperAdminPanel() {
       setOnboardModalOpen(false);
       setNewOrgName('');
       setNewOrgDomain('');
+      setNewOrgIndustry('Technology');
+      setNewOrgCompanySize('11-50');
+      setNewOrgLocation('');
+      setNewOrgPhone('');
+      setNewOrgDescription('');
     } catch (err) {
       notify('Failed to create organization: ' + (err instanceof Error ? err.message : 'Check permissions'), 'error');
       handleFirestoreError(err, OperationType.CREATE, 'organizations');
@@ -5046,8 +5068,8 @@ function SuperAdminPanel() {
         </div>
 
         {!bulkMode ? (
-          <form onSubmit={handleCreateOrg} className="space-y-6">
-             <div className="space-y-2">
+          <form onSubmit={handleCreateOrg} className="space-y-4">
+             <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Name</label>
                 <input 
                   autoFocus
@@ -5055,20 +5077,88 @@ function SuperAdminPanel() {
                   value={newOrgName}
                   onChange={e => setNewOrgName(e.target.value)}
                   placeholder="e.g. Acme Corporation"
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300"
                 />
              </div>
-             <div className="space-y-2">
+             
+             <div className="grid grid-cols-2 gap-3">
+               <div className="space-y-1">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry</label>
+                 <select
+                   value={newOrgIndustry}
+                   onChange={e => setNewOrgIndustry(e.target.value)}
+                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all bg-white"
+                 >
+                   <option value="Technology">Technology</option>
+                   <option value="Finance">Finance</option>
+                   <option value="Healthcare">Healthcare</option>
+                   <option value="Education">Education</option>
+                   <option value="Retail">Retail</option>
+                   <option value="Non-Profit">Non-Profit</option>
+                   <option value="Other">Other</option>
+                 </select>
+               </div>
+
+               <div className="space-y-1">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Size</label>
+                 <select
+                   value={newOrgCompanySize}
+                   onChange={e => setNewOrgCompanySize(e.target.value)}
+                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all bg-white"
+                 >
+                   <option value="1-10">1-10 employees</option>
+                   <option value="11-50">11-50 employees</option>
+                   <option value="51-200">51-200 employees</option>
+                   <option value="201-500">201-500 employees</option>
+                   <option value="501-1000">501-1000 employees</option>
+                   <option value="1000+">1000+ employees</option>
+                 </select>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-2 gap-3">
+               <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">HQ Location</label>
+                  <input 
+                    value={newOrgLocation}
+                    onChange={e => setNewOrgLocation(e.target.value)}
+                    placeholder="e.g. San Francisco"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300"
+                  />
+               </div>
+               <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Phone</label>
+                  <input 
+                    value={newOrgPhone}
+                    onChange={e => setNewOrgPhone(e.target.value)}
+                    placeholder="e.g. +1 (555) 123-4567"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300"
+                  />
+               </div>
+             </div>
+
+             <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Domain (Optional)</label>
                 <input 
                   value={newOrgDomain}
                   onChange={e => setNewOrgDomain(e.target.value)}
                   placeholder="e.g. acme.com"
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 font-mono text-sm"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 font-mono"
                 />
-                <p className="text-[10px] text-slate-400 font-medium italic">Used for auto-linking employees by email domain.</p>
              </div>
-             <div className="flex gap-3 pt-4">
+
+             <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description / Vision</label>
+                <textarea 
+                  value={newOrgDescription}
+                  onChange={e => setNewOrgDescription(e.target.value)}
+                  placeholder="Briefly state organization vision or core domain focus..."
+                  rows={2}
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 resize-none font-sans"
+                />
+             </div>
+
+             <div className="flex gap-3 pt-3">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -5272,53 +5362,72 @@ function SuperAdminPanel() {
                     <Plus className="w-3.5 h-3.5 mr-1.5" /> Onboard Organization
                   </Button>
                </div>
-               <Card className="overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[700px]">
-                    <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Created</th>
-                        <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Management</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {organizations.map(org => (
-                        <tr key={org.id}>
-                          <td className="px-6 py-4">
-                            <div className="font-bold text-sm uppercase tracking-tight">{org.name}</div>
-                            <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={cn(
-                              "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest",
-                              org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                            )}>{org.status}</span>
-                          </td>
-                          <td className="px-6 py-4 text-xs text-slate-500">
-                            {formatDate(org.createdAt)}
-                          </td>
-                          <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                             <Button 
-                               variant="outline" 
-                               className="h-8 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100"
-                               onClick={() => {
-                                 const url = `${window.location.origin}/join/${org.id}`;
-                                 navigator.clipboard.writeText(url);
-                                 notify(`Invite link for ${org.name} copied!`, 'success');
-                               }}
-                             >
-                               <Copy className="w-3 h-3 mr-1.5" /> Invite Link
-                             </Button>
-                             <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest">Suspend</Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-               </Card>
+                <Card className="overflow-hidden">
+                   <div className="overflow-x-auto">
+                     <table className="w-full min-w-[1000px]">
+                     <thead className="bg-slate-50 border-b border-slate-100">
+                       <tr>
+                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
+                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry & Size</th>
+                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact & HQ</th>
+                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
+                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Created</th>
+                         <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Management</th>
+                       </tr>
+                     </thead>
+                     <tbody className="divide-y divide-slate-100">
+                       {organizations.map(org => (
+                         <tr key={org.id}>
+                           <td className="px-6 py-4">
+                             <div className="font-bold text-sm uppercase tracking-tight text-slate-900">{org.name}</div>
+                             <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
+                             {org.domain && <div className="text-[10px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
+                           </td>
+                           <td className="px-6 py-4">
+                             <div className="text-xs font-bold text-slate-700">{org.industry || "Technology"}</div>
+                             <div className="text-[10px] text-slate-500 mt-0.5">{org.companySize || "11-50 employees"}</div>
+                           </td>
+                           <td className="px-6 py-4">
+                             <div className="text-xs font-semibold text-slate-700">{org.location || "Not Provided"}</div>
+                             <div className="text-[10px] text-slate-500 font-mono mt-0.5">{org.phone || "No Phone"}</div>
+                           </td>
+                           <td className="px-6 py-4">
+                             <p className="text-xs text-slate-600 max-w-xs truncate" title={org.description}>
+                               {org.description || "No vision summary provided."}
+                             </p>
+                           </td>
+                           <td className="px-6 py-4">
+                             <span className={cn(
+                               "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest",
+                               org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                             )}>{org.status}</span>
+                           </td>
+                           <td className="px-6 py-4 text-xs text-slate-500">
+                             {formatDate(org.createdAt)}
+                           </td>
+                           <td className="px-6 py-4 text-right">
+                             <div className="flex items-center justify-end gap-2">
+                               <Button 
+                                 variant="outline" 
+                                 className="h-8 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-3 hover:bg-indigo-50"
+                                 onClick={() => {
+                                   const url = `${window.location.origin}/join/${org.id}`;
+                                   navigator.clipboard.writeText(url);
+                                   notify(`Invite link for ${org.name} copied!`, 'success');
+                                 }}
+                               >
+                                 <Copy className="w-3 h-3 mr-1.5" /> Invite Link
+                               </Button>
+                               <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-500">Suspend</Button>
+                             </div>
+                           </td>
+                         </tr>
+                       ))}
+                     </tbody>
+                   </table>
+                 </div>
+                </Card>
             </div>
           ) : activeTab === 'payments' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
@@ -5521,6 +5630,11 @@ function Onboarding() {
   const { notify } = useNotification();
   const navigate = useNavigate();
   const [orgName, setOrgName] = useState('');
+  const [orgIndustry, setOrgIndustry] = useState('Technology');
+  const [orgCompanySize, setOrgCompanySize] = useState('11-50');
+  const [orgLocation, setOrgLocation] = useState('');
+  const [orgPhone, setOrgPhone] = useState('');
+  const [orgDescription, setOrgDescription] = useState('');
   const [invitedOrg, setInvitedOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingInvite, setCheckingInvite] = useState(!!orgId);
@@ -5580,6 +5694,11 @@ function Onboarding() {
     try {
       const orgRef = await addDoc(collection(db, 'organizations'), {
         name: orgName.trim(),
+        industry: orgIndustry,
+        companySize: orgCompanySize,
+        location: orgLocation.trim(),
+        phone: orgPhone.trim(),
+        description: orgDescription.trim(),
         createdAt: serverTimestamp(),
         createdBy: auth.currentUser.uid,
         status: 'active'
@@ -5669,26 +5788,94 @@ function Onboarding() {
               <p className="text-slate-500 text-sm font-medium">Create an organization to start hiring.</p>
             </div>
 
-            <form onSubmit={handleCreateOrg} className="space-y-6">
-              <div className="space-y-2">
+            <form onSubmit={handleCreateOrg} className="space-y-4">
+              <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Organization Name</label>
                 <input 
                   type="text"
                   required
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 placeholder:text-slate-300 text-sm"
                   placeholder="e.g. Acme Corp"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Industry</label>
+                  <select
+                    value={orgIndustry}
+                    onChange={(e) => setOrgIndustry(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 text-sm bg-white"
+                  >
+                    <option value="Technology">Technology</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Education">Education</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Non-Profit">Non-Profit</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Company Size</label>
+                  <select
+                    value={orgCompanySize}
+                    onChange={(e) => setOrgCompanySize(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 text-sm bg-white"
+                  >
+                    <option value="1-10">1-10 employees</option>
+                    <option value="11-50">11-50 employees</option>
+                    <option value="51-200">51-200 employees</option>
+                    <option value="201-500">201-500 employees</option>
+                    <option value="501-1000">501-1000 employees</option>
+                    <option value="1000+">1000+ employees</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">HQ Location</label>
+                <input 
+                  type="text"
+                  value={orgLocation}
+                  onChange={(e) => setOrgLocation(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 placeholder:text-slate-300 text-sm"
+                  placeholder="e.g. San Francisco, CA"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Contact Phone</label>
+                <input 
+                  type="tel"
+                  value={orgPhone}
+                  onChange={(e) => setOrgPhone(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 placeholder:text-slate-300 text-sm"
+                  placeholder="e.g. +1 (555) 123-4567"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Description / Vision</label>
+                <textarea 
+                  value={orgDescription}
+                  onChange={(e) => setOrgDescription(e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-100 focus:outline-none focus:border-indigo-600 transition-all font-bold text-slate-700 placeholder:text-slate-300 text-sm resize-none"
+                  placeholder="Tell us briefly about your team..."
                 />
               </div>
 
               <Button 
                 type="submit" 
                 variant="secondary" 
-                className="w-full h-14 text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-200"
+                className="w-full h-12 text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-200 mt-2"
                 disabled={loading}
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Organization'}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Organization Workspace'}
               </Button>
             </form>
           </>

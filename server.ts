@@ -212,7 +212,7 @@ app.post("/api/calendar/schedule", async (req, res) => {
 
 app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
-  const { candidateEmail, candidateName, interviewLink, jobTitle } = req.body;
+  const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp } = req.body;
 
   // Validate email format strictly to protect against mailing injections or header manipulation
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -320,6 +320,38 @@ app.post("/api/candidate/send-invite", async (req, res) => {
   }
 
   // 2. Try configured SMTP
+  if (!emailSent && customSmtp && (customSmtp.smtpUser || customSmtp.user) && (customSmtp.smtpPass || customSmtp.pass)) {
+    try {
+      const host = customSmtp.smtpHost || customSmtp.host || "smtp.gmail.com";
+      const port = parseInt(customSmtp.smtpPort || customSmtp.port || "465");
+      const secure = (customSmtp.smtpSecure !== undefined ? customSmtp.smtpSecure : customSmtp.secure) !== false;
+      const user = customSmtp.smtpUser || customSmtp.user;
+      const pass = customSmtp.smtpPass || customSmtp.pass;
+      const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireAI";
+      const fromEmail = customSmtp.smtpFromEmail || customSmtp.fromEmail || user;
+
+      const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure,
+        auth: { user, pass }
+      });
+
+      await transporter.sendMail({
+        from: `"${fromName}" <${fromEmail}>`,
+        to: candidateEmail,
+        subject,
+        html: htmlBody
+      });
+      emailSent = true;
+      fallbackInfo = "Custom Organization SMTP";
+      console.log("Invitation sent successfully via Organization custom SMTP.");
+    } catch (smtpErr: any) {
+      console.error("Organization custom SMTP sending failed, trying global fallback:", smtpErr.message || smtpErr);
+    }
+  }
+
+  // 3. Try configured global environment SMTP
   if (!emailSent && process.env.SMTP_USER && process.env.SMTP_PASS) {
     try {
       const transporter = nodemailer.createTransport({
@@ -394,6 +426,141 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       previewUrl: `https://ethereal.email/messages`
     });
   }
+});
+
+app.post("/api/admin/broadcast-email", async (req, res) => {
+  const { emails, subject, body, customSmtp } = req.body;
+
+  if (!emails || !Array.isArray(emails) || emails.length === 0) {
+    return res.status(400).json({ success: false, error: "Recipient emails are required and must be an array" });
+  }
+  if (!subject || typeof subject !== "string") {
+    return res.status(400).json({ success: false, error: "Subject is required" });
+  }
+  if (!body || typeof body !== "string") {
+    return res.status(400).json({ success: false, error: "Body text or HTML is required" });
+  }
+
+  // Validate all emails to block mailing injections
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const validEmails = emails.filter(email => typeof email === "string" && emailRegex.test(email));
+
+  if (validEmails.length === 0) {
+    return res.status(400).json({ success: false, error: "No valid recipient email addresses specified" });
+  }
+
+  const cleanSubject = safeSanitize(subject).substring(0, 200);
+
+  let transporter: any = null;
+  let fromString = '"HireAI platform" <no-reply@hireai.com>';
+  let dispatchMode = "Ethereal Test Mode";
+
+  if (customSmtp && (customSmtp.smtpUser || customSmtp.user) && (customSmtp.smtpPass || customSmtp.pass)) {
+    try {
+      const host = customSmtp.smtpHost || customSmtp.host || "smtp.gmail.com";
+      const port = parseInt(customSmtp.smtpPort || customSmtp.port || "465");
+      const secure = (customSmtp.smtpSecure !== undefined ? customSmtp.smtpSecure : customSmtp.secure) !== false;
+      const user = customSmtp.smtpUser || customSmtp.user;
+      const pass = customSmtp.smtpPass || customSmtp.pass;
+      const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireAI Platforms";
+      const fromEmail = customSmtp.smtpFromEmail || customSmtp.fromEmail || user;
+
+      transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure,
+        auth: { user, pass }
+      });
+      fromString = `"${fromName}" <${fromEmail}>`;
+      dispatchMode = "Super Admin Custom SMTP Link";
+    } catch (err: any) {
+      console.error("Super Admin SMTP setup failed:", err.message);
+    }
+  }
+
+  if (!transporter && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT || "465"),
+        secure: process.env.SMTP_SECURE !== "false",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+      const fromName = process.env.SMTP_FROM_NAME || "HireAI Platforms";
+      const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+      fromString = `"${fromName}" <${fromEmail}>`;
+      dispatchMode = "Global Environment SMTP";
+    } catch (err: any) {
+      console.error("Global SMTP failed on broadcast initialization:", err.message);
+    }
+  }
+
+  let previewUrl = "";
+
+  if (!transporter) {
+    try {
+      const testAccount = await nodemailer.createTestAccount();
+      transporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass
+        }
+      });
+      fromString = '"HireAI platform" <no-reply@hireai.com>';
+      dispatchMode = "Ethereal Test account Fallback";
+    } catch (err) {
+      console.error("Test account failed:", err);
+    }
+  }
+
+  if (!transporter) {
+    return res.status(500).json({ success: false, error: "Mailer initialization failure" });
+  }
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  for (const targetMail of validEmails) {
+    try {
+      const info = await transporter.sendMail({
+        from: fromString,
+        to: targetMail,
+        subject: cleanSubject,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
+            <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+              <h2 style="color: #4f46e5; margin-top: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">Platform Broadcast Update</h2>
+              <div style="margin: 20px 0; line-height: 1.8; font-size: 15px; color: #1e293b; white-space: pre-wrap;">${body}</div>
+              <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 25px; font-size: 11px; color: #94a3b8; text-align: center;">
+                This update email was dispatched regarding global platform governance by HireAI.
+              </div>
+            </div>
+          </div>
+        `
+      });
+      successCount++;
+      if (dispatchMode.includes("Ethereal")) {
+        previewUrl = nodemailer.getTestMessageUrl(info) || "";
+      }
+    } catch (err) {
+      console.error(`Broadcast failed for ${targetMail}:`, err);
+      failureCount++;
+    }
+  }
+
+  return res.json({
+    success: true,
+    message: `Broadcast complete. Successful: ${successCount}. Failures: ${failureCount}. Delivered via ${dispatchMode}.`,
+    previewUrl,
+    successCount,
+    failureCount
+  });
 });
 
 // AI Proxy Routes

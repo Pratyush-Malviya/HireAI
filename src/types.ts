@@ -2,9 +2,23 @@ export interface Organization {
   id: string;
   name: string;
   domain?: string;
+  industry?: string;
+  companySize?: string;
+  location?: string;
+  phone?: string;
+  description?: string;
   createdAt: any;
   createdBy: string;
   status: 'active' | 'suspended';
+  emailSettings?: {
+    smtpHost?: string;
+    smtpPort?: string;
+    smtpSecure?: boolean;
+    smtpUser?: string;
+    smtpPass?: string;
+    smtpFromName?: string;
+    smtpFromEmail?: string;
+  };
   settings?: {
     branding?: {
       logo?: string;
