@@ -1364,9 +1364,14 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </Link>
               )}
             </div>
-            <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
-              © 2026 HireAI Inc. All rights reserved.
-            </p>
+            <div className="flex flex-col items-center md:items-end gap-1.5">
+              <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
+                © 2026 HireAI Inc. All rights reserved.
+              </p>
+              <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
+                Developed by <a href="https://www.linkedin.com/in/pratyushmalviy/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-bold transition-colors">Pratyush Malviya</a>
+              </p>
+            </div>
           </div>
         </div>
       </footer>
