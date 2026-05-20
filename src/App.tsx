@@ -308,7 +308,7 @@ function Button({ className, variant = 'primary', size = 'md', as: Component = '
 
 function Card({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('saas-card overflow-hidden', className)} {...props}>
+    <div className={cn('saas-card', !className?.includes('overflow-') && 'overflow-hidden', className)} {...props}>
       {children}
     </div>
   );
@@ -3620,7 +3620,7 @@ function CandidateDetail() {
 
         {/* Dimension Breakdown */}
         <div className="lg:col-span-2 space-y-8">
-          <Card className="p-8">
+          <Card className="p-8 overflow-visible">
             <div className="flex items-center justify-between mb-8 border-b pb-4">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-black">D6 Scoring Engine</h2>
@@ -3720,13 +3720,13 @@ function CandidateDetail() {
                 
                 return (
                   <Card key={dimInfo.id} className={cn(
-                    "p-0 overflow-hidden border-2 transition-all group/dim",
+                    "p-0 overflow-visible border-2 transition-all group/dim",
                     dim ? (dim.score >= 80 ? "border-green-100/50 hover:border-green-200" : dim.score >= 50 ? "border-amber-100/50 hover:border-amber-200" : "border-red-100/50 hover:border-red-200") : "border-slate-100 opacity-70"
                   )}>
                     <div className="flex flex-col md:flex-row">
                       {/* Score Indicator Sidebar */}
                       <div className={cn(
-                        "w-full md:w-32 p-6 flex md:flex-col items-center justify-center gap-2 shrink-0 transition-colors",
+                        "w-full md:w-32 p-6 flex md:flex-col items-center justify-center gap-2 shrink-0 transition-colors rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl",
                         dim ? (dim.score >= 80 ? "bg-green-50/50" : dim.score >= 50 ? "bg-amber-50/50" : "bg-red-50/50") : "bg-slate-50"
                       )}>
                         <div className="relative">
@@ -4259,11 +4259,18 @@ function OrgAdminPanel() {
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 overflow-visible">
                 Working hours 
-                <span className="cursor-help text-slate-300 hover:text-slate-500">
-                  <Info className="w-3.5 h-3.5" />
-                </span>
+                <div className="group relative">
+                  <span className="cursor-help text-slate-300 hover:text-indigo-500 transition-colors">
+                    <Info className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-slate-700 pointer-events-none normal-case tracking-normal">
+                    <span className="font-black text-indigo-400 block mb-1 uppercase tracking-widest">Working Hours Range</span>
+                    Defines the standard operational hour interval used to segment analytics for timezone/outside-hours interview metrics.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900" />
+                  </div>
+                </div>
               </label>
               <div className="flex items-center gap-3">
                 <div className="relative flex-1">
