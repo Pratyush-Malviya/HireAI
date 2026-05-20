@@ -178,8 +178,8 @@ async function generateContentWithRetry(params: any, maxRetries = 3, initialDela
   for (const currentModel of modelsToTry) {
     const modelParams = { ...params, model: currentModel };
     
-    // Automatically set thinking level to "MINIMAL" on gemini-3.1-flash-lite to skip reasoning delay
-    if (currentModel === "gemini-3.1-flash-lite") {
+    // Automatically set thinking level to "MINIMAL" on gemini-3.1-flash-lite and gemini-3.5-flash to skip reasoning delay
+    if (currentModel === "gemini-3.1-flash-lite" || currentModel === "gemini-3.5-flash") {
       modelParams.config = {
         ...modelParams.config,
         thinkingConfig: {
@@ -531,9 +531,15 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     res.json(result);
   } catch (error: any) {
     console.error("Screen Candidate Error:", error);
-    const isRateLimit = error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota');
+    const errorText = error ? (error.message || String(error)) : "Unknown error";
+    const status = error?.status || error?.code;
+    const isRateLimit = status === 429 || (typeof errorText === 'string' && (errorText.includes('429') || errorText.includes('quota')));
     const message = isRateLimit ? "AI Model limit reached. Candidate evaluation paused." : "Candidate screening failed";
-    res.status(isRateLimit ? 429 : 500).json({ error: message });
+    res.status(isRateLimit ? 429 : 500).json({ 
+      error: message, 
+      details: errorText,
+      code: status
+    });
   }
 });
 
