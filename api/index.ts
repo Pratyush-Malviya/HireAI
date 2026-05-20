@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import nodemailer from "nodemailer";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 
 dotenv.config();
@@ -13,8 +15,59 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+// Enable Helmet with sandbox-friendly exemptions so preview frames render perfectly
+app.use(helmet({
+  contentSecurityPolicy: false,       // Prevent asset-blocking or sandbox failures
+  frameguard: false,                  // Allow rendering inside AI Studio container frames
+  crossOriginOpenerPolicy: false,      // Allow OAuth Google popup scopes to send parent postMessages
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Mitigate large payload memory-overflow DoS vector (limit JSON to 5MB max)
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(cookieParser());
+
+// Define granular rate limit structures to protect AI execution routes and transactional mail routes
+const generalLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 350,                  // max 350 requests per client per window
+  message: { error: "General request quota exceeded. Please try again shortly." },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const aiQuotaLimit = rateLimit({
+  windowMs: 60 * 1000,      // 1 minute
+  max: 15,                  // max 15 heavy AI audit prompts per client per minute
+  message: { error: "AI processing capacity reached. Please hold for 1 minute before your next talent audit." },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const deliveryLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 8,                   // max 8 external candidate invite notifications per client to block automated mail spam
+  message: { error: "Notification dispatch rate exceeded. Please try again in 10 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Sanitize user inputs safely dynamically to avert potential stored HTML or scripts injection
+const safeSanitize = (unsafe: any): string => {
+  if (typeof unsafe !== "string") return "";
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+// Apply general limiters to API routes except assets
+app.use("/api/", generalLimit);
+app.use("/api/ai/", aiQuotaLimit);
+app.use("/api/candidate/send-invite", deliveryLimiter);
 
 const getOAuthClient = () => {
   return new google.auth.OAuth2(
@@ -161,11 +214,29 @@ app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
   const { candidateEmail, candidateName, interviewLink, jobTitle } = req.body;
 
-  if (!candidateEmail) {
-    return res.status(400).json({ success: false, error: "Candidate email is required" });
+  // Validate email format strictly to protect against mailing injections or header manipulation
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  if (!candidateEmail || typeof candidateEmail !== "string" || !emailRegex.test(candidateEmail)) {
+    return res.status(400).json({ success: false, error: "A valid candidate email is required" });
   }
 
-  const subject = `Interview Invitation: ${jobTitle || 'Applied Position'} with HireAI`;
+  // Sanitize variables to prevent remote HTML stored injection inside client clients
+  const cleanName = safeSanitize(candidateName || "Candidate").substring(0, 100);
+  const cleanTitle = safeSanitize(jobTitle || "Applied Position").substring(0, 150);
+
+  // Validate the link destination to block open HTTP redirects
+  let cleanLink = "/";
+  if (interviewLink && typeof interviewLink === "string") {
+    const isSafe = interviewLink.startsWith("/") || interviewLink.startsWith("http://localhost:") || (process.env.APP_URL && interviewLink.startsWith(process.env.APP_URL));
+    if (isSafe) {
+      cleanLink = interviewLink;
+    } else {
+      console.warn("Suspicious redirect link blocked during security checks:", interviewLink);
+      return res.status(400).json({ success: false, error: "Security Exception: Invalid invite link destination" });
+    }
+  }
+
+  const subject = `Interview Invitation: ${cleanTitle} with HireAI`;
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
       <div style="text-align: center; margin-bottom: 30px;">
@@ -174,9 +245,9 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       </div>
       
       <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Hi ${candidateName || 'Candidate'},</h2>
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Hi ${cleanName},</h2>
         
-        <p style="font-size: 16px; margin-bottom: 24px;">Thank you for your interest in the <strong>${jobTitle || 'Applied Position'}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireAI).</p>
+        <p style="font-size: 16px; margin-bottom: 24px;">Thank you for your interest in the <strong>${cleanTitle}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireAI).</p>
         
         <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; border-left: 4px solid #4f46e5; margin-bottom: 24px;">
           <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Your Interview Details</h3>
@@ -186,14 +257,14 @@ app.post("/api/candidate/send-invite", async (req, res) => {
         </div>
 
         <div style="text-align: center; margin: 32px 0;">
-          <a href="${interviewLink}" target="_blank" style="background-color: #4f46e5; color: #ffffff; padding: 14px 28px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); font-size: 16px;">
+          <a href="${cleanLink}" target="_blank" style="background-color: #4f46e5; color: #ffffff; padding: 14px 28px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); font-size: 16px;">
             Join Interview Room
           </a>
         </div>
 
         <p style="font-size: 14px; color: #64748b; text-align: center; margin-bottom: 0;">
           If the button above does not work, copy and paste this link into your browser:<br/>
-          <a href="${interviewLink}" style="color: #4f46e5; word-break: break-all;">${interviewLink}</a>
+          <a href="${cleanLink}" style="color: #4f46e5; word-break: break-all;">${cleanLink}</a>
         </p>
       </div>
       
@@ -1153,15 +1224,28 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       ]
     }`;
 
-    const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
-        temperature: 0,
-        responseMimeType: "application/json"
-      },
-    });
+    let response;
+    try {
+      response = await generateContentWithRetry({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          tools: [{ googleSearch: {} }],
+          temperature: 0,
+          responseMimeType: "application/json"
+        },
+      });
+    } catch (groundingError: any) {
+      console.warn("Research Candidate with Grounding failed or rate-limited. Retrying without Google Search grounding tool to bypass limits:", groundingError);
+      response = await generateContentWithRetry({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          temperature: 0,
+          responseMimeType: "application/json"
+        },
+      });
+    }
 
     const text = response.text || "";
     let jsonResult: any = {};
