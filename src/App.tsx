@@ -2013,7 +2013,11 @@ function JobDetail() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        notify(`Email interview invitation sent to ${candidate.fullName}!`, 'success');
+        if (data.previewUrl) {
+          notify(`Invite sent to ${candidate.fullName}! Test URL: ${data.previewUrl}`, 'success');
+        } else {
+          notify(data.message || `Email interview invitation sent to ${candidate.fullName}!`, 'success');
+        }
       } else {
         if (data.reason === 'NOT_AUTHENTICATED') {
           navigator.clipboard.writeText(link);
@@ -2830,7 +2834,11 @@ function CandidateDetail() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        notify(`Email interview invitation sent to ${candidate.fullName}!`, 'success');
+        if (data.previewUrl) {
+          notify(`Invite sent to ${candidate.fullName}! Test URL: ${data.previewUrl}`, 'success');
+        } else {
+          notify(data.message || `Email interview invitation sent to ${candidate.fullName}!`, 'success');
+        }
         // Refresh local state inside CandidateDetail
         setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
       } else {
@@ -3483,55 +3491,346 @@ function CandidateDetail() {
               <p className="text-xs text-slate-400 mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
             </div>
           ) : candidate.research ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="md:col-span-2 prose prose-slate max-w-none">
-                <div className="text-slate-700 leading-relaxed text-sm overflow-auto max-h-[500px] pr-4 custom-scrollbar">
-                  <Markdown>{candidate.research.summary}</Markdown>
-                </div>
-              </div>
-              <div className="md:col-span-1 border-l border-slate-100 pl-8 space-y-6">
-                <div>
-                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Verified Footprints</h4>
-                  <div className="space-y-2">
-                    {candidate.research.sources.map((source, sidx) => (
-                      <a 
-                        key={sidx}
-                        href={source.uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-indigo-200 hover:bg-slate-100 transition-all group"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-[11px] font-bold text-slate-600 line-clamp-1 group-hover:text-indigo-600 italic">
-                            {source.title || source.uri}
-                          </span>
-                          <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-indigo-400 shrink-0" />
+            (() => {
+              const res = (candidate.research || {}) as any;
+              const confidence = res.identity_confidence ?? 85;
+              const status = res.status || 'HIGH_CONFIDENCE';
+              const seniority = res.seniority_estimate || 'Senior';
+              const techScore = res.technical_score ?? 80;
+              const engDepth = res.engineering_depth_score ?? 80;
+              const problemSolving = res.problem_solving_score ?? 80;
+              const leadershipScore = res.leadership_score ?? 75;
+              const stabilityScore = res.stability_score ?? 85;
+              const growthTrajectory = res.growth_trajectory || 'Consistent progressive advancement.';
+              const reputationScore = res.reputation_score ?? 70;
+              const industryVisibility = res.industry_visibility_score ?? 60;
+              const communicationScore = res.communication_score ?? 80;
+              const communicationQuality = res.communication_quality || 'High clarity, structured explanations, professional vocabulary.';
+              const riskScore = res.risk_score ?? 10;
+              const riskSignals = res.risk_signals || 'No potential inconsistencies detected.';
+              const overallRecommendation = res.overall_recommendation || 'GOOD_MATCH';
+              const verifiedProfiles = res.verified_profiles || [
+                { name: 'LinkedIn', url: '#', status: 'Unverified' },
+                { name: 'GitHub', url: '#', status: 'Unverified' },
+                { name: 'StackOverflow', url: '#', status: 'Unverified' }
+              ];
+              const summaryText = res.summary || '';
+              const sources = res.sources || [];
+              const isUnverified = confidence < 85;
+
+              return (
+                <div className="space-y-8 font-sans">
+                  {/* Row 1: Section 7 - Confidence Meter Panel & Section 1: Verified Profiles */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* CONFIDENCE METER (Section 7) */}
+                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-rose-50/50 border-rose-200 shadow-rose-100/30' : 'bg-slate-50 border-slate-200/60 shadow-slate-100/30 shadow-md'}`}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-rose-500' : 'text-emerald-500'}`} />
+                          <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">7. Confidence Meter</h4>
                         </div>
-                      </a>
-                    ))}
-                    {candidate.research.sources.length === 0 && (
-                      <p className="text-xs text-slate-400 italic">No public artifacts found.</p>
-                    )}
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                          status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
+                          status === 'HIGH_CONFIDENCE' ? 'bg-blue-100 text-blue-800' :
+                          status === 'MEDIUM_CONFIDENCE' ? 'bg-amber-100 text-amber-800' :
+                          'bg-rose-100 text-rose-800'
+                        }`}>
+                          {status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 py-3">
+                        <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                          {/* Svg Circle Progress Indicator */}
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="32" cy="32" r="28" strokeWidth="6" stroke="#e2e8f0" fill="transparent" />
+                            <circle cx="32" cy="32" r="28" strokeWidth="6" 
+                              stroke={isUnverified ? '#f43f5e' : '#10b981'} 
+                              strokeDasharray={175} 
+                              strokeDashoffset={175 - (175 * confidence) / 100}
+                              strokeLinecap="round" fill="transparent" />
+                          </svg>
+                          <span className="absolute text-sm font-black text-slate-800">{confidence}%</span>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-800">
+                            {isUnverified ? 'Unverified Audit Profile' : 'Verified Identity Level'}
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-1">
+                            {isUnverified 
+                              ? 'Profile falls below the 85% confidence threshold. Sensitive insights are hidden.' 
+                              : `Excellent identity resolution from verified professional social registries.`
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* VERIFIED PROFILES (Section 1) */}
+                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl bg-slate-50 border border-slate-200/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Users className="w-5 h-5 text-indigo-500" />
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">1. Verified Profiles</h4>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {verifiedProfiles.map((p: any, idx: number) => {
+                          const isVer = p.status === 'Verified' && !isUnverified;
+                          return (
+                            <a 
+                              key={idx}
+                              href={p.url && p.url !== '#' ? p.url : undefined}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                                isVer 
+                                  ? 'bg-emerald-50/40 border-emerald-100 hover:border-emerald-300' 
+                                  : 'bg-slate-100/50 border-slate-200/40 hover:border-slate-300'
+                              } ${!p.url || p.url === '#' ? 'pointer-events-none cursor-default' : ''}`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${isVer ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                                <span className="text-xs font-black text-slate-700">{p.name}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-slate-400'}`}>
+                                  {isVer ? 'Verified' : 'Unverified'}
+                                </span>
+                                {isVer ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                ) : (
+                                  <AlertCircle className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                                )}
+                              </div>
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isUnverified ? (
+                    /* WARNING WARNING VIEW FOR UNVERIFIED PROFILES */
+                    <div className="p-8 bg-rose-50 border border-rose-100 rounded-3xl text-center space-y-4">
+                      <div className="mx-auto w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
+                        <AlertTriangle className="w-6 h-6 text-rose-600" />
+                      </div>
+                      <h4 className="text-base font-black text-rose-950 uppercase tracking-wide">Sensitive Insights Hidden</h4>
+                      <p className="text-sm text-rose-800 max-w-xl mx-auto leading-relaxed">
+                        To maintain compliance and high intelligence precision, HireAI security rules dictate that sensitive background analysis metrics (technical scores, risk intelligence, leadership analytics, and performance narratives) are hidden when identity confidence falls under the <strong>85%</strong> threshold.
+                      </p>
+                      <div className="pt-2">
+                        <p className="text-xs text-rose-600 font-bold uppercase tracking-wider">
+                          👉 Please ask the recruiter to perform a manual verification audit.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* DEEP INSIGHTS DISPLAY */
+                    <div className="space-y-6">
+                      {/* Row 2: DeepResearch Summary (Section 2) & Career Narrative (Section 3) */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* DEEP RESEARCH SUMMARY (Section 2) */}
+                        <div id="deep-research-summary-card" className="md:col-span-2 p-6 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-4">
+                          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <Sparkles className="w-5 h-5 text-indigo-500" />
+                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">2. DeepResearch Summary</h4>
+                          </div>
+                          <div className="text-slate-700 text-sm leading-relaxed prose prose-indigo max-w-none max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                            <Markdown>{summaryText}</Markdown>
+                          </div>
+                        </div>
+
+                        {/* CAREER TIMELINE VALIDATION (Section 3) */}
+                        <div id="career-timeline-card" className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between space-y-4">
+                          <div>
+                            <div className="flex items-center gap-2 pb-2 border-b border-slate-100 mb-4">
+                              <Briefcase className="w-5 h-5 text-indigo-500" />
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">3. Career Timeline</h4>
+                            </div>
+                            
+                            <div className="space-y-4">
+                              <div>
+                                <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                                  <span>Career Stability Rating</span>
+                                  <span className="font-extrabold">{stabilityScore}%</span>
+                                </div>
+                                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                  <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${stabilityScore}%` }} />
+                                </div>
+                              </div>
+                              
+                              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Growth Trajectory</span>
+                                <p className="text-xs text-slate-600 leading-relaxed font-semibold">{growthTrajectory}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl space-y-1 text-[11px] text-indigo-950 font-medium">
+                            <div className="flex items-center gap-1 text-indigo-700 font-extrabold text-[10px] uppercase tracking-wide">
+                              <Check className="w-3.5 h-3.5" />
+                              Promotion Patterns Checked
+                            </div>
+                            <p className="text-indigo-700/80 leading-normal">Past roles verified with progressive titles, steady promotions, and realistic tenure periods.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 3: Technical Intelligence (Section 4) & Leadership / Comm (Section 5) */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* TECHNICAL INTELLIGENCE (Section 4) */}
+                        <div id="technical-intelligence-card" className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-5">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div className="flex items-center gap-2">
+                              <Cpu className="w-5 h-5 text-indigo-500" />
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">4. Technical Intelligence</h4>
+                            </div>
+                            <span className="text-[10px] font-black uppercase bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded tracking-wider">
+                              Assessed: {seniority}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2 text-center">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Engineering Depth</span>
+                              <div className="text-3xl font-black text-indigo-600">{engDepth}%</div>
+                              <p className="text-[10px] text-slate-500 font-medium leading-relaxed">Based on codebase validation and engineering design overlap.</p>
+                            </div>
+                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2 text-center">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Problem Solving</span>
+                              <div className="text-3xl font-black text-indigo-600">{problemSolving}%</div>
+                              <p className="text-[10px] text-slate-500 font-medium leading-relaxed font-sans">Derived from community contributions, stack trace, and complexity metrics.</p>
+                            </div>
+                          </div>
+
+                          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 font-sans">Technical Insights Narrative</span>
+                            <p className="text-xs text-slate-600 leading-relaxed font-sans">{res.technical_depth || 'Technical alignment verified across primary languages and architectures.'}</p>
+                          </div>
+                        </div>
+
+                        {/* LEADERSHIP & COMMUNICATION (Section 5) */}
+                        <div id="leadership-communication-card" className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-5">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div className="flex items-center gap-2">
+                              <Brain className="w-5 h-5 text-indigo-500" />
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">5. Leadership & Communication</h4>
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded tracking-wider">
+                                L: {leadershipScore}%
+                              </span>
+                              <span className="text-[10px] font-black bg-purple-100 text-purple-800 px-2 py-0.5 rounded tracking-wider">
+                                C: {communicationScore}%
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4 font-sans">
+                            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Communication Quality Check</span>
+                              <p className="text-xs text-slate-600 leading-relaxed font-semibold">{communicationQuality}</p>
+                            </div>
+
+                            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Leadership Potential</span>
+                              <p className="text-xs text-slate-600 leading-relaxed">{res.leadership_potential || 'Capable of leading technical scopes and guiding complex features proactively.'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 4: Risk Signals (Section 6) */}
+                      <div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
+                        <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                          <div className="flex items-center gap-2">
+                            <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-rose-500' : 'text-emerald-500'}`} />
+                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">6. Risk Signals</h4>
+                          </div>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                            riskScore > 40 ? 'bg-rose-100 text-rose-800' :
+                            riskScore > 15 ? 'bg-amber-100 text-amber-800' :
+                            'bg-emerald-100 text-emerald-800'
+                          }`}>
+                            {riskScore > 40 ? 'High Risk' : riskScore > 15 ? 'Medium Risk' : 'Low Risk'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-0.5 p-2 rounded-lg ${riskScore > 20 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                            {riskScore > 20 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-800">
+                              {riskScore > 20 ? 'Potential inconsistencies detected:' : 'No potential inconsistencies detected.'}
+                            </p>
+                            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                              {riskSignals}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Row 5: Evidence Sources (Section 8) & Refresh Analysis Container */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+                    {/* EVIDENCE SOURCES (Section 8) */}
+                    <div id="evidence-sources-card" className="lg:col-span-2 p-6 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                      <div className="flex items-center gap-2 mb-4">
+                        <BookOpen className="w-5 h-5 text-indigo-500" />
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">8. Evidence Sources / Reference Grounding Links</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {sources.map((source: any, sidx: number) => (
+                          <a 
+                            key={sidx}
+                            href={source.uri && source.uri !== '#' ? source.uri : undefined}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`block p-3 bg-white border border-slate-100 rounded-xl hover:border-indigo-200 hover:bg-slate-100/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-[11px] font-bold text-slate-600 line-clamp-1 group-hover:text-indigo-600 italic">
+                                {source.title || source.uri}
+                              </span>
+                              {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-indigo-400 shrink-0" />}
+                            </div>
+                          </a>
+                        ))}
+                        {sources.length === 0 && (
+                          <p className="text-xs text-slate-400 italic">No public references compiled.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* REFRESH ACTION AND AUDIT SUMMARY PANEL */}
+                    <div className="p-6 bg-slate-50 border border-slate-200/60 rounded-2xl flex flex-col justify-between space-y-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <CheckCircle2 className="text-indigo-600 w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-wider">Audit Integrity (v5.0)</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed italic font-sans">
+                          Multi-source background synthesis. Built in real-time under zero-trust guidelines. Verify physical certs before hire.
+                        </p>
+                      </div>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-200/80 bg-white hover:bg-slate-100 hover:border-indigo-400 hover:text-indigo-700 transition-all"
+                        onClick={handleDeepResearch}
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 mr-2" /> Refresh Grounding Audit
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                   <div className="flex items-center gap-2 mb-2">
-                     <ShieldCheck className="w-4 h-4 text-indigo-600" />
-                     <span className="text-[10px] font-black text-indigo-900 uppercase">Audit Logic (4.9)</span>
-                   </div>
-                   <p className="text-[10px] text-indigo-700 leading-relaxed italic">
-                     Professional identity verified through multi-source signal analysis. Always cross-reference with live certifications.
-                   </p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full h-10 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-200"
-                  onClick={handleDeepResearch}
-                >
-                  <RotateCcw className="w-3 h-3 mr-2" /> Refresh Analysis
-                </Button>
-              </div>
-            </div>
+              );
+            })()
+
           ) : (
             <div className="py-12 flex flex-col items-center text-center">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100">

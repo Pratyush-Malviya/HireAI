@@ -122,10 +122,40 @@ export interface Candidate {
   interviewStatus?: 'none' | 'invited' | 'in_progress' | 'completed' | 'failed';
   meetLink?: string;
   research?: {
+    // Basic fields
     summary: string;
     sources: { title: string; uri: string }[];
     lastResearchedAt: any;
+
+    // Structured metric fields from HireAI DeepResearch Engine Document
+    status?: 'VERIFIED' | 'HIGH_CONFIDENCE' | 'MEDIUM_CONFIDENCE' | 'LOW_CONFIDENCE' | 'NOT_FOUND';
+    message?: string;
+    identity_confidence?: number;
+    technical_score?: number;
+    leadership_score?: number;
+    communication_score?: number;
+    reputation_score?: number;
+    risk_score?: number;
+    overall_recommendation?: 'STRONG_MATCH' | 'GOOD_MATCH' | 'POTENTIAL_MATCH' | 'NOT_RECOMMENDED' | string;
+    
+    // Narrative layers
+    career_narrative?: string;
+    technical_depth?: string;
+    leadership_potential?: string;
+    communication_quality?: string;
+    hiring_recommendation?: string;
+    risk_signals?: string;
+
+    // Deep metrics
+    seniority_estimate?: string;
+    engineering_depth_score?: number;
+    problem_solving_score?: number;
+    stability_score?: number;
+    growth_trajectory?: string;
+    industry_visibility_score?: number;
+    verified_profiles?: { name: string; url: string; status: 'Verified' | 'Unverified' }[];
   };
+
 }
 
 export interface AdminUser {
