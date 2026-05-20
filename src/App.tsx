@@ -2079,8 +2079,8 @@ function JobDetail() {
 
   const filteredCandidates = candidates
     .filter(c => {
-      const matchesSearch = c.fullName.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-                          c.currentRole.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesSearch = (c.fullName || '').toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+                          (c.currentRole || '').toLowerCase().includes(debouncedSearch.toLowerCase());
       
       let matchesStatus = true;
       if (statusFilter !== 'All') {
