@@ -7,6 +7,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLi
 
 // In-memory cache to store extracted text mapped by content hash
 const textCache = new Map<string, string>();
+const MAX_CACHE_SIZE = 100;
 
 async function getFileHash(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
@@ -22,7 +23,11 @@ export async function extractTextFromFile(file: File): Promise<string> {
   const hash = await getFileHash(file);
   if (textCache.has(hash)) {
     console.log('Cache hit for:', file.name);
-    return textCache.get(hash)!;
+    const cachedText = textCache.get(hash)!;
+    // LRU Refresh: delete and re-insert to move to end (most recently used)
+    textCache.delete(hash);
+    textCache.set(hash, cachedText);
+    return cachedText;
   }
 
   const extension = file.name.split('.').pop()?.toLowerCase();
@@ -40,7 +45,14 @@ export async function extractTextFromFile(file: File): Promise<string> {
       throw new Error('Unsupported file format: ' + extension);
     }
 
-    // Cache the result
+    // Cache the result with LRU eviction
+    if (textCache.size >= MAX_CACHE_SIZE) {
+      // Map keys are in insertion order, so the first one is the oldest (LRU)
+      const oldestKey = textCache.keys().next().value;
+      if (oldestKey) {
+        textCache.delete(oldestKey);
+      }
+    }
     textCache.set(hash, extractedText);
     return extractedText;
   } catch (err: any) {

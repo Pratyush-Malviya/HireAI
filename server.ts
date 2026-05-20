@@ -166,55 +166,87 @@ const ai = new GoogleGenAI({
 });
 
 async function generateContentWithRetry(params: any, maxRetries = 5, initialDelay = 2000) {
+  const modelsToTry = [
+    params.model,
+    "gemini-3.5-flash",
+    "gemini-2.5-flash",
+    "gemini-1.5-flash",
+    "gemini-flash-latest"
+  ].filter((m, i, arr) => m && arr.indexOf(m) === i); // Deduplicate & filter undefined
+
   let lastError: any;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await ai.models.generateContent(params);
-    } catch (error: any) {
-      lastError = error;
-      
-      // Handle the SDK's specialized error structure
-      const errorText = error.message || String(error);
-      let errorData: any = {};
+
+  for (const currentModel of modelsToTry) {
+    const modelParams = { ...params, model: currentModel };
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        // Many errors come as JSON strings in the message property
-        if (errorText.includes('{')) {
-          const jsonStart = errorText.indexOf('{');
-          const jsonEnd = errorText.lastIndexOf('}') + 1;
-          errorData = JSON.parse(errorText.substring(jsonStart, jsonEnd));
-        }
-      } catch (e) {
-        // Fallback to simple string check
-      }
-
-      const status = error.status || error.code || errorData?.error?.code || errorData?.status;
-      const message = errorData?.error?.message || errorText;
-      const isRateLimit = status === 429 || status === 'RESOURCE_EXHAUSTED' || message?.includes('quota');
-      
-      if (isRateLimit && attempt < maxRetries) {
-        // Don't retry if it looks like a hard daily quota limit
-        if (message?.includes('PerDay') && !message?.includes('retry in')) {
-          console.log('Daily quota exceeded. Stopping retries.');
-          throw error;
-        }
-
-        let delay = initialDelay * Math.pow(3, attempt); // More aggressive exponential backoff
+        console.log(`Sending API request using model: ${currentModel} (attempt ${attempt + 1}/${maxRetries + 1})`);
+        return await ai.models.generateContent(modelParams);
+      } catch (error: any) {
+        lastError = error;
         
-        // Extract retry seconds from message
-        const retryMatch = message?.match(/retry in ([\d.]+)s/);
-        if (retryMatch) {
-          const waitTime = parseFloat(retryMatch[1]);
-          delay = Math.max(delay, (waitTime + 2) * 1000); // Add buffer
+        // Handle the SDK's specialized error structure
+        const errorText = error.message || String(error);
+        let errorData: any = {};
+        try {
+          // Many errors come as JSON strings in the message property
+          if (errorText.includes('{')) {
+            const jsonStart = errorText.indexOf('{');
+            const jsonEnd = errorText.lastIndexOf('}') + 1;
+            errorData = JSON.parse(errorText.substring(jsonStart, jsonEnd));
+          }
+        } catch (e) {
+          // Fallback to simple string check
+        }
+
+        const status = error.status || error.code || errorData?.error?.code || errorData?.status;
+        const message = errorData?.error?.message || errorText;
+        const isRateLimit = status === 429 || status === 'RESOURCE_EXHAUSTED' || message?.includes('quota');
+        
+        if (isRateLimit) {
+          // If a rate limit is hit, first try to move to the next fallback model if we have more remaining
+          if (modelsToTry.indexOf(currentModel) < modelsToTry.length - 1) {
+            console.warn(`Model ${currentModel} exhausted/rate-limited. Swapping to fallback model.`);
+            break; // Break the inner retry loop, proceeds to the next model in the outer loop
+          }
+
+          // If this is the last available model, perform exponential backoff
+          if (attempt < maxRetries) {
+            // Don't retry if it looks like a hard daily quota limit
+            if (message?.includes('PerDay') && !message?.includes('retry in')) {
+              console.log('Daily quota exceeded on final model. Stopping retries.');
+              throw error;
+            }
+
+            let delay = initialDelay * Math.pow(3, attempt); // More aggressive exponential backoff
+            
+            // Extract retry seconds from message
+            const retryMatch = message?.match(/retry in ([\d.]+)s/);
+            if (retryMatch) {
+              const waitTime = parseFloat(retryMatch[1]);
+              delay = Math.max(delay, (waitTime + 2) * 1000); // Add buffer
+            }
+            
+            // Cap maximum delay to 15 seconds to prevent browser HTTP and reverse proxy gateway timeouts
+            delay = Math.min(delay, 15000);
+
+            console.log(`Rate limit on final model, retrying in ${Math.round(delay)}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
         }
         
-        // Cap maximum delay to 90 seconds
-        delay = Math.min(delay, 90000);
+        // If the specified model isn't supported or not found on this API key, fallback immediately to next model
+        if (errorText.includes('not found') || errorText.includes('does not exist') || status === 404) {
+          if (modelsToTry.indexOf(currentModel) < modelsToTry.length - 1) {
+            console.warn(`Model ${currentModel} not found. Trying next fallback.`);
+            break; // Try next fallback model
+          }
+        }
 
-        console.log(`Rate limit hit on attempt ${attempt + 1}. Retrying in ${Math.round(delay)}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
+        throw error;
       }
-      throw error;
     }
   }
   throw lastError;

@@ -23,16 +23,26 @@ const ROLE_WEIGHTS = {
 } as const;
 
 function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) {
+  if (!screeningResult) {
+    screeningResult = {};
+  }
+  if (!screeningResult.scorecard) {
+    screeningResult.scorecard = {};
+  }
+  if (!screeningResult.scorecard.dimensions) {
+    screeningResult.scorecard.dimensions = {};
+  }
   const dimensions = screeningResult.scorecard.dimensions;
-  const roleType = jobRequirements.role_type || 'Operations / Generalist';
+  
+  const roleType = jobRequirements?.role_type || 'Operations / Generalist';
   const roleWeights = (ROLE_WEIGHTS as any)[roleType] || ROLE_WEIGHTS['Operations / Generalist'];
   
   let weightedSum = 0;
-  weightedSum += (dimensions.skillsMatch?.score || 0) * roleWeights.skillsMatch;
-  weightedSum += (dimensions.experienceFit?.score || 0) * roleWeights.experienceFit;
-  weightedSum += (dimensions.education?.score || 0) * roleWeights.education;
-  weightedSum += (dimensions.achievements?.score || 0) * roleWeights.achievements;
-  weightedSum += (dimensions.culturalRoleFit?.score || 0) * roleWeights.culturalRoleFit;
+  weightedSum += (dimensions.skillsMatch?.score || 0) * (roleWeights.skillsMatch || 0.25);
+  weightedSum += (dimensions.experienceFit?.score || 0) * (roleWeights.experienceFit || 0.25);
+  weightedSum += (dimensions.education?.score || 0) * (roleWeights.education || 0.2);
+  weightedSum += (dimensions.achievements?.score || 0) * (roleWeights.achievements || 0.2);
+  weightedSum += (dimensions.culturalRoleFit?.score || 0) * (roleWeights.culturalRoleFit || 0.1);
 
   let penaltySum = (dimensions.redFlags?.totalPenalty || 0);
 
@@ -47,8 +57,13 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
 
   if (lowScoresCount >= 3) {
     penaltySum += 15;
-    // Add to red flags if not present
-    if (!dimensions.redFlags.flags.some((f: any) => f.label === 'Cross-Dimension Weakness')) {
+    if (!dimensions.redFlags) {
+      dimensions.redFlags = { flags: [], totalPenalty: 0 };
+    }
+    if (!dimensions.redFlags.flags) {
+      dimensions.redFlags.flags = [];
+    }
+    if (!dimensions.redFlags.flags.some((f: any) => f?.label === 'Cross-Dimension Weakness')) {
       dimensions.redFlags.flags.push({
         label: 'Cross-Dimension Weakness',
         severity: 'medium',
@@ -61,7 +76,10 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
   const finalScore = Math.max(0, Math.min(100, Math.round(weightedSum - penaltySum)));
   
   // Auto-Reject Logic (PDF Decision Bands)
-  let recommendationStatus = screeningResult.scorecard.recommendation.status;
+  if (!screeningResult.scorecard.recommendation) {
+    screeningResult.scorecard.recommendation = { fitHeader: 'Potential Fit', status: 'potential', summary: '' };
+  }
+  let recommendationStatus = screeningResult.scorecard.recommendation.status || 'potential';
   if (finalScore < 40 || (dimensions.skillsMatch?.score || 0) < 40) {
     recommendationStatus = 'rejected';
   }
