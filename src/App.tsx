@@ -2024,7 +2024,7 @@ function JobDetail() {
       return timeB - timeA;
     });
 
-  const uniqueRoles = Array.from(new Set(candidates.map(c => c.currentRole))).filter(Boolean);
+  const uniqueRoles = Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All');
 
   const stats = {
     total: candidates.length,
@@ -2233,7 +2233,7 @@ function JobDetail() {
                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Status</h4>
                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', 'Processing Resume', 'Ready to Invite', 'Invite Sent', 'Scheduled', 'Evaluating', 'Passed', 'Failed'].map(status => (
-                      <label key={status} className="flex items-center gap-3 cursor-pointer group">
+                      <label key={`status-filter-${status}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
                           statusFilter === status ? "border-indigo-600 bg-indigo-600" : "border-slate-200 group-hover:border-indigo-400"
@@ -2252,8 +2252,8 @@ function JobDetail() {
                 <div>
                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Role</h4>
                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                    {['All', ...Array.from(new Set(candidates.map(c => c.currentRole)))].slice(0, 5).map(role => (
-                      <label key={role} className="flex items-center gap-3 cursor-pointer group">
+                    {['All', ...Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All')].slice(0, 5).map(role => (
+                      <label key={`role-filter-${role}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
                           roleFilter === role ? "border-indigo-600 bg-indigo-600" : "border-slate-200 group-hover:border-indigo-400"
@@ -2343,7 +2343,7 @@ function JobDetail() {
                   >
                     <option>All</option>
                     {uniqueRoles.map(role => (
-                      <option key={role} value={role}>{role}</option>
+                      <option key={`dropdown-role-${role}`} value={role}>{role}</option>
                     ))}
                   </select>
                 </div>

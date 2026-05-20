@@ -203,55 +203,47 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
         const isRateLimit = status === 429 || status === 'RESOURCE_EXHAUSTED' || message?.includes('quota');
         const isUnavailable = status === 503 || status === 'UNAVAILABLE' || message?.includes('demand') || message?.includes('temporary') || message?.includes('overloaded');
         
+        const hasMoreModels = modelsToTry.indexOf(currentModel) < modelsToTry.length - 1;
+
         if (isRateLimit || isUnavailable) {
-          const isFirstModel = modelsToTry.indexOf(currentModel) === 0;
-          const hasMoreModels = modelsToTry.indexOf(currentModel) < modelsToTry.length - 1;
-          
-          if (isFirstModel && attempt < 1) {
-            // Perform a fast retry on the primary model first to see if a transient 503 clears
-            console.log(`Transient limit on primary model ${currentModel}, retrying on same model first (attempt ${attempt + 1})...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            continue;
+          // If a rate limit or service unavailability (503) is hit, retry the current model up to 3 times before swapping if we have fallback models,
+          // or try up to maxRetries if this is the last available model.
+          const maxAttemptsBeforeSwap = hasMoreModels ? 2 : maxRetries;
+
+          if (attempt < maxAttemptsBeforeSwap) {
+            // Don't retry on same model if it's a hard daily quota limit
+            if (message?.includes('PerDay') && !message?.includes('retry in')) {
+              console.log('Daily quota exceeded. Swapping/stopping retries.');
+            } else {
+              let delay = initialDelay * Math.pow(2, attempt); // Exponential backoff: 2s, 4s, 8s, ...
+              
+              // Extract retry seconds from message
+              const retryMatch = message?.match(/retry in ([\d.]+)s/);
+              if (retryMatch) {
+                const waitTime = parseFloat(retryMatch[1]);
+                delay = Math.max(delay, (waitTime + 2) * 1000); // Add buffer
+              }
+              
+              // Add simple random jitter (+0-1500ms) to prevent thundering herd
+              const jitter = Math.random() * 1500;
+              delay = Math.min(delay + jitter, 15000); // Keep capped at 15s to avoid timeout
+
+              console.log(`Transient limit/unavailability on model ${currentModel} (Status: ${status}). Retrying same model in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxAttemptsBeforeSwap + 1})...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+              continue;
+            }
           }
 
           if (hasMoreModels) {
-            // If a rate limit or service unavailability (503) is hit, first try to move to the next fallback model if we have more remaining
-            console.warn(`Model ${currentModel} exhausted, rate-limited, or unavailable (Status: ${status}). Swapping to fallback model.`);
-            break; // Break the inner retry loop, proceeds to the next model in the outer loop
-          }
-
-          // If this is the last available model, perform exponential backoff
-          if (attempt < maxRetries) {
-            // Don't retry if it looks like a hard daily quota limit
-            if (message?.includes('PerDay') && !message?.includes('retry in')) {
-              console.log('Daily quota exceeded on final model. Stopping retries.');
-              throw error;
-            }
-
-            let delay = initialDelay * Math.pow(3, attempt); // More aggressive exponential backoff
-            
-            // Extract retry seconds from message
-            const retryMatch = message?.match(/retry in ([\d.]+)s/);
-            if (retryMatch) {
-              const waitTime = parseFloat(retryMatch[1]);
-              delay = Math.max(delay, (waitTime + 2) * 1000); // Add buffer
-            }
-            
-            // Cap maximum delay to 15 seconds to prevent browser HTTP and reverse proxy gateway timeouts
-            delay = Math.min(delay, 15000);
-
-            console.log(`Rate limit or unavailability on final model, retrying in ${Math.round(delay)}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
+            console.warn(`Model ${currentModel} exhausted, rate-limited, or unavailable after ${attempt + 1} attempts. Swapping to fallback model.`);
+            break; // Break the inner loop, proceeds to the next model in the outer loop
           }
         }
         
-        // If the specified model isn't supported or not found on this API key, fallback immediately to next model
-        if (errorText.includes('not found') || errorText.includes('does not exist') || status === 404) {
-          if (modelsToTry.indexOf(currentModel) < modelsToTry.length - 1) {
-            console.warn(`Model ${currentModel} not found. Trying next fallback.`);
-            break; // Try next fallback model
-          }
+        // If the specified model isn't supported, not found, or returns a bad request (e.g. 404, 400), swap to next model immediately if available
+        if (hasMoreModels && (status === 404 || status === 400 || errorText.includes('not found') || errorText.includes('does not exist') || errorText.includes('not supported') || errorText.includes('invalid'))) {
+          console.warn(`Model ${currentModel} returned error: ${errorText} (Status: ${status}). Falling back immediately.`);
+          break; // Try next fallback model
         }
 
         throw error;
