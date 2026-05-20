@@ -169,9 +169,7 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
   const modelsToTry = [
     params.model,
     "gemini-3.5-flash",
-    "gemini-2.5-flash",
-    "gemini-1.5-flash",
-    "gemini-flash-latest"
+    "gemini-3.1-flash-lite"
   ].filter((m, i, arr) => m && arr.indexOf(m) === i); // Deduplicate & filter undefined
 
   let lastError: any;
@@ -203,11 +201,22 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
         const status = error.status || error.code || errorData?.error?.code || errorData?.status;
         const message = errorData?.error?.message || errorText;
         const isRateLimit = status === 429 || status === 'RESOURCE_EXHAUSTED' || message?.includes('quota');
+        const isUnavailable = status === 503 || status === 'UNAVAILABLE' || message?.includes('demand') || message?.includes('temporary') || message?.includes('overloaded');
         
-        if (isRateLimit) {
-          // If a rate limit is hit, first try to move to the next fallback model if we have more remaining
-          if (modelsToTry.indexOf(currentModel) < modelsToTry.length - 1) {
-            console.warn(`Model ${currentModel} exhausted/rate-limited. Swapping to fallback model.`);
+        if (isRateLimit || isUnavailable) {
+          const isFirstModel = modelsToTry.indexOf(currentModel) === 0;
+          const hasMoreModels = modelsToTry.indexOf(currentModel) < modelsToTry.length - 1;
+          
+          if (isFirstModel && attempt < 1) {
+            // Perform a fast retry on the primary model first to see if a transient 503 clears
+            console.log(`Transient limit on primary model ${currentModel}, retrying on same model first (attempt ${attempt + 1})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
+          }
+
+          if (hasMoreModels) {
+            // If a rate limit or service unavailability (503) is hit, first try to move to the next fallback model if we have more remaining
+            console.warn(`Model ${currentModel} exhausted, rate-limited, or unavailable (Status: ${status}). Swapping to fallback model.`);
             break; // Break the inner retry loop, proceeds to the next model in the outer loop
           }
 
@@ -231,7 +240,7 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
             // Cap maximum delay to 15 seconds to prevent browser HTTP and reverse proxy gateway timeouts
             delay = Math.min(delay, 15000);
 
-            console.log(`Rate limit on final model, retrying in ${Math.round(delay)}ms...`);
+            console.log(`Rate limit or unavailability on final model, retrying in ${Math.round(delay)}ms...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
@@ -374,7 +383,7 @@ app.post("/api/ai/parse-job", async (req, res) => {
 
   try {
     const response = await generateContentWithRetry({
-      model: "gemini-flash-latest",
+      model: "gemini-3.5-flash",
       contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
       
       FOCUS AREAS:
@@ -409,7 +418,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 
   try {
     const response = await generateContentWithRetry({
-      model: "gemini-flash-latest",
+      model: "gemini-3.5-flash",
       contents: `You are a Principal Talent Solutions Architect and Adversarial Talent Auditor. 
       Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements.
       
@@ -493,7 +502,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     MANDATE: Be objective, data-driven, and prioritize verified links over general descriptions. Max 500 words.`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-flash-latest",
+      model: "gemini-3.5-flash",
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
@@ -529,7 +538,7 @@ app.post("/api/ai/chat", async (req, res) => {
 
   try {
     const response = await generateContentWithRetry({
-      model: "gemini-flash-latest", 
+      model: "gemini-3.5-flash", 
       contents: [
         { 
           role: "user", 
@@ -564,7 +573,7 @@ app.post("/api/ai/summarize", async (req, res) => {
 
   try {
     const response = await generateContentWithRetry({
-      model: "gemini-flash-latest",
+      model: "gemini-3.5-flash",
       contents: `You are an elite principal technical recruiter with 20 years of experience. Analyze the following interview transcript and provide a highly detailed, objective evaluation.
       
       EVALUATION DEPTH MANDATE:
@@ -644,4 +653,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
