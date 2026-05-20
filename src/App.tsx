@@ -338,44 +338,81 @@ function InterviewRoom() {
 
   // Initialize Video/Audio Stream
   useEffect(() => {
+    let localStream: MediaStream | null = null;
+    let localAudioCtx: AudioContext | null = null;
+
     async function setupStream() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        notify("Media devices not supported in this browser. Running in text interview mode.", "info");
+        return;
+      }
+
       try {
-        const s = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        setStream(s);
-        if (videoRef.current) videoRef.current.srcObject = s;
-
-        // Sound intensity analysis
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(s);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        source.connect(analyser);
-        
-        audioContextRef.current = audioCtx;
-        analyserRef.current = analyser;
-
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        const checkVolume = () => {
-          if (!analyserRef.current) return;
-          analyserRef.current.getByteFrequencyData(dataArray);
-          let sum = 0;
-          for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
-          const avg = sum / bufferLength;
-          setVolume(avg);
-          requestAnimationFrame(checkVolume);
-        };
-        checkVolume();
+        // Fallback Step 1: Try both video and audio
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       } catch (err) {
-        console.error("Error accessing media devices:", err);
-        notify("Could not access camera/microphone. Please check permissions.", "error");
+        console.warn("Could not access both video and audio. Trying audio-only fallback...", err);
+        try {
+          // Fallback Step 2: Try audio only (for users without cameras or when camera is blocked)
+          localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+        } catch (err2) {
+          console.warn("Could not access audio. Trying video-only fallback...", err2);
+          try {
+            // Fallback Step 3: Try video only (for setups with camera but no mic)
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          } catch (err3) {
+            console.error("Error accessing media devices:", err3);
+            notify("Could not access camera or microphone. Standard text interview mode is enabled.", "info");
+          }
+        }
+      }
+
+      if (localStream) {
+        setStream(localStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = localStream;
+        }
+
+        // Sound intensity analysis (only if we have audio tracks)
+        if (localStream.getAudioTracks().length > 0) {
+          try {
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            localAudioCtx = audioCtx;
+            const source = audioCtx.createMediaStreamSource(localStream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            
+            audioContextRef.current = audioCtx;
+            analyserRef.current = analyser;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const checkVolume = () => {
+              if (!analyserRef.current) return;
+              analyserRef.current.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
+              const avg = sum / bufferLength;
+              setVolume(avg);
+              requestAnimationFrame(checkVolume);
+            };
+            checkVolume();
+          } catch (e) {
+            console.error("Error creating audio analyzer node:", e);
+          }
+        }
       }
     }
     setupStream();
     return () => {
-      stream?.getTracks().forEach(t => t.stop());
-      audioContextRef.current?.close();
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+      }
+      if (localAudioCtx) {
+        localAudioCtx.close();
+      }
     };
   }, []);
 
@@ -1654,6 +1691,7 @@ function JobDetail() {
   const [uploading, setUploading] = useState(false);
   const [researchingAll, setResearchingAll] = useState(false);
   const [retryingScreening, setRetryingScreening] = useState<string | null>(null);
+  const [invitingCandidateId, setInvitingCandidateId] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -1948,6 +1986,46 @@ function JobDetail() {
       console.error('Delete Candidate Error:', err);
       notify('Delete failed. Verify permissions.', 'error');
       handleFirestoreError(err, OperationType.DELETE, `candidates/${id}`);
+    }
+  };
+
+  const handleSendInviteForCandidate = async (candidate: Candidate) => {
+    setInvitingCandidateId(candidate.id);
+    const link = `${window.location.origin}/interview/${candidate.id}`;
+    try {
+      // 1. Update status in db
+      await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
+      
+      // 2. Try to send email via backend endpoint
+      const res = await fetch('/api/candidate/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateEmail: candidate.email,
+          candidateName: candidate.fullName,
+          interviewLink: link,
+          jobTitle: job?.title || 'Applied Position'
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        notify(`Email interview invitation sent to ${candidate.fullName}!`, 'success');
+      } else {
+        if (data.reason === 'NOT_AUTHENTICATED') {
+          navigator.clipboard.writeText(link);
+          notify('Invite created! Google account not connected - copied link to clipboard.', 'info');
+        } else {
+          navigator.clipboard.writeText(link);
+          notify(`Invite created! Copied link to clipboard. (Email error: ${data.error || 'unknown'})`, 'info');
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      navigator.clipboard.writeText(link);
+      notify('Invite created! Copied link to clipboard.', 'info');
+    } finally {
+      setInvitingCandidateId(null);
     }
   };
 
@@ -2642,15 +2720,21 @@ function JobDetail() {
                                 </Button>
                                <Button 
                                  variant="outline" 
-                                 className="h-8 text-[10px] font-black uppercase tracking-widest border-indigo-100 text-indigo-600 hover:bg-indigo-50"
+                                 className="h-8 text-[10px] font-black uppercase tracking-widest border-indigo-100 text-indigo-600 hover:bg-indigo-50 min-w-[150px] flex items-center justify-center gap-1.5"
                                  onClick={(e) => {
                                    e.stopPropagation();
-                                   const interviewLink = `${window.location.origin}/interview/${candidate.id}`;
-                                   navigator.clipboard.writeText(interviewLink);
-                                   notify('Interview link copied to clipboard', 'success');
+                                   handleSendInviteForCandidate(candidate);
                                  }}
+                                 disabled={invitingCandidateId === candidate.id}
                                >
-                                 Invite to Interview
+                                 {invitingCandidateId === candidate.id ? (
+                                   <>
+                                     <Loader2 className="w-3 h-3 animate-spin" />
+                                     Inviting...
+                                   </>
+                                 ) : (
+                                   'Invite to Interview'
+                                 )}
                                </Button>
                                <Button variant="ghost" className="h-8 text-[10px] font-black" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${candidate.id}`); }}>View Details</Button>
                                <button onClick={(e) => deleteCandidate(e, candidate.id)} className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
@@ -2688,6 +2772,7 @@ function CandidateDetail() {
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
   const [scheduling, setScheduling] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string, label: string} | null>(null);
+  const [sendingInvite, setSendingInvite] = useState(false);
 
   useEffect(() => {
     fetch('/api/calendar/status')
@@ -2717,6 +2802,51 @@ function CandidateDetail() {
     } catch (err) {
       console.error(err);
       notify('Failed to initiate Google Calendar connection.', 'error');
+    }
+  };
+
+  const handleSendInvite = async () => {
+    if (!candidate) return;
+    setSendingInvite(true);
+    const link = `${window.location.origin}/interview/${candidate.id}`;
+    try {
+      // 1. Update status in db
+      await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
+      
+      // 2. Try to send email via backend endpoint
+      const res = await fetch('/api/candidate/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateEmail: candidate.email,
+          candidateName: candidate.fullName,
+          interviewLink: link,
+          jobTitle: job?.title || 'Applied Position'
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        notify(`Email interview invitation sent to ${candidate.fullName}!`, 'success');
+        // Refresh local state inside CandidateDetail
+        setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
+      } else {
+        if (data.reason === 'NOT_AUTHENTICATED') {
+          navigator.clipboard.writeText(link);
+          notify('Invite created! Google account not connected - copied link to clipboard.', 'info');
+        } else {
+          navigator.clipboard.writeText(link);
+          notify(`Invite created! Copied link to clipboard. (Email error: ${data.error || 'unknown'})`, 'info');
+        }
+        setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
+      }
+    } catch (err: any) {
+      console.error(err);
+      navigator.clipboard.writeText(link);
+      notify('Invite created! Copied link to clipboard.', 'info');
+      setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
+    } finally {
+      setSendingInvite(false);
     }
   };
 
@@ -3133,17 +3263,18 @@ function CandidateDetail() {
                  Lobby
                </Button>
              ) : (
-               <Button variant="secondary" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs py-2 h-auto" onClick={async () => {
-                 try {
-                   await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
-                   notify('Invite sent!', 'success');
-                 } catch (err) {
-                   handleFirestoreError(err, OperationType.UPDATE, `candidates/${candidate.id}`);
-                   notify('Failed to update status.', 'error');
-                 }
-               }}>
-                 <Video className="w-3.5 h-3.5 mr-2" />
-                 Invite
+               <Button 
+                 variant="secondary" 
+                 className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs py-2 h-auto flex items-center justify-center gap-2" 
+                 onClick={handleSendInvite}
+                 disabled={sendingInvite}
+               >
+                 {sendingInvite ? (
+                   <Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" />
+                 ) : (
+                   <Video className="w-3.5 h-3.5 mr-1 sm:mr-2" />
+                 )}
+                 {sendingInvite ? 'Inviting...' : 'Invite'}
                </Button>
              )}
 

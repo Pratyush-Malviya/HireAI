@@ -31,7 +31,8 @@ app.get("/api/auth/google/url", (req, res) => {
       "https://www.googleapis.com/auth/calendar.events",
       "https://www.googleapis.com/auth/calendar.readonly",
       "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/userinfo.profile"
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/gmail.send"
     ],
     prompt: "consent"
   });
@@ -151,6 +152,104 @@ app.post("/api/calendar/schedule", async (req, res) => {
   } catch (error) {
     console.error("Schedule Error:", error);
     res.status(500).json({ error: "Failed to schedule interview: " + (error instanceof Error ? error.message : "Unknown error") });
+  }
+});
+
+app.post("/api/candidate/send-invite", async (req, res) => {
+  const tokensRaw = req.cookies.google_tokens;
+  const { candidateEmail, candidateName, interviewLink, jobTitle } = req.body;
+
+  if (!tokensRaw) {
+    return res.status(401).json({ 
+      success: false,
+      reason: "NOT_AUTHENTICATED", 
+      error: "Google account is not connected. Please connect your Google account in Settings to send emails automatically via Gmail." 
+    });
+  }
+
+  if (!candidateEmail) {
+    return res.status(400).json({ success: false, error: "Candidate email is required" });
+  }
+
+  try {
+    const tokens = JSON.parse(tokensRaw);
+    const oauth2Client = getOAuthClient();
+    oauth2Client.setCredentials(tokens);
+
+    // Build standard Gmail base64raw message
+    const makeBody = (to: string, subjectStr: string, htmlContent: string) => {
+      const utf8Subject = `=?utf-8?B?${Buffer.from(subjectStr).toString('base64')}?=`;
+      const str = [
+        `To: <${to}>`,
+        "Content-Type: text/html; charset=utf-8",
+        "MIME-Version: 1.0",
+        `Subject: ${utf8Subject}`,
+        "",
+        htmlContent
+      ].join("\r\n");
+
+      return Buffer.from(str)
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+    };
+
+    const subject = `Interview Invitation: ${jobTitle || 'Applied Position'} with HireAI`;
+    const htmlBody = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.05em;">HireAI</h1>
+          <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Intelligent Recruitment Platform</p>
+        </div>
+        
+        <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Hi ${candidateName || 'Candidate'},</h2>
+          
+          <p style="font-size: 16px; margin-bottom: 24px;">Thank you for your interest in the <strong>${jobTitle || 'Applied Position'}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireAI).</p>
+          
+          <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; border-left: 4px solid #4f46e5; margin-bottom: 24px;">
+            <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Your Interview Details</h3>
+            <p style="margin: 0; font-size: 15px; color: #1e293b;"><strong>Platform:</strong> HireAI Automated Lobby</p>
+            <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b;"><strong>Duration:</strong> ~15-20 minutes</p>
+            <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b;"><strong>Requirements:</strong> Please ensure you are in a quiet room with a working microphone/camera.</p>
+          </div>
+
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${interviewLink}" target="_blank" style="background-color: #4f46e5; color: #ffffff; padding: 14px 28px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); font-size: 16px;">
+              Join Interview Room
+            </a>
+          </div>
+
+          <p style="font-size: 14px; color: #64748b; text-align: center; margin-bottom: 0;">
+            If the button above does not work, copy and paste this link into your browser:<br/>
+            <a href="${interviewLink}" style="color: #4f46e5; word-break: break-all;">${interviewLink}</a>
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #94a3b8;">
+          <p style="margin: 0;">This invitation was sent automatically via HireAI on behalf of the recruitment team.</p>
+        </div>
+      </div>
+    `;
+
+    const rawMessage = makeBody(candidateEmail, subject, htmlBody);
+    const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+    
+    await gmail.users.messages.send({
+      userId: "me",
+      requestBody: {
+        raw: rawMessage
+      }
+    });
+
+    res.json({ success: true, message: "Interview invitation email sent successfully." });
+  } catch (error: any) {
+    console.error("Gmail Send Error:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Failed to send email via Gmail: " + (error instanceof Error ? error.message : "Unknown error") 
+    });
   }
 });
 
