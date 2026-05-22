@@ -242,22 +242,22 @@ app.post("/api/candidate/send-invite", async (req, res) => {
     }
   }
 
-  const subject = `Interview Invitation: ${cleanTitle} with HireAI`;
+  const subject = `Interview Invitation: ${cleanTitle} with HireNow`;
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.05em;">HireAI</h1>
+        <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.05em;">HireNow</h1>
         <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Intelligent Recruitment Platform</p>
       </div>
       
       <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
         <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Hi ${cleanName},</h2>
         
-        <p style="font-size: 16px; margin-bottom: 24px;">Thank you for your interest in the <strong>${cleanTitle}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireAI).</p>
+        <p style="font-size: 16px; margin-bottom: 24px;">Thank you for your interest in the <strong>${cleanTitle}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).</p>
         
         <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; border-left: 4px solid #4f46e5; margin-bottom: 24px;">
           <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Your Interview Details</h3>
-          <p style="margin: 0; font-size: 15px; color: #1e293b;"><strong>Platform:</strong> HireAI Automated Lobby</p>
+          <p style="margin: 0; font-size: 15px; color: #1e293b;"><strong>Platform:</strong> HireNow Automated Lobby</p>
           <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b;"><strong>Duration:</strong> ~15-20 minutes</p>
           <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b;"><strong>Requirements:</strong> Please ensure you are in a quiet room with a working microphone/camera.</p>
         </div>
@@ -275,7 +275,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       </div>
       
       <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #94a3b8;">
-        <p style="margin: 0;">This invitation was sent automatically via HireAI on behalf of the recruitment team.</p>
+        <p style="margin: 0;">This invitation was sent automatically via HireNow on behalf of the recruitment team.</p>
       </div>
     </div>
   `;
@@ -333,7 +333,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       const secure = (customSmtp.smtpSecure !== undefined ? customSmtp.smtpSecure : customSmtp.secure) !== false;
       const user = customSmtp.smtpUser || customSmtp.user;
       const pass = customSmtp.smtpPass || customSmtp.pass;
-      const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireAI";
+      const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireNow";
       const fromEmail = customSmtp.smtpFromEmail || customSmtp.fromEmail || user;
 
       const transporter = nodemailer.createTransport({
@@ -370,7 +370,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
         }
       });
 
-      const fromName = process.env.SMTP_FROM_NAME || "HireAI";
+      const fromName = process.env.SMTP_FROM_NAME || "HireNow";
       const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
 
       await transporter.sendMail({
@@ -403,7 +403,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       });
 
       const info = await transporter.sendMail({
-        from: '"HireAI Recruiter" <invite@hireai.com>',
+        from: '"HireNow Recruiter" <invite@hirenow.com>',
         to: candidateEmail,
         subject,
         html: htmlBody
@@ -458,7 +458,7 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
   const cleanSubject = safeSanitize(subject).substring(0, 200);
 
   let transporter: any = null;
-  let fromString = '"HireAI platform" <no-reply@hireai.com>';
+  let fromString = '"HireNow platform" <no-reply@hirenow.com>';
   let dispatchMode = "Ethereal Test Mode";
 
   if (customSmtp && (customSmtp.smtpUser || customSmtp.user) && (customSmtp.smtpPass || customSmtp.pass)) {
@@ -468,7 +468,7 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
       const secure = (customSmtp.smtpSecure !== undefined ? customSmtp.smtpSecure : customSmtp.secure) !== false;
       const user = customSmtp.smtpUser || customSmtp.user;
       const pass = customSmtp.smtpPass || customSmtp.pass;
-      const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireAI Platforms";
+      const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireNow Platforms";
       const fromEmail = customSmtp.smtpFromEmail || customSmtp.fromEmail || user;
 
       transporter = nodemailer.createTransport({
@@ -495,7 +495,7 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
           pass: process.env.SMTP_PASS
         }
       });
-      const fromName = process.env.SMTP_FROM_NAME || "HireAI Platforms";
+      const fromName = process.env.SMTP_FROM_NAME || "HireNow Platforms";
       const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
       fromString = `"${fromName}" <${fromEmail}>`;
       dispatchMode = "Global Environment SMTP";
@@ -518,7 +518,7 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
           pass: testAccount.pass
         }
       });
-      fromString = '"HireAI platform" <no-reply@hireai.com>';
+      fromString = '"HireNow platform" <no-reply@hirenow.com>';
       dispatchMode = "Ethereal Test account Fallback";
     } catch (err) {
       console.error("Test account failed:", err);
@@ -544,7 +544,7 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
               <h2 style="color: #4f46e5; margin-top: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">Platform Broadcast Update</h2>
               <div style="margin: 20px 0; line-height: 1.8; font-size: 15px; color: #1e293b; white-space: pre-wrap;">${body}</div>
               <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 25px; font-size: 11px; color: #94a3b8; text-align: center;">
-                This update email was dispatched regarding global platform governance by HireAI.
+                This update email was dispatched regarding global platform governance by HireNow.
               </div>
             </div>
           </div>
@@ -982,7 +982,7 @@ A comprehensive synthetic verification audit for **${candidateName || "Candidate
       { name: "GitHub", url: "#", status: "Unverified" }
     ],
     sources: [
-      { title: "HireAI Static Verification Registry", uri: "#" }
+      { title: "HireNow Static Verification Registry", uri: "#" }
     ],
     timestamp: new Date().toISOString(),
     aiQuotaExceeded: true
@@ -995,7 +995,7 @@ function chatFallback(candidateName: string, role: string, company: string, jd: 
   
   if (turnCount === 0) {
     return {
-      text: `Hello ${candidateName || "Candidate"}! I am HireAI Assistant, the digital recruiter for ${company || "our corporate team"}. I will be walking you through a brief professional screening interview for the ${role || "open"} role today.\n\nAre you ready to begin?`,
+      text: `Hello ${candidateName || "Candidate"}! I am HireNow Assistant, the digital recruiter for ${company || "our corporate team"}. I will be walking you through a brief professional screening interview for the ${role || "open"} role today.\n\nAre you ready to begin?`,
       aiQuotaExceeded: true
     };
   }
@@ -1542,7 +1542,7 @@ app.post("/api/ai/chat", async (req, res) => {
         { 
           role: "user", 
           parts: [{ text: `SYSTEM INSTRUCTIONS:
-You are "HireAI Assistant", an intelligent AI Recruiter for ${company}. 
+You are "HireNow Assistant", an intelligent AI Recruiter for ${company}. 
 You are conducting a 1st-level professional screening interview with ${candidateName} for the position of ${role}.
 JOB DESCRIPTION: ${jd}
 CANDIDATE RESUME: ${resume}
@@ -1552,7 +1552,7 @@ YOUR PROTOCOL:
 STYLE: Ask ONE question at a time. Follow up for specifics. 5-8 questions.
 END with: "Thank you for your time, ${candidateName}. We have gathered sufficient initial information. I will now process your interview for our human recruiting team."` }] 
         },
-        { role: "model", parts: [{ text: "Understood. I am HireAI Assistant. I will follow the protocol strictly." }] },
+        { role: "model", parts: [{ text: "Understood. I am HireNow Assistant. I will follow the protocol strictly." }] },
         ...history.map((h: any) => ({ role: h.role, parts: [{ text: h.text }] }))
       ],
     });

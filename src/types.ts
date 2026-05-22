@@ -141,7 +141,7 @@ export interface Candidate {
     sources: { title: string; uri: string }[];
     lastResearchedAt: any;
 
-    // Structured metric fields from HireAI DeepResearch Engine Document
+    // Structured metric fields from HireNow DeepResearch Engine Document
     status?: 'VERIFIED' | 'HIGH_CONFIDENCE' | 'MEDIUM_CONFIDENCE' | 'LOW_CONFIDENCE' | 'NOT_FOUND';
     message?: string;
     identity_confidence?: number;

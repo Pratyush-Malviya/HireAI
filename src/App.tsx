@@ -591,7 +591,7 @@ function InterviewRoom() {
     if (!candidate || !job) return;
     setLoading(true);
     try {
-      const intro = `Hello ${candidate.fullName}, I am HireAI Assistant. Thank you for joining this session for the ${job.title} position at ${job.company || 'our firm'}. Before we begin our structured technical screening, I'd like to ask: are you ready and in a quiet environment to start the interview now?`;
+      const intro = `Hello ${candidate.fullName}, I am HireNow Assistant. Thank you for joining this session for the ${job.title} position at ${job.company || 'our firm'}. Before we begin our structured technical screening, I'd like to ask: are you ready and in a quiet environment to start the interview now?`;
       
       const newSession = {
         candidateId: candidate.id,
@@ -897,7 +897,7 @@ function InterviewRoom() {
                           <motion.div className="w-1 h-1 bg-white rounded-full" animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} />
                           <motion.div className="w-1 h-1 bg-white rounded-full" animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} />
                         </div>
-                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">HireAI is reasoning</span>
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">HireNow is reasoning</span>
                       </motion.div>
                     ) : isSpeaking ? (
                       <motion.div 
@@ -931,7 +931,7 @@ function InterviewRoom() {
                  <Play className="w-10 h-10 text-indigo-500" />
               </div>
               <h2 className="text-2xl font-black text-white tracking-tight mb-4">Screening Room Initialized</h2>
-              <p className="text-slate-400 text-sm font-medium mb-8">HireAI Assistant is calibrated and ready. Ensure your environment is calm before beginning.</p>
+              <p className="text-slate-400 text-sm font-medium mb-8">HireNow Assistant is calibrated and ready. Ensure your environment is calm before beginning.</p>
               <Button onClick={startInterview} disabled={loading} className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl shadow-indigo-600/20 font-black tracking-tight text-lg transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 Start Recording
               </Button>
@@ -1101,7 +1101,7 @@ function InterviewRoom() {
                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
                          </div>
-                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">HireAI Assistant is thinking...</p>
+                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">HireNow Assistant is thinking...</p>
                       </motion.div>
                     ) : input ? (
                       <motion.div 
@@ -1266,7 +1266,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 <Search className="w-5 h-5 text-white" />
               </div>
               <span className={cn("font-display font-black text-2xl tracking-tighter uppercase", user ? "text-white" : "text-slate-950")}>
-                HireAI
+                HireNow
               </span>
             </Link>
             
@@ -1440,7 +1440,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                <div className="w-6 h-6 bg-slate-900 rounded flex items-center justify-center">
                  <Search className="w-3.5 h-3.5 text-white" />
                </div>
-               HireAI
+               HireNow
             </div>
             <div className="flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-slate-400">
               <Link to="/" className="hover:text-indigo-600 transition-colors">Workspace</Link>
@@ -1455,7 +1455,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
             </div>
             <div className="flex flex-col items-center md:items-end gap-1.5">
               <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
-                © 2026 HireAI Inc. All rights reserved.
+                © 2026 HireNow Inc. All rights reserved.
               </p>
               <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
                 Developed by <a href="https://www.linkedin.com/in/pratyushmalviy/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-bold transition-colors">Pratyush Malviya</a>
@@ -3246,7 +3246,7 @@ function CandidateDetail() {
           candidateEmail: candidate.email,
           startTime: selectedSlot.start,
           endTime: selectedSlot.end,
-          summary: `Interview: ${candidate.fullName} | HireAI Assessment`,
+          summary: `Interview: ${candidate.fullName} | HireNow Assessment`,
           description: `Assessment Summary: ${candidate.scorecard.recommendation.summary}\nCandidate Location: ${candidate.location}\n\nThis meeting was automatically scheduled following high-signal AI screening.`
         })
       });
@@ -3375,7 +3375,7 @@ function CandidateDetail() {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(200, 200, 200);
-    doc.text(`HireAI Professional Assessment | ${formatDateTime(new Date())}`, 20, 33);
+    doc.text(`HireNow Professional Assessment | ${formatDateTime(new Date())}`, 20, 33);
     
     // SECTION: Candidate Profile
     doc.setFontSize(14);
@@ -3537,7 +3537,7 @@ function CandidateDetail() {
         doc.setPage(i);
         doc.setFontSize(8);
         doc.setTextColor(150);
-        doc.text(`Page ${i} of ${pageCount} | Confidental Report | Generated by HireAI`, pageWidth / 2, 285, { align: 'center' });
+        doc.text(`Page ${i} of ${pageCount} | Confidental Report | Generated by HireNow`, pageWidth / 2, 285, { align: 'center' });
     }
 
     doc.save(`${candidate.fullName.replace(/\s+/g, '_')}_Full_Evaluation.pdf`);
@@ -3984,7 +3984,7 @@ function CandidateDetail() {
                       </div>
                       <h4 className="text-base font-black text-rose-950 uppercase tracking-wide">Sensitive Insights Hidden</h4>
                       <p className="text-sm text-rose-800 max-w-xl mx-auto leading-relaxed">
-                        To maintain compliance and high intelligence precision, HireAI security rules dictate that sensitive background analysis metrics (technical scores, risk intelligence, leadership analytics, and performance narratives) are hidden when identity confidence falls under the <strong>85%</strong> threshold.
+                        To maintain compliance and high intelligence precision, HireNow security rules dictate that sensitive background analysis metrics (technical scores, risk intelligence, leadership analytics, and performance narratives) are hidden when identity confidence falls under the <strong>85%</strong> threshold.
                       </p>
                       <div className="pt-2">
                         <p className="text-xs text-rose-600 font-bold uppercase tracking-wider">
@@ -7000,7 +7000,7 @@ function LandingPage() {
 
   const testimonials = [
     {
-      quote: "HireAI cut our screening time by 90%. We hired our lead architect in just 4 days.",
+      quote: "HireNow cut our screening time by 90%. We hired our lead architect in just 4 days.",
       author: "Sarah Jenkins",
       role: "VP Engineering, TechFlow",
       image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
@@ -7160,7 +7160,7 @@ function LandingPage() {
             <span className="text-indigo-600 inline-block">HIRING <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-emerald-500">POWER.</span></span>
           </h1>
           <p className="text-base sm:text-xl md:text-3xl text-slate-500 max-w-3xl mx-auto font-medium leading-normal sm:leading-tight mb-12 sm:mb-16 tracking-tight px-4">
-            HireAI initiates 24/7 autonomous screenings that out-perform human panels in consistency, depth, and speed.
+            HireNow initiates 24/7 autonomous screenings that out-perform human panels in consistency, depth, and speed.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4">
             <Button variant="brand" size="lg" className="w-full sm:w-auto h-auto py-5 sm:py-6 px-10 sm:px-14 text-lg sm:text-xl shadow-2xl shadow-indigo-500/40 rounded-[2rem]" onClick={() => setShowPricing(true)}>
@@ -7526,7 +7526,7 @@ function LandingPage() {
                    <div className="w-32 h-32 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-10 border border-indigo-500/40">
                       <Zap className="w-16 h-16 text-indigo-400" />
                    </div>
-                   <h3 className="text-4xl font-display font-black text-white mb-6 uppercase tracking-tight">HireAI AGENT IS ACTIVE.</h3>
+                   <h3 className="text-4xl font-display font-black text-white mb-6 uppercase tracking-tight">HireNow AGENT IS ACTIVE.</h3>
                    <div className="flex justify-center gap-1">
                       {[1,2,3,4,5].map(i => <div key={i} className="w-2 h-8 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />)}
                    </div>
@@ -7572,7 +7572,7 @@ function LandingPage() {
               Built for <br />
               <span className="text-indigo-600">Complex Scale.</span>
             </h2>
-            <p className="text-xl text-slate-500 font-medium">Whatever your stack, wherever your team is based, HireAI adapts to your specific hiring needs.</p>
+            <p className="text-xl text-slate-500 font-medium">Whatever your stack, wherever your team is based, HireNow adapts to your specific hiring needs.</p>
           </div>
           <div className="h-px flex-1 bg-slate-100 hidden md:block mb-6" />
         </div>
@@ -7592,7 +7592,7 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Benefits / Why HireAI - NEW SECTION */}
+      {/* Benefits / Why HireNow - NEW SECTION */}
       <section id="about" className="py-32 bg-slate-50 relative z-10 overflow-hidden rounded-[5rem] my-20">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-indigo-600 skew-x-12 translate-x-1/2 opacity-[0.03]" />
         
@@ -7605,7 +7605,7 @@ function LandingPage() {
                  </div>
                  <h2 className="text-5xl font-display font-black text-slate-900 tracking-tighter uppercase mb-6 leading-none">Enterprise-Grade <br /><span className="text-indigo-600">Trust & Security.</span></h2>
                  <p className="text-xl text-slate-500 font-medium mb-8 leading-relaxed">
-                    HireAI is built for organizations that prioritize data privacy and objective evaluation. Our agents are SOC2 Type II compliant and conduct every interview within a secure, sandboxed environment.
+                    HireNow is built for organizations that prioritize data privacy and objective evaluation. Our agents are SOC2 Type II compliant and conduct every interview within a secure, sandboxed environment.
                  </p>
                  <div className="grid grid-cols-2 gap-6">
                     <div className="p-6 bg-white rounded-3xl border border-slate-100">
@@ -7646,7 +7646,7 @@ function LandingPage() {
 
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
            <div className="lg:col-span-5">
-              <h2 className="text-5xl font-display font-black text-slate-900 tracking-tighter uppercase mb-8">Why choose <br /><span className="text-indigo-600">HireAI?</span></h2>
+              <h2 className="text-5xl font-display font-black text-slate-900 tracking-tighter uppercase mb-8">Why choose <br /><span className="text-indigo-600">HireNow?</span></h2>
               <div className="space-y-10">
                  {benefits.map((b, i) => (
                    <div key={i} className="flex gap-6">
@@ -7679,7 +7679,7 @@ function LandingPage() {
                  </Card>
                  <Card className="p-8 bg-white shadow-xl rounded-[2.5rem] border-none">
                     <div className="text-4xl font-display font-black text-indigo-600 mb-2">4 Days</div>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-tight">Average time to hire with HireAI</p>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-tight">Average time to hire with HireNow</p>
                  </Card>
               </div>
            </div>
@@ -7851,7 +7851,7 @@ export default function App() {
         </div>
       </div>
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-black text-white uppercase tracking-widest">HireAI</h2>
+        <h2 className="text-xl font-black text-white uppercase tracking-widest">HireNow</h2>
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] animate-pulse">Initializing Neural Interface...</p>
       </div>
     </div>
