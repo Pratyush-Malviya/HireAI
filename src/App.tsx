@@ -3037,6 +3037,67 @@ function JobDetail() {
   );
 }
 
+function parseD6Sections(markdown: string): {
+  executiveSummary: string;
+  performanceLedger: string;
+  auditingAnomalies: string;
+  interviewStrategy: string;
+} {
+  const sections = {
+    executiveSummary: '',
+    performanceLedger: '',
+    auditingAnomalies: '',
+    interviewStrategy: '',
+  };
+
+  if (!markdown) return sections;
+
+  const lines = markdown.split('\n');
+  let currentSection: 'executiveSummary' | 'performanceLedger' | 'auditingAnomalies' | 'interviewStrategy' | null = null;
+  let currentContent: string[] = [];
+
+  for (const line of lines) {
+    const cleanLine = line.toLowerCase().replace(/[*#_]/g, '').trim();
+    
+    let matchedSection: 'executiveSummary' | 'performanceLedger' | 'auditingAnomalies' | 'interviewStrategy' | null = null;
+    if (cleanLine.includes('executive summary') || cleanLine.includes('match narrative')) {
+      matchedSection = 'executiveSummary';
+    } else if (cleanLine.includes('performance ledger')) {
+      matchedSection = 'performanceLedger';
+    } else if (cleanLine.includes('auditing, penalties') || cleanLine.includes('auditing penalties') || cleanLine.includes('anomalies') || cleanLine.includes('penalties') || cleanLine.includes('audit')) {
+      matchedSection = 'auditingAnomalies';
+    } else if (cleanLine.includes('interview strategy') || cleanLine.includes('hiring recommendation')) {
+      matchedSection = 'interviewStrategy';
+    }
+
+    if (matchedSection) {
+      if (currentSection) {
+        sections[currentSection] = currentContent.join('\n').trim();
+      }
+      currentSection = matchedSection;
+      currentContent = [];
+    } else {
+      if (currentSection) {
+        currentContent.push(line);
+      } else {
+        currentContent.push(line);
+        currentSection = 'executiveSummary';
+      }
+    }
+  }
+
+  if (currentSection) {
+    sections[currentSection] = currentContent.join('\n').trim();
+  }
+
+  // If we couldn't split anything (e.g. no headings matched), put everything into executiveSummary as fallback
+  if (!sections.executiveSummary && !sections.performanceLedger && !sections.auditingAnomalies && !sections.interviewStrategy) {
+    sections.executiveSummary = markdown;
+  }
+
+  return sections;
+}
+
 function CandidateDetail() {
   const { candidateId } = useParams();
   const { profile, organization } = useProfile();
@@ -3751,8 +3812,8 @@ function CandidateDetail() {
             <p className="text-[11px] text-indigo-400 font-extrabold uppercase tracking-widest">
               Applied for: {job?.title || 'Unknown Position'}
             </p>
-            <div className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl mt-4 prose prose-invert">
-              <Markdown>{scorecard?.recommendation?.summary || candidate.oneLineSummary}</Markdown>
+            <div className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl mt-4 font-semibold italic">
+              <Markdown>{candidate.oneLineSummary || "Forensic screening and scoring analysis completed."}</Markdown>
             </div>
           </div>
         </div>
@@ -4156,6 +4217,100 @@ function CandidateDetail() {
           )}
         </div>
       </Card>
+
+      {/* D6 Forensic Analysis Reports & Narrative */}
+      {(() => {
+        const d6Sections = parseD6Sections(scorecard?.recommendation?.summary || '');
+        const hasDetailedReports = d6Sections.executiveSummary || d6Sections.performanceLedger || d6Sections.auditingAnomalies || d6Sections.interviewStrategy;
+        
+        if (!hasDetailedReports) return null;
+
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="border-b border-slate-200 pb-2">
+              <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                D6+ Forensic Analysis Reports
+              </h2>
+              <p className="text-xs text-slate-500 font-semibold tracking-wide">Deconstructed adversarial talent reports across major scoring dimensions</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Executive Summary & Match Narrative */}
+              {d6Sections.executiveSummary && (
+                <Card id="d6-executive-summary" className="p-6 border-l-4 border-l-indigo-500 bg-white shadow-md shadow-indigo-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                  <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
+                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">D6 Executive Summary & Match Narrative</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">CORE FIT & SYNTHESIS</p>
+                    </div>
+                  </div>
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-indigo max-w-none flex-1">
+                    <Markdown>{d6Sections.executiveSummary}</Markdown>
+                  </div>
+                </Card>
+              )}
+
+              {/* Dimensional Performance Ledger */}
+              {d6Sections.performanceLedger && (
+                <Card id="d6-performance-ledger" className="p-6 border-l-4 border-l-blue-500 bg-white shadow-md shadow-blue-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                  <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
+                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shrink-0">
+                      <BarChart3 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">Dimensional Performance Ledger</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">D1-D5 BREAKDOWN DECONSTRUCTION</p>
+                    </div>
+                  </div>
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-blue max-w-none flex-1">
+                    <Markdown>{d6Sections.performanceLedger}</Markdown>
+                  </div>
+                </Card>
+              )}
+
+              {/* D6 Auditing, Penalties & Anomalies */}
+              {d6Sections.auditingAnomalies && (
+                <Card id="d6-auditing-anomalies" className="p-6 border-l-4 border-l-amber-500 bg-white shadow-md shadow-amber-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                  <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
+                    <div className="p-2 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">D6 Auditing, Penalties & Anomalies</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">ADVERSARIAL STABILITY & GAP EVALUATION</p>
+                    </div>
+                  </div>
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-amber max-w-none flex-1">
+                    <Markdown>{d6Sections.auditingAnomalies}</Markdown>
+                  </div>
+                </Card>
+              )}
+
+              {/* Hiring Recommendation & Interview Strategy */}
+              {d6Sections.interviewStrategy && (
+                <Card id="d6-interview-strategy" className="p-6 border-l-4 border-l-emerald-500 bg-white shadow-md shadow-emerald-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                  <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
+                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+                      <Lightbulb className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">Hiring Recommendation & Interview Strategy</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">PRESCRIPTIVE PANEL EVALUATION QUESTIONS</p>
+                    </div>
+                  </div>
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-emerald max-w-none flex-1">
+                    <Markdown>{d6Sections.interviewStrategy}</Markdown>
+                  </div>
+                </Card>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Details */}
