@@ -1740,7 +1740,8 @@ function JobDetail() {
   const [job, setJob] = useState<Job | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [activeUploadsCount, setActiveUploadsCount] = useState(0);
+  const uploading = activeUploadsCount > 0;
   const [researchingAll, setResearchingAll] = useState(false);
   const [retryingScreening, setRetryingScreening] = useState<string | null>(null);
   const [invitingCandidateId, setInvitingCandidateId] = useState<string | null>(null);
@@ -1759,7 +1760,7 @@ function JobDetail() {
     currentFileName?: string;
     startTime?: number;
     estimatedSecondsRemaining?: number;
-    files: { name: string; status: 'queued' | 'processing' | 'success' | 'skipped' | 'error'; message?: string }[]
+    files: { id?: string; name: string; status: 'queued' | 'processing' | 'success' | 'skipped' | 'error'; message?: string }[]
   } | null>(null);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
@@ -1812,116 +1813,145 @@ function JobDetail() {
     const files = e.target.files;
     if (!files || !job || !jobId) return;
 
-    setUploading(true);
+    setActiveUploadsCount(prev => prev + 1);
     const batchId = Date.now().toString();
     localStorage.setItem(`lastBatch_${jobId}`, batchId);
     
-    const fileList = Array.from(files).map(f => ({ name: f.name, status: 'queued' as const }));
-    setUploadProgress({ 
-      total: files.length, 
-      current: 0, 
-      success: 0, 
-      skipped: 0, 
-      files: fileList,
-      startTime: Date.now()
+    const newFilesToUpload = Array.from(files).map((f, i) => ({
+      id: `${f.name}_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 7)}`,
+      file: f,
+      name: f.name,
+      status: 'queued' as const
+    }));
+
+    setUploadProgress(prev => {
+      const newFilesProgress = newFilesToUpload.map(nf => ({
+        id: nf.id,
+        name: nf.name,
+        status: nf.status
+      }));
+
+      if (!prev || prev.current >= prev.total) {
+        return { 
+          total: newFilesToUpload.length, 
+          current: 0, 
+          success: 0, 
+          skipped: 0, 
+          files: newFilesProgress,
+          startTime: Date.now()
+        };
+      } else {
+        return {
+          ...prev,
+          total: prev.total + newFilesToUpload.length,
+          files: [...prev.files, ...newFilesProgress]
+        };
+      }
     });
 
     // Process in small batches to avoid rate limits
     const BATCH_SIZE = 1;
-    const filesArray = Array.from(files);
     
-    for (let i = 0; i < filesArray.length; i += BATCH_SIZE) {
-      const currentBatch = filesArray.slice(i, i + BATCH_SIZE);
-      
-      // Delay between batches to respect rate limits
-      if (i > 0) {
-        // Longer delay to be safe
-        await new Promise(resolve => setTimeout(resolve, 3500));
-      }
-      
-      await Promise.all(currentBatch.map(async (file, batchIdx) => {
-        const actualIdx = i + batchIdx;
-        setUploadProgress(prev => prev ? ({ 
-          ...prev, 
-          currentFileName: file.name,
-          files: prev.files.map((f, idx) => idx === actualIdx ? { ...f, status: 'processing' } : f) 
-        }) : null);
-
-        try {
-          const text = await extractTextFromFile(file);
-          const resumeHash = await hashString(text);
-
-          const dupQuery = query(
-            collection(db, 'candidates'), 
-            where('jobId', '==', jobId),
-            where('resumeHash', '==', resumeHash),
-            where('createdBy', '==', auth.currentUser.uid)
-          );
-          const dupSnap = await getDocs(dupQuery);
+    try {
+      for (let i = 0; i < newFilesToUpload.length; i += BATCH_SIZE) {
+        const currentBatch = newFilesToUpload.slice(i, i + BATCH_SIZE);
+        
+        // Delay between batches to respect rate limits
+        if (i > 0) {
+          // Longer delay to be safe
+          await new Promise(resolve => setTimeout(resolve, 3500));
+        }
+        
+        await Promise.all(currentBatch.map(async (item) => {
+          const file = item.file;
+          const fileId = item.id;
           
-          if (!dupSnap.empty) {
+          setUploadProgress(prev => {
+            if (!prev) return null;
+            return { 
+              ...prev, 
+              currentFileName: file.name,
+              files: prev.files.map(f => f.id === fileId ? { ...f, status: 'processing' as const } : f) 
+            };
+          });
+
+          try {
+            const text = await extractTextFromFile(file);
+            const resumeHash = await hashString(text);
+
+            const dupQuery = query(
+              collection(db, 'candidates'), 
+              where('jobId', '==', jobId),
+              where('resumeHash', '==', resumeHash),
+              where('createdBy', '==', auth.currentUser.uid)
+            );
+            const dupSnap = await getDocs(dupQuery);
+            
+            if (!dupSnap.empty) {
+              setUploadProgress(prev => {
+                if (!prev) return null;
+                const newCurrent = Math.min(prev.total, prev.current + 1);
+                const elapsed = Date.now() - (prev.startTime || Date.now());
+                const avgTimePerFile = elapsed / newCurrent;
+                const remaining = Math.round((prev.total - newCurrent) * (avgTimePerFile / 1000));
+                
+                return { 
+                  ...prev, 
+                  current: newCurrent, 
+                  skipped: prev.skipped + 1,
+                  estimatedSecondsRemaining: remaining,
+                  files: prev.files.map(f => f.id === fileId ? { ...f, status: 'skipped' as const, message: 'Duplicate' } : f) 
+                };
+              });
+              return;
+            }
+
+            const rawScreeningResult = await screenCandidate(text, job.requirements);
+            const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
+            
+            await addDoc(collection(db, 'candidates'), {
+              ...screeningResult,
+              jobId,
+              organizationId: profile.organizationId,
+              createdBy: auth.currentUser.uid,
+              resumeHash,
+              resumeText: text, // Store original text for retry
+              batchId,
+              createdAt: serverTimestamp(),
+              status: 'processed'
+            });
+
             setUploadProgress(prev => {
               if (!prev) return null;
               const newCurrent = Math.min(prev.total, prev.current + 1);
               const elapsed = Date.now() - (prev.startTime || Date.now());
               const avgTimePerFile = elapsed / newCurrent;
               const remaining = Math.round((prev.total - newCurrent) * (avgTimePerFile / 1000));
-              
+
               return { 
                 ...prev, 
                 current: newCurrent, 
-                skipped: prev.skipped + 1,
+                success: prev.success + 1,
                 estimatedSecondsRemaining: remaining,
-                files: prev.files.map((f, idx) => idx === actualIdx ? { ...f, status: 'skipped', message: 'Duplicate' } : f) 
+                files: prev.files.map(f => f.id === fileId ? { ...f, status: 'success' as const } : f) 
               };
             });
-            return;
+          } catch (err: any) {
+            setUploadProgress(prev => {
+              if (!prev) return null;
+              const newCurrent = Math.min(prev.total, prev.current + 1);
+              return { 
+                ...prev, 
+                current: newCurrent, 
+                files: prev.files.map(f => f.id === fileId ? { ...f, status: 'error' as const, message: err.message } : f) 
+              };
+            });
           }
-
-          const rawScreeningResult = await screenCandidate(text, job.requirements);
-          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
-          
-          await addDoc(collection(db, 'candidates'), {
-            ...screeningResult,
-            jobId,
-            organizationId: profile.organizationId,
-            createdBy: auth.currentUser.uid,
-            resumeHash,
-            resumeText: text, // Store original text for retry
-            batchId,
-            createdAt: serverTimestamp(),
-            status: 'processed'
-          });
-
-          setUploadProgress(prev => {
-            if (!prev) return null;
-            const newCurrent = Math.min(prev.total, prev.current + 1);
-            const elapsed = Date.now() - (prev.startTime || Date.now());
-            const avgTimePerFile = elapsed / newCurrent;
-            const remaining = Math.round((prev.total - newCurrent) * (avgTimePerFile / 1000));
-
-            return { 
-              ...prev, 
-              current: newCurrent, 
-              success: prev.success + 1,
-              estimatedSecondsRemaining: remaining,
-              files: prev.files.map((f, idx) => idx === actualIdx ? { ...f, status: 'success' } : f) 
-            };
-          });
-        } catch (err: any) {
-          setUploadProgress(prev => {
-            if (!prev) return null;
-            const newCurrent = Math.min(prev.total, prev.current + 1);
-            return { 
-              ...prev, 
-              current: newCurrent, 
-              files: prev.files.map((f, idx) => idx === actualIdx ? { ...f, status: 'error', message: err.message } : f) 
-            };
-          });
-        }
-      }));
+        }));
+      }
+    } finally {
+      setActiveUploadsCount(prev => Math.max(0, prev - 1));
     }
-    setUploading(false);
   };
 
   const handleResearchAll = async () => {
@@ -2187,9 +2217,6 @@ function JobDetail() {
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center font-black animate-pulse">BOOTSTRAPPING PIPELINE...</div>;
-  if (!job) return <div className="p-20 text-center">Job sequence not found.</div>;
-
   const filteredRealCandidates = useMemo(() => {
     return candidates
       .filter(c => {
@@ -2262,6 +2289,9 @@ function JobDetail() {
     ? Math.max(...candidates.map(c => c.scorecard.compositeScore)) 
     : 0;
 
+  if (loading) return <div className="h-screen flex items-center justify-center font-black animate-pulse">BOOTSTRAPPING PIPELINE...</div>;
+  if (!job) return <div className="p-20 text-center">Job sequence not found.</div>;
+
   return (
     <div className="space-y-12 pb-20">
       {/* Header */}
@@ -2287,11 +2317,11 @@ function JobDetail() {
             </div>
           </div>
         </div>
-        <label className={cn("cursor-pointer", uploading && "opacity-50 cursor-not-allowed")}>
-          <input type="file" multiple accept=".pdf,.docx" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+        <label className="cursor-pointer">
+          <input type="file" multiple accept=".pdf,.docx" className="hidden" onChange={handleFileUpload} />
           <Button variant="secondary" className="px-6 h-12 rounded-xl text-sm font-black shadow-lg shadow-indigo-200" as="div">
-            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            {uploading ? 'Processing Resumes...' : 'New Interview Session'}
+            <Plus className="w-4 h-4 mr-1.5" />
+            New Interview Session
           </Button>
         </label>
       </div>
@@ -3682,31 +3712,46 @@ function CandidateDetail() {
         </Card>
       )}
 
-      {/* Recommendation Banner */}
+      {/* Elegant, State-of-the-art Recommendation Banner & Profile Card */}
       <Card className={cn(
-        "p-1 border-none bg-gradient-to-r",
-        scorecard?.recommendation?.status === 'perfect' ? "from-green-600 to-emerald-500" :
-        scorecard?.recommendation?.status === 'strong' ? "from-indigo-600 to-blue-500" :
-        scorecard?.recommendation?.status === 'potential' ? "from-amber-500 to-orange-400" : "from-slate-700 to-slate-500"
+        "p-1 border-none bg-gradient-to-r relative overflow-hidden shadow-xl shadow-indigo-100/30",
+        scorecard?.recommendation?.status === 'perfect' ? "from-emerald-500 via-teal-500 to-green-500" :
+        scorecard?.recommendation?.status === 'strong' ? "from-indigo-500 via-purple-500 to-blue-500" :
+        scorecard?.recommendation?.status === 'potential' ? "from-amber-500 via-orange-500 to-yellow-500" : "from-slate-600 via-slate-700 to-slate-500"
       )}>
-        <div className="bg-white m-[1px] rounded-[11px] p-8 flex flex-col md:flex-row items-center gap-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.06),transparent)] pointer-events-none" />
+        <div className="bg-slate-900 text-white m-[1px] rounded-[11px] p-8 flex flex-col md:flex-row items-center gap-8 relative z-10">
           <div className={cn(
-             "w-32 h-32 rounded-3xl flex flex-col items-center justify-center shrink-0 border-4",
-             getScoreColor(scorecard?.compositeScore || 0)
+             "w-32 h-32 rounded-3xl flex flex-col items-center justify-center shrink-0 border-4 shadow-lg shadow-black/40 backdrop-blur-md",
+              scorecard?.recommendation?.status === 'perfect' ? "bg-green-500/10 border-green-500/40 text-green-400" :
+              scorecard?.recommendation?.status === 'strong' ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-400" :
+              scorecard?.recommendation?.status === 'potential' ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-slate-500/10 border-slate-500/40 text-slate-400"
           )}>
-            <span className="text-4xl font-black">{scorecard?.compositeScore || 0}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Match Score</span>
+            <span className="text-5xl font-black tracking-tighter">{scorecard?.compositeScore || 0}</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Match Index</span>
           </div>
-          <div className="flex-1 text-center md:text-left">
-            <span className={cn(
-              "text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest mb-2 inline-block",
-              scorecard?.recommendation?.status === 'perfect' ? "bg-green-100 text-green-700" :
-              scorecard?.recommendation?.status === 'strong' ? "bg-indigo-100 text-indigo-700" : "bg-amber-100 text-amber-700"
-            )}>
-              {scorecard?.recommendation?.fitHeader || 'Screening Report'}
-            </span>
-            <h1 className="text-3xl font-black text-slate-900 mb-2">{candidate.fullName}</h1>
-            <div className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-4xl mt-3 prose prose-indigo">
+          <div className="flex-1 text-center md:text-left space-y-3">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              <span className={cn(
+                "text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider",
+                scorecard?.recommendation?.status === 'perfect' ? "bg-green-500/20 text-green-400 border border-green-500/30" :
+                scorecard?.recommendation?.status === 'strong' ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" :
+                scorecard?.recommendation?.status === 'potential' ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "bg-slate-500/20 text-slate-450 border border-slate-500/30"
+              )}>
+                {scorecard?.recommendation?.fitHeader || 'Screening Report'}
+              </span>
+              <span className="text-[10px] font-bold bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-slate-700/50">
+                {candidate.location}
+              </span>
+              <span className="text-[10px] font-bold bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-slate-700/50">
+                {candidate.totalExperience} Years Experience
+              </span>
+            </div>
+            <h1 className="text-4xl font-black text-white tracking-tight">{candidate.fullName}</h1>
+            <p className="text-[11px] text-indigo-400 font-extrabold uppercase tracking-widest">
+              Applied for: {job?.title || 'Unknown Position'}
+            </p>
+            <div className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl mt-4 prose prose-invert">
               <Markdown>{scorecard?.recommendation?.summary || candidate.oneLineSummary}</Markdown>
             </div>
           </div>
@@ -4278,16 +4323,26 @@ function CandidateDetail() {
                 const dim = scorecard?.dimensions?.[dimInfo.key as keyof typeof scorecard.dimensions] as any;
                 const Icon = dimInfo.icon;
                 
+                // Static colors map to ensure compilation in Tailwind CSS v4 without dynamic class name construction
+                const staticColorsMap: Record<string, { bg: string; text: string; bgActive: string; textActive: string; border: string }> = {
+                  indigo: { bg: 'bg-indigo-50/10', text: 'text-indigo-400', bgActive: 'bg-indigo-50', textActive: 'text-indigo-600', border: 'border-indigo-100' },
+                  blue: { bg: 'bg-blue-50/10', text: 'text-blue-400', bgActive: 'bg-blue-50', textActive: 'text-blue-600', border: 'border-blue-100' },
+                  emerald: { bg: 'bg-emerald-50/10', text: 'text-emerald-400', bgActive: 'bg-emerald-50', textActive: 'text-emerald-600', border: 'border-emerald-100' },
+                  amber: { bg: 'bg-amber-50/10', text: 'text-amber-400', bgActive: 'bg-amber-50', textActive: 'text-amber-600', border: 'border-amber-100' },
+                  rose: { bg: 'bg-rose-50/10', text: 'text-rose-400', bgActive: 'bg-rose-50', textActive: 'text-rose-600', border: 'border-rose-100' },
+                };
+                const colors = staticColorsMap[dimInfo.color] || { bg: 'bg-slate-50', text: 'text-slate-400', bgActive: 'bg-slate-100', textActive: 'text-slate-700', border: 'border-slate-150' };
+
                 return (
                   <Card key={dimInfo.id} className={cn(
                     "p-0 overflow-visible border-2 transition-all group/dim",
-                    dim ? (dim.score >= 80 ? "border-green-100/50 hover:border-green-200" : dim.score >= 50 ? "border-amber-100/50 hover:border-amber-200" : "border-red-100/50 hover:border-red-200") : "border-slate-100 opacity-70"
+                    dim ? (dim.score >= 80 ? "border-green-150 hover:border-green-300" : dim.score >= 50 ? "border-amber-150 hover:border-amber-300" : "border-red-150 hover:border-red-300") : "border-slate-100 opacity-70"
                   )}>
                     <div className="flex flex-col md:flex-row">
                       {/* Score Indicator Sidebar */}
                       <div className={cn(
                         "w-full md:w-32 p-6 flex md:flex-col items-center justify-center gap-2 shrink-0 transition-colors rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl",
-                        dim ? (dim.score >= 80 ? "bg-green-50/50" : dim.score >= 50 ? "bg-amber-50/50" : "bg-red-50/50") : "bg-slate-50"
+                        dim ? (dim.score >= 80 ? "bg-green-50" : dim.score >= 50 ? "bg-amber-50" : "bg-red-50") : "bg-slate-50"
                       )}>
                         <div className="relative">
                           <div className={cn(
@@ -4319,7 +4374,7 @@ function CandidateDetail() {
                       <div className="flex-1 p-6 space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <div className={cn("p-2 rounded-lg", dim ? `bg-${dimInfo.color}-50 text-${dimInfo.color}-600` : "bg-slate-50 text-slate-300")}>
+                            <div className={cn("p-2 rounded-lg", dim ? `${colors.bgActive} ${colors.textActive}` : "bg-slate-50 text-slate-300")}>
                               <Icon className="w-5 h-5" />
                             </div>
                             <div>
