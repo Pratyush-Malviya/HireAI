@@ -3179,7 +3179,23 @@ function CandidateDetail() {
     
     let currentY = (doc as any).lastAutoTable.finalY + 15;
 
+    // SECTION: Match Narrative / Executive Summary
+    if (currentY > 240) { doc.addPage(); currentY = 20; }
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('1.2 Executive Match Summary (D6 Scorecard)', 20, currentY);
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    const summaryClean = (candidate.scorecard?.recommendation?.summary || candidate.oneLineSummary || '')
+      .replace(/[#*]/g, '');
+    const summaryLines = doc.splitTextToSize(summaryClean, pageWidth - 40);
+    doc.text(summaryLines, 20, currentY + 7);
+    currentY += (summaryLines.length * 4.5) + 18;
+
     // SECTION: Screening Analytics
+    if (currentY > 240) { doc.addPage(); currentY = 20; }
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('2. AI Screening Analytics', 20, currentY);
@@ -3558,9 +3574,9 @@ function CandidateDetail() {
               {scorecard?.recommendation?.fitHeader || 'Screening Report'}
             </span>
             <h1 className="text-3xl font-black text-slate-900 mb-2">{candidate.fullName}</h1>
-            <p className="text-lg text-slate-500 leading-relaxed max-w-3xl">
-              {scorecard?.recommendation?.summary || candidate.oneLineSummary}
-            </p>
+            <div className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-4xl mt-3 prose prose-indigo">
+              <Markdown>{scorecard?.recommendation?.summary || candidate.oneLineSummary}</Markdown>
+            </div>
           </div>
         </div>
       </Card>
