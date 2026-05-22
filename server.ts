@@ -563,6 +563,78 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
   });
 });
 
+app.post("/api/admin/test-smtp", async (req, res) => {
+  const { smtpHost, smtpPort, smtpSecure, smtpUser, smtpPass, smtpFromName, smtpFromEmail, testRecipient } = req.body;
+
+  if (!smtpHost || !smtpPort || !smtpUser || !smtpPass || !testRecipient) {
+    return res.status(400).json({ success: false, error: "Host, port, username, password, and test recipient email are required parameters." });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: parseInt(smtpPort),
+      secure: smtpSecure === true,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass
+      }
+    });
+
+    // 1. Verify connection
+    await transporter.verify();
+
+    // 2. Send test email
+    const fromName = smtpFromName || "HireAI Gateway Test";
+    const fromEmail = smtpFromEmail || smtpUser;
+    const fromString = `"${fromName}" <${fromEmail}>`;
+
+    await transporter.sendMail({
+      from: fromString,
+      to: testRecipient,
+      subject: "HireAI SMTP Mail Server Configuration - Test Success",
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
+          <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #15803d; font-weight: bold; font-size: 14px; display: inline-block;">
+              ✓ Live SMTP Connection Succeeded
+            </div>
+            <h2 style="color: #4f46e5; margin-top: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 15px;">SMTP Server Test Successful</h2>
+            <p style="margin: 0 0 10px 0; font-size: 14px; color: #475569;">Congratulations! Your workspace has successfully linked its custom SMTP mail delivery server to HireAI.</p>
+            <p style="margin: 0 0 20px 0; font-size: 14px; color: #475569;">All recruitment invitations, scorecard dispatches, and notifications for candidates will now be dispatched from your company domain.</p>
+            
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-size: 13px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 4px 0; color: #64748b; font-weight: bold; width: 100px;">Host:</td><td style="padding: 4px 0; color: #0f172a; font-family: monospace;">${smtpHost}</td></tr>
+                <tr><td style="padding: 4px 0; color: #64748b; font-weight: bold;">Port:</td><td style="padding: 4px 0; color: #0f172a; font-family: monospace;">${smtpPort}</td></tr>
+                <tr><td style="padding: 4px 0; color: #64748b; font-weight: bold;">Secure:</td><td style="padding: 4px 0; color: #0f172a; font-family: monospace;">${smtpSecure ? 'SSL/TLS (secure)' : 'Non-secure (STARTTLS)'}</td></tr>
+                <tr><td style="padding: 4px 0; color: #64748b; font-weight: bold;">Sender Name:</td><td style="padding: 4px 0; color: #0f172a; font-family: monospace;">${fromName}</td></tr>
+                <tr><td style="padding: 4px 0; color: #64748b; font-weight: bold;">Sender Email:</td><td style="padding: 4px 0; color: #0f172a; font-family: monospace;">${fromEmail}</td></tr>
+              </table>
+            </div>
+
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 25px; font-size: 11px; color: #94a3b8; text-align: center;">
+              This test email was dispatched automatically when configuring custom mail settings on HireAI.
+            </div>
+          </div>
+        </div>
+      `
+    });
+
+    return res.json({
+      success: true,
+      message: `SMTP connection and test mail delivery succeeded. Sent to: ${testRecipient}`,
+    });
+
+  } catch (err: any) {
+    console.error("Test SMTP failed:", err);
+    return res.status(500).json({
+      success: false,
+      error: err.message || "An error occurred during SMTP mail server verification."
+    });
+  }
+});
+
 // AI Proxy Routes
 const ai = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY || '',

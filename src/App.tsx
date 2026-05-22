@@ -4282,12 +4282,38 @@ function MetricCard({
 }
 
 function OrgAdminPanel() {
-  const { profile, organization } = useProfile();
+  const { profile, organization, refreshProfile } = useProfile();
+  const { notify } = useNotification();
   const [loading, setLoading] = useState(true);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Custom states for Workspace settings editing
+  const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace'>('analytics');
+
+  const [orgName, setOrgName] = useState('');
+  const [orgDomain, setOrgDomain] = useState('');
+  const [orgIndustry, setOrgIndustry] = useState('Technology');
+  const [orgCompanySize, setOrgCompanySize] = useState('11-50');
+  const [orgLocation, setOrgLocation] = useState('');
+  const [orgPhone, setOrgPhone] = useState('');
+  const [orgDescription, setOrgDescription] = useState('');
+
+  // SMTP States
+  const [smtpHost, setSmtpHost] = useState('');
+  const [smtpPort, setSmtpPort] = useState('465');
+  const [smtpSecure, setSmtpSecure] = useState(true);
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPass, setSmtpPass] = useState('');
+  const [smtpFromName, setSmtpFromName] = useState('');
+  const [smtpFromEmail, setSmtpFromEmail] = useState('');
+
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [testingSmtp, setTestingSmtp] = useState(false);
+
+  const isReadOnly = profile?.role === 'recruiter';
   
   // Filters State
   const [dateRange, setDateRange] = useState<string>('30');
@@ -4296,6 +4322,68 @@ function OrgAdminPanel() {
   const [workingHoursEnd, setWorkingHoursEnd] = useState<string>('18:00');
 
   const isSuperAdmin = auth.currentUser?.email === 'malviya.pratyush26@gmail.com';
+
+  useEffect(() => {
+    if (organization) {
+      setOrgName(organization.name || '');
+      setOrgDomain(organization.domain || '');
+      setOrgIndustry(organization.industry || 'Technology');
+      setOrgCompanySize(organization.companySize || '11-50');
+      setOrgLocation(organization.location || '');
+      setOrgPhone(organization.phone || '');
+      setOrgDescription(organization.description || '');
+
+      setSmtpHost(organization.emailSettings?.smtpHost || '');
+      setSmtpPort(organization.emailSettings?.smtpPort || '465');
+      setSmtpSecure(organization.emailSettings?.smtpSecure !== false);
+      setSmtpUser(organization.emailSettings?.smtpUser || '');
+      setSmtpPass(organization.emailSettings?.smtpPass || '');
+      setSmtpFromName(organization.emailSettings?.smtpFromName || '');
+      setSmtpFromEmail(organization.emailSettings?.smtpFromEmail || '');
+    }
+  }, [organization]);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization) return;
+    if (isReadOnly) {
+      notify('Access Denied: Recruiter role cannot alter workspace configurations.', 'error');
+      return;
+    }
+
+    setSavingSettings(true);
+    try {
+      const updatedData: Partial<Organization> = {
+        name: orgName.trim(),
+        domain: orgDomain.trim() || null,
+        industry: orgIndustry,
+        companySize: orgCompanySize,
+        location: orgLocation.trim() || null,
+        phone: orgPhone.trim() || null,
+        description: orgDescription.trim() || null,
+        emailSettings: {
+          smtpHost: smtpHost.trim() || null,
+          smtpPort: smtpPort.trim() || null,
+          smtpSecure: smtpSecure,
+          smtpUser: smtpUser.trim() || null,
+          smtpPass: smtpPass.trim() || null,
+          smtpFromName: smtpFromName.trim() || null,
+          smtpFromEmail: smtpFromEmail.trim() || null,
+        }
+      };
+
+      await updateDoc(doc(db, 'organizations', organization.id), updatedData);
+      notify('Workspace preferences saved successfully', 'success');
+      await refreshProfile();
+      setActivePanelTab('analytics');
+    } catch (err) {
+      console.error('Error saving organization settings:', err);
+      notify('Failed to save settings: ' + (err instanceof Error ? err.message : 'Permission denied'), 'error');
+      handleFirestoreError(err, OperationType.UPDATE, `organizations/${organization.id}`);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   // Set default selected organization once profile is loaded
   useEffect(() => {
@@ -4623,8 +4711,38 @@ function OrgAdminPanel() {
         </div>
       </div>
 
-      {/* Sub Header for Metrics Panel */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-6">
+      {/* Sub-Tab Navigation Bar */}
+      <div className="flex gap-4 border-b border-slate-200 pb-2">
+        <button 
+          onClick={() => setActivePanelTab('analytics')}
+          className={cn(
+            "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
+            activePanelTab === 'analytics' 
+              ? "border-b-2 border-indigo-600 text-indigo-600 font-black pb-[11px]" 
+              : "border-transparent text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <BarChart3 className="w-4 h-4" />
+          Analytics Dashboard
+        </button>
+        <button 
+          onClick={() => setActivePanelTab('workspace')}
+          className={cn(
+            "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
+            activePanelTab === 'workspace' 
+              ? "border-b-2 border-indigo-600 text-indigo-600 font-black pb-[11px]" 
+              : "border-transparent text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <Settings className="w-4 h-4" />
+          Workspace Configuration
+        </button>
+      </div>
+
+      {activePanelTab === 'analytics' ? (
+        <>
+          {/* Sub Header for Metrics Panel */}
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-1">
             HR Agent Metrics Dashboard
@@ -4809,8 +4927,314 @@ function OrgAdminPanel() {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </>
+  ) : (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        {isReadOnly && (
+          <div className="flex gap-4 p-4 bg-amber-50 rounded-2xl border border-amber-100 items-center">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+            <p className="text-xs font-bold text-amber-800 uppercase tracking-wide leading-relaxed">
+              Read-only Access: Only Workspace Owners or Administrators can modify company details and mail delivery configuration.
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleSaveSettings} className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Company Details */}
+            <Card className="p-8 space-y-6 bg-white border border-slate-100 shadow-sm rounded-3xl">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide">Company Identity</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Workspace Profile Details</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Name</label>
+                  <input
+                    type="text"
+                    required
+                    disabled={isReadOnly}
+                    value={orgName}
+                    onChange={e => setOrgName(e.target.value)}
+                    placeholder="e.g. Acme Corp"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Web Domain</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={orgDomain}
+                    onChange={e => setOrgDomain(e.target.value)}
+                    placeholder="e.g. acme.com"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry</label>
+                  <select
+                    disabled={isReadOnly}
+                    value={orgIndustry}
+                    onChange={e => setOrgIndustry(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  >
+                    {['Technology', 'Finance', 'Healthcare', 'Education', 'Retail', 'Non-Profit', 'Consumer Services', 'Other'].map(ind => (
+                      <option key={ind} value={ind}>{ind}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Size</label>
+                  <select
+                    disabled={isReadOnly}
+                    value={orgCompanySize}
+                    onChange={e => setOrgCompanySize(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  >
+                    {['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'].map(sz => (
+                      <option key={sz} value={sz}>{sz} employees</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">HQ Location</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={orgLocation}
+                    onChange={e => setOrgLocation(e.target.value)}
+                    placeholder="e.g. San Francisco, CA"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Phone</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={orgPhone}
+                    onChange={e => setOrgPhone(e.target.value)}
+                    placeholder="e.g. +1 (555) 123-4567"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description / Vision Statement</label>
+                  <textarea
+                    disabled={isReadOnly}
+                    rows={4}
+                    value={orgDescription}
+                    onChange={e => setOrgDescription(e.target.value)}
+                    placeholder="Explain your organization's mission, culture and vision of screening..."
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs resize-none disabled:opacity-60 font-medium"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Mail Server Controls (SMTP) */}
+            <Card className="p-8 space-y-6 bg-white border border-slate-100 shadow-sm rounded-3xl">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                  <Database className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide">Candidate Invitation Mail Server</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest font-mono">Custom SMTP Settings</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SMTP Outgoing Host</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={smtpHost}
+                    onChange={e => setSmtpHost(e.target.value)}
+                    placeholder="smtp.example.com"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Port</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={smtpPort}
+                    onChange={e => setSmtpPort(e.target.value)}
+                    placeholder="465 / 587"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label className="flex items-center gap-3.5 p-3.5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 cursor-pointer transition-all select-none disabled:opacity-60 w-full mb-0">
+                    <input
+                      type="checkbox"
+                      disabled={isReadOnly}
+                      checked={smtpSecure}
+                      onChange={e => setSmtpSecure(e.target.checked)}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                    />
+                    <div>
+                      <p className="text-xs font-black text-slate-800 uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
+                      <p className="text-[10px] text-slate-400 font-medium">Configure secure SSL/TLS. Set checked for port 465, false/unchecked for port 587 (STARTTLS).</p>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SMTP Account Username</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={smtpUser}
+                    onChange={e => setSmtpUser(e.target.value)}
+                    placeholder="user@example.com"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SMTP Password</label>
+                  <input
+                    type="password"
+                    disabled={isReadOnly}
+                    value={smtpPass}
+                    onChange={e => setSmtpPass(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name (From)</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={smtpFromName}
+                    onChange={e => setSmtpFromName(e.target.value)}
+                    placeholder="e.g. Acme Corp Careers"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Email (From)</label>
+                  <input
+                    type="email"
+                    disabled={isReadOnly}
+                    value={smtpFromEmail}
+                    onChange={e => setSmtpFromEmail(e.target.value)}
+                    placeholder="e.g. no-reply@example.com"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+              </div>
+
+              {/* Test Connection Form Inline block */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3.5">
+                <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest block leading-none">Connection Verification Test</span>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    id="testSmtpEmailRecipient"
+                    placeholder="Test recipient email (e.g. yours)"
+                    className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 font-semibold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={testingSmtp}
+                    onClick={async () => {
+                      const el = document.getElementById('testSmtpEmailRecipient') as HTMLInputElement;
+                      const recipient = el?.value?.trim();
+                      if (!recipient) {
+                        notify('Please specify a recipient email to receive the SMTP test notification.', 'error');
+                        return;
+                      }
+                      if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
+                        notify('SMTP Host, Port, Username and Password are required to test setup.', 'error');
+                        return;
+                      }
+                      setTestingSmtp(true);
+                      try {
+                        const res = await fetch('/api/admin/test-smtp', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            smtpHost,
+                            smtpPort,
+                            smtpSecure,
+                            smtpUser,
+                            smtpPass,
+                            smtpFromName,
+                            smtpFromEmail,
+                            testRecipient: recipient
+                          })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          notify(data.message || 'SMTP server connection test verified successfully!', 'success');
+                        } else {
+                          notify('SMTP Test Failed: ' + (data.error || 'Check server connection parameters.'), 'error');
+                        }
+                      } catch (testErr) {
+                        notify('SMTP verification request failed: ' + (testErr instanceof Error ? testErr.message : 'Timeout'), 'error');
+                      } finally {
+                        setTestingSmtp(false);
+                      }
+                    }}
+                    className="h-9 text-[10px] px-4 font-black uppercase tracking-widest text-[#10b981] border-[#bbf7d0] hover:bg-[#f0fdf4] shrink-0"
+                  >
+                    {testingSmtp ? 'Testing Server...' : 'Test Config'}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Action Controls */}
+          <div className="flex items-center justify-end gap-4 border-t border-slate-100 pt-6">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={savingSettings}
+              onClick={() => setActivePanelTab('analytics')}
+              className="px-6 h-11 text-[10px] font-black uppercase tracking-widest"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="brand"
+              disabled={savingSettings || isReadOnly}
+              className="px-8 h-11 text-[10px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold"
+            >
+              {savingSettings ? 'Saving Changes...' : 'Save Workspace Settings'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    )}
+  </div>
+);
 }
 
 function SuperAdminPanel() {
