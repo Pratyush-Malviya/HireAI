@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText } from 'lucide-react';
-import { useEffect, useState, createContext, useContext, useRef, Component } from 'react';
+import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -229,6 +229,55 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, { ha
 
     return this.props.children;
   }
+}
+
+function PlaceholderScoreCircle({ isProcessing }: { isProcessing: boolean }) {
+  const [progress, setProgress] = useState(isProcessing ? 15 : 5);
+  
+  useEffect(() => {
+    if (!isProcessing) {
+      setProgress(5);
+      return;
+    }
+    
+    setProgress(Math.floor(Math.random() * 8) + 12);
+    
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 98) return 98;
+        let increment = 1;
+        if (prev < 30) increment = Math.max(1, Math.floor(Math.random() * 4) + 2);
+        else if (prev < 75) increment = Math.max(1, Math.floor(Math.random() * 3) + 1);
+        else if (prev < 90) increment = Math.max(1, Math.floor(Math.random() * 2) + 1);
+        else increment = Math.random() > 0.4 ? 1 : 0;
+        
+        return Math.min(98, prev + increment);
+      });
+    }, 450);
+    
+    return () => clearInterval(interval);
+  }, [isProcessing]);
+
+  return (
+    <div className="relative w-16 h-16 flex items-center justify-center">
+      <svg className="absolute inset-0 w-full h-full -rotate-90">
+        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-100" />
+        <circle 
+          cx="32" cy="32" r="28" 
+          stroke="currentColor" strokeWidth="3" 
+          strokeDasharray={175.9} 
+          strokeDashoffset={175.9 - (progress / 100) * 175.9} 
+          strokeLinecap="round" 
+          fill="transparent" 
+          className="text-indigo-500 animate-pulse" 
+        />
+      </svg>
+      <div className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center bg-indigo-50 border border-indigo-100 text-indigo-600 z-10 font-black">
+        <span className="text-[7.5px] font-black uppercase opacity-80 leading-none mb-0.5 tracking-tighter">SCREEN</span>
+        <span className="text-sm font-mono leading-none">{progress}%</span>
+      </div>
+    </div>
+  );
 }
 
 // --- Contexts ---
@@ -2141,33 +2190,64 @@ function JobDetail() {
   if (loading) return <div className="h-screen flex items-center justify-center font-black animate-pulse">BOOTSTRAPPING PIPELINE...</div>;
   if (!job) return <div className="p-20 text-center">Job sequence not found.</div>;
 
-  const filteredCandidates = candidates
-    .filter(c => {
-      const matchesSearch = (c.fullName || '').toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-                          (c.currentRole || '').toLowerCase().includes(debouncedSearch.toLowerCase());
-      
-      let matchesStatus = true;
-      if (statusFilter !== 'All') {
-        const normalizedFilter = statusFilter.toLowerCase();
-        if (normalizedFilter === 'shortlisted') {
-          matchesStatus = c.scorecard.compositeScore >= 80;
-        } else if (normalizedFilter === 'rejected') {
-          matchesStatus = c.scorecard.compositeScore < 40;
-        } else if (normalizedFilter === 'processed') {
-          matchesStatus = c.status === 'processed';
+  const filteredRealCandidates = useMemo(() => {
+    return candidates
+      .filter(c => {
+        const matchesSearch = (c.fullName || '').toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+                            (c.currentRole || '').toLowerCase().includes(debouncedSearch.toLowerCase());
+        
+        let matchesStatus = true;
+        if (statusFilter !== 'All') {
+          const normalizedFilter = statusFilter.toLowerCase();
+          if (normalizedFilter === 'shortlisted') {
+            matchesStatus = c.scorecard.compositeScore >= 80;
+          } else if (normalizedFilter === 'rejected') {
+            matchesStatus = c.scorecard.compositeScore < 40;
+          } else if (normalizedFilter === 'processed') {
+            matchesStatus = c.status === 'processed';
+          }
         }
-      }
 
-      const matchesRole = roleFilter === 'All' || c.currentRole === roleFilter;
-      return matchesSearch && matchesStatus && matchesRole;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'Score') return b.scorecard.compositeScore - a.scorecard.compositeScore;
-      if (sortBy === 'Integrity') return (b.scorecard.integrityScore || 0) - (a.scorecard.integrityScore || 0);
-      const timeA = a.createdAt?.seconds || Date.now() / 1000;
-      const timeB = b.createdAt?.seconds || Date.now() / 1000;
-      return timeB - timeA;
-    });
+        const matchesRole = roleFilter === 'All' || c.currentRole === roleFilter;
+        return matchesSearch && matchesStatus && matchesRole;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'Score') return b.scorecard.compositeScore - a.scorecard.compositeScore;
+        if (sortBy === 'Integrity') return (b.scorecard.integrityScore || 0) - (a.scorecard.integrityScore || 0);
+        const timeA = a.createdAt?.seconds || Date.now() / 1000;
+        const timeB = b.createdAt?.seconds || Date.now() / 1000;
+        return timeB - timeA;
+      });
+  }, [candidates, debouncedSearch, statusFilter, roleFilter, sortBy]);
+
+  const filteredCandidates = useMemo(() => {
+    if (!uploadProgress || uploadProgress.current >= uploadProgress.total) {
+      return filteredRealCandidates;
+    }
+
+    const placeholders = uploadProgress.files
+      .filter(f => f.status === 'processing' || f.status === 'queued')
+      .map((f, index) => ({
+        id: `placeholder_${f.name}_${index}`,
+        fullName: f.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " "),
+        currentRole: job?.title || 'Screening...',
+        currentCompany: 'Pending Analysis',
+        totalExperience: 0,
+        location: 'Analysis Node',
+        oneLineSummary: 'AI is performing forensic screening and Scoring...',
+        createdAt: { seconds: Math.floor(Date.now() / 1000) + 1000 - index },
+        status: 'screening' as const,
+        fileIndex: index,
+        scorecard: {
+          compositeScore: 0,
+          integrityScore: 100,
+          skillsAnalysis: { confirmed: [] },
+          recommendation: { summary: 'Screening in progress...', fitHeader: 'Loading', status: 'potential' }
+        }
+      }));
+
+    return [...placeholders, ...filteredRealCandidates];
+  }, [filteredRealCandidates, uploadProgress, job]);
 
   const uniqueRoles = Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All');
 
@@ -2242,127 +2322,6 @@ function JobDetail() {
         ))}
       </div>
 
-      {uploadProgress && (
-        <Card className="p-6 bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Search className="w-24 h-24 rotate-12" />
-          </div>
-          <div className="relative">
-            <div className="flex justify-between items-end mb-4">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 mb-1">
-                  {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Batch Pipeline'}
-                </h3>
-                <p className="text-2xl font-black tracking-tight text-white">
-                  {researchingAll ? 'Researching Candidates...' : 'Synchronizing Pipeline...'}
-                  <span className="ml-4 text-indigo-500">{Math.round((uploadProgress.current / uploadProgress.total) * 100)}%</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Current Sequence</span>
-                <span className="text-sm font-mono font-bold bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">{uploadProgress.current} / {uploadProgress.total}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center mb-2 px-1">
-              <div className="flex items-center gap-2 overflow-hidden max-w-[70%]">
-                {uploadProgress.current < uploadProgress.total && (
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shrink-0" />
-                )}
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 truncate">
-                  {uploadProgress.current === uploadProgress.total ? 'Processing Complete' : (uploadProgress.currentFileName ? `Target: ${uploadProgress.currentFileName}` : 'Initializing...')}
-                </span>
-              </div>
-              {uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && uploadProgress.current < uploadProgress.total && (
-                <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1 shrink-0">
-                  <Clock className="w-3 h-3" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
-                </span>
-              )}
-            </div>
-            
-            <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden mb-8 border border-slate-700/50">
-              <motion.div 
-                className="h-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-                initial={{ width: 0 }}
-                animate={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
-                transition={{ type: 'spring', damping: 20 }}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-              <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-lg font-black leading-none">{uploadProgress.success}</p>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Validated</p>
-                </div>
-              </div>
-              <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <AlertCircle className="w-4 h-4 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-lg font-black leading-none">{uploadProgress.skipped}</p>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Duplicates</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="max-h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-              {uploadProgress.files.map((file, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl border border-slate-700/30 hover:bg-slate-800/50 transition-colors">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    {file.status === 'processing' ? (
-                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_8px_rgba(129,140,248,0.6)]" />
-                    ) : file.status === 'success' ? (
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    ) : file.status === 'skipped' ? (
-                      <AlertCircle className="w-4 h-4 text-amber-500" />
-                    ) : file.status === 'error' ? (
-                      <AlertCircle className="w-4 h-4 text-red-500" />
-                    ) : (
-                      <div className="w-2.5 h-2.5 rounded-full bg-slate-700" />
-                    )}
-                    <div className="overflow-hidden">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white truncate">{file.name}</p>
-                      {file.message && (
-                        <p className={`text-[8px] font-bold uppercase tracking-tighter truncate ${file.message.includes('limit') ? 'text-amber-400 animate-pulse' : 'text-slate-500'}`}>
-                          {file.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={cn(
-                      "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border",
-                      file.status === 'processing' ? "text-indigo-400 border-indigo-500/30 bg-indigo-500/10" :
-                      file.status === 'success' ? "text-green-400 border-green-500/30 bg-green-500/10" :
-                      file.status === 'skipped' ? "text-amber-400 border-amber-500/30 bg-amber-500/10" :
-                      file.status === 'error' ? "text-red-400 border-red-500/30 bg-red-500/10" : "text-slate-600 border-slate-700 bg-slate-800"
-                    )}>
-                      {file.status === 'processing' ? 'Evaluating...' : file.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {uploadProgress.current === uploadProgress.total && !uploading && (
-              <div className="mt-8 pt-8 border-t border-slate-800 flex justify-end">
-                <Button 
-                  variant="secondary" 
-                  className="px-8 h-10 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20"
-                  onClick={() => setUploadProgress(null)}
-                >
-                  Enter Results Terminal
-                </Button>
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Sidebar Filters */}
@@ -2421,6 +2380,63 @@ function JobDetail() {
 
         {/* Main Content */}
         <div className="lg:col-span-9 space-y-8">
+          {uploadProgress && (
+            <div className="bg-slate-900 text-white rounded-xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800 animate-in fade-in-50 slide-in-from-top-4 duration-300">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0">
+                  <Cpu className="w-4 h-4 text-indigo-400 animate-pulse" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-black tracking-widest uppercase text-indigo-400 leading-none">
+                      {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Batch Pipeline'}
+                    </p>
+                    <span className="text-[10px] font-mono font-bold bg-slate-800 px-1.5 py-0.5 rounded text-indigo-300 border border-indigo-500/20">
+                      {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1 truncate">
+                    {uploadProgress.current === uploadProgress.total ? 'Processing complete' : `Target: ${uploadProgress.currentFileName || 'Initializing...'}`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress and indicators */}
+              <div className="flex items-center gap-4 w-full md:w-auto md:justify-end">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> {uploadProgress.success}
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> {uploadProgress.skipped}
+                </div>
+
+                <div className="hidden sm:block w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/30 shrink-0">
+                  <div 
+                    className="h-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)] transition-all duration-300"
+                    style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                  />
+                </div>
+
+                {uploadProgress.current === uploadProgress.total && !uploading ? (
+                  <Button 
+                    variant="brand" 
+                    size="sm"
+                    className="bg-indigo-600 hover:bg-indigo-700 font-extrabold text-[9px] uppercase tracking-wider h-7 px-3 rounded-lg text-white"
+                    onClick={() => setUploadProgress(null)}
+                  >
+                    Dismiss
+                  </Button>
+                ) : (
+                  uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && (
+                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
+                      <Clock className="w-3.5 h-3.5 animate-spin" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div>
@@ -2552,7 +2568,66 @@ function JobDetail() {
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6">
               {filteredCandidates.map(candidate => {
-                const isBestMatch = candidate.scorecard.compositeScore === bestScore && bestScore >= 80;
+                const isPlaceholder = candidate.status === 'screening';
+                const isBestMatch = !isPlaceholder && candidate.scorecard.compositeScore === bestScore && bestScore >= 80;
+                
+                if (isPlaceholder) {
+                  return (
+                    <motion.div 
+                      key={candidate.id} 
+                      layout 
+                      initial={{ opacity: 0, scale: 0.95 }} 
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="order-first"
+                    >
+                      <Card className="p-6 border-2 border-dashed border-indigo-200/60 bg-gradient-to-br from-indigo-50/10 via-white to-slate-50/5 relative hover:border-indigo-300 transition-all shadow-sm">
+                        <div className="absolute top-4 right-4">
+                          <PlaceholderScoreCircle isProcessing={true} />
+                        </div>
+                        
+                        <div className="flex gap-5 mb-6 pr-16 relative">
+                          <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-black animate-pulse text-indigo-400 shrink-0">
+                            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-black text-slate-800 truncate text-base tracking-tight animate-pulse">
+                                {candidate.fullName}
+                              </h3>
+                              <span className="text-[8px] font-black bg-indigo-505 bg-indigo-500/10 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-widest border border-indigo-200/50 flex items-center gap-1 shrink-0 animate-pulse">
+                                <Sparkles className="w-2.5 h-2.5 animate-pulse" /> Forensic Screening
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 ">
+                              {candidate.currentRole} 
+                              <span className="w-1 h-1 rounded-full bg-slate-300" />
+                              Active Session
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2 mb-8 h-10 overflow-hidden items-center">
+                          <div className="h-6 w-20 bg-slate-100 rounded-lg animate-pulse" />
+                          <div className="h-6 w-28 bg-slate-100 rounded-lg animate-pulse" />
+                          <div className="h-6 w-16 bg-slate-100 rounded-lg animate-pulse" />
+                          <div className="h-6 w-24 bg-slate-150 bg-slate-100 rounded-lg animate-pulse" />
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-5 border-t border-slate-50">
+                          <div className="px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-indigo-50 text-indigo-600 border border-indigo-100/50">
+                            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+                            Analyzing Resume Stack
+                          </div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
+                            Generating Scorecard...
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  );
+                }
+
                 return (
                   <motion.div 
                     key={candidate.id} 
@@ -2730,8 +2805,65 @@ function JobDetail() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredCandidates.map(candidate => {
-                      const isBestMatch = candidate.scorecard.compositeScore === bestScore && bestScore >= 80;
+                      const isPlaceholder = candidate.status === 'screening';
+                      const isBestMatch = !isPlaceholder && candidate.scorecard.compositeScore === bestScore && bestScore >= 80;
                       const isSelected = selectedCandidates.includes(candidate.id);
+                      
+                      if (isPlaceholder) {
+                        return (
+                          <tr 
+                            key={candidate.id} 
+                            className="bg-indigo-50/10 animate-pulse border-b border-indigo-100/30"
+                          >
+                            <td className="px-6 py-4 w-12" onClick={(e) => e.stopPropagation()}>
+                              <input 
+                                type="checkbox"
+                                disabled
+                                className="w-4 h-4 rounded text-slate-300 border-slate-200 cursor-not-allowed opacity-40 animate-pulse"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-400 flex items-center justify-center font-bold">
+                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-505 text-indigo-500" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-black text-slate-700 truncate animate-pulse">
+                                      {candidate.fullName}
+                                    </p>
+                                    <span className="text-[7px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-indigo-100/30 flex items-center gap-1">
+                                      <Sparkles className="w-2.5 h-2.5 mr-0.5 animate-pulse" /> Screening
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Active session</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col gap-1 w-32 mx-auto">
+                                <div className="flex justify-between items-center mb-0.5">
+                                  <span className="text-[10px] font-black text-indigo-500">
+                                    Analyzing...
+                                  </span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                                  <div className="h-full bg-indigo-500 animate-pulse w-[45%]" />
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest bg-indigo-50 text-indigo-600 animate-pulse">
+                                Screening
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="text-[10px] font-bold text-slate-400">Forensic Indexing...</span>
+                            </td>
+                          </tr>
+                        );
+                      }
+
                       return (
                         <tr 
                           key={candidate.id} 

@@ -15,6 +15,9 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+// trust proxy setting so express-rate-limit can properly identify users behind the cloud proxy
+app.set("trust proxy", 1);
+
 // Enable Helmet with sandbox-friendly exemptions so preview frames render perfectly
 app.use(helmet({
   contentSecurityPolicy: false,       // Prevent asset-blocking or sandbox failures
@@ -34,7 +37,8 @@ const generalLimit = rateLimit({
   max: 350,                  // max 350 requests per client per window
   message: { error: "General request quota exceeded. Please try again shortly." },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  validate: { forwardedHeader: false }
 });
 
 const aiQuotaLimit = rateLimit({
@@ -42,7 +46,8 @@ const aiQuotaLimit = rateLimit({
   max: 15,                  // max 15 heavy AI audit prompts per client per minute
   message: { error: "AI processing capacity reached. Please hold for 1 minute before your next talent audit." },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  validate: { forwardedHeader: false }
 });
 
 const deliveryLimiter = rateLimit({
@@ -50,7 +55,8 @@ const deliveryLimiter = rateLimit({
   max: 8,                   // max 8 external candidate invite notifications per client to block automated mail spam
   message: { error: "Notification dispatch rate exceeded. Please try again in 10 minutes." },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  validate: { forwardedHeader: false }
 });
 
 // Sanitize user inputs safely dynamically to avert potential stored HTML or scripts injection
