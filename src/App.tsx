@@ -1195,7 +1195,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
 
   const navLinks = [
     { name: 'Features', href: '#features' },
-    { name: 'How it Works', href: '#how-it-works' },
+    { name: 'Simulator', href: '#interactive-lab' },
     { name: 'Solutions', href: '#solutions' },
     { name: 'Security', href: '#about' },
     { name: 'Pricing', href: '/?view=pricing' },
@@ -1715,6 +1715,8 @@ function JobDetail() {
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
   const { profile, organization } = useProfile();
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  const [bulkInviting, setBulkInviting] = useState(false);
 
   // Debounce search query
   useEffect(() => {
@@ -1726,6 +1728,7 @@ function JobDetail() {
 
   useEffect(() => {
     if (!jobId || !auth.currentUser || !profile) return;
+    setSelectedCandidates([]);
     const unsubJob = onSnapshot(doc(db, 'jobs', jobId), (snapshot) => {
       if (snapshot.exists()) {
         const data = { id: snapshot.id, ...snapshot.data() } as Job;
@@ -2035,6 +2038,62 @@ function JobDetail() {
     } finally {
       setInvitingCandidateId(null);
     }
+  };
+
+  const handleBulkInvite = async () => {
+    if (selectedCandidates.length === 0) return;
+    const ok = await confirm(`Are you sure you want to invite all ${selectedCandidates.length} selected candidates to interviews?`);
+    if (!ok) return;
+
+    setBulkInviting(true);
+    let successCount = 0;
+    let clipboardCount = 0;
+
+    for (const cId of selectedCandidates) {
+      const candidate = candidates.find(c => c.id === cId);
+      if (!candidate) continue;
+
+      const link = `${window.location.origin}/interview/${candidate.id}`;
+      try {
+        try {
+          await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, `candidates/${candidate.id}`);
+        }
+        
+        const res = await fetch('/api/candidate/send-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateEmail: candidate.email,
+            candidateName: candidate.fullName,
+            interviewLink: link,
+            jobTitle: job?.title || 'Applied Position',
+            customSmtp: organization?.emailSettings || null
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          successCount++;
+        } else {
+          clipboardCount++;
+        }
+      } catch (err) {
+        console.error(err);
+        clipboardCount++;
+      }
+    }
+
+    if (successCount > 0) {
+      notify(`Successfully sent interview invites to ${successCount} candidate(s)!`, 'success');
+    }
+    if (clipboardCount > 0) {
+      notify(`Created invites for ${clipboardCount} candidate(s). Email delivery skipped or failed.`, 'info');
+    }
+
+    setSelectedCandidates([]);
+    setBulkInviting(false);
   };
 
   const clearJobCandidates = async () => {
@@ -2382,6 +2441,27 @@ function JobDetail() {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {selectedCandidates.length > 0 && (
+                <Button 
+                  variant="brand" 
+                  size="sm" 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] h-9 px-4 flex items-center gap-1.5 shadow-md shadow-emerald-100"
+                  onClick={handleBulkInvite}
+                  disabled={bulkInviting}
+                >
+                  {bulkInviting ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin mr-2" />
+                      Inviting ({selectedCandidates.length})...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5 mr-1" />
+                      Bulk Invite ({selectedCandidates.length})
+                    </>
+                  )}
+                </Button>
+              )}
               {candidates.length > 0 && (
                 <Button 
                   variant="outline" 
@@ -2626,6 +2706,22 @@ function JobDetail() {
                  <table className="w-full text-left min-w-[800px]">
                   <thead className="bg-slate-50 border-b border-slate-100">
                     <tr>
+                      <th className="w-12 px-6 py-4">
+                        <input 
+                          type="checkbox"
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                          checked={filteredCandidates.length > 0 && filteredCandidates.every(c => selectedCandidates.includes(c.id))}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              const allIds = filteredCandidates.map(c => c.id);
+                              setSelectedCandidates(prev => Array.from(new Set([...prev, ...allIds])));
+                            } else {
+                              const filteredIds = filteredCandidates.map(c => c.id);
+                              setSelectedCandidates(prev => prev.filter(id => !filteredIds.includes(id)));
+                            }
+                          }}
+                        />
+                      </th>
                       <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
                       <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Score</th>
                       <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
@@ -2635,15 +2731,30 @@ function JobDetail() {
                   <tbody className="divide-y divide-slate-100">
                     {filteredCandidates.map(candidate => {
                       const isBestMatch = candidate.scorecard.compositeScore === bestScore && bestScore >= 80;
+                      const isSelected = selectedCandidates.includes(candidate.id);
                       return (
                         <tr 
                           key={candidate.id} 
                           className={cn(
                             "transition-colors cursor-pointer group relative",
-                            isBestMatch ? "bg-indigo-50/50 hover:bg-indigo-50" : "hover:bg-slate-50"
+                            isSelected ? "bg-indigo-50" : isBestMatch ? "bg-indigo-50/50 hover:bg-indigo-50" : "hover:bg-slate-50"
                           )} 
                           onClick={() => navigate(`/candidates/${candidate.id}`)}
                         >
+                          <td className="px-6 py-4 w-12" onClick={(e) => e.stopPropagation()}>
+                            <input 
+                              type="checkbox"
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedCandidates(prev => [...prev, candidate.id]);
+                                } else {
+                                  setSelectedCandidates(prev => prev.filter(id => id !== candidate.id));
+                                }
+                              }}
+                            />
+                          </td>
                           <td className="px-6 py-4 relative">
                              {isBestMatch && (
                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600" />
@@ -6333,7 +6444,104 @@ function Onboarding() {
 
 function LandingPage() {
   const { signIn, notify } = useNotification();
-  
+  const [activeRole, setActiveRole] = useState<'ai-engineer' | 'cloud-architect' | 'security-lead'>('ai-engineer');
+  const [simulationStep, setSimulationStep] = useState<number>(0);
+  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [simLog, setSimLog] = useState<string[]>([
+    "Initial connection handshakes... Completed",
+    "Loading vetting telemetry parameters..."
+  ]);
+
+  const roleData = {
+    'ai-engineer': {
+      title: "Staff AI Engineer",
+      salary: "$210,000 - $260,000",
+      skills: ["Gemini SDK", "Retrieval Augmented Generation", "Distributed Training"],
+      steps: [
+        {
+          question: "How do you mitigate prompt injection and data exfiltration vectors in consumer-facing agent tools?",
+          answer: "We deploy layered defensive sandboxing. All system prompts are isolated through structured XML delimiters, reinforced by secondary verification agents inspecting output token sequences prior to outbound socket transmission. Enterprise documents are vectorized using private tenant namespaces with absolute context boundary constraints.",
+          grading: { coding: 94, architecture: 98, security: 97, comms: 92 },
+          log: "Verifying contextual sanitization heuristics... OK [Pass]"
+        },
+        {
+          question: "What strategies do you employ to manage latency and rate limits when running multi-agent reasoning chains?",
+          answer: "We apply token-aware request multiplexing paired with exponential fallback cache maps. Speculative decoding routing predicts intermediate agents' requirements, decreasing warm cluster latency down to 140ms on complex 8-agent task graphs.",
+          grading: { coding: 96, architecture: 96, security: 92, comms: 95 },
+          log: "Running token throughput projection models... OK [Passed]"
+        }
+      ]
+    },
+    'cloud-architect': {
+      title: "Principal Cloud Architect",
+      salary: "$230,000 - $280,000",
+      skills: ["AWS / GCP", "Zero-Trust Mesh", "Kubernetes Operator Patterns"],
+      steps: [
+        {
+          question: "How do you design a system for zero-downtime database failovers across multiple write regions?",
+          answer: "By standing up active-active multi-region engines connected with consensus-based proxy gateways (Spanner or CockroachDB design pattern). Write conflicts are resolved using custom timestamp vector clocks with state synchronies backed by high-capacity Kafka queues.",
+          grading: { coding: 91, architecture: 99, security: 95, comms: 93 },
+          log: "Simulating region-wide node loss... Resiliency 100% [Passed]"
+        },
+        {
+          question: "Explain the architecture of a global private ingress gateway under mTLS protocols.",
+          answer: "We establish Cloud API Gateways pairing Envoy with local sidecar TLS termination. Private key pairs are dynamically rotated through secure HSM arrays utilizing SPIFFE/SPIRE for identity assertions.",
+          grading: { coding: 93, architecture: 97, security: 99, comms: 90 },
+          log: "Validating HSM signing handshakes... OK"
+        }
+      ]
+    },
+    'security-lead': {
+      title: "Principal Security Engineer",
+      salary: "$195,000 - $240,000",
+      skills: ["SOC2 / ISO27001", "Threat Modeling", "eBPF Kernel Probes"],
+      steps: [
+        {
+          question: "How would you defend high-frequency transaction servers against kernel-level memory scraping attacks?",
+          answer: "We run hardened Linux kernels isolated through secure hypervisor environments. Real-time system calls are strictly filtered utilizing eBPF monitoring tools connected to live anomaly detection micro-pipelines, triggering memory lockdown protocol during suspicious buffer reads.",
+          grading: { coding: 92, architecture: 94, security: 99, comms: 94 },
+          log: "Loading kernel-probe threat profile... Block Vector Active"
+        },
+        {
+          question: "What is your approach to automated credential scanning and secret rotation inside live CI/CD clusters?",
+          answer: "We deploy hook-interceptors that parse AST representations of committing code. High-entropy key signatures are quarantined, and the cluster rotates compromised secrets instantly across Kubernetes clusters via secure Vault API integrations.",
+          grading: { coding: 95, architecture: 93, security: 98, comms: 92 },
+          log: "Scanning artifact dependencies for entropy anomalies... Passed"
+        }
+      ]
+    }
+  };
+
+  useEffect(() => {
+    setSimulationStep(0);
+    setIsSimulating(false);
+    setSimLog([
+      `Initial connection handshakes for ${roleData[activeRole].title} screening... Completed`,
+      "Loading specialized vetting parameters...",
+      "Ready to initialize candidate audio & console interface."
+    ]);
+  }, [activeRole]);
+
+  const handleNextStep = () => {
+    const currentRole = roleData[activeRole];
+    if (simulationStep < currentRole.steps.length - 1) {
+      const nextStep = simulationStep + 1;
+      setSimulationStep(nextStep);
+      setSimLog(prev => [
+        ...prev,
+        `Vetting Question #${nextStep} analyzed.`,
+        currentRole.steps[nextStep].log || "Recalculating score matrices..."
+      ]);
+    } else {
+      setSimulationStep(currentRole.steps.length);
+      setSimLog(prev => [
+        ...prev,
+        "Screening concluded successfully.",
+        `VETTING CERTIFICATE GENERATED: ${currentRole.title} scorecard finalized.`
+      ]);
+    }
+  };
+
   const features = [
     {
       title: "Autonomous Vetting",
@@ -6664,6 +6872,270 @@ function LandingPage() {
         </div>
       </div>
     </section>
+
+      {/* Vetting Sandbox Section */}
+      <section id="interactive-lab" className="py-24 sm:py-32 bg-slate-950 border-t border-slate-900 text-white relative z-20 overflow-hidden">
+        {/* Abstract Background details */}
+        <div className="absolute inset-0 bg-grid-white opacity-5 pointer-events-none" />
+        <div className="absolute bottom-0 right-[20%] w-[350px] h-[350px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4 backdrop-blur-md">
+              <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-[9px] font-black tracking-widest text-indigo-300 uppercase">Live Evaluation Sandbox</span>
+            </div>
+            <h2 className="text-4xl sm:text-6xl font-display font-black tracking-tight uppercase leading-none mb-6">
+              Vetting Sandbox <br />
+              <span className="text-indigo-400">Try it in Real-time</span>
+            </h2>
+            <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto font-medium">
+              We developed this live testing node so technology leaders can assess our neural grading matrices, automated latency triggers, and secure PII masking logs instantly.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            {/* Left: Role Selection & Options */}
+            <div className="lg:col-span-4 flex flex-col justify-between gap-6 bg-slate-900/60 border border-slate-800/80 p-8 rounded-[2rem] backdrop-blur-md">
+              <div>
+                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-3">1. Select Target Persona</h3>
+                <div className="space-y-3">
+                  {(['ai-engineer', 'cloud-architect', 'security-lead'] as const).map((roleKey) => {
+                    const data = roleData[roleKey];
+                    const isActive = activeRole === roleKey;
+                    return (
+                      <button
+                        key={roleKey}
+                        onClick={() => {
+                          setActiveRole(roleKey);
+                          notify(`Switched preview node to ${data.title} standard profile`, 'info');
+                        }}
+                        className={cn(
+                          "w-full text-left p-4 rounded-2xl transition-all border flex flex-col gap-1 cursor-pointer",
+                          isActive 
+                            ? "bg-indigo-600/10 border-indigo-500/50 text-white shadow-lg shadow-indigo-950/20" 
+                            : "bg-slate-900/30 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200"
+                        )}
+                      >
+                        <div className="flex justify-between items-center w-full">
+                          <span className="font-bold text-sm tracking-tight">{data.title}</span>
+                          <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-full", isActive ? "bg-indigo-500 text-white" : "bg-slate-800 text-slate-500")}>
+                            {data.salary}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {data.skills.slice(0, 3).map((s, idx) => (
+                            <span key={idx} className="text-[9px] font-semibold bg-slate-950/50 px-2 py-0.5 rounded text-slate-400">
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="border-t border-slate-800 pt-6 space-y-4">
+                <div className="rounded-2xl bg-slate-950/85 border border-slate-800 p-4 font-mono text-[11px] leading-relaxed text-slate-400 max-h-[160px] overflow-y-auto">
+                  <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5 border-b border-indigo-950 pb-1.5">
+                    <Database className="w-3 h-3" /> System Live Metrics
+                  </div>
+                  {simLog.map((log, index) => (
+                    <div key={index} className="flex gap-2">
+                      <span className="text-slate-600">❯</span>
+                      <span>{log}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {!isSimulating ? (
+                  <Button
+                    onClick={() => {
+                      setIsSimulating(true);
+                      setSimulationStep(0);
+                      notify('Autonomous vetting simulation initialized!', 'success');
+                    }}
+                    variant="brand"
+                    className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl shadow-indigo-950/50 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-current mr-1" />
+                    Launch Evaluation Node
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setIsSimulating(false);
+                        setSimulationStep(0);
+                        notify('Simulation parameters reset.', 'info');
+                      }}
+                      className="flex-1 h-14 border border-slate-800 hover:border-slate-700 text-slate-400 bg-slate-950/20 font-black uppercase tracking-widest text-[11px] rounded-2xl cursor-pointer"
+                    >
+                      Reset Sim
+                    </button>
+                    <button
+                      onClick={handleNextStep}
+                      className="flex-[2] h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-950 cursor-pointer"
+                    >
+                      {simulationStep >= roleData[activeRole].steps.length ? (
+                        <>Complete Vetting</>
+                      ) : (
+                        <>
+                          Next Question <ArrowRight className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Simulated Vetting Terminal Dashboard Mockup */}
+            <div className="lg:col-span-8 flex flex-col bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl relative overflow-hidden min-h-[500px]">
+              {/* Header Bar */}
+              <div className="px-8 py-5 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-rose-500/30 border border-rose-500/50 block" />
+                    <span className="w-3 h-3 rounded-full bg-amber-500/30 border border-amber-500/50 block" />
+                    <span className="w-3 h-3 rounded-full bg-emerald-500/30 border border-emerald-500/50 block" />
+                  </div>
+                  <span className="h-4 w-px bg-slate-800" />
+                  <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                    v2.24-live // {roleData[activeRole].title}
+                  </span>
+                </div>
+                <div className="text-[10px] font-mono font-black border border-indigo-950 text-indigo-400 bg-indigo-950/20 px-3 py-1 rounded-full uppercase tracking-widest">
+                  Secure Cluster
+                </div>
+              </div>
+
+              {/* Main Content Pane */}
+              <div className="flex-1 p-8 sm:p-10 flex flex-col justify-between gap-8 h-full">
+                {!isSimulating ? (
+                  // Empty State / Idle Mode
+                  <div className="flex-1 flex flex-col items-center justify-center text-center my-auto min-h-[350px]">
+                    <div className="w-20 h-20 bg-indigo-500/10 border border-indigo-500/20 rounded-3xl flex items-center justify-center text-indigo-400 mb-6">
+                      <Brain className="w-10 h-10" />
+                    </div>
+                    <h3 className="text-xl font-bold tracking-tight mb-2">Vetting Suite Standby</h3>
+                    <p className="text-sm text-slate-400 max-w-sm font-medium mb-8">
+                      Click the "Launch Evaluation Node" button to review how candidates answer questions and generate scorecards in real-time.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-4 text-[10px] font-mono text-slate-500 tracking-wider">
+                      <span>✓ TLS ENCRYPTION</span>
+                      <span>•</span>
+                      <span>✓ SOC2 FRAMEWORKS</span>
+                      <span>•</span>
+                      <span>✓ mTLS CERTIFICATES</span>
+                    </div>
+                  </div>
+                ) : simulationStep >= roleData[activeRole].steps.length ? (
+                  // Completed report state
+                  <div className="space-y-8 animate-in fade-in duration-500">
+                    <div className="flex items-center gap-4 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                      <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-950">
+                        <Check className="w-5 h-5 stroke-[3px]" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-emerald-400 text-sm">Vetting Successfully Completed</h4>
+                        <p className="text-xs text-slate-400 font-medium">Automatic background matrix sync check completed.</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                      <div className="p-6 bg-slate-950 border border-slate-800/80 rounded-2xl">
+                        <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest block mb-1">COMPOSITE SCORE</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-5xl font-display font-black text-white">96</span>
+                          <span className="text-slate-500 font-bold text-sm">/100</span>
+                        </div>
+                        <p className="text-[11px] text-emerald-400 font-extrabold tracking-widest uppercase mt-3 flex items-center gap-1.5">
+                          <Award className="w-3.5 h-3.5" /> Fast-track candidate [top 1%]
+                        </p>
+                      </div>
+
+                      <div className="p-6 bg-slate-950 border border-slate-800/80 rounded-2xl space-y-4">
+                        <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest block">Parameter Evaluation</span>
+                        <div className="space-y-3">
+                          {[
+                            { name: "Technical Depth", val: 97, color: "bg-indigo-500" },
+                            { name: "Architectural Foresight", val: 98, color: "bg-teal-500" },
+                            { name: "Risk Mitigation Sense", val: 95, color: "bg-blue-500" },
+                            { name: "Communication Impact", val: 94, color: "bg-violet-500" },
+                          ].map((metric, idx) => (
+                            <div key={idx} className="space-y-1">
+                              <div className="flex justify-between text-[11px] font-bold">
+                                <span className="text-slate-400">{metric.name}</span>
+                                <span className="text-white">{metric.val}%</span>
+                              </div>
+                              <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                                <div className={cn("h-full rounded-full transition-all duration-700", metric.color)} style={{ width: `${metric.val}%` }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-950/60 border border-slate-850 rounded-2xl font-mono text-xs leading-relaxed text-slate-400">
+                      <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3">AI Recommendation Thesis</div>
+                      "Candidate demonstrates exceptional capabilities in system resiliency and mitigation pipelines. Depth of response indicates hands-on experience under high production pressures. Automated recommendation: bypass secondary screenings directly into CTO structural design discussion."
+                    </div>
+                  </div>
+                ) : (
+                  // Active interactive step state
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded bg-indigo-950 border border-indigo-900 text-indigo-400 text-[9px] font-mono font-black uppercase">
+                          QUESTION 0{simulationStep + 1}
+                        </span>
+                        <span className="text-slate-600 font-mono text-xs">• Live session</span>
+                      </div>
+                      <h4 className="text-lg sm:text-xl font-bold tracking-tight text-white">
+                        {roleData[activeRole].steps[simulationStep].question}
+                      </h4>
+                    </div>
+
+                    <div className="p-6 bg-slate-950 rounded-2xl border border-slate-850/80 relative">
+                      <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+                        <span className="text-[9px] font-mono text-indigo-400 font-bold uppercase tracking-widest">TRANSCRIBING AUDIO</span>
+                      </div>
+                      <p className="text-sm text-slate-300 font-medium leading-relaxed italic pr-12">
+                        "{roleData[activeRole].steps[simulationStep].answer}"
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {Object.entries(roleData[activeRole].steps[simulationStep].grading).map(([key, value]) => (
+                        <div key={key} className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl text-center">
+                          <span className="text-[9.5px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                            {key}
+                          </span>
+                          <span className="text-2xl font-display font-black text-indigo-400">{value}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Simulator Footer details */}
+                <div className="pt-6 border-t border-slate-800 flex flex-wrap gap-4 items-center justify-between text-slate-500 font-mono text-[10px]">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>SECURE DIRECTORY ENCRYPTION: ACTIVE</span>
+                  </div>
+                  <span>SESSION TOKEN: HI_AE_SEC_V34</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* How it Works */}
       <section id="how-it-works" className="py-32 px-6 max-w-7xl mx-auto relative z-10">
