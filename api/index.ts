@@ -1230,18 +1230,33 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("AI Key missing");
     }
+
+    const custom = jobRequirements?.customCriteria || {};
+    const d1_name = custom.skillsMatch?.name || "skillsMatch (D1)";
+    const d1_desc = custom.skillsMatch?.description || "Keyword overlap + semantic similarity. Must-have match = full score. Nice-to-have = partial.";
+    const d2_name = custom.experienceFit?.name || "experienceFit (D2)";
+    const d2_desc = custom.experienceFit?.description || "Years of relevant exp, title proximity (IC vs Mgr), industry alignment.";
+    const d3_name = custom.education?.name || "education (D3)";
+    const d3_desc = custom.education?.description || "Degree level match, field relevance, institution tier.";
+    const d4_name = custom.achievements?.name || "achievements (D4)";
+    const d4_desc = custom.achievements?.description || "Quantified outcomes (%, $, numbers), awards, scale signals.";
+    const d5_name = custom.culturalRoleFit?.name || "culturalRoleFit (D5)";
+    const d5_desc = custom.culturalRoleFit?.description || "Tenure patterns (job-hopping), growth trajectory consistency.";
+
+    const scoringProtocol = `SCORING PROTOCOL (D6+ v2.0):
+      Analyze and score the candidate on 5 core dimensions (Each 0-100), mapping your analysis to these json keys: 'skillsMatch', 'experienceFit', 'education', 'achievements', 'culturalRoleFit':
+      1. skillsMatch (D1, Custom Criteria/Name: "${d1_name}"): ${d1_desc}
+      2. experienceFit (D2, Custom Criteria/Name: "${d2_name}"): ${d2_desc}
+      3. education (D3, Custom Criteria/Name: "${d3_name}"): ${d3_desc}
+      4. achievements (D4, Custom Criteria/Name: "${d4_name}"): ${d4_desc}
+      5. culturalRoleFit (D5, Custom Criteria/Name: "${d5_name}"): ${d5_desc}`;
+
     const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: `You are a Principal Talent Solutions Architect and Adversarial Talent Auditor. 
-      Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements.
+      Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements and custom screening criteria.
       
-      SCORING PROTOCOL (D6+ v2.0):
-      Analyze and score the candidate on 5 core dimensions (Each 0-100):
-      1. skillsMatch (D1): Keyword overlap + semantic similarity. Must-have match = full score. Nice-to-have = partial.
-      2. experienceFit (D2): Years of relevant exp, title proximity (IC vs Mgr), industry alignment.
-      3. education (D3): Degree level match, field relevance, institution tier.
-      4. achievements (D4): Quantified outcomes (%, $, numbers), awards, scale signals.
-      5. culturalRoleFit (D5): Tenure patterns (job-hopping), growth trajectory consistency.
+      ${scoringProtocol}
   
       SIGNAL REQUIREMENTS:
       - Identify specific "Penalties" (e.g., gaps > 12mo, job-hopping < 1yr avg tenure, resume < 300 words).
@@ -1257,14 +1272,14 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
       - This must be an extremely detailed, rich, multi-paragraph Markdown-formatted executive deconstruction (at least 300 words).
       - Utilize markdown structures (### and #### and bullet lists) to present it professionally on the landing dashboard.
       - It MUST contain the following sections:
-        1. ### **D6 Executive Summary & Match Narrative**
-           A high-density synthesis of their fit, core capabilities, and general match strength.
-        2. ### **Dimensional Performance Ledger**
-           An analytical breakdown explaining the scores achieved in skillsMatch (D1), experienceFit (D2), education (D3), achievements (D4), and culturalRoleFit (D5).
-        3. ### **D6 Auditing, Penalties & Anomalies**
-           An adversarial review explaining any gaps, stability patterns, short resumes, or other detected anomalies.
-        4. ### **Hiring Recommendation & Interview Strategy**
-           Prescriptive advice with exact questions tailored to probe their specific experience and skill gaps during upcoming live panels.
+         1. ### **D6 Executive Summary & Match Narrative**
+            A high-density synthesis of their fit, core capabilities, and general match strength.
+         2. ### **Dimensional Performance Ledger**
+            An analytical breakdown explaining the scores achieved in skillsMatch (D1), experienceFit (D2), education (D3), achievements (D4), and culturalRoleFit (D5). Make sure to refer to the custom names specified: ${d1_name}, ${d2_name}, ${d3_name}, ${d4_name}, ${d5_name}.
+         3. ### **D6 Auditing, Penalties & Anomalies**
+            An adversarial review explaining any gaps, stability patterns, short resumes, or other detected anomalies.
+         4. ### **Hiring Recommendation & Interview Strategy**
+            Prescriptive advice with exact questions tailored to probe their specific experience and skill gaps during upcoming live panels.
       
       JOB REQUIREMENTS:
       ${JSON.stringify(jobRequirements, null, 2)}

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -38,12 +38,32 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
   const roleType = jobRequirements?.role_type || 'Operations / Generalist';
   const roleWeights = (ROLE_WEIGHTS as any)[roleType] || ROLE_WEIGHTS['Operations / Generalist'];
   
+  let weights = {
+    skillsMatch: roleWeights.skillsMatch,
+    experienceFit: roleWeights.experienceFit,
+    education: roleWeights.education,
+    achievements: roleWeights.achievements,
+    culturalRoleFit: roleWeights.culturalRoleFit,
+  };
+
+  if (jobRequirements?.customCriteria) {
+    weights = {
+      skillsMatch: jobRequirements.customCriteria.skillsMatch?.weight ?? roleWeights.skillsMatch,
+      experienceFit: jobRequirements.customCriteria.experienceFit?.weight ?? roleWeights.experienceFit,
+      education: jobRequirements.customCriteria.education?.weight ?? roleWeights.education,
+      achievements: jobRequirements.customCriteria.achievements?.weight ?? roleWeights.achievements,
+      culturalRoleFit: jobRequirements.customCriteria.culturalRoleFit?.weight ?? roleWeights.culturalRoleFit,
+    };
+  }
+
+  const totalWeight = Object.values(weights).reduce((a: number, b: number) => a + b, 0) || 1;
+
   let weightedSum = 0;
-  weightedSum += (dimensions.skillsMatch?.score || 0) * (roleWeights.skillsMatch || 0.25);
-  weightedSum += (dimensions.experienceFit?.score || 0) * (roleWeights.experienceFit || 0.25);
-  weightedSum += (dimensions.education?.score || 0) * (roleWeights.education || 0.2);
-  weightedSum += (dimensions.achievements?.score || 0) * (roleWeights.achievements || 0.2);
-  weightedSum += (dimensions.culturalRoleFit?.score || 0) * (roleWeights.culturalRoleFit || 0.1);
+  weightedSum += (dimensions.skillsMatch?.score || 0) * (weights.skillsMatch / totalWeight);
+  weightedSum += (dimensions.experienceFit?.score || 0) * (weights.experienceFit / totalWeight);
+  weightedSum += (dimensions.education?.score || 0) * (weights.education / totalWeight);
+  weightedSum += (dimensions.achievements?.score || 0) * (weights.achievements / totalWeight);
+  weightedSum += (dimensions.culturalRoleFit?.score || 0) * (weights.culturalRoleFit / totalWeight);
 
   let penaltySum = (dimensions.redFlags?.totalPenalty || 0);
 
@@ -76,13 +96,22 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
 
   const finalScore = Math.max(0, Math.min(100, Math.round(weightedSum - penaltySum)));
   
+  // Custom thresholds
+  const lowThreshold = jobRequirements?.thresholds?.low ?? 40;
+  const passedThreshold = jobRequirements?.thresholds?.passed ?? 80;
+
   // Auto-Reject Logic (PDF Decision Bands)
   if (!screeningResult.scorecard.recommendation) {
     screeningResult.scorecard.recommendation = { fitHeader: 'Potential Fit', status: 'potential', summary: '' };
   }
   let recommendationStatus = screeningResult.scorecard.recommendation.status || 'potential';
-  if (finalScore < 40 || (dimensions.skillsMatch?.score || 0) < 40) {
+  
+  if (finalScore < lowThreshold || (dimensions.skillsMatch?.score || 0) < lowThreshold) {
     recommendationStatus = 'rejected';
+  } else if (finalScore >= passedThreshold) {
+    recommendationStatus = 'perfect';
+  } else {
+    recommendationStatus = 'potential';
   }
 
   return {
@@ -92,7 +121,8 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
       compositeScore: finalScore,
       recommendation: {
         ...screeningResult.scorecard.recommendation,
-        status: recommendationStatus
+        status: recommendationStatus,
+        fitHeader: finalScore >= passedThreshold ? 'Top Match' : finalScore >= lowThreshold ? 'Potential Match' : 'Low Match'
       },
       dimensions: {
         ...dimensions,
@@ -1630,6 +1660,32 @@ function NewJob() {
   const { notify } = useNotification();
   const { profile } = useProfile();
 
+  // Custom Controls Core State
+  const [passedThreshold, setPassedThreshold] = useState(80);
+  const [lowThreshold, setLowThreshold] = useState(40);
+  
+  const [d1Name, setD1Name] = useState('Technical Skill Fit');
+  const [d1Desc, setD1Desc] = useState('Required frameworks, programming languages, and tool stack matched with candidate experience.');
+  const [d1Weight, setD1Weight] = useState(30);
+
+  const [d2Name, setD2Name] = useState('Years & Proximity Analysis');
+  const [d2Desc, setD2Desc] = useState('Matches total tenure, role-title matches, management level depth, and specific industry alignment.');
+  const [d2Weight, setD2Weight] = useState(30);
+
+  const [d3Name, setD3Name] = useState('Educational Foundation');
+  const [d3Desc, setD3Desc] = useState('University degree status, major/subject alignment, and tier ranking of credentials.');
+  const [d3Weight, setD3Weight] = useState(15);
+
+  const [d4Name, setD4Name] = useState('Quantifiably Backed Outcomes');
+  const [d4Desc, setD4Desc] = useState('Metric improvements (KPIs in %, USD, scale), leadership actions, and award recognitions.');
+  const [d4Weight, setD4Weight] = useState(15);
+
+  const [d5Name, setD5Name] = useState('Culture Match & Commitment');
+  const [d5Desc, setD5Desc] = useState('Job-hopping rates, career trajectory consistency, and values coherence.');
+  const [d5Weight, setD5Weight] = useState(10);
+
+  const [showConfig, setShowConfig] = useState(false);
+
   const handleFileJD = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -1650,6 +1706,21 @@ function NewJob() {
     setLoading(true);
     try {
       const requirements = await parseJobDescription(description);
+      
+      // Inject customized thresholds and criteria definitions
+      requirements.customCriteria = {
+        skillsMatch: { name: d1Name, description: d1Desc, weight: Number(d1Weight) },
+        experienceFit: { name: d2Name, description: d2Desc, weight: Number(d2Weight) },
+        education: { name: d3Name, description: d3Desc, weight: Number(d3Weight) },
+        achievements: { name: d4Name, description: d4Desc, weight: Number(d4Weight) },
+        culturalRoleFit: { name: d5Name, description: d5Desc, weight: Number(d5Weight) },
+      };
+      
+      requirements.thresholds = {
+        passed: Number(passedThreshold),
+        low: Number(lowThreshold)
+      };
+
       try {
         const docRef = await addDoc(collection(db, 'jobs'), {
           title: requirements.title || title,
@@ -1681,7 +1752,7 @@ function NewJob() {
         </Button>
         <div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Initialize Campaign</h1>
-          <p className="text-slate-500 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and our neural engine will decompose the assessment matrix automatically.</p>
+          <p className="text-slate-500 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and customize screening dimensions for precise candidate fit evaluation.</p>
         </div>
       </div>
 
@@ -1710,19 +1781,253 @@ function NewJob() {
             <textarea
               required
               rows={12}
-              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all text-sm leading-relaxed font-medium min-h-[300px] custom-scrollbar"
+              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all text-sm leading-relaxed font-medium min-h-[250px] custom-scrollbar"
               placeholder={parsingFile ? "Decrypting document layers..." : "Paste the full mission brief / job description here..."}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={parsingFile}
             />
-            <div className="flex items-center gap-2 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100/50 mt-4">
-              <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
-              <p className="text-[10px] sm:text-xs text-indigo-700 font-bold leading-relaxed italic">
-                Our AI Agent will extract technical benchmarks, soft-skill markers, and cultural alignment indicators to build the D6 scorecard automatically.
-              </p>
-            </div>
           </div>
+
+          {/* Advanced Configurations Expansion */}
+          <div className="border-t border-slate-100 pt-6">
+            <button
+              type="button"
+              id="toggle-config-btn"
+              onClick={() => setShowConfig(!showConfig)}
+              className="flex items-center justify-between w-full p-4 bg-slate-50 hover:bg-slate-100/85 rounded-2xl transition-all border border-slate-100 font-bold text-xs uppercase tracking-wider text-slate-700 shadow-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-indigo-500" />
+                <span>Scoring Matrix & Passing Thresholds Configuration ({showConfig ? 'Hide' : 'Customize'})</span>
+              </div>
+              <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform", showConfig && "rotate-180")} />
+            </button>
+
+            {showConfig && (
+              <div className="mt-6 space-y-8 p-6 bg-slate-50/50 rounded-3xl border border-slate-100/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Threshold Section */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-500" /> Screening Thresholds
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passed Match</label>
+                        <span className="text-sm font-black text-green-600 bg-green-50 px-2.5 py-0.5 rounded-lg border border-green-100">{passedThreshold}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="50"
+                        max="95"
+                        theme-target-id="passed-threshold-range"
+                        className="w-full accent-green-500"
+                        value={passedThreshold}
+                        onChange={(e) => setPassedThreshold(Number(e.target.value))}
+                      />
+                      <p className="text-[9px] text-slate-400 font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
+                    </div>
+
+                    <div className="space-y-2 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Low Match (Failed)</label>
+                        <span className="text-sm font-black text-red-600 bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-100">{lowThreshold}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="20"
+                        max="60"
+                        theme-target-id="low-threshold-range"
+                        className="w-full accent-red-500"
+                        value={lowThreshold}
+                        onChange={(e) => setLowThreshold(Number(e.target.value))}
+                      />
+                      <p className="text-[9px] text-slate-400 font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Dimensions Section */}
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <h3 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-indigo-500" /> Screening Criteria Parameters
+                    </h3>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-indigo-600">
+                      Cumulate Weights: {Number(d1Weight) + Number(d2Weight) + Number(d3Weight) + Number(d4Weight) + Number(d5Weight)}%
+                    </span>
+                  </div>
+
+                  {/* Dimension 1: skillsMatch */}
+                  <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                      <div className="sm:col-span-8 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
+                        <input
+                          type="text"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d1Name}
+                          onChange={(e) => setD1Name(e.target.value)}
+                        />
+                      </div>
+                      <div className="sm:col-span-4 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <input
+                          type="number"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d1Weight}
+                          onChange={(e) => setD1Weight(Math.max(0, Number(e.target.value)))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <textarea
+                        rows={2}
+                        className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                        value={d1Desc}
+                        onChange={(e) => setD1Desc(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dimension 2: experienceFit */}
+                  <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                      <div className="sm:col-span-8 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
+                        <input
+                          type="text"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d2Name}
+                          onChange={(e) => setD2Name(e.target.value)}
+                        />
+                      </div>
+                      <div className="sm:col-span-4 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <input
+                          type="number"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d2Weight}
+                          onChange={(e) => setD2Weight(Math.max(0, Number(e.target.value)))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <textarea
+                        rows={2}
+                        className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                        value={d2Desc}
+                        onChange={(e) => setD2Desc(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dimension 3: education */}
+                  <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                      <div className="sm:col-span-8 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
+                        <input
+                          type="text"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d3Name}
+                          onChange={(e) => setD3Name(e.target.value)}
+                        />
+                      </div>
+                      <div className="sm:col-span-4 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <input
+                          type="number"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d3Weight}
+                          onChange={(e) => setD3Weight(Math.max(0, Number(e.target.value)))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <textarea
+                        rows={2}
+                        className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                        value={d3Desc}
+                        onChange={(e) => setD3Desc(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dimension 4: achievements */}
+                  <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                      <div className="sm:col-span-8 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
+                        <input
+                          type="text"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d4Name}
+                          onChange={(e) => setD4Name(e.target.value)}
+                        />
+                      </div>
+                      <div className="sm:col-span-4 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <input
+                          type="number"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d4Weight}
+                          onChange={(e) => setD4Weight(Math.max(0, Number(e.target.value)))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <textarea
+                        rows={2}
+                        className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                        value={d4Desc}
+                        onChange={(e) => setD4Desc(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Dimension 5: culturalRoleFit */}
+                  <div className="p-4 bg-white border border-slate-100 rounded-2xl space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                      <div className="sm:col-span-8 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
+                        <input
+                          type="text"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d5Name}
+                          onChange={(e) => setD5Name(e.target.value)}
+                        />
+                      </div>
+                      <div className="sm:col-span-4 space-y-2">
+                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <input
+                          type="number"
+                          className="w-full text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                          value={d5Weight}
+                          onChange={(e) => setD5Weight(Math.max(0, Number(e.target.value)))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <textarea
+                        rows={2}
+                        className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                        value={d5Desc}
+                        onChange={(e) => setD5Desc(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="pt-6 flex flex-col sm:flex-row gap-4">
             <Button type="button" variant="outline" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl order-2 sm:order-1" onClick={() => navigate('/')}>Abandon Sequence</Button>
             <Button type="submit" variant="secondary" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 order-1 sm:order-2" disabled={loading || parsingFile}>
@@ -1767,6 +2072,130 @@ function JobDetail() {
   const { profile, organization } = useProfile();
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [bulkInviting, setBulkInviting] = useState(false);
+
+  const [reevaluatingAll, setReevaluatingAll] = useState(false);
+  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+
+  // Editable configuration states for the drawer:
+  const [editPassedThresh, setEditPassedThresh] = useState(80);
+  const [editLowThresh, setEditLowThresh] = useState(40);
+  
+  const [editD1Name, setEditD1Name] = useState('');
+  const [editD1Desc, setEditD1Desc] = useState('');
+  const [editD1Weight, setEditD1Weight] = useState(30);
+
+  const [editD2Name, setEditD2Name] = useState('');
+  const [editD2Desc, setEditD2Desc] = useState('');
+  const [editD2Weight, setEditD2Weight] = useState(30);
+
+  const [editD3Name, setEditD3Name] = useState('');
+  const [editD3Desc, setEditD3Desc] = useState('');
+  const [editD3Weight, setEditD3Weight] = useState(15);
+
+  const [editD4Name, setEditD4Name] = useState('');
+  const [editD4Desc, setEditD4Desc] = useState('');
+  const [editD4Weight, setEditD4Weight] = useState(15);
+
+  const [editD5Name, setEditD5Name] = useState('');
+  const [editD5Desc, setEditD5Desc] = useState('');
+  const [editD5Weight, setEditD5Weight] = useState(10);
+
+  useEffect(() => {
+    if (!job) return;
+    const reqs = job.requirements;
+    const custom = reqs?.customCriteria;
+    
+    setEditPassedThresh(reqs?.thresholds?.passed ?? 80);
+    setEditLowThresh(reqs?.thresholds?.low ?? 40);
+
+    setEditD1Name(custom?.skillsMatch?.name ?? 'Technical Skill Fit');
+    setEditD1Desc(custom?.skillsMatch?.description ?? 'Required frameworks, programming languages, and tool stack matched with candidate experience.');
+    setEditD1Weight(custom?.skillsMatch?.weight ?? 30);
+
+    setEditD2Name(custom?.experienceFit?.name ?? 'Years & Proximity Analysis');
+    setEditD2Desc(custom?.experienceFit?.description ?? 'Matches total tenure, role-title matches, management level depth, and specific industry alignment.');
+    setEditD2Weight(custom?.experienceFit?.weight ?? 30);
+
+    setEditD3Name(custom?.education?.name ?? 'Educational Foundation');
+    setEditD3Desc(custom?.education?.description ?? 'University degree status, major/subject alignment, and tier ranking of credentials.');
+    setEditD3Weight(custom?.education?.weight ?? 15);
+
+    setEditD4Name(custom?.achievements?.name ?? 'Quantifiably Backed Outcomes');
+    setEditD4Desc(custom?.achievements?.description ?? 'Metric improvements (KPIs in %, USD, scale), leadership actions, and award recognitions.');
+    setEditD4Weight(custom?.achievements?.weight ?? 15);
+
+    setEditD5Name(custom?.culturalRoleFit?.name ?? 'Culture Match & Commitment');
+    setEditD5Desc(custom?.culturalRoleFit?.description ?? 'Job-hopping rates, career trajectory consistency, and values coherence.');
+    setEditD5Weight(custom?.culturalRoleFit?.weight ?? 10);
+  }, [job]);
+
+  const handleSaveSettings = async () => {
+    if (!job || !jobId) return;
+    try {
+      const updatedRequirements = {
+        ...job.requirements,
+        customCriteria: {
+          skillsMatch: { name: editD1Name, description: editD1Desc, weight: Number(editD1Weight) },
+          experienceFit: { name: editD2Name, description: editD2Desc, weight: Number(editD2Weight) },
+          education: { name: editD3Name, description: editD3Desc, weight: Number(editD3Weight) },
+          achievements: { name: editD4Name, description: editD4Desc, weight: Number(editD4Weight) },
+          culturalRoleFit: { name: editD5Name, description: editD5Desc, weight: Number(editD5Weight) },
+        },
+        thresholds: {
+          passed: Number(editPassedThresh),
+          low: Number(editLowThresh)
+        }
+      };
+
+      await updateDoc(doc(db, 'jobs', jobId), {
+        requirements: updatedRequirements
+      });
+
+      notify('Evaluation parameters updated successfully.', 'success');
+      setShowSettingsDrawer(false);
+    } catch (err) {
+      console.error(err);
+      notify('Failed to update evaluation settings.', 'error');
+    }
+  };
+
+  const handleReevaluateAllCandidates = async () => {
+    const realCandidates = candidates.filter(c => c.status === 'processed' || c.status === 'shortlisted' || c.status === 'rejected');
+    // We only reevaluate processed or candidate details that have resume text
+    const targetCandidates = realCandidates.filter(c => c.resumeText);
+    if (targetCandidates.length === 0) {
+      notify('No screened candidates with cached resumes available to re-evaluate.', 'info');
+      return;
+    }
+    const ok = await confirm(`Are you sure you want to re-screen all ${targetCandidates.length} candidates? This will re-run the AI models with your updated custom criteria and weights.`);
+    if (!ok) return;
+
+    setReevaluatingAll(true);
+    try {
+      let successCount = 0;
+      for (const candidate of targetCandidates) {
+        try {
+          const rawScreeningResult = await screenCandidate(candidate.resumeText || '', job?.requirements || '');
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job?.requirements);
+          
+          await updateDoc(doc(db, 'candidates', candidate.id), {
+            ...screeningResult,
+            status: 'processed',
+            lastRetriedAt: serverTimestamp()
+          });
+          successCount++;
+        } catch (e) {
+          console.error(`Failed to re-score candidate ${candidate.id}:`, e);
+        }
+      }
+      notify(`Successfully re-evaluated ${successCount}/${targetCandidates.length} candidates.`, 'success');
+    } catch (err) {
+      console.error(err);
+      notify('Error running bulk re-evaluation.', 'error');
+    } finally {
+      setReevaluatingAll(false);
+    }
+  };
 
   // Debounce search query
   useEffect(() => {
@@ -2278,11 +2707,14 @@ function JobDetail() {
 
   const uniqueRoles = Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All');
 
+  const passedThresh = job?.requirements?.thresholds?.passed ?? 80;
+  const lowThresh = job?.requirements?.thresholds?.low ?? 40;
+
   const stats = {
     total: candidates.length,
     pending: candidates.filter(c => c.status === 'processed').length,
-    passed: candidates.filter(c => c.scorecard.compositeScore >= 80).length,
-    failed: candidates.filter(c => c.scorecard.compositeScore < 40).length
+    passed: candidates.filter(c => c.scorecard.compositeScore >= passedThresh).length,
+    failed: candidates.filter(c => c.scorecard.compositeScore < lowThresh).length
   };
 
   const bestScore = candidates.length > 0 
@@ -2317,13 +2749,26 @@ function JobDetail() {
             </div>
           </div>
         </div>
-        <label className="cursor-pointer">
-          <input type="file" multiple accept=".pdf,.docx" className="hidden" onChange={handleFileUpload} />
-          <Button variant="secondary" className="px-6 h-12 rounded-xl text-sm font-black shadow-lg shadow-indigo-200" as="div">
-            <Plus className="w-4 h-4 mr-1.5" />
-            New Interview Session
+        
+        <div className="flex flex-wrap gap-3 items-center">
+          <Button
+            variant="outline"
+            id="scoring-settings-btn"
+            onClick={() => setShowSettingsDrawer(true)}
+            className="px-5 h-12 rounded-xl text-sm font-bold border-indigo-100 hover:bg-slate-50 transition-all text-indigo-700 flex items-center gap-1.5"
+          >
+            <Sliders className="w-4 h-4" />
+            Evaluation Settings
           </Button>
-        </label>
+
+          <label className="cursor-pointer">
+            <input type="file" multiple accept=".pdf,.docx" className="hidden" onChange={handleFileUpload} />
+            <Button variant="secondary" className="px-6 h-12 rounded-xl text-sm font-black shadow-lg shadow-indigo-200" as="div">
+              <Plus className="w-4 h-4 mr-1.5" />
+              New Interview Session
+            </Button>
+          </label>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -2331,8 +2776,8 @@ function JobDetail() {
         {[
           { label: 'Total Scanned', count: stats.total, percent: 100, color: 'text-indigo-500' },
           { label: 'Ready to Invite', count: stats.pending, percent: Math.round((stats.pending / (stats.total || 1)) * 100), color: 'text-blue-500' },
-          { label: 'Passed Match (80+)', count: stats.passed, percent: Math.round((stats.passed / (stats.total || 1)) * 100), color: 'text-green-500' },
-          { label: 'Low Match (<40)', count: stats.failed, percent: Math.round((stats.failed / (stats.total || 1)) * 100), color: 'text-red-500' },
+          { label: `Passed Match (${passedThresh}+)`, count: stats.passed, percent: Math.round((stats.passed / (stats.total || 1)) * 100), color: 'text-green-500' },
+          { label: `Low Match (<${lowThresh})`, count: stats.failed, percent: Math.round((stats.failed / (stats.total || 1)) * 100), color: 'text-red-500' },
         ].map(s => (
           <Card key={s.label} className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between border-slate-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="text-center sm:text-left mb-2 sm:mb-0">
@@ -3033,8 +3478,272 @@ function JobDetail() {
           )}
         </div>
       </div>
+
+      {/* Scoring Configuration Modal */}
+      <Modal
+        isOpen={showSettingsDrawer}
+        onClose={() => setShowSettingsDrawer(false)}
+        title="Scoring Configuration & Threshold Rules"
+      >
+        <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+            Specify customized candidate screening dimensions, weights, and match-classification thresholds. Updates are real-time and saved directly to the database.
+          </p>
+
+          {/* Thresholds */}
+          <div className="space-y-4 border-b border-slate-100 pb-5">
+            <h3 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+              <Target className="w-4 h-4 text-indigo-500" /> Screening Thresholds
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-center">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Passed Match</label>
+                  <span className="text-xs font-black text-green-600 bg-white px-2 py-0.5 rounded border border-green-100">{editPassedThresh}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="95"
+                  className="w-full accent-green-500"
+                  value={editPassedThresh}
+                  onChange={(e) => setEditPassedThresh(Number(e.target.value))}
+                />
+              </div>
+
+              <div className="space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-center">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Low Match (Fail)</label>
+                  <span className="text-xs font-black text-red-600 bg-white px-2 py-0.5 rounded border border-red-100">{editLowThresh}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="20"
+                  max="60"
+                  className="w-full accent-red-500"
+                  value={editLowThresh}
+                  onChange={(e) => setEditLowThresh(Number(e.target.value))}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Custom Criteria Weights & Names */}
+          <div className="space-y-5">
+            <div className="flex justify-between items-center pb-2">
+              <h3 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-indigo-500" /> Screening Criteria Parameters
+              </h3>
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-indigo-600">
+                Total Weight: {Number(editD1Weight) + Number(editD2Weight) + Number(editD3Weight) + Number(editD4Weight) + Number(editD5Weight)}%
+              </span>
+            </div>
+
+            {/* Metric 1 */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div className="md:col-span-8 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 1 Name</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD1Name}
+                    onChange={(e) => setEditD1Name(e.target.value)}
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <input
+                    type="number"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD1Weight}
+                    onChange={(e) => setEditD1Weight(Math.max(0, Number(editD1Weight)))}
+                  />
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                className="w-full text-xs font-medium px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                value={editD1Desc}
+                onChange={(e) => setEditD1Desc(e.target.value)}
+              />
+            </div>
+
+            {/* Metric 2 */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div className="md:col-span-8 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 2 Name</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD2Name}
+                    onChange={(e) => setEditD2Name(e.target.value)}
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <input
+                    type="number"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD2Weight}
+                    onChange={(e) => setEditD2Weight(Math.max(0, Number(editD2Weight)))}
+                  />
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                className="w-full text-xs font-medium px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                value={editD2Desc}
+                onChange={(e) => setEditD2Desc(e.target.value)}
+              />
+            </div>
+
+            {/* Metric 3 */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div className="md:col-span-8 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 3 Name</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD3Name}
+                    onChange={(e) => setEditD3Name(e.target.value)}
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <input
+                    type="number"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800 text-slate-800"
+                    value={editD3Weight}
+                    onChange={(e) => setEditD3Weight(Math.max(0, Number(editD3Weight)))}
+                  />
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                className="w-full text-xs font-medium px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                value={editD3Desc}
+                onChange={(e) => setEditD3Desc(e.target.value)}
+              />
+            </div>
+
+            {/* Metric 4 */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div className="md:col-span-8 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 4 Name</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD4Name}
+                    onChange={(e) => setEditD4Name(e.target.value)}
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <input
+                    type="number"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800 text-slate-800"
+                    value={editD4Weight}
+                    onChange={(e) => setEditD4Weight(Math.max(0, Number(editD4Weight)))}
+                  />
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                className="w-full text-xs font-medium px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                value={editD4Desc}
+                onChange={(e) => setEditD4Desc(e.target.value)}
+              />
+            </div>
+
+            {/* Metric 5 */}
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div className="md:col-span-8 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 5 Name</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800"
+                    value={editD5Name}
+                    onChange={(e) => setEditD5Name(e.target.value)}
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <input
+                    type="number"
+                    className="w-full text-xs font-bold px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-800 text-slate-800"
+                    value={editD5Weight}
+                    onChange={(e) => setEditD5Weight(Math.max(0, Number(editD5Weight)))}
+                  />
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                className="w-full text-xs font-medium px-2 py-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-700 leading-relaxed"
+                value={editD5Desc}
+                onChange={(e) => setEditD5Desc(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-700 border-slate-200"
+            onClick={() => setShowSettingsDrawer(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 h-12 text-[10px] uppercase font-black text-indigo-600 border-indigo-100 tracking-widest"
+            disabled={reevaluatingAll}
+            onClick={async () => {
+              await handleSaveSettings();
+              await handleReevaluateAllCandidates();
+            }}
+          >
+            {reevaluatingAll ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Save & Re-score All'}
+          </Button>
+
+          <Button
+            type="button"
+            variant="primary"
+            className="flex-1 h-12 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white"
+            onClick={handleSaveSettings}
+          >
+            Save Parameters Only
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
+}
+
+function truncateSummary(text: string, limit: number = 450): string {
+  if (!text) return "";
+  if (text.length <= limit) return text;
+  
+  const truncated = text.substring(0, limit);
+  const lastPeriod = truncated.lastIndexOf('.');
+  if (lastPeriod > limit - 80) {
+    return truncated.substring(0, lastPeriod + 1);
+  }
+  
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > limit - 40) {
+    return truncated.substring(0, lastSpace) + '...';
+  }
+  
+  return truncated + '...';
 }
 
 function parseD6Sections(markdown: string): {
@@ -3424,11 +4133,11 @@ function CandidateDetail() {
     doc.text('2. AI Screening Analytics', 20, currentY);
     
     const dimensionRows = [
-      { key: 'skillsMatch', label: 'Skills Match (D1)' },
-      { key: 'experienceFit', label: 'Experience Fit (D2)' },
-      { key: 'education', label: 'Education (D3)' },
-      { key: 'achievements', label: 'Achievements (D4)' },
-      { key: 'culturalRoleFit', label: 'Cultural Fit (D5)' },
+      { key: 'skillsMatch', label: job?.requirements?.customCriteria?.skillsMatch?.name ? `${job.requirements.customCriteria.skillsMatch.name} (D1)` : 'Skills Match (D1)' },
+      { key: 'experienceFit', label: job?.requirements?.customCriteria?.experienceFit?.name ? `${job.requirements.customCriteria.experienceFit.name} (D2)` : 'Experience Fit (D2)' },
+      { key: 'education', label: job?.requirements?.customCriteria?.education?.name ? `${job.requirements.customCriteria.education.name} (D3)` : 'Education (D3)' },
+      { key: 'achievements', label: job?.requirements?.customCriteria?.achievements?.name ? `${job.requirements.customCriteria.achievements.name} (D4)` : 'Achievements (D4)' },
+      { key: 'culturalRoleFit', label: job?.requirements?.customCriteria?.culturalRoleFit?.name ? `${job.requirements.customCriteria.culturalRoleFit.name} (D5)` : 'Cultural Fit (D5)' },
     ].map(dimInfo => {
       const dim = candidate.scorecard.dimensions[dimInfo.key as keyof typeof candidate.scorecard.dimensions] as any;
       return [dimInfo.label, dim ? `${dim.score}/100` : 'N/A', dim ? dim.rationale : 'Dimension not assessed'];
@@ -3813,7 +4522,7 @@ function CandidateDetail() {
               Applied for: {job?.title || 'Unknown Position'}
             </p>
             <div className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl mt-4 font-semibold italic">
-              <Markdown>{candidate.oneLineSummary || "Forensic screening and scoring analysis completed."}</Markdown>
+              <Markdown>{truncateSummary(candidate.oneLineSummary || "Forensic screening and scoring analysis completed.", 450)}</Markdown>
             </div>
           </div>
         </div>
@@ -4427,51 +5136,61 @@ function CandidateDetail() {
                 { 
                   id: 'D1', 
                   key: 'skillsMatch', 
-                  label: 'Skills Match', 
-                  weight: '30-35%', 
+                  label: job?.requirements?.customCriteria?.skillsMatch?.name || 'Skills Match', 
+                  weight: job?.requirements?.customCriteria?.skillsMatch?.weight !== undefined
+                    ? `${Math.round((job.requirements.customCriteria.skillsMatch.weight / (Object.values(job.requirements.customCriteria).reduce((acc: number, c: any) => acc + (c?.weight || 0), 0) || 1)) * 100)}%`
+                    : '30-35%', 
                   icon: Terminal, 
                   color: 'indigo', 
-                  description: 'Semantic overlap between resume skills and JD requirements.',
+                  description: job?.requirements?.customCriteria?.skillsMatch?.description || 'Semantic overlap between resume skills and JD requirements.',
                   calculationDetail: 'Uses TF-IDF and semantic embedding cosine similarity to compare resume keywords against mandatory and preferred skill lists.'
                 },
                 { 
                   id: 'D2', 
                   key: 'experienceFit', 
-                  label: 'Experience Fit', 
-                  weight: '25-30%', 
+                  label: job?.requirements?.customCriteria?.experienceFit?.name || 'Experience Fit', 
+                  weight: job?.requirements?.customCriteria?.experienceFit?.weight !== undefined
+                    ? `${Math.round((job.requirements.customCriteria.experienceFit.weight / (Object.values(job.requirements.customCriteria).reduce((acc: number, c: any) => acc + (c?.weight || 0), 0) || 1)) * 100)}%`
+                    : '25-30%', 
                   icon: Briefcase, 
                   color: 'blue', 
-                  description: 'Relevant years, title proximity, and industry alignment analysis.',
+                  description: job?.requirements?.customCriteria?.experienceFit?.description || 'Relevant years, title proximity, and industry alignment analysis.',
                   calculationDetail: 'Analyses years of experience vs requirements, title seniority (IC vs Manager), and industry relevance. Seniority gaps are heavily penalized.'
                 },
                 { 
                   id: 'D3', 
                   key: 'education', 
-                  label: 'Education', 
-                  weight: '10-20%', 
+                  label: job?.requirements?.customCriteria?.education?.name || 'Education', 
+                  weight: job?.requirements?.customCriteria?.education?.weight !== undefined
+                    ? `${Math.round((job.requirements.customCriteria.education.weight / (Object.values(job.requirements.customCriteria).reduce((acc: number, c: any) => acc + (c?.weight || 0), 0) || 1)) * 100)}%`
+                    : '10-20%', 
                   icon: BookOpen, 
                   color: 'emerald', 
-                  description: 'Degree level match, field relevance, and institution tiering.',
+                  description: job?.requirements?.customCriteria?.education?.description || 'Degree level match, field relevance, and institution tiering.',
                   calculationDetail: 'Matches degree levels (Bachelor, Master, PhD) and field of study. Considers institution rank and equivalent experience offsets.'
                 },
                 { 
                   id: 'D4', 
                   key: 'achievements', 
-                  label: 'Achievements', 
-                  weight: '20-35%', 
+                  label: job?.requirements?.customCriteria?.achievements?.name || 'Achievements', 
+                  weight: job?.requirements?.customCriteria?.achievements?.weight !== undefined
+                    ? `${Math.round((job.requirements.customCriteria.achievements.weight / (Object.values(job.requirements.customCriteria).reduce((acc: number, c: any) => acc + (c?.weight || 0), 0) || 1)) * 100)}%`
+                    : '20-35%', 
                   icon: Award, 
                   color: 'amber', 
-                  description: 'Quantified professional outcomes, scale signals, and impact statements.',
+                  description: job?.requirements?.customCriteria?.achievements?.description || 'Quantified professional outcomes, scale signals, and impact statements.',
                   calculationDetail: 'Extracts impact statements with quantified numbers (%, $, scale). Looks for awards, promotions, and significant project ownership.'
                 },
                 { 
                   id: 'D5', 
                   key: 'culturalRoleFit', 
-                  label: 'Cultural / Role Fit', 
-                  weight: '5-10%', 
+                  label: job?.requirements?.customCriteria?.culturalRoleFit?.name || 'Cultural / Role Fit', 
+                  weight: job?.requirements?.customCriteria?.culturalRoleFit?.weight !== undefined
+                    ? `${Math.round((job.requirements.customCriteria.culturalRoleFit.weight / (Object.values(job.requirements.customCriteria).reduce((acc: number, c: any) => acc + (c?.weight || 0), 0) || 1)) * 100)}%`
+                    : '5-10%', 
                   icon: Brain, 
                   color: 'rose', 
-                  description: 'Tenure patterns, growth trajectory, and career consistency.',
+                  description: job?.requirements?.customCriteria?.culturalRoleFit?.description || 'Tenure patterns, growth trajectory, and career consistency.',
                   calculationDetail: 'Evaluates job-hopping signals (<1yr avg tenure), consistency of career path, and alignment with organizational scale and values.'
                 },
               ].map((dimInfo) => {

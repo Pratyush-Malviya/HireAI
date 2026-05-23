@@ -46,6 +46,17 @@ export interface JobRequirements {
   role_type: string;
   location_requirement: string;
   keywords: string[];
+  thresholds?: {
+    passed: number;
+    low: number;
+  };
+  customCriteria?: {
+    skillsMatch?: { name: string; description: string; weight: number };
+    experienceFit?: { name: string; description: string; weight: number };
+    education?: { name: string; description: string; weight: number };
+    achievements?: { name: string; description: string; weight: number };
+    culturalRoleFit?: { name: string; description: string; weight: number };
+  };
 }
 
 export interface Job {
