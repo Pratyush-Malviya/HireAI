@@ -1,5 +1,6 @@
+import { LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -361,21 +362,21 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
 
 function Button({ className, variant = 'primary', size = 'md', as: Component = 'button', ...props }: any) {
   const variants = {
-    primary: 'bg-slate-900 text-white hover:bg-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.1)]',
-    secondary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20',
-    outline: 'border-2 border-slate-100 hover:border-slate-200 hover:bg-slate-50 text-slate-600 font-bold',
-    ghost: 'hover:bg-slate-100 text-slate-600 font-bold',
-    brand: 'bg-indigo-600 text-white hover:bg-indigo-700 font-bold tracking-tight',
+    primary: 'bg-slate-900 text-white hover:bg-slate-800 shadow-sm',
+    secondary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm',
+    outline: 'border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-medium',
+    ghost: 'hover:bg-slate-100 text-slate-700 font-medium',
+    brand: 'bg-indigo-600 text-white hover:bg-indigo-700 font-medium tracking-tight',
   };
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs rounded-lg',
-    md: 'px-5 py-2.5 text-sm rounded-xl',
-    lg: 'px-8 py-4 text-base rounded-2xl',
+    sm: 'px-3 py-1.5 text-xs rounded-md',
+    md: 'px-4 py-2 text-sm rounded-lg',
+    lg: 'px-6 py-3 text-base rounded-xl',
   };
   return (
     <Component
       className={cn(
-        'font-sans inline-flex items-center justify-center gap-2 transition-all duration-200 saas-button active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed',
+        'font-sans inline-flex items-center justify-center gap-2 transition-all duration-200 saas-button disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1',
         variants[variant as keyof typeof variants],
         sizes[size as keyof typeof sizes],
         className
@@ -540,6 +541,7 @@ function InterviewRoom() {
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [isKeyboardMode, setIsKeyboardMode] = useState(false);
+  const [botSpeakingPace, setBotSpeakingPace] = useState(1.05);
 
   // Selected Accent / Language state
   const [selectedVoice, setSelectedVoice] = useState<BotVoiceOption>(() => {
@@ -779,7 +781,7 @@ function InterviewRoom() {
     // Remove markdown symbols for better speech
     const cleanText = text.replace(/[*#_`~]/g, '').replace(/https?:\/\/\S+/g, 'link');
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 1.05; // Slightly faster for responsiveness
+    utterance.rate = botSpeakingPace; // Configured via HR Admin or defaults to 1.05
     utterance.pitch = 1.0;
     
     // Core dialect configurations
@@ -861,7 +863,17 @@ function InterviewRoom() {
       if (d.exists()) {
         const c = { id: d.id, ...d.data() } as Candidate;
         setCandidate(c);
-        getDoc(doc(db, 'jobs', c.jobId)).then(jd => jd.exists() && setJob({ id: jd.id, ...jd.data() } as Job)).catch(err => handleFirestoreError(err, OperationType.GET, `jobs/${c.jobId}`));
+                getDoc(doc(db, 'jobs', c.jobId)).then(jd => jd.exists() && setJob({ id: jd.id, ...jd.data() } as Job)).catch(err => handleFirestoreError(err, OperationType.GET, `jobs/${c.jobId}`));
+        if (c.organizationId) {
+          getDoc(doc(db, 'organizations', c.organizationId)).then(orgD => {
+            if (orgD.exists()) {
+              const org = orgD.data();
+              if (org.botSpeakingPace !== undefined) {
+                setBotSpeakingPace(org.botSpeakingPace);
+              }
+            }
+          }).catch(err => console.error(err));
+        }
       }
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, `candidates/${candidateId}`);
@@ -1039,7 +1051,7 @@ function InterviewRoom() {
   if (!candidate) return <div className="p-12 text-center text-slate-400">Loading Interview Room...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto py-6 px-4 min-h-[calc(100vh-140px)] flex flex-col gap-6">
+    <div className="w-full py-6 px-4 min-h-[calc(100vh-140px)] flex flex-col gap-6">
       
       {/* Dynamic Iframe and Device Permission Warning Alert Banner */}
       {(mediaError || speechError) && (
@@ -1621,6 +1633,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
   const navigate = useNavigate();
   const { confirm, notify, signIn } = useNotification();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const handleGlobalClear = async () => {
     if (!user) return;
@@ -1721,222 +1734,113 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     { name: 'Pricing', href: '/?view=pricing' },
   ];
 
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100">
-      <header className={cn(
-        "sticky top-0 z-50 transition-all duration-500",
-        user ? "bg-slate-900 text-white shadow-2xl" : "bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-sm"
-      )}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 lg:gap-12 min-w-0">
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:rotate-[15deg] group-hover:scale-110",
-                user ? "bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-lg shadow-indigo-500/20" : "bg-slate-900 shadow-lg"
-              )}>
-                <Search className="w-5 h-5 text-white" />
-              </div>
-              <span className={cn("font-display font-black text-2xl tracking-tighter uppercase", user ? "text-white" : "text-slate-950")}>
-                HireNow
-              </span>
-            </Link>
-            
-            {!user && (
-              <nav className="hidden lg:flex items-center gap-8">
-                {navLinks.map((link) => (
-                  <a 
-                    key={link.name} 
-                    href={link.href} 
-                    className="text-[11px] font-black text-slate-500 hover:text-indigo-600 transition-colors uppercase tracking-[0.2em]"
-                    onClick={(e) => {
-                      if (link.href.startsWith('#')) {
-                        e.preventDefault();
-                        const id = link.href.substring(1);
-                        const el = document.getElementById(id);
-                        if (el) {
-                          el.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }
-                    }}
-                  >
-                    {link.name}
-                  </a>
-                ))}
-              </nav>
-            )}
-
-            {user && (
-              <nav className="hidden md:flex items-center gap-2 overflow-x-auto whitespace-nowrap lg:gap-6 scrollbar-none">
-                <Link to="/" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Dashboard</Link>
-                <Link to="/jobs/new" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">Post Job</Link>
-                <Link to="/org-admin" className="text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-[0.15em] px-3 py-2 rounded-lg hover:bg-white/5">HR Admin</Link>
-                {isUserAdmin && (
-                  <Link to="/admin" className="text-[10px] font-black text-indigo-400 hover:text-indigo-300 transition-all uppercase tracking-[0.15em] flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 shrink-0">
-                    <Shield className="w-3 h-3" /> System Admin
-                  </Link>
-                )}
-              </nav>
-            )}
+  if (user) {
+    return (
+      <div className="flex h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 overflow-hidden">
+                {/* Sidebar */}
+        <aside className={cn("bg-slate-900 text-white flex-col hidden lg:flex shrink-0 border-r border-slate-800 transition-all duration-300", isSidebarCollapsed ? "w-20" : "w-64")}>
+          <div className={cn("h-16 flex items-center border-b border-slate-800 shrink-0", isSidebarCollapsed ? "px-0 justify-center" : "px-6 justify-between")}>
+             <div className="flex items-center">
+               <div className={cn("bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm shrink-0", isSidebarCollapsed ? "w-10 h-10" : "w-8 h-8 mr-3")}>
+                  <Search className="w-4 h-4 text-white" />
+               </div>
+               {!isSidebarCollapsed && <span className="font-display font-black text-xl tracking-tighter uppercase">HireNow</span>}
+             </div>
+             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors">
+               <Menu className="w-4 h-4" />
+             </button>
           </div>
-
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            {user ? (
-              <div className="flex items-center gap-2 sm:gap-4">
-                <Button 
+          <nav className="flex-1 px-3 py-6 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
+             <Link to="/" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                <LayoutGrid className="w-5 h-5 shrink-0" /> 
+                {!isSidebarCollapsed && <span className="truncate">Dashboard</span>}
+             </Link>
+             <Link to="/jobs/new" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                <Briefcase className="w-5 h-5 shrink-0" /> 
+                {!isSidebarCollapsed && <span className="truncate">Post Job</span>}
+             </Link>
+             <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                <Settings className="w-5 h-5 shrink-0" /> 
+                {!isSidebarCollapsed && <span className="truncate">HR Admin</span>}
+             </Link>
+             {isUserAdmin && (
+                <Link to="/admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:bg-indigo-900/30 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                  <Shield className="w-5 h-5 shrink-0" /> 
+                  {!isSidebarCollapsed && <span className="truncate">System Admin</span>}
+                </Link>
+             )}
+          </nav>
+          <div className={cn("p-4 border-t border-slate-800 flex flex-col shrink-0 gap-4", isSidebarCollapsed ? "items-center" : "")}>
+            <div className={cn("flex items-center gap-3", isSidebarCollapsed ? "justify-center" : "px-2")}>
+              <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-sm font-bold shrink-0">{user.email.charAt(0).toUpperCase()}</div>
+              {!isSidebarCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-white truncate">{user.email}</p>
+                  <p className="text-[10px] text-slate-400 truncate">Authenticated</p>
+                </div>
+              )}
+            </div>
+            <Button variant="ghost" className={cn("text-slate-400 hover:text-white hover:bg-slate-800 text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
+              <LogOut className={cn("shrink-0", isSidebarCollapsed ? "w-5 h-5" : "w-4 h-4 mr-2")} /> 
+              {!isSidebarCollapsed && "Logout"}
+            </Button>
+          </div>
+        </aside>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0">
+             <div className="flex items-center gap-4">
+                <button className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                   <Menu className="w-5 h-5" />
+                </button>
+             </div>
+             <div className="flex items-center gap-4">
+               <Button 
                   variant="outline" 
-                  className="hidden xl:flex text-red-400 border-slate-700 hover:bg-slate-800 hover:text-red-500 py-2 h-auto text-[10px] font-black uppercase tracking-widest shrink-0"
+                  className="hidden xl:flex text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs py-1.5 h-auto font-medium"
                   onClick={handleGlobalClear}
                   disabled={clearing}
                 >
                   <Trash2 className="w-3.5 h-3.5 mr-2" /> {clearing ? 'Clearing...' : 'Clear Platform'}
                 </Button>
-                <div className="w-px h-6 bg-slate-800 mx-1 hidden xl:block" />
-                <div className="hidden sm:flex flex-col items-end mr-1">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Authenticated as</span>
-                  <span className="text-sm font-bold text-indigo-400">{user.email}</span>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  className="text-white hover:bg-slate-800 px-3 sm:px-4 py-2 h-auto text-[10px] sm:text-xs font-black uppercase tracking-widest shrink-0" 
-                  onClick={() => signOut(auth)}
-                >
-                  Logout
-                </Button>
-                <button 
-                  className="md:hidden p-2 text-white hover:bg-slate-800 rounded-lg shrink-0"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                  {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={signIn} 
-                  className="hidden sm:block text-sm font-black text-slate-600 hover:text-indigo-600 transition-colors uppercase tracking-widest px-4"
-                >
-                  Log In
-                </button>
-                <Button 
-                  variant="brand" 
-                  size="sm" 
-                  className="h-11 px-6 shadow-xl shadow-indigo-100 font-black uppercase tracking-widest text-xs"
-                  onClick={() => navigate('/?view=pricing')}
-                >
-                  Get Started
-                </Button>
-                <button 
-                  className="lg:hidden p-2 text-slate-600 hover:bg-slate-50 rounded-lg"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className={cn(
-                "lg:hidden border-t overflow-hidden",
-                user ? "bg-slate-900 border-slate-800" : "bg-white border-slate-100"
-              )}
-            >
-              <div className="px-6 py-8 space-y-6 flex flex-col">
-                {!user ? (
-                  <>
-                    {navLinks.map((link) => (
-                      <a 
-                        key={link.name} 
-                        href={link.href} 
-                        onClick={(e) => {
-                          setMobileMenuOpen(false);
-                          if (link.href.startsWith('#')) {
-                            e.preventDefault();
-                            const id = link.href.substring(1);
-                            const el = document.getElementById(id);
-                            if (el) {
-                              el.scrollIntoView({ behavior: 'smooth' });
-                            }
-                          }
-                        }}
-                        className="text-lg font-black text-slate-900 font-display uppercase tracking-tighter"
-                      >
-                        {link.name}
-                      </a>
-                    ))}
-                    <div className="pt-6 border-t border-slate-50">
-                      <Button variant="brand" className="w-full h-14 font-black uppercase tracking-widest text-xs" onClick={() => { signIn(); setMobileMenuOpen(false); }}>
-                        Sign In
+             </div>
+          </header>
+          
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="lg:hidden border-b bg-slate-900 border-slate-800 shrink-0"
+              >
+                <div className="px-6 py-4 space-y-2 flex flex-col">
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Dashboard</Link>
+                    <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Post Job</Link>
+                    <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">HR Admin</Link>
+                    {isUserAdmin && (
+                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors">System Admin</Link>
+                    )}
+                    <div className="pt-4 border-t border-slate-800">
+                      <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800 text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
+                        <LogOut className="w-4 h-4 mr-2" /> Logout
                       </Button>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-white uppercase tracking-tighter">Dashboard</Link>
-                    <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-white uppercase tracking-tighter">Post Job</Link>
-                    <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-white uppercase tracking-tighter">HR Admin</Link>
-                    {isUserAdmin && (
-                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="text-lg font-black text-indigo-400 uppercase tracking-tighter">System Admin</Link>
-                    )}
-                    <div className="pt-6 border-t border-slate-800 flex flex-col gap-4">
-                       <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-slate-500 uppercase">Logged in as</span>
-                          <span className="text-sm font-bold text-indigo-400">{user.email}</span>
-                       </div>
-                       <Button variant="ghost" className="w-full h-14 text-white hover:bg-slate-800 font-black uppercase tracking-widest text-xs" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
-                         Logout
-                       </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[60vh]">
-        {children}
-      </main>
-      <footer className="bg-white border-t border-slate-200 py-12 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-2 font-bold text-slate-900">
-               <div className="w-6 h-6 bg-slate-900 rounded flex items-center justify-center">
-                 <Search className="w-3.5 h-3.5 text-white" />
-               </div>
-               HireNow
-            </div>
-            <div className="flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-slate-400">
-              <Link to="/" className="hover:text-indigo-600 transition-colors">Workspace</Link>
-              <Link to="/about" className="hover:text-indigo-600 transition-colors">Platform</Link>
-              <Link to="/terms" className="hover:text-indigo-600 transition-colors">Terms</Link>
-              {user?.email === 'malviya.pratyush26@gmail.com' && (
-                <Link to="/admin" className="text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3 h-3" />
-                  Super Admin Registry
-                </Link>
-              )}
-            </div>
-            <div className="flex flex-col items-center md:items-end gap-1.5">
-              <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
-                © 2026 HireNow Inc. All rights reserved.
-              </p>
-              <p className="text-slate-400 text-[10px] font-medium uppercase tracking-tight">
-                Developed by <a href="https://www.linkedin.com/in/pratyushmalviy/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-bold transition-colors">Pratyush Malviya</a>
-              </p>
-            </div>
-          </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
         </div>
-      </footer>
-    </div>
-  );
+      </div>
+    );
+  }
+
+  // Unauthenticated Layout
+  return <>{children}</>;
 }
 
 // --- Pages ---
@@ -3213,7 +3117,7 @@ function JobDetail() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {[
           { label: 'Total Scanned', count: stats.total, percent: 100, color: 'text-indigo-500' },
           { label: 'Ready to Invite', count: stats.pending, percent: Math.round((stats.pending / (stats.total || 1)) * 100), color: 'text-blue-500' },
@@ -3251,7 +3155,7 @@ function JobDetail() {
               <div className="space-y-8 mt-4 lg:mt-0">
                 <div>
                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Status</h4>
-                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', 'Processing Resume', 'Ready to Invite', 'Invite Sent', 'Scheduled', 'Evaluating', 'Passed', 'Failed'].map(status => (
                       <label key={`status-filter-${status}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
@@ -3271,7 +3175,7 @@ function JobDetail() {
                 </div>
                 <div>
                   <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Role</h4>
-                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', ...Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All')].slice(0, 5).map(role => (
                       <label key={`role-filter-${role}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
@@ -4266,7 +4170,7 @@ function CandidateDetail() {
   const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string, label: string} | null>(null);
   const [sendingInvite, setSendingInvite] = useState(false);
 
-  // HireFlow OS Enhanced Feature States
+  // HireNow Enhanced Feature States
   const [activeDetailTab, setActiveDetailTab] = useState<'core' | 'offer' | 'campaign' | 'proctoring'>('core');
 
   // Offer Letter Generation OS States
@@ -4752,7 +4656,7 @@ function CandidateDetail() {
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
            <Button 
             variant="outline" 
             className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
@@ -4804,7 +4708,7 @@ function CandidateDetail() {
              </Button>
            )}
 
-           <div className="grid grid-cols-2 lg:flex gap-2">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:flex gap-2">
              {candidate.interviewStatus === 'completed' ? (
                <Button variant="secondary" className="flex-1 bg-green-600 hover:bg-green-700 text-xs py-2 h-auto" onClick={() => navigate(`/interview/${candidate.id}`)}>
                  <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
@@ -6013,7 +5917,7 @@ function CandidateDetail() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Currency Selector</label>
                   <select 
@@ -6053,7 +5957,7 @@ function CandidateDetail() {
 
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Employment Level</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                   {['Standard Full-time', 'Consultant Contract', 'Internship Trial'].map((type) => (
                     <button 
                       key={type}
@@ -6144,7 +6048,7 @@ function CandidateDetail() {
               <div className="bg-slate-900 text-white px-8 py-8 border-b-4 border-indigo-600 flex justify-between items-center">
                 <div>
                   <h2 className="text-xl font-black uppercase tracking-widest text-indigo-400 leading-none mb-1">
-                    {organization?.name || 'HIREFLOW OS'}
+                    {organization?.name || 'HIRENOW'}
                   </h2>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Official Talent Agreement Letter</p>
                 </div>
@@ -6208,7 +6112,7 @@ function CandidateDetail() {
                   <div className="text-left">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Authorized Signatory</span>
                     <p className="font-semibold text-slate-800">HR Director</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{organization?.name || 'HIREFLOW'}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{organization?.name || 'HIRENOW'}</p>
                   </div>
 
                   <div className="border-2 border-dashed border-indigo-150 rounded-2xl p-4 bg-slate-50 min-w-[200px] text-center relative group">
@@ -6258,7 +6162,7 @@ function CandidateDetail() {
 
               {/* PDF Print and Standalone footer */}
               <div className="bg-slate-50 py-3 px-8 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-medium">
-                <p>© 2026 {organization?.name || 'HireFlow OS'} • Confidentially Guarded</p>
+                <p>© 2026 {organization?.name || 'HireNow'} • Confidentially Guarded</p>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => {
@@ -6411,7 +6315,7 @@ function CandidateDetail() {
                   HF
                 </div>
                 <div className="text-left">
-                  <h4 className="text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">{organization?.name || 'HIREFLOW OS'}</h4>
+                  <h4 className="text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">{organization?.name || 'HIRENOW'}</h4>
                   <p className="text-[8px] text-emerald-400 font-bold uppercase tracking-widest">Active Verification Profile</p>
                 </div>
               </div>
@@ -6731,6 +6635,11 @@ function OrgAdminPanel() {
   const [orgLocation, setOrgLocation] = useState('');
   const [orgPhone, setOrgPhone] = useState('');
   const [orgDescription, setOrgDescription] = useState('');
+  // Working Hours States
+  const [orgWorkingHoursStart, setOrgWorkingHoursStart] = useState('09:00');
+  const [orgWorkingHoursEnd, setOrgWorkingHoursEnd] = useState('17:00');
+  const [orgWorkingHoursTimezone, setOrgWorkingHoursTimezone] = useState('UTC');
+  const [botSpeakingPace, setBotSpeakingPace] = useState<number>(1.0);
 
   // SMTP States
   const [smtpHost, setSmtpHost] = useState('');
@@ -6743,21 +6652,6 @@ function OrgAdminPanel() {
 
   const [savingSettings, setSavingSettings] = useState(false);
   const [testingSmtp, setTestingSmtp] = useState(false);
-
-  // White-Label Customization States
-  const [logoUrl, setLogoUrl] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80');
-  const [primaryColor, setPrimaryColor] = useState('#4f46e5');
-  const [brandingName, setBrandingName] = useState('HireFlow OS Portal');
-  const [markupFactor, setMarkupFactor] = useState(1.35);
-  const [resellerModel, setResellerModel] = useState<'per_seat' | 'per_interview'>('per_interview');
-  const [clientTenants, setClientTenants] = useState([
-    { id: 'ct-1', name: 'Zeta Software Solutions', jobs: 6, candidates: 184, billableAmt: 5400, markup: 1.30 },
-    { id: 'ct-2', name: 'Stellar Tech Labs', jobs: 3, candidates: 49, billableAmt: 1950, markup: 1.40 },
-    { id: 'ct-3', name: 'Infinity Healthcare Corp', jobs: 8, candidates: 298, billableAmt: 11200, markup: 1.25 }
-  ]);
-  const [editingTenantId, setEditingTenantId] = useState<string | null>(null);
-  const [editingTenantName, setEditingTenantName] = useState('');
-  const [editingTenantMarkup, setEditingTenantMarkup] = useState(1.35);
 
   const isReadOnly = profile?.role === 'recruiter';
   
@@ -6778,6 +6672,10 @@ function OrgAdminPanel() {
       setOrgLocation(organization.location || '');
       setOrgPhone(organization.phone || '');
       setOrgDescription(organization.description || '');
+      setOrgWorkingHoursStart(organization.workingHours?.start || '09:00');
+      setOrgWorkingHoursEnd(organization.workingHours?.end || '17:00');
+      setOrgWorkingHoursTimezone(organization.workingHours?.timezone || 'UTC');
+      setBotSpeakingPace(organization.botSpeakingPace || 1.0);
 
       setSmtpHost(organization.emailSettings?.smtpHost || '');
       setSmtpPort(organization.emailSettings?.smtpPort || '465');
@@ -6807,6 +6705,12 @@ function OrgAdminPanel() {
         location: orgLocation.trim() || null,
         phone: orgPhone.trim() || null,
         description: orgDescription.trim() || null,
+        workingHours: {
+          start: orgWorkingHoursStart,
+          end: orgWorkingHoursEnd,
+          timezone: orgWorkingHoursTimezone
+        },
+        botSpeakingPace: botSpeakingPace,
         emailSettings: {
           smtpHost: smtpHost.trim() || null,
           smtpPort: smtpPort.trim() || null,
@@ -6978,14 +6882,35 @@ function OrgAdminPanel() {
 
   completedInterviews.forEach(c => {
     const cDate = getCandidateDate(c);
-    const hour = cDate.getHours();
-    const minute = cDate.getMinutes();
-    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    
+    try {
+      const timeStrOptions: Intl.DateTimeFormatOptions = {
+        timeZone: orgWorkingHoursTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      };
+      
+      const timeFormatter = new Intl.DateTimeFormat('en-US', timeStrOptions);
+      // Extracts HH:MM formatted in the organization's timezone
+      const formattedTime = timeFormatter.format(cDate);
 
-    if (timeStr >= workingHoursStart && timeStr <= workingHoursEnd) {
-      workingHoursCount++;
-    } else {
-      outsideHoursCount++;
+      // Compare lexically (e.g., "14:30" >= "09:00")
+      if (formattedTime >= orgWorkingHoursStart && formattedTime <= orgWorkingHoursEnd) {
+        workingHoursCount++;
+      } else {
+        outsideHoursCount++;
+      }
+    } catch (e) {
+      // Fallback if timezone is invalid
+      const hour = cDate.getHours();
+      const minute = cDate.getMinutes();
+      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      if (timeStr >= orgWorkingHoursStart && timeStr <= orgWorkingHoursEnd) {
+        workingHoursCount++;
+      } else {
+        outsideHoursCount++;
+      }
     }
   });
 
@@ -7490,6 +7415,70 @@ function OrgAdminPanel() {
                   />
                 </div>
               </div>
+
+              <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="col-span-1 sm:col-span-3">
+                  <h4 className="font-bold text-slate-800 text-sm">Official Working Hours</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Used to track after-hours interviews</p>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Time</label>
+                  <input
+                    type="time"
+                    disabled={isReadOnly}
+                    value={orgWorkingHoursStart}
+                    onChange={e => setOrgWorkingHoursStart(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Time</label>
+                  <input
+                    type="time"
+                    disabled={isReadOnly}
+                    value={orgWorkingHoursEnd}
+                    onChange={e => setOrgWorkingHoursEnd(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Timezone</label>
+                  <select
+                    disabled={isReadOnly}
+                    value={orgWorkingHoursTimezone}
+                    onChange={e => setOrgWorkingHoursTimezone(e.target.value)}
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs disabled:opacity-60"
+                  >
+                    {['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Kolkata', 'Asia/Tokyo', 'Australia/Sydney'].map(tz => (
+                      <option key={tz} value={tz}>{tz}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <div className="mb-4">
+                  <h4 className="font-bold text-slate-800 text-sm">Bot Speaking Pace</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Control how fast the AI interviewer speaks</p>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                  {[
+                    { label: 'Slow', value: 0.8 },
+                    { label: 'Normal', value: 1.0 },
+                    { label: 'Fast', value: 1.2 }
+                  ].map(pace => (
+                    <button
+                      key={pace.label}
+                      type="button"
+                      disabled={isReadOnly}
+                      onClick={() => setBotSpeakingPace(pace.value)}
+                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-indigo-50 border-indigo-600 text-indigo-700' : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200'}`}
+                    >
+                      {pace.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </Card>
 
             {/* Mail Server Controls (SMTP) */}
@@ -7656,364 +7645,6 @@ function OrgAdminPanel() {
             </Card>
           </div>
 
-          {/* White-Label Customization Workspace Panel */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-            {/* Customiser Controls Card */}
-            <Card className="p-8 space-y-6 bg-white border border-slate-100 shadow-sm rounded-3xl text-left">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                  <Sliders className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide">Brand customizer</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">White-Label Portal Customization Settings</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Interactive Portal Brand Name</label>
-                  <input
-                    type="text"
-                    disabled={isReadOnly}
-                    value={brandingName}
-                    onChange={e => setBrandingName(e.target.value)}
-                    placeholder="e.g. HireFlow Pro"
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Corporate Branding Logo URL</label>
-                  <input
-                    type="text"
-                    disabled={isReadOnly}
-                    value={logoUrl}
-                    onChange={e => setLogoUrl(e.target.value)}
-                    placeholder="Provide logo image URL..."
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Primary Color Scheme Accent</label>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {[
-                      { hex: '#4f46e5', label: 'Indigo' },
-                      { hex: '#10b981', label: 'Mint' },
-                      { hex: '#ef4444', label: 'Crimson' },
-                      { hex: '#f59e0b', label: 'Amber' },
-                      { hex: '#2563eb', label: 'Classic' },
-                      { hex: '#9333ea', label: 'Orchid' }
-                    ].map((col) => (
-                      <button
-                        key={col.hex}
-                        type="button"
-                        onClick={() => setPrimaryColor(col.hex)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-xl border-2 text-[10px] font-black uppercase tracking-wider transition-all",
-                          primaryColor === col.hex 
-                            ? "bg-slate-900 text-white shadow-md scale-102" 
-                            : "bg-white border-slate-200 text-slate-650 hover:bg-slate-50"
-                        )}
-                      >
-                        <span 
-                          className="inline-block w-2.5 h-2.5 rounded-full mr-2" 
-                          style={{ backgroundColor: col.hex }}
-                        />
-                        {col.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Enterprise Reseller Parameters</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Licensing Fee Markup Factor</label>
-                      <div className="flex items-center gap-3">
-                        <input 
-                          type="range" 
-                          min={1.0} 
-                          max={3.0} 
-                          step={0.05}
-                          value={markupFactor}
-                          onChange={(e) => setMarkupFactor(Number(e.target.value))}
-                          className="flex-1 accent-indigo-600"
-                        />
-                        <span className="text-xs font-black bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg shrink-0">{markupFactor.toFixed(2)}x</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Client Reseller Model</label>
-                      <select
-                        value={resellerModel}
-                        onChange={(e) => setResellerModel(e.target.value as any)}
-                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 font-bold text-slate-700 text-xs"
-                      >
-                        <option value="per_seat">Per Active Seat License ($)</option>
-                        <option value="per_interview">Per Candidate voice screening ($)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Portal Real-time Interface Rendering Mock */}
-            <Card className="p-8 space-y-6 bg-slate-900 border-none text-white rounded-3xl overflow-hidden relative flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 -mr-16 -mt-16" style={{ backgroundColor: primaryColor }} />
-              
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-slate-800/80">
-                  <div>
-                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-0.5">Custom white label preview</span>
-                    <h3 className="font-extrabold text-white text-xs uppercase tracking-widest leading-none">Live Render Portal Mockup</h3>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="text-[8px] font-semibold uppercase px-2 py-0.5 bg-slate-800 border border-slate-700/60 rounded text-slate-400">ACTIVE CUSTOMIZER</span>
-                  </div>
-                </div>
-
-                <div className="border border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-950 font-sans text-left text-xs text-slate-400 min-h-[220px] flex flex-col justify-between">
-                  {/* Mock Portal Header */}
-                  <div className="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <img 
-                        src={logoUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80'} 
-                        referrerPolicy="no-referrer"
-                        alt="Portal Core Logo" 
-                        className="w-5 h-5 rounded-lg object-cover"
-                        onError={(e) => {
-                          // Fallback
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80';
-                        }}
-                      />
-                      <span className="font-extrabold text-white text-xs tracking-wider uppercase">{brandingName}</span>
-                    </div>
-
-                    <div className="flex gap-2 text-[9px] font-bold">
-                      <span className="text-white">Assesments</span>
-                      <span>Candidates</span>
-                      <span>Settings</span>
-                    </div>
-                  </div>
-
-                  {/* Mock Portal Landing content body */}
-                  <div className="p-6 space-y-3 flex-1 flex flex-col justify-center">
-                    <h2 className="text-sm font-black text-white leading-tight uppercase tracking-wide">
-                      Welcome to your Automated screening Lobby
-                    </h2>
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
-                      Powered under secure sandbox protocols. All transcripts and audio evaluation logs are analyzed securely with dynamic pricing variables.
-                    </p>
-
-                    <div className="pt-2">
-                      <button 
-                        type="button"
-                        style={{ backgroundColor: primaryColor }}
-                        className="px-4 py-2 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-md transition-all scale-102"
-                      >
-                        Enter Assessment Lobby
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Mock Portal Footer banner */}
-                  <div className="p-3 bg-slate-900 border-t border-slate-800/50 flex justify-between items-center text-[8px] text-slate-500 font-mono">
-                    <p>© 2026 {brandingName} Portal Client Isolation</p>
-                    <span 
-                      className="w-2 h-2 rounded-full shrink-0 animate-ping" 
-                      style={{ backgroundColor: primaryColor }} 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Summary details */}
-              <div className="p-4 bg-slate-850 border border-slate-800/80 rounded-2xl flex items-center justify-between text-left">
-                <div>
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Calculated Mark-Up Pricing Factor</span>
-                  <p className="text-xs text-slate-300 leading-normal font-sans">
-                    Reselling standard rates with a calculated markup factor of <strong className="text-white">{(markupFactor).toFixed(2)}x</strong> over base licensing models.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Section 4: Multi-Tenant Workspaces Directory Ledger */}
-          <Card className="p-8 mt-8 space-y-6 bg-white border border-slate-100 shadow-sm rounded-3xl text-left">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide font-sans">Multi-Tenant Client Workspaces Matrix</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Reseller Client Billing Profiles & Consumption Dashboard</p>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                onClick={() => {
-                  const name = prompt("Enter new Client Tenant Org Name:", "Aperture Labs");
-                  const markup = Number(prompt("Enter pricing markup multiplier factor for this client:", "1.35"));
-                  if (name) {
-                    setClientTenants(prev => [
-                      ...prev,
-                      {
-                        id: 'ct-' + (prev.length + 1),
-                        name: name,
-                        jobs: 0,
-                        candidates: 0,
-                        billableAmt: 0,
-                        markup: isNaN(markup) ? 1.35 : markup
-                      }
-                    ]);
-                    notify('New Client Tenant Account Active and Ready!', 'success');
-                  }
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-[10px] font-black uppercase tracking-widest px-4 h-9"
-              >
-                <Plus className="w-3.5 h-3.5 mr-1" /> Add Client Workspace
-              </Button>
-            </div>
-
-            {/* List Table of Tenant client workspaces */}
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
-              <table className="w-full text-left border-collapse font-sans">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <th className="py-4 px-6">Client Organization Name</th>
-                    <th className="py-4 px-4 text-center">Jobs Ordered</th>
-                    <th className="py-4 px-4 text-center">Screened Evaluated</th>
-                    <th className="py-4 px-4 text-right">Raw Platform Usage</th>
-                    <th className="py-4 px-4 text-center">Reseller Markup Mode</th>
-                    <th className="py-4 px-6 text-right">CLIENT BILLABLE TOTAL</th>
-                    <th className="py-4 px-6 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs text-slate-650">
-                  {clientTenants.map((ten) => {
-                    // Raw consumption calculation depending on model
-                    const baseConsumption = resellerModel === 'per_interview' 
-                      ? ten.candidates * 12 // $12 per interview
-                      : ten.jobs * 150; // $150 per active vacancy seat
-
-                    // Combine global markupFactor and tenant-level specific markup multiplier
-                    const combinedMarkup = markupFactor * ten.markup;
-                    const calculatedBillBytes = baseConsumption * combinedMarkup;
-
-                    return (
-                      <tr key={ten.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-6">
-                          {editingTenantId === ten.id ? (
-                            <input 
-                              type="text"
-                              value={editingTenantName}
-                              onChange={(e) => setEditingTenantName(e.target.value)}
-                              className="w-48 p-1.5 rounded border border-indigo-200 text-xs font-bold font-sans text-slate-800"
-                            />
-                          ) : (
-                            <div>
-                              <p className="font-extrabold text-slate-900">{ten.name}</p>
-                              <p className="text-[10px] text-slate-450 font-mono">WORKSPACE_ID: {ten.id}</p>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-4 px-4 text-center font-extrabold text-slate-800">
-                          {ten.jobs}
-                        </td>
-                        <td className="py-4 px-4 text-center font-extrabold text-slate-800">
-                          {ten.candidates}
-                        </td>
-                        <td className="py-4 px-4 text-right font-mono font-medium text-slate-500">
-                          ${baseConsumption.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-4 px-4 text-center">
-                          {editingTenantId === ten.id ? (
-                            <div className="flex items-center gap-1.5 justify-center">
-                              <input 
-                                type="number"
-                                step={0.05}
-                                min={1.0}
-                                value={editingTenantMarkup}
-                                onChange={(e) => setEditingTenantMarkup(Number(e.target.value))}
-                                className="w-16 p-1 rounded border border-indigo-200 text-center font-bold"
-                              />
-                              <span className="text-[10px] text-slate-400 font-bold font-mono">x</span>
-                            </div>
-                          ) : (
-                            <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                              {(combinedMarkup).toFixed(2)}x combined
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6 text-right text-emerald-650 font-black font-mono text-sm">
-                          ${calculatedBillBytes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          {editingTenantId === ten.id ? (
-                            <div className="flex gap-2 justify-center">
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  setClientTenants(prev => prev.map(p => p.id === ten.id ? { ...p, name: editingTenantName, markup: editingTenantMarkup } : p));
-                                  setEditingTenantId(null);
-                                  notify('Client configuration parameters updated.', 'success');
-                                }}
-                                className="p-1 px-2.5 bg-emerald-100 hover:bg-[#e2f1e5] rounded text-[10px] font-extrabold uppercase mt-0.5 text-emerald-700"
-                              >
-                                Save
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2 justify-center">
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  setEditingTenantId(ten.id);
-                                  setEditingTenantName(ten.name);
-                                  setEditingTenantMarkup(ten.markup);
-                                }}
-                                className="p-1 text-indigo-600 hover:text-indigo-850 font-bold font-sans"
-                              >
-                                Edit
-                              </button>
-                              <span className="text-slate-350 font-mono">|</span>
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  if (confirm(`Are you sure you want to suspend client workspace '${ten.name}'?`)) {
-                                    setClientTenants(prev => prev.filter(p => p.id !== ten.id));
-                                    notify(`Workspace ${ten.name} suspended on client matrix.`, 'info');
-                                  }
-                                }}
-                                className="p-1 text-red-600 hover:text-red-800 font-bold font-sans"
-                              >
-                                Suspend
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center justify-between text-[11px] text-amber-900 leading-relaxed">
-              <p>
-                <strong>Calculation Audit ledger Logic:</strong> Combined pricing is automatically derived via the dynamic equation: <code>Billable CTC = usageUnitCount * unitCostPrice * ResellerMarkupMultiplier * clientSpecificFactor</code>. All invoices are isolate-persisted inside the client workspace domains respectively.
-              </p>
-            </div>
-          </Card>
-
           {/* Action Controls */}
           <div className="flex items-center justify-end gap-4 border-t border-slate-100 pt-6">
             <Button
@@ -8043,12 +7674,28 @@ function OrgAdminPanel() {
 
 function SuperAdminPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual') || 'overview';
+  const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
   const [stats, setStats] = useState({ jobs: 0, candidates: 0, users: 0, organizations: 0 });
   const [loading, setLoading] = useState(true);
   const [recentCandidates, setRecentCandidates] = useState<Candidate[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+
+  // HireNow White-Label & Reseller States
+  const [logoUrl, setLogoUrl] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80');
+  const [primaryColor, setPrimaryColor] = useState('#4f46e5');
+  const [brandingName, setBrandingName] = useState('HireNow Portal');
+  const [markupFactor, setMarkupFactor] = useState(1.35);
+  const [resellerModel, setResellerModel] = useState<'per_seat' | 'per_interview'>('per_interview');
+  const [clientTenants, setClientTenants] = useState([
+    { id: 'ct-1', name: 'Zeta Software Solutions', jobs: 6, candidates: 184, billableAmt: 5400, markup: 1.30 },
+    { id: 'ct-2', name: 'Stellar Tech Labs', jobs: 3, candidates: 49, billableAmt: 1950, markup: 1.40 },
+    { id: 'ct-3', name: 'Infinity Healthcare Corp', jobs: 8, candidates: 298, billableAmt: 11200, markup: 1.25 }
+  ]);
+  const [editingTenantId, setEditingTenantId] = useState<string | null>(null);
+  const [editingTenantName, setEditingTenantName] = useState('');
+  const [editingTenantMarkup, setEditingTenantMarkup] = useState(1.35);
+
   const [onboardModalOpen, setOnboardModalOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgDomain, setNewOrgDomain] = useState('');
@@ -8938,7 +8585,7 @@ function SuperAdminPanel() {
                 />
              </div>
              
-             <div className="grid grid-cols-2 gap-3">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div className="space-y-1">
                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry</label>
                  <select
@@ -8973,7 +8620,7 @@ function SuperAdminPanel() {
                </div>
              </div>
 
-             <div className="grid grid-cols-2 gap-3">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">HQ Location</label>
                   <input 
@@ -9817,7 +9464,7 @@ function Onboarding() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Industry</label>
                   <select
@@ -9946,916 +9593,495 @@ function LandingPage() {
           log: "Verifying contextual sanitization heuristics... OK [Pass]"
         },
         {
-          question: "What strategies do you employ to manage latency and rate limits when running multi-agent reasoning chains?",
-          answer: "We apply token-aware request multiplexing paired with exponential fallback cache maps. Speculative decoding routing predicts intermediate agents' requirements, decreasing warm cluster latency down to 140ms on complex 8-agent task graphs.",
-          grading: { coding: 96, architecture: 96, security: 92, comms: 95 },
-          log: "Running token throughput projection models... OK [Passed]"
+          question: "What strategies do you employ to manage latency and rate limits when running multi-agent reasoning loops against major LLM endpoints?",
+          answer: "I implement semantic caching layers utilizing vector DBs for immediate query matching. For distinct requests, I deploy async concurrent batching with exponential back-off strategies, governed by a global token bucket rate-limiter running on a Redis cluster to prevent endpoint throttling.",
+          grading: { coding: 96, architecture: 95, security: 89, comms: 94 },
+          log: "Validating caching architecture & rate-limit strategies... OK [Pass]"
         }
       ]
     },
     'cloud-architect': {
       title: "Principal Cloud Architect",
-      salary: "$230,000 - $280,000",
-      skills: ["AWS / GCP", "Zero-Trust Mesh", "Kubernetes Operator Patterns"],
+      salary: "$190,000 - $240,000",
+      skills: ["Kubernetes", "Terraform", "Multi-Cloud Infra"],
       steps: [
         {
-          question: "How do you design a system for zero-downtime database failovers across multiple write regions?",
-          answer: "By standing up active-active multi-region engines connected with consensus-based proxy gateways (Spanner or CockroachDB design pattern). Write conflicts are resolved using custom timestamp vector clocks with state synchronies backed by high-capacity Kafka queues.",
-          grading: { coding: 91, architecture: 99, security: 95, comms: 93 },
-          log: "Simulating region-wide node loss... Resiliency 100% [Passed]"
+          question: "Describe your approach to designing a zero-trust multi-region active-active deployment on AWS.",
+          answer: "I utilize AWS Transit Gateway interconnected with strictly peered VPCs, ensuring no public subnets exist. All internal traffic is routed via PrivateLink and encrypted via KMS. Compute layers run on EKS clusters spanning 3 regions with Route53 latency-based routing orchestrating failover, backed by Aurora Global Databases.",
+          grading: { coding: 88, architecture: 99, security: 96, comms: 91 },
+          log: "Analyzing zero-trust network topologies... OK [Pass]"
         },
         {
-          question: "Explain the architecture of a global private ingress gateway under mTLS protocols.",
-          answer: "We establish Cloud API Gateways pairing Envoy with local sidecar TLS termination. Private key pairs are dynamically rotated through secure HSM arrays utilizing SPIFFE/SPIRE for identity assertions.",
-          grading: { coding: 93, architecture: 97, security: 99, comms: 90 },
-          log: "Validating HSM signing handshakes... OK"
+          question: "How do you manage infrastructure drift and state locking in large engineering teams?",
+          answer: "We enforce strict GitOps pipelines using Atlantis. Direct AWS console access is revoked. Terraform state is locked via DynamoDB and stored in version-controlled S3 buckets. Drift detection runs nightly via chron jobs, alerting the platform team via PagerDuty on state misalignment.",
+          grading: { coding: 92, architecture: 94, security: 95, comms: 93 },
+          log: "Evaluating IAC state management protocols... OK [Pass]"
         }
       ]
     },
     'security-lead': {
-      title: "Principal Security Engineer",
-      salary: "$195,000 - $240,000",
-      skills: ["SOC2 / ISO27001", "Threat Modeling", "eBPF Kernel Probes"],
+      title: "Head of AppSec",
+      salary: "$200,000 - $250,000",
+      skills: ["DevSecOps", "Pen Testing", "Cryptographic Protocols"],
       steps: [
         {
-          question: "How would you defend high-frequency transaction servers against kernel-level memory scraping attacks?",
-          answer: "We run hardened Linux kernels isolated through secure hypervisor environments. Real-time system calls are strictly filtered utilizing eBPF monitoring tools connected to live anomaly detection micro-pipelines, triggering memory lockdown protocol during suspicious buffer reads.",
-          grading: { coding: 92, architecture: 94, security: 99, comms: 94 },
-          log: "Loading kernel-probe threat profile... Block Vector Active"
+          question: "Explain how you would secure a microservices architecture handling sensitive PII financial data.",
+          answer: "I mandate mutual TLS (mTLS) across all service meshes (e.g., Istio). Secrets are injected at runtime via HashiCorp Vault. All PII is tokenized at the edge before hitting core services. We implement strict RBAC mapped to JWT claims, and run continuous SAST/DAST checks on CI/CD pipelines.",
+          grading: { coding: 90, architecture: 95, security: 98, comms: 94 },
+          log: "Assessing cryptographic boundaries & edge sanitization... OK [Pass]"
         },
         {
-          question: "What is your approach to automated credential scanning and secret rotation inside live CI/CD clusters?",
-          answer: "We deploy hook-interceptors that parse AST representations of committing code. High-entropy key signatures are quarantined, and the cluster rotates compromised secrets instantly across Kubernetes clusters via secure Vault API integrations.",
-          grading: { coding: 95, architecture: 93, security: 98, comms: 92 },
-          log: "Scanning artifact dependencies for entropy anomalies... Passed"
+          question: "Walk me through your incident response protocol for a suspected zero-day breach.",
+          answer: "Immediate containment via network segmentation and blocking compromised CIDR blocks. We preserve forensic artifacts (disk images, memory dumps) without alerting the adversary. Concurrently, the IR team spins up a clean communication channel, assesses blast radius, and initiates parallel patching and regulatory disclosure protocols.",
+          grading: { coding: 85, architecture: 92, security: 99, comms: 96 },
+          log: "Simulating incident response lifecycle... OK [Pass]"
         }
       ]
     }
   };
 
   useEffect(() => {
+    if (!isSimulating) return;
+    
+    const maxSteps = roleData[activeRole].steps.length;
+    
+    if (simulationStep >= maxSteps) {
+      setTimeout(() => {
+        setSimLog(prev => [...prev, "Finalizing aggregate scoring model...", "Candidate Approved. Generating technical scorecard."]);
+        setIsSimulating(false);
+      }, 1000);
+      return;
+    }
+    
+    const step = roleData[activeRole].steps[simulationStep];
+    let timing = 0;
+    
+    // Animate AI Question
+    setTimeout(() => {
+      setSimLog(prev => [...prev, `[AI Interviewer]: ${step.question}`]);
+    }, timing += 800);
+    
+    // Animate Candidate Answer
+    setTimeout(() => {
+      setSimLog(prev => [...prev, `[Candidate Voice Transcript]: ${step.answer}`]);
+    }, timing += 2500);
+    
+    // Animate Telemetry & Evaluation
+    setTimeout(() => {
+      setSimLog(prev => [...prev, step.log, "Computing multidimensional skill matrices..."]);
+    }, timing += 1500);
+    
+    // Advance to next step
+    setTimeout(() => {
+      setSimulationStep(s => s + 1);
+    }, timing += 1000);
+    
+  }, [isSimulating, simulationStep, activeRole]);
+
+  const startSimulation = (role: 'ai-engineer' | 'cloud-architect' | 'security-lead') => {
+    if (isSimulating) return;
+    setActiveRole(role);
     setSimulationStep(0);
-    setIsSimulating(false);
     setSimLog([
-      `Initial connection handshakes for ${roleData[activeRole].title} screening... Completed`,
-      "Loading specialized vetting parameters...",
-      "Ready to initialize candidate audio & console interface."
+      `Initializing neural vetting sequence for: ${roleData[role].title}`,
+      "Establishing secure bidirectional audio channels... OK",
+      "Calibrating technical assessment matrices... OK"
     ]);
-  }, [activeRole]);
-
-  const handleNextStep = () => {
-    const currentRole = roleData[activeRole];
-    if (simulationStep < currentRole.steps.length - 1) {
-      const nextStep = simulationStep + 1;
-      setSimulationStep(nextStep);
-      setSimLog(prev => [
-        ...prev,
-        `Vetting Question #${nextStep} analyzed.`,
-        currentRole.steps[nextStep].log || "Recalculating score matrices..."
-      ]);
-    } else {
-      setSimulationStep(currentRole.steps.length);
-      setSimLog(prev => [
-        ...prev,
-        "Screening concluded successfully.",
-        `VETTING CERTIFICATE GENERATED: ${currentRole.title} scorecard finalized.`
-      ]);
-    }
+    setIsSimulating(true);
   };
-
-  const features = [
-    {
-      title: "Autonomous Vetting",
-      description: "Our AI agents conduct full-length technical and behavioral interviews without needing any human supervision.",
-      icon: <Brain className="w-10 h-10 text-indigo-600" />,
-      color: "bg-indigo-50"
-    },
-    {
-      title: "Deep Background Research",
-      description: "Instantly research candidate's public projects, open-source contributions, and professional web presence.",
-      icon: <Globe className="w-10 h-10 text-emerald-600" />,
-      color: "bg-emerald-50"
-    },
-    {
-      title: "Real-time Intelligence",
-      description: "Get instant, high-fidelity scorecards after every session. Identify top 1% talent with automated precision.",
-      icon: <Cpu className="w-10 h-10 text-amber-600" />,
-      color: "bg-amber-50"
-    },
-    {
-      title: "Dynamic Scheduling",
-      description: "Auto-sync with Google Calendar. AI handles the back-and-forth to set up final human-round interviews.",
-      icon: <Calendar className="w-10 h-10 text-rose-600" />,
-      color: "bg-rose-50"
-    },
-    {
-      title: "Bias-Free Evaluation",
-      description: "Standardized grading systems ensure every candidate is evaluated strictly on merit and skills.",
-      icon: <ShieldCheck className="w-10 h-10 text-blue-600" />,
-      color: "bg-blue-50"
-    },
-    {
-      title: "Seamless Integration",
-      description: "Export data to your existing ATS or CRM. Our API-first architecture fits into any enterprise stack.",
-      icon: <Zap className="w-10 h-10 text-violet-600" />,
-      color: "bg-violet-50"
-    }
-  ];
-
-  const steps = [
-    {
-      number: "01",
-      title: "Upload Job Description",
-      description: "Our AI analyzes your requirements, stack, and culture to build a custom screening persona."
-    },
-    {
-      number: "02",
-      title: "Invite Candidates",
-      description: "Send a magic link to applicants. They can start their AI-led interview instantly."
-    },
-    {
-      number: "03",
-      title: "AI Conducts Interview",
-      description: "A deep-dive session happens in real-time. The AI probes skills, experience, and problem-solving."
-    },
-    {
-      number: "04",
-      title: "Human Review",
-      description: "Review a ranked list of top performers with full transcripts and AI-generated insights."
-    }
-  ];
-
-  const useCases = [
-    {
-      title: "High-Volume Technical Hiring",
-      description: "Perfect for startups and scaling tech companies. Screen 500+ developers in a single weekend without burning out your engineering lead.",
-      benefit: "Reduce screening time from weeks to hours."
-    },
-    {
-      title: "Global Remote Expansion",
-      description: "Conduct interviews across every timezone 24/7. Our AI agents never hit 'recruiter fatigue', ensuring every candidate gets a fair shot.",
-      benefit: "True round-the-clock talent acquisition."
-    },
-    {
-      title: "Niche Domain Vetting",
-      description: "Whether it's Rust, Distributed Systems, or AI Research, our agents deep-dive into specialized nuances that standard rubrics miss.",
-      benefit: "Identify the top 1% of specialized talent."
-    }
-  ];
-
-  const benefits = [
-    {
-      title: "Zero Ghosting Policy",
-      description: "Candidates get immediate sessions and instant feedback, protecting your developer brand and ensuring a top-tier candidate experience.",
-      icon: <Users className="w-6 h-6 text-indigo-600" />
-    },
-    {
-      title: "Unbiased Evaluation",
-      description: "Remove conscious and unconscious bias from the first round. Every candidate is evaluated strictly on their answers and technical merit.",
-      icon: <ShieldCheck className="w-6 h-6 text-indigo-600" />
-    },
-    {
-      title: "Massive Cost Reduction",
-      description: "Eliminate the need for massive internal recruitment teams or expensive third-party agencies for early-stage vetting.",
-      icon: <Zap className="w-6 h-6 text-indigo-600" />
-    }
-  ];
-
-  const testimonials = [
-    {
-      quote: "HireNow cut our screening time by 90%. We hired our lead architect in just 4 days.",
-      author: "Sarah Jenkins",
-      role: "VP Engineering, TechFlow",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
-    },
-    {
-      quote: "The depth of technical questions the AI asks is mind-blowing. It's like having a senior dev on every call.",
-      author: "Marcus Chen",
-      role: "CTO, CloudScale",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus"
-    },
-    {
-      quote: "Finally, a way to scale hiring without burning out our interview panel with early-stage filtering.",
-      author: "Elena Rodriguez",
-      role: "Head of Talent, InnovateHQ",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena"
-    }
-  ];
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const showPricing = searchParams.get('view') === 'pricing';
-  const setShowPricing = (val: boolean) => {
-    if (val) setSearchParams({ view: 'pricing' });
-    else setSearchParams({});
-  };
-
-  const plans = [
-    {
-      id: "price_free",
-      name: "Free",
-      price: "0",
-      description: "Perfect for exploring AI vetting capabilities.",
-      features: ["5 AI Screenings / mo", "Standard Scoring", "Email Support", "1 Admin User"],
-      buttonText: "Start Free",
-      color: "bg-white",
-      textColor: "text-slate-900"
-    },
-    {
-      id: "price_pro",
-      name: "Pro",
-      price: "299",
-      description: "For scaling teams with high-throughput needs.",
-      features: ["50 AI Screenings / mo", "Advanced Predictive Scoring", "Priority Support", "5 Admin Users", "Calendar Integration"],
-      buttonText: "Get Pro",
-      color: "bg-indigo-600",
-      textColor: "text-white",
-      popular: true
-    },
-    {
-      id: "price_enterprise",
-      name: "Enterprise",
-      price: "999",
-      description: "Custom solutions for global organizations.",
-      features: ["Unlimited Screenings", "Custom Agent Training", "Dedicated Success Manager", "Unlimited Admin Users", "API Access", "SSO / SAML"],
-      buttonText: "Contact Sales",
-      color: "bg-slate-900",
-      textColor: "text-white"
-    }
-  ];
-
-  const handleCheckout = (planId: string) => {
-    // Direct sign in for MVP, payment gateway disabled
-    signIn();
-  };
-
-  if (showPricing) {
-    return (
-      <div className="min-h-screen bg-slate-50 py-32 px-6">
-        <div className="max-w-7xl mx-auto">
-          <button 
-            onClick={() => setShowPricing(false)}
-            className="flex items-center gap-2 text-slate-500 font-bold mb-12 hover:text-indigo-600 transition-colors uppercase tracking-widest text-xs"
-          >
-            <ArrowRight className="w-4 h-4 rotate-180" /> Back to home
-          </button>
-          
-          <div className="text-center mb-20">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black text-slate-900 tracking-tighter mb-6 uppercase">Ready to scale <br /><span className="text-indigo-600">at machine speed?</span></h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-500 font-medium max-w-2xl mx-auto">Choose the plan that fits your growth trajectory. All plans include our core autonomous screening engine.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((p, i) => (
-              <Card key={i} className={cn("p-12 relative overflow-hidden flex flex-col justify-between rounded-[3rem] border-none shadow-2xl", p.color)}>
-                {p.popular && (
-                  <div className="absolute top-8 right-8 px-4 py-1 bg-white text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                    Most Popular
-                  </div>
-                )}
-                <div>
-                   <h3 className={cn("text-2xl font-black mb-2 uppercase tracking-tight", p.textColor)}>{p.name}</h3>
-                   <div className="flex items-baseline gap-1 mb-6">
-                      <span className={cn("text-5xl font-display font-black", p.textColor)}>${p.price}</span>
-                      <span className={cn("font-bold", p.textColor === 'text-white' ? 'text-indigo-200' : 'text-slate-400')}>/mo</span>
-                   </div>
-                   <p className={cn("font-medium mb-10 leading-relaxed", p.textColor === 'text-white' ? 'text-indigo-100' : 'text-slate-500')}>{p.description}</p>
-                   
-                   <div className="space-y-6 mb-12">
-                      {p.features.map((f, fi) => (
-                        <div key={fi} className="flex items-center gap-4">
-                           <div className={cn("w-5 h-5 rounded-full flex items-center justify-center shrink-0", p.textColor === 'text-white' ? 'bg-white/20' : 'bg-indigo-50')}>
-                              <Check className={cn("w-3 h-3", p.textColor === 'text-white' ? 'text-white' : 'text-indigo-600')} />
-                           </div>
-                           <span className={cn("text-sm font-bold", p.textColor === 'text-white' ? 'text-indigo-50' : 'text-slate-700')}>{f}</span>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-
-                <Button 
-                  variant={p.color === 'bg-white' ? 'brand' : 'white'} 
-                  size="lg" 
-                  className="w-full h-16 rounded-2xl font-black uppercase tracking-widest"
-                  onClick={() => handleCheckout(p.id)}
-                >
-                  {p.buttonText}
-                </Button>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-20 p-12 bg-white rounded-[3rem] border border-slate-100 text-center">
-             <h4 className="text-xl font-bold text-slate-900 mb-4">Enterprise Customization</h4>
-             <p className="text-slate-500 font-medium mb-8 max-w-xl mx-auto">Need something unique? We offer localized agent training, custom voice profiles, and specialized assessment matrices for specific industry high-volume needs.</p>
-             <button className="text-indigo-600 font-black uppercase tracking-widest text-sm hover:underline">Speak with a Solution Architect</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden selection:bg-indigo-100 italic-shadows">
-      {/* 2026 Aurora Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-indigo-500/10 blur-[120px] rounded-full animate-aurora" />
-        <div className="absolute top-[20%] -right-[10%] w-[60%] h-[60%] bg-emerald-500/5 blur-[120px] rounded-full animate-aurora-delayed" />
-        <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-indigo-600/5 blur-[120px] rounded-full animate-aurora" />
+    <div className="min-h-screen bg-[#050505] text-slate-300 font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-\\\\[marquee_30s_linear_infinite\\\\] {
+          animation: marquee 30s linear infinite;
+        }
+      `}} />
+      
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px] mix-blend-screen animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-600/10 blur-[150px] mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-indigo-600/10 blur-[100px] mix-blend-screen animate-pulse" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
       </div>
 
-      {/* Background Decor */}
-      <div className="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[800px] bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.05)_0%,transparent_70%)] pointer-events-none" />
-
-      {/* Hero Section */}
-      <section id="home" className="relative z-10 pt-20 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 max-w-7xl mx-auto text-center">
-        <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 border border-indigo-100 mb-8 sm:mb-10 backdrop-blur-md shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="text-[10px] font-black text-indigo-900 uppercase tracking-[0.25em]">The 2026 Standard for Talent</span>
-          </div>
-          <h1 className="text-5xl sm:text-7xl md:text-[8rem] lg:text-[9.5rem] font-display font-black text-slate-950 tracking-tighter leading-[0.8] mb-10 sm:mb-12 uppercase drop-shadow-sm">
-            AUTONOMOUS <br />
-            <span className="text-indigo-600 inline-block">HIRING <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-emerald-500">POWER.</span></span>
-          </h1>
-          <p className="text-base sm:text-xl md:text-3xl text-slate-500 max-w-3xl mx-auto font-medium leading-normal sm:leading-tight mb-12 sm:mb-16 tracking-tight px-4">
-            HireNow initiates 24/7 autonomous screenings that out-perform human panels in consistency, depth, and speed.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4">
-            <Button variant="brand" size="lg" className="w-full sm:w-auto h-auto py-5 sm:py-6 px-10 sm:px-14 text-lg sm:text-xl shadow-2xl shadow-indigo-500/40 rounded-[2rem]" onClick={() => setShowPricing(true)}>
-              Start Scaling <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2" />
-            </Button>
-            <button className="w-full sm:w-auto flex items-center justify-center gap-3 text-slate-900 font-bold text-lg hover:text-indigo-600 transition-all group py-4 sm:py-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-slate-200 flex items-center justify-center group-hover:border-indigo-600 group-hover:scale-110 transition-all">
-                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+      <div className="relative z-10">
+        
+        {/* Navigation */}
+        <header className="sticky top-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-2xl">
+          <div className="w-full px-4 sm:px-6 h-20 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-600 to-cyan-500 p-[1px]">
+                <div className="w-full h-full bg-[#050505] rounded-[11px] flex items-center justify-center">
+                  <Cpu className="w-5 h-5 text-white" />
+                </div>
               </div>
-              Watch Vision
-            </button>
+              <span className="font-display font-black text-2xl tracking-tighter text-white">Hire<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400">Now</span></span>
+            </div>
+            
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Platform</a>
+              <a href="#simulation" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
+              <a href="#trusted" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Enterprise</a>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <button onClick={signIn} className="text-xs font-bold text-slate-300 hover:text-white transition-colors uppercase tracking-widest">
+                Log In
+              </button>
+              <button onClick={signIn} className="px-5 py-2.5 rounded-lg bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                Deploy Now
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Hero Section */}
+        <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">
+            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">v2.0 Autonomous Engine Live</span>
           </div>
           
-          {/* Floating Highlights */}
-          <div className="mt-16 flex flex-wrap justify-center gap-4">
-             <div className="px-5 py-2.5 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                   <Clock className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-bold text-slate-600 tracking-tight">Vet in <span className="text-slate-950">minutes</span></span>
-             </div>
-             <div className="px-5 py-2.5 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                   <Brain className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-bold text-slate-600 tracking-tight">AI Interviewers</span>
-             </div>
-             <div className="px-5 py-2.5 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-                   <Award className="w-4 h-4" />
-                </div>
-                <span className="text-sm font-bold text-slate-600 tracking-tight">Top 1% Identification</span>
-             </div>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white leading-[1.1] mb-8 font-display max-w-5xl mx-auto">
+            Supercharge your agency with <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-indigo-400 to-cyan-400">Autonomous AI Screening.</span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
+            Stop wasting recruiter hours on initial screening calls. Deploy our conversational AI agents to conduct rigorous, multi-dimensional interviews for your clients at infinite scale.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <button onClick={signIn} className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_30px_rgba(79,70,229,0.3)]">
+              Start Building Team
+            </button>
+            <a href="#simulation" className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-widest hover:bg-white/10 transition-colors backdrop-blur-md">
+              Watch Simulation
+            </a>
           </div>
-        </motion.div>
+        </section>
 
-      </section>
+        {/* Trusted By Ticker */}
+        <section id="trusted" className="py-12 border-y border-white/5 bg-black/20 overflow-hidden backdrop-blur-md">
+          <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500 mb-8">Trusted by Elite Engineering Teams</p>
+          <div className="flex w-full overflow-hidden">
+            <div className="flex animate-[marquee_30s_linear_infinite] min-w-full items-center justify-around gap-16 px-8 opacity-40 grayscale">
+              {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
+                <span key={i} className="text-xl md:text-2xl font-black uppercase tracking-tighter font-display whitespace-nowrap text-white">{company}</span>
+              ))}
+            </div>
+            <div className="flex animate-[marquee_30s_linear_infinite] min-w-full items-center justify-around gap-16 px-8 opacity-40 grayscale" aria-hidden="true">
+              {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
+                <span key={i} className="text-xl md:text-2xl font-black uppercase tracking-tighter font-display whitespace-nowrap text-white">{company}</span>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* Stats Bar */}
-      <section className="py-12 sm:py-20 border-y border-slate-100 bg-slate-50/50 backdrop-blur-sm relative z-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center mb-10 sm:mb-12">Trusted by 200+ elite engineering teams</div>
-          <div className="flex flex-wrap justify-center sm:justify-between items-center gap-8 sm:gap-10 opacity-30 grayscale mb-12 sm:mb-16">
-             <div className="text-xl sm:text-2xl font-black tracking-tighter">TECHFLOW</div>
-             <div className="text-xl sm:text-2xl font-black tracking-tighter italic">CloudScale</div>
-             <div className="text-xl sm:text-2xl font-black tracking-tighter uppercase">InnovateHQ</div>
-             <div className="text-xl sm:text-2xl font-black tracking-tighter leading-none">GlobalVenture</div>
-             <div className="text-xl sm:text-2xl font-black tracking-tighter italic">DevSymphony</div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 text-center">
-          <div>
-            <div className="text-3xl sm:text-5xl font-display font-black text-slate-900 mb-1 sm:mb-2 tracking-tighter">85%</div>
-            <div className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Time Subtraction</div>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-5xl font-display font-black text-slate-900 mb-1 sm:mb-2 tracking-tighter">1.2k</div>
-            <div className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Hours Saved Monthly</div>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-5xl font-display font-black text-slate-900 mb-1 sm:mb-2 tracking-tighter">0.01s</div>
-            <div className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Decision Latency</div>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-5xl font-display font-black text-slate-900 mb-1 sm:mb-2 tracking-tighter">4.9/5</div>
-            <div className="text-[9px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Candidate Net Score</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-      {/* Vetting Sandbox Section */}
-      <section id="interactive-lab" className="py-24 sm:py-32 bg-slate-950 border-t border-slate-900 text-white relative z-20 overflow-hidden">
-        {/* Abstract Background details */}
-        <div className="absolute inset-0 bg-grid-white opacity-5 pointer-events-none" />
-        <div className="absolute bottom-0 right-[20%] w-[350px] h-[350px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-6">
+        {/* Interactive Simulation Terminal */}
+        <section id="simulation" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-4 backdrop-blur-md">
-              <Terminal className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="text-[9px] font-black tracking-widest text-indigo-300 uppercase">Live Evaluation Sandbox</span>
-            </div>
-            <h2 className="text-4xl sm:text-6xl font-display font-black tracking-tight uppercase leading-none mb-6">
-              Vetting Sandbox <br />
-              <span className="text-indigo-400">Try it in Real-time</span>
-            </h2>
-            <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto font-medium">
-              We developed this live testing node so technology leaders can assess our neural grading matrices, automated latency triggers, and secure PII masking logs instantly.
-            </p>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-4">See the AI in Action.</h2>
+            <p className="text-slate-400 max-w-xl mx-auto">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            {/* Left: Role Selection & Options */}
-            <div className="lg:col-span-4 flex flex-col justify-between gap-6 bg-slate-900/60 border border-slate-800/80 p-8 rounded-[2rem] backdrop-blur-md">
-              <div>
-                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-3">1. Select Target Persona</h3>
-                <div className="space-y-3">
-                  {(['ai-engineer', 'cloud-architect', 'security-lead'] as const).map((roleKey) => {
-                    const data = roleData[roleKey];
-                    const isActive = activeRole === roleKey;
-                    return (
-                      <button
-                        key={roleKey}
-                        onClick={() => {
-                          setActiveRole(roleKey);
-                          notify(`Switched preview node to ${data.title} standard profile`, 'info');
-                        }}
-                        className={cn(
-                          "w-full text-left p-4 rounded-2xl transition-all border flex flex-col gap-1 cursor-pointer",
-                          isActive 
-                            ? "bg-indigo-600/10 border-indigo-500/50 text-white shadow-lg shadow-indigo-950/20" 
-                            : "bg-slate-900/30 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200"
-                        )}
-                      >
-                        <div className="flex justify-between items-center w-full">
-                          <span className="font-bold text-sm tracking-tight">{data.title}</span>
-                          <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-full", isActive ? "bg-indigo-500 text-white" : "bg-slate-800 text-slate-500")}>
-                            {data.salary}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {data.skills.slice(0, 3).map((s, idx) => (
-                            <span key={idx} className="text-[9px] font-semibold bg-slate-950/50 px-2 py-0.5 rounded text-slate-400">
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+          <div className="bg-[#0A0A0B] rounded-2xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden max-w-5xl mx-auto">
+            {/* Terminal Header */}
+            <div className="h-12 border-b border-white/10 bg-[#121214] flex items-center px-4 justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
               </div>
-
-              <div className="border-t border-slate-800 pt-6 space-y-4">
-                <div className="rounded-2xl bg-slate-950/85 border border-slate-800 p-4 font-mono text-[11px] leading-relaxed text-slate-400 max-h-[160px] overflow-y-auto">
-                  <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5 border-b border-indigo-950 pb-1.5">
-                    <Database className="w-3 h-3" /> System Live Metrics
-                  </div>
-                  {simLog.map((log, index) => (
-                    <div key={index} className="flex gap-2">
-                      <span className="text-slate-600">❯</span>
-                      <span>{log}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {!isSimulating ? (
-                  <Button
-                    onClick={() => {
-                      setIsSimulating(true);
-                      setSimulationStep(0);
-                      notify('Autonomous vetting simulation initialized!', 'success');
-                    }}
-                    variant="brand"
-                    className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl shadow-indigo-950/50 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Play className="w-4 h-4 fill-current mr-1" />
-                    Launch Evaluation Node
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setIsSimulating(false);
-                        setSimulationStep(0);
-                        notify('Simulation parameters reset.', 'info');
-                      }}
-                      className="flex-1 h-14 border border-slate-800 hover:border-slate-700 text-slate-400 bg-slate-950/20 font-black uppercase tracking-widest text-[11px] rounded-2xl cursor-pointer"
-                    >
-                      Reset Sim
-                    </button>
-                    <button
-                      onClick={handleNextStep}
-                      className="flex-[2] h-14 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-950 cursor-pointer"
-                    >
-                      {simulationStep >= roleData[activeRole].steps.length ? (
-                        <>Complete Vetting</>
-                      ) : (
-                        <>
-                          Next Question <ArrowRight className="w-3.5 h-3.5" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
+              <div className="text-[10px] font-mono text-slate-500 flex items-center gap-2">
+                <Terminal className="w-3 h-3" />
+                hirenow-engine // live-eval
               </div>
+              <div className="w-16"></div>
             </div>
 
-            {/* Right: Simulated Vetting Terminal Dashboard Mockup */}
-            <div className="lg:col-span-8 flex flex-col bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl relative overflow-hidden min-h-[500px]">
-              {/* Header Bar */}
-              <div className="px-8 py-5 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-rose-500/30 border border-rose-500/50 block" />
-                    <span className="w-3 h-3 rounded-full bg-amber-500/30 border border-amber-500/50 block" />
-                    <span className="w-3 h-3 rounded-full bg-emerald-500/30 border border-emerald-500/50 block" />
-                  </div>
-                  <span className="h-4 w-px bg-slate-800" />
-                  <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                    v2.24-live // {roleData[activeRole].title}
-                  </span>
-                </div>
-                <div className="text-[10px] font-mono font-black border border-indigo-950 text-indigo-400 bg-indigo-950/20 px-3 py-1 rounded-full uppercase tracking-widest">
-                  Secure Cluster
+            <div className="grid grid-cols-1 lg:grid-cols-3">
+              {/* Sidebar Controls */}
+              <div className="border-r border-white/10 bg-[#121214]/50 p-6 flex flex-col gap-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Select Target Persona</p>
+                
+                {(Object.keys(roleData) as Array<keyof typeof roleData>).map(role => (
+                  <button
+                    key={role}
+                    onClick={() => startSimulation(role)}
+                    disabled={isSimulating}
+                    className={`flex flex-col text-left p-4 rounded-xl border ${activeRole === role ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-transparent hover:bg-white/10'} transition-all disabled:opacity-50`}
+                  >
+                    <span className="text-sm font-bold text-white mb-1">{roleData[role].title}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{roleData[role].salary}</span>
+                  </button>
+                ))}
+                
+                <div className="mt-auto pt-6">
+                   <Button 
+                    onClick={() => startSimulation(activeRole)} 
+                    disabled={isSimulating}
+                    className="w-full bg-white text-black hover:bg-slate-200 text-xs font-black uppercase tracking-widest"
+                   >
+                     {isSimulating ? 'Processing...' : 'Run Simulation'}
+                   </Button>
                 </div>
               </div>
 
-              {/* Main Content Pane */}
-              <div className="flex-1 p-8 sm:p-10 flex flex-col justify-between gap-8 h-full">
-                {!isSimulating ? (
-                  // Empty State / Idle Mode
-                  <div className="flex-1 flex flex-col items-center justify-center text-center my-auto min-h-[350px]">
-                    <div className="w-20 h-20 bg-indigo-500/10 border border-indigo-500/20 rounded-3xl flex items-center justify-center text-indigo-400 mb-6">
-                      <Brain className="w-10 h-10" />
-                    </div>
-                    <h3 className="text-xl font-bold tracking-tight mb-2">Vetting Suite Standby</h3>
-                    <p className="text-sm text-slate-400 max-w-sm font-medium mb-8">
-                      Click the "Launch Evaluation Node" button to review how candidates answer questions and generate scorecards in real-time.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4 text-[10px] font-mono text-slate-500 tracking-wider">
-                      <span>✓ TLS ENCRYPTION</span>
-                      <span>•</span>
-                      <span>✓ SOC2 FRAMEWORKS</span>
-                      <span>•</span>
-                      <span>✓ mTLS CERTIFICATES</span>
-                    </div>
-                  </div>
-                ) : simulationStep >= roleData[activeRole].steps.length ? (
-                  // Completed report state
-                  <div className="space-y-8 animate-in fade-in duration-500">
-                    <div className="flex items-center gap-4 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                      <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-950">
-                        <Check className="w-5 h-5 stroke-[3px]" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-emerald-400 text-sm">Vetting Successfully Completed</h4>
-                        <p className="text-xs text-slate-400 font-medium">Automatic background matrix sync check completed.</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
-                      <div className="p-6 bg-slate-950 border border-slate-800/80 rounded-2xl">
-                        <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest block mb-1">COMPOSITE SCORE</span>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-5xl font-display font-black text-white">96</span>
-                          <span className="text-slate-500 font-bold text-sm">/100</span>
-                        </div>
-                        <p className="text-[11px] text-emerald-400 font-extrabold tracking-widest uppercase mt-3 flex items-center gap-1.5">
-                          <Award className="w-3.5 h-3.5" /> Fast-track candidate [top 1%]
-                        </p>
-                      </div>
-
-                      <div className="p-6 bg-slate-950 border border-slate-800/80 rounded-2xl space-y-4">
-                        <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest block">Parameter Evaluation</span>
-                        <div className="space-y-3">
-                          {[
-                            { name: "Technical Depth", val: 97, color: "bg-indigo-500" },
-                            { name: "Architectural Foresight", val: 98, color: "bg-teal-500" },
-                            { name: "Risk Mitigation Sense", val: 95, color: "bg-blue-500" },
-                            { name: "Communication Impact", val: 94, color: "bg-violet-500" },
-                          ].map((metric, idx) => (
-                            <div key={idx} className="space-y-1">
-                              <div className="flex justify-between text-[11px] font-bold">
-                                <span className="text-slate-400">{metric.name}</span>
-                                <span className="text-white">{metric.val}%</span>
-                              </div>
-                              <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-                                <div className={cn("h-full rounded-full transition-all duration-700", metric.color)} style={{ width: `${metric.val}%` }} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 bg-slate-950/60 border border-slate-850 rounded-2xl font-mono text-xs leading-relaxed text-slate-400">
-                      <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3">AI Recommendation Thesis</div>
-                      "Candidate demonstrates exceptional capabilities in system resiliency and mitigation pipelines. Depth of response indicates hands-on experience under high production pressures. Automated recommendation: bypass secondary screenings directly into CTO structural design discussion."
-                    </div>
-                  </div>
-                ) : (
-                  // Active interactive step state
-                  <div className="space-y-6 animate-in fade-in duration-300">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded bg-indigo-950 border border-indigo-900 text-indigo-400 text-[9px] font-mono font-black uppercase">
-                          QUESTION 0{simulationStep + 1}
-                        </span>
-                        <span className="text-slate-600 font-mono text-xs">• Live session</span>
-                      </div>
-                      <h4 className="text-lg sm:text-xl font-bold tracking-tight text-white">
-                        {roleData[activeRole].steps[simulationStep].question}
-                      </h4>
-                    </div>
-
-                    <div className="p-6 bg-slate-950 rounded-2xl border border-slate-850/80 relative">
-                      <div className="absolute top-4 right-4 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
-                        <span className="text-[9px] font-mono text-indigo-400 font-bold uppercase tracking-widest">TRANSCRIBING AUDIO</span>
-                      </div>
-                      <p className="text-sm text-slate-300 font-medium leading-relaxed italic pr-12">
-                        "{roleData[activeRole].steps[simulationStep].answer}"
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      {Object.entries(roleData[activeRole].steps[simulationStep].grading).map(([key, value]) => (
-                        <div key={key} className="p-4 bg-slate-950/40 border border-slate-850 rounded-xl text-center">
-                          <span className="text-[9.5px] font-black text-slate-500 uppercase tracking-widest block mb-1">
-                            {key}
-                          </span>
-                          <span className="text-2xl font-display font-black text-indigo-400">{value}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              {/* Terminal Output */}
+              <div className="lg:col-span-2 p-6 font-mono text-sm h-[500px] overflow-y-auto bg-black relative flex flex-col">
+                {simLog.map((log, i) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    key={i} 
+                    className={`mb-3 ${log.includes('[AI Interviewer]') ? 'text-indigo-400' : log.includes('[Candidate Voice') ? 'text-slate-300 pl-4 border-l-2 border-slate-700' : log.includes('[Pass]') ? 'text-green-400' : 'text-slate-500'}`}
+                  >
+                    {log.includes('OK') ? (
+                      <span className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                        <span>{log}</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-start gap-2">
+                        <ChevronRight className="w-4 h-4 opacity-50 shrink-0 mt-0.5" />
+                        <span className="leading-relaxed">{log}</span>
+                      </span>
+                    )}
+                  </motion.div>
+                ))}
+                
+                {isSimulating && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="mt-4"
+                  >
+                    <span className="w-2 h-4 bg-indigo-500 inline-block"></span>
+                  </motion.div>
                 )}
                 
-                {/* Simulator Footer details */}
-                <div className="pt-6 border-t border-slate-800 flex flex-wrap gap-4 items-center justify-between text-slate-500 font-mono text-[10px]">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>SECURE DIRECTORY ENCRYPTION: ACTIVE</span>
-                  </div>
-                  <span>SESSION TOKEN: HI_AE_SEC_V34</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section id="how-it-works" className="py-32 px-6 max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-          <div>
-            <h2 className="text-5xl md:text-7xl font-display font-black text-slate-950 tracking-tighter leading-none mb-10 uppercase">
-              How the platform <br />
-              <span className="text-indigo-600">scales your talent.</span>
-            </h2>
-            <p className="text-xl text-slate-500 font-medium leading-relaxed mb-12">
-              Transforming your hiring pipeline into a high-throughput engine. No more manual screening, no more scheduling nightmares.
-            </p>
-            <div className="space-y-12">
-               {steps.map((step, i) => (
-                 <div key={i} className="flex gap-8 group">
-                    <div className="text-4xl font-display font-black text-slate-200 group-hover:text-indigo-600 transition-colors">{step.number}</div>
-                    <div>
-                      <h4 className="text-2xl font-bold text-slate-900 mb-2">{step.title}</h4>
-                      <p className="text-slate-500 font-medium">{step.description}</p>
-                    </div>
-                 </div>
-               ))}
-            </div>
-          </div>
-          <div className="relative">
-             <div className="absolute inset-0 bg-indigo-500/10 blur-[100px] rounded-full" />
-             <Card className="aspect-square relative flex items-center justify-center p-12 bg-slate-900 rounded-[4rem] border-none shadow-2xl overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.4)_0%,transparent_100%)]" />
-                <div className="text-center relative z-10">
-                   <div className="w-32 h-32 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-10 border border-indigo-500/40">
-                      <Zap className="w-16 h-16 text-indigo-400" />
-                   </div>
-                   <h3 className="text-4xl font-display font-black text-white mb-6 uppercase tracking-tight">HireNow AGENT IS ACTIVE.</h3>
-                   <div className="flex justify-center gap-1">
-                      {[1,2,3,4,5].map(i => <div key={i} className="w-2 h-8 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />)}
-                   </div>
-                </div>
-             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Grid */}
-      <section id="features" className="py-32 px-6 max-w-7xl mx-auto relative z-10 bg-slate-900 rounded-[5rem] my-20 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white opacity-[0.03] pointer-events-none" />
-        <div className="text-center mb-24 relative z-10">
-          <h2 className="text-5xl md:text-7xl font-display font-black text-white tracking-tighter mb-6 uppercase">SUPERCHARGED VETTING.</h2>
-          <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto">Enterprise-grade tools for teams who refuse to settle for average talent.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ y: -10 }}
-              className="group"
-            >
-              <Card className="p-12 h-full flex flex-col items-start gap-8 bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-left backdrop-blur-xl">
-                <div className={cn("w-20 h-20 rounded-[2rem] flex items-center justify-center transition-all group-hover:scale-110", f.color)}>
-                  {f.icon}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-4">{f.title}</h3>
-                  <p className="text-slate-400 leading-relaxed font-medium">{f.description}</p>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Use Cases - NEW SECTION */}
-      <section id="solutions" className="py-32 px-6 max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row items-end justify-between gap-10 mb-20">
-          <div className="max-w-2xl">
-            <h2 className="text-5xl md:text-7xl font-display font-black text-slate-950 tracking-tighter leading-none mb-6 uppercase">
-              Built for <br />
-              <span className="text-indigo-600">Complex Scale.</span>
-            </h2>
-            <p className="text-xl text-slate-500 font-medium">Whatever your stack, wherever your team is based, HireNow adapts to your specific hiring needs.</p>
-          </div>
-          <div className="h-px flex-1 bg-slate-100 hidden md:block mb-6" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {useCases.map((uc, i) => (
-            <div key={i} className="group p-10 bg-white border border-slate-100 rounded-[3rem] hover:shadow-2xl hover:shadow-indigo-500/10 transition-all">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">{uc.title}</h3>
-              <p className="text-slate-500 font-medium leading-relaxed mb-8">{uc.description}</p>
-              <div className="flex items-center gap-3 text-indigo-600 font-bold">
-                 <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center">
-                    <Check className="w-4 h-4" />
-                 </div>
-                 {uc.benefit}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Benefits / Why HireNow - NEW SECTION */}
-      <section id="about" className="py-32 bg-slate-50 relative z-10 overflow-hidden rounded-[5rem] my-20">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-indigo-600 skew-x-12 translate-x-1/2 opacity-[0.03]" />
-        
-        {/* Added Trust/Security Section */}
-        <div className="max-w-7xl mx-auto px-6 mb-32 border-b border-slate-200 pb-32">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-              <div>
-                 <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mb-8">
-                    <ShieldCheck className="w-6 h-6 text-white" />
-                 </div>
-                 <h2 className="text-5xl font-display font-black text-slate-900 tracking-tighter uppercase mb-6 leading-none">Enterprise-Grade <br /><span className="text-indigo-600">Trust & Security.</span></h2>
-                 <p className="text-xl text-slate-500 font-medium mb-8 leading-relaxed">
-                    HireNow is built for organizations that prioritize data privacy and objective evaluation. Our agents are SOC2 Type II compliant and conduct every interview within a secure, sandboxed environment.
-                 </p>
-                 <div className="grid grid-cols-2 gap-6">
-                    <div className="p-6 bg-white rounded-3xl border border-slate-100">
-                       <h5 className="font-black text-slate-900 mb-2">Pii Redaction</h5>
-                       <p className="text-xs text-slate-500 font-medium lowercase italic">Automatic masking of sensitive candidate data during initial vetting rounds.</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-3xl border border-slate-100">
-                       <h5 className="font-black text-slate-900 mb-2">GDPR Compliant</h5>
-                       <p className="text-xs text-slate-500 font-medium lowercase italic">Full right-to-be-forgotten and data residency controls for global scale.</p>
-                    </div>
-                 </div>
-              </div>
-              <div className="relative">
-                 <div className="absolute inset-0 bg-indigo-500/5 blur-[80px] rounded-full" />
-                 <Card className="p-10 bg-white shadow-2xl rounded-[3rem] border-none relative overflow-hidden">
-                    <div className="space-y-6">
-                       {[1,2,3].map(i => (
-                         <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
-                            <div className="h-3 w-1/2 bg-slate-200 rounded-full" />
-                            <div className="ml-auto text-[10px] font-black text-slate-400">ENCRYPTED</div>
+                {!isSimulating && simLog.length > 2 && (
+                   <div className="mt-auto pt-6">
+                      <div className="p-4 border border-green-500/30 bg-green-500/10 rounded-xl flex items-center justify-between">
+                         <div className="flex flex-col">
+                            <span className="text-green-400 font-bold uppercase text-[10px] tracking-widest">Simulation Concluded</span>
+                            <span className="text-white text-sm">Scorecard Generated Successfully</span>
                          </div>
-                       ))}
-                       <div className="pt-4 border-t border-slate-100">
-                          <div className="flex justify-between text-[10px] font-black tracking-widest text-indigo-600 uppercase mb-4">
-                             <span>Security Audit Pulse</span>
-                             <span>99.9% Pass Rate</span>
-                          </div>
-                          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                             <div className="h-full w-full bg-indigo-600" />
-                          </div>
-                       </div>
-                    </div>
-                 </Card>
-              </div>
-           </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
-           <div className="lg:col-span-5">
-              <h2 className="text-5xl font-display font-black text-slate-900 tracking-tighter uppercase mb-8">Why choose <br /><span className="text-indigo-600">HireNow?</span></h2>
-              <div className="space-y-10">
-                 {benefits.map((b, i) => (
-                   <div key={i} className="flex gap-6">
-                      <div className="w-14 h-14 shrink-0 bg-white shadow-lg rounded-2xl flex items-center justify-center">
-                         {b.icon}
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-bold text-slate-900 mb-2">{b.title}</h4>
-                        <p className="text-slate-500 font-medium leading-relaxed">{b.description}</p>
+                         <Button onClick={signIn} variant="ghost" className="text-green-400 hover:bg-green-500/20 text-[10px] uppercase font-black tracking-widest">
+                           View Details
+                         </Button>
                       </div>
                    </div>
-                 ))}
+                )}
               </div>
-           </div>
-           <div className="lg:col-span-7 grid grid-cols-2 gap-6">
-              <div className="space-y-6 pt-12">
-                 <Card className="p-8 bg-white shadow-xl rounded-[2.5rem] border-none">
-                    <div className="text-4xl font-display font-black text-indigo-600 mb-2">90%</div>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-tight">Reduction in cost per technical hire</p>
-                 </Card>
-                 <Card className="p-8 bg-slate-900 shadow-xl rounded-[2.5rem] border-none text-white">
-                    <div className="text-4xl font-display font-black text-white mb-2">Instant</div>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-tight">Feedback loop for all candidates</p>
-                 </Card>
-              </div>
-              <div className="space-y-6">
-                 <Card className="p-8 bg-indigo-600 shadow-xl rounded-[2.5rem] border-none text-white">
-                    <div className="text-4xl font-display font-black text-white mb-2">100%</div>
-                    <p className="text-sm font-bold text-indigo-200 uppercase tracking-widest leading-tight">Consistency in evaluation metrics</p>
-                 </Card>
-                 <Card className="p-8 bg-white shadow-xl rounded-[2.5rem] border-none">
-                    <div className="text-4xl font-display font-black text-indigo-600 mb-2">4 Days</div>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-tight">Average time to hire with HireNow</p>
-                 </Card>
-              </div>
-           </div>
-        </div>
-      </section>
+            </div>
+          </div>
+        </section>
 
-      {/* Testimonials */}
-      <section className="py-24 sm:py-32 px-4 sm:px-6 max-w-7xl mx-auto text-center">
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-black text-slate-950 tracking-tighter mb-16 sm:mb-20 uppercase">Intelligence Era <br /> <span className="text-indigo-600">Leaderboard.</span></h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
-          {testimonials.map((t, i) => (
-             <Card key={i} className="p-8 sm:p-10 border-2 border-slate-50 bg-slate-50/20 backdrop-blur-sm text-left flex flex-col justify-between hover:border-indigo-100 hover:bg-white transition-all duration-500">
-                <div>
-                  <div className="flex gap-1 mb-6 sm:mb-8 text-amber-500">
-                     {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />)}
+        {/* Bento Grid Features */}
+        <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+           <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-4">Enterprise Architecture.</h2>
+            <p className="text-slate-400 max-w-xl mx-auto">Built from the ground up to support high-volume hiring operations with uncompromised accuracy and compliance.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+             {/* Feature 1 - Large */}
+             <div className="md:col-span-2 md:row-span-2 rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+               <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center mb-6">
+                 <Cpu className="w-6 h-6 text-indigo-400" />
+               </div>
+               <h3 className="text-2xl font-black text-white mb-3">Adaptive Neural Assessment</h3>
+               <p className="text-slate-400 font-medium max-w-md">Our AI doesn't ask static questions. It parses the candidate's resume and dynamically generates deep, contextual technical challenges that adapt based on their real-time responses.</p>
+               
+               <div className="mt-auto border border-white/10 bg-black/40 rounded-xl p-4 flex items-center gap-4 backdrop-blur-md">
+                 <div className="flex-1 space-y-2">
+                   <div className="h-2 bg-white/10 rounded-full w-full overflow-hidden">
+                     <div className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 w-[85%]"></div>
+                   </div>
+                   <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                     <span>System Architecture Evaluation</span>
+                     <span className="text-cyan-400 font-bold">94/100</span>
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             {/* Feature 2 - Small */}
+             <div className="rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col relative overflow-hidden group">
+               <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center mb-4">
+                 <Database className="w-5 h-5 text-violet-400" />
+               </div>
+               <h3 className="text-lg font-black text-white mb-2">ATS Integrations</h3>
+               <p className="text-sm text-slate-400">Seamless bidirectional sync with Greenhouse, Lever, and Workday. Webhook support for custom workflows.</p>
+             </div>
+
+             {/* Feature 3 - Small */}
+             <div className="rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col relative overflow-hidden group">
+               <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-4">
+                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
+               </div>
+               <h3 className="text-lg font-black text-white mb-2">Anti-Cheat Protocols</h3>
+               <p className="text-sm text-slate-400">Real-time eye tracking, tab-switch monitoring, and ambient audio analysis ensure candidate integrity.</p>
+             </div>
+
+             {/* Feature 4 - Medium */}
+             <div className="md:col-span-3 rounded-3xl bg-gradient-to-r from-indigo-900/40 via-violet-900/40 to-black border border-white/10 p-8 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden group">
+               <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 mb-4">
+                     <Globe className="w-3 h-3 text-white" />
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-white">White-Label OS</span>
                   </div>
-                  <p className="text-lg sm:text-xl text-slate-800 font-medium italic leading-relaxed mb-8 sm:mb-10 tracking-tight">"{t.quote}"</p>
-                </div>
-                <div className="flex items-center gap-4 border-t border-slate-100 pt-6 sm:pt-8">
-                   <img src={t.image} alt={t.author} className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white p-1 ring-2 ring-slate-100" />
-                   <div>
-                      <h4 className="font-black text-slate-900 text-sm sm:text-base leading-none mb-1">{t.author}</h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.role}</p>
-                   </div>
-                </div>
-             </Card>
-          ))}
-        </div>
-      </section>
+                  <h3 className="text-2xl font-black text-white mb-3">Enterprise Reseller Capabilities</h3>
+                  <p className="text-slate-400 text-sm max-w-2xl">Operate HireNow as your own product. Embed the screening lobby directly into your corporate domain with fully customized branding, color schemes, and dynamic pricing matrices for your sub-tenants.</p>
+               </div>
+               <div className="w-full sm:w-auto shrink-0 flex items-center gap-4">
+                  <button onClick={signIn} className="px-6 py-3 rounded-xl bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-colors">
+                    Explore Enterprise
+                  </button>
+               </div>
+             </div>
+          </div>
+        </section>
 
-      {/* CTA Footer */}
-      <section className="py-40 px-6 max-w-7xl mx-auto text-center">
-        <div className="relative p-24 bg-indigo-600 rounded-[5rem] overflow-hidden shadow-2xl shadow-indigo-500/40">
-           <div className="absolute inset-0 bg-grid-white opacity-10 pointer-events-none" />
-           <div className="relative z-10">
-              <h2 className="text-6xl md:text-8xl font-display font-black text-white tracking-tighter leading-none mb-12 uppercase">READY TO HIRE <br /> BETTER?</h2>
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
-                <Button variant="white" size="lg" className="h-auto py-8 px-20 text-2xl text-indigo-600 font-black shadow-2xl hover:scale-105 transition-transform" onClick={() => setShowPricing(true)}>
-                  Start Free Trial
-                </Button>
-                <Button variant="outline" className="h-auto py-8 px-20 text-2xl text-white border-white/30 bg-white/5 hover:bg-white/10 hover:border-white font-black shadow-2xl hover:scale-105 transition-transform" onClick={() => setShowPricing(true)}>
-                  Request Demo
-                </Button>
-              </div>
-              <p className="mt-10 text-indigo-200 font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> No credit card required • 14 Day Unlimited Pilot
-              </p>
-           </div>
-        </div>
-      </section>
+        
+        {/* Workflow Section */}
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/10 to-transparent pointer-events-none"></div>
+          <div className="text-center mb-20 relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-4 font-display">The HireNow Workflow.</h2>
+            <p className="text-slate-400 max-w-xl mx-auto font-medium">From ATS integration to candidate deployment in three autonomous steps.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+             <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+             
+             {/* Step 1 */}
+             <div className="relative flex flex-col items-center text-center">
+               <div className="w-24 h-24 rounded-3xl bg-[#0A0A0B] border border-white/10 shadow-[0_0_30px_rgba(79,70,229,0.15)] flex items-center justify-center mb-6 relative overflow-hidden group">
+                 <div className="absolute inset-0 bg-indigo-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                 <span className="text-3xl font-black text-white font-display">01</span>
+               </div>
+               <h3 className="text-xl font-black text-white mb-3">Connect Client ATS</h3>
+               <p className="text-slate-400 text-sm max-w-xs leading-relaxed">Sync directly with Greenhouse, Lever, or Workday. HireNow ingests job requirements automatically.</p>
+             </div>
+             
+             {/* Step 2 */}
+             <div className="relative flex flex-col items-center text-center">
+               <div className="w-24 h-24 rounded-3xl bg-indigo-950/40 border border-indigo-500/20 shadow-[0_0_50px_rgba(79,70,229,0.25)] flex items-center justify-center mb-6 relative overflow-hidden group">
+                 <div className="absolute inset-0 bg-indigo-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                 <span className="text-3xl font-black text-indigo-400 font-display">02</span>
+               </div>
+               <h3 className="text-xl font-black text-white mb-3">Autonomous Screening</h3>
+               <p className="text-slate-400 text-sm max-w-xs leading-relaxed">Candidates enter the branded HireNow lobby for a dynamic, 30-minute conversational technical interview.</p>
+             </div>
+             
+             {/* Step 3 */}
+             <div className="relative flex flex-col items-center text-center">
+               <div className="w-24 h-24 rounded-3xl bg-[#0A0A0B] border border-white/10 shadow-[0_0_30px_rgba(79,70,229,0.15)] flex items-center justify-center mb-6 relative overflow-hidden group">
+                 <div className="absolute inset-0 bg-indigo-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                 <span className="text-3xl font-black text-white font-display">03</span>
+               </div>
+               <h3 className="text-xl font-black text-white mb-3">Deploy Top Talent</h3>
+               <p className="text-slate-400 text-sm max-w-xs leading-relaxed">Review the top 5% of candidates based on multidimensional scorecard metrics, completely bias-free.</p>
+             </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5 relative">
+           <div className="text-center mb-16 relative z-10">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white mb-4 font-display">Transparent Agency Pricing.</h2>
+            <p className="text-slate-400 max-w-xl mx-auto font-medium">Scale your recruiting margins with predictable, usage-based licensing.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto relative z-10">
+             {/* Starter */}
+             <div className="rounded-3xl bg-[#0A0A0B] border border-white/10 p-8 flex flex-col hover:border-white/20 transition-colors">
+               <h3 className="text-xl font-black text-white mb-2">Starter</h3>
+               <p className="text-slate-400 text-sm mb-6">For boutique agencies.</p>
+               <div className="mb-6">
+                 <span className="text-4xl font-black text-white font-display">$499</span>
+                 <span className="text-slate-500 font-medium"> / mo</span>
+               </div>
+               <ul className="space-y-4 mb-8 flex-1">
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Up to 500 candidate interviews/mo</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Standard ATS integrations</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Standard scorecard reports</li>
+               </ul>
+               <button onClick={signIn} className="w-full py-3.5 rounded-xl bg-white/5 text-white text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-colors border border-white/10">Start Free Trial</button>
+             </div>
+
+             {/* Pro */}
+             <div className="rounded-3xl bg-indigo-950/40 border border-indigo-500/30 p-8 flex flex-col relative overflow-hidden transform md:-translate-y-4 shadow-[0_0_50px_rgba(79,70,229,0.2)]">
+               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 to-cyan-400"></div>
+               <div className="absolute top-4 right-4 bg-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-indigo-500/30">Most Popular</div>
+               
+               <h3 className="text-xl font-black text-white mb-2">Agency Pro</h3>
+               <p className="text-indigo-200/60 text-sm mb-6">For scaling recruitment firms.</p>
+               <div className="mb-6">
+                 <span className="text-4xl font-black text-white font-display">$1,299</span>
+                 <span className="text-indigo-300/50 font-medium"> / mo</span>
+               </div>
+               <ul className="space-y-4 mb-8 flex-1">
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Unlimited candidate interviews</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Advanced Anti-Cheat protocols</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> White-label portal capabilities</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Custom scoring dimensions</li>
+               </ul>
+               <button onClick={signIn} className="w-full py-3.5 rounded-xl bg-indigo-600 text-white text-xs font-black uppercase tracking-widest hover:bg-indigo-500 hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)]">Upgrade to Pro</button>
+             </div>
+
+             {/* Enterprise */}
+             <div className="rounded-3xl bg-[#0A0A0B] border border-white/10 p-8 flex flex-col hover:border-white/20 transition-colors">
+               <h3 className="text-xl font-black text-white mb-2">Enterprise</h3>
+               <p className="text-slate-400 text-sm mb-6">For global talent enterprises.</p>
+               <div className="mb-6">
+                 <span className="text-4xl font-black text-white font-display">Custom</span>
+               </div>
+               <ul className="space-y-4 mb-8 flex-1">
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Custom Reseller Pricing Margins</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> Dedicated Account Manager</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> SLA Guarantees</li>
+                 <li className="flex items-start gap-3 text-sm text-slate-300 font-medium"><CheckCircle className="w-5 h-5 text-indigo-400 shrink-0" /> On-premise deployment options</li>
+               </ul>
+               <button onClick={signIn} className="w-full py-3.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-colors">Contact Sales</button>
+             </div>
+          </div>
+        </section>
+
+        {/* Footer CTA */}
+        <section className="py-32 px-4 border-t border-white/5 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-indigo-900/20 pointer-events-none"></div>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6 relative z-10">
+            Ready to upgrade your hiring?
+          </h2>
+          <p className="text-slate-400 text-lg mb-10 max-w-2xl mx-auto relative z-10">
+            Join the top 1% of engineering teams using autonomous agents to discover world-class talent faster.
+          </p>
+          <button onClick={signIn} className="relative z-10 px-10 py-5 rounded-2xl bg-white text-black text-sm font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.3)]">
+            Deploy HireNow Today
+          </button>
+        </section>
+        
+        <footer className="py-8 border-t border-white/10 text-center">
+           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">© 2026 HireNow Inc. All systems operational.</p>
+        </footer>
+
+      </div>
     </div>
   );
 }
+
 
 export default function App() {
   const [user, setUser] = useState<any>(null);

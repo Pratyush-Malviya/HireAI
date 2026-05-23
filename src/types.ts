@@ -7,6 +7,7 @@ export interface Organization {
   location?: string;
   phone?: string;
   description?: string;
+  botSpeechRate?: number;
   createdAt: any;
   createdBy: string;
   status: 'active' | 'suspended';
@@ -25,6 +26,12 @@ export interface Organization {
       primaryColor?: string;
     }
   };
+  workingHours?: {
+    start: string;
+    end: string;
+    timezone: string;
+  };
+  botSpeakingPace?: number;
 }
 
 export interface UserProfile {

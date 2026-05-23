@@ -8,9 +8,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 import nodemailer from "nodemailer";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import OpenAI from "openai";
 
 
-dotenv.config();
+dotenv.config({ path: ".env" });
+dotenv.config({ path: ".env.local", override: true });
 
 const app = express();
 const PORT = 3000;
@@ -59,6 +61,15 @@ const deliveryLimiter = rateLimit({
   validate: { forwardedHeader: false }
 });
 
+const nvidiaQuotaLimit = rateLimit({
+  windowMs: 60 * 1000,      // 1 minute
+  max: 20,                  // max 20 NVIDIA NIM requests per client per minute
+  message: { error: "NVIDIA AI capacity reached. Please hold for 1 minute." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { forwardedHeader: false }
+});
+
 // Sanitize user inputs safely dynamically to avert potential stored HTML or scripts injection
 const safeSanitize = (unsafe: any): string => {
   if (typeof unsafe !== "string") return "";
@@ -73,6 +84,7 @@ const safeSanitize = (unsafe: any): string => {
 // Apply general limiters to API routes except assets
 app.use("/api/", generalLimit);
 app.use("/api/ai/", aiQuotaLimit);
+app.use("/api/nvidia/", nvidiaQuotaLimit);
 app.use("/api/candidate/send-invite", deliveryLimiter);
 
 const getOAuthClient = () => {
@@ -1640,6 +1652,160 @@ app.post("/api/ai/summarize", async (req, res) => {
     }
   }
 });
+
+// ==========================================
+// NVIDIA NIM ROUTES
+// ==========================================
+
+// NVIDIA NIM client — lazy initialized so dotenv has time to load before first use
+let _nvidiaClient: OpenAI | null = null;
+function getNvidiaClient(): OpenAI {
+  if (!_nvidiaClient) {
+    const apiKey = process.env.NVIDIA_API_KEY;
+    if (!apiKey) throw new Error("NVIDIA_API_KEY is not configured in .env.local");
+    _nvidiaClient = new OpenAI({
+      apiKey,
+      baseURL: "https://integrate.api.nvidia.com/v1",
+    });
+  }
+  return _nvidiaClient;
+}
+
+const NVIDIA_MODELS = {
+  resumeScreening: "deepseek-ai/deepseek-r1",
+  interview: "meta/llama-3.3-70b-instruct",
+  hrAgent: "nvidia/llama-3.1-nemotron-70b-instruct",
+} as const;
+
+function stripThinkBlock(text: string): string {
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+}
+
+function parseNvidiaJson<T = unknown>(raw: string): T {
+  const stripped = stripThinkBlock(raw);
+  const cleaned = stripped
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```\s*$/i, "")
+    .trim();
+  const match = cleaned.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+  return JSON.parse(match ? match[0] : cleaned) as T;
+}
+
+// POST /api/nvidia/resume-screening — deepseek-ai/deepseek-r1
+app.post("/api/nvidia/resume-screening", async (req, res) => {
+  const { resumeText, jobDescription, jobRequirements } = req.body;
+  if (!resumeText || (!jobDescription && !jobRequirements)) {
+    return res.status(400).json({ error: "resumeText and jobDescription are required." });
+  }
+  try {
+    if (!process.env.NVIDIA_API_KEY) throw new Error("NVIDIA_API_KEY is not configured.");
+    const jdContext = jobDescription || JSON.stringify(jobRequirements, null, 2);
+    const systemPrompt = `You are an elite Principal Talent Acquisition Architect. Perform a forensic screening of the candidate resume against the job description.
+Respond with ONLY a valid JSON object matching this schema:
+{
+  "fullName": "string", "email": "string", "phone": "string", "currentRole": "string", "totalExperience": 5,
+  "oneLineSummary": "string", "compositeScore": 82,
+  "recommendation": { "status": "strong", "fitHeader": "string", "summary": "Detailed markdown 300+ words" },
+  "strengths": ["string"], "weaknesses": ["string"],
+  "skillsMatch": { "score": 85, "confirmed": [], "absent": [], "inferred": [] },
+  "experienceFit": { "score": 80, "rationale": "string" },
+  "education": { "score": 75, "rationale": "string" },
+  "achievements": { "score": 88, "rationale": "string" },
+  "culturalRoleFit": { "score": 78, "rationale": "string" },
+  "redFlags": [], "interviewQuestions": ["string"]
+}
+Recommendation status MUST be one of: "perfect", "strong", "potential", "rejected". compositeScore = weighted avg (skills 35%, exp 25%, edu 15%, achievements 15%, cultural 10%). Cite evidence.`;
+    const completion = await getNvidiaClient().chat.completions.create({
+      model: NVIDIA_MODELS.resumeScreening,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `JOB DESCRIPTION:\n${jdContext}\n\nCANDIDATE RESUME:\n${resumeText}\n\nReturn ONLY the JSON object.` },
+      ],
+      temperature: 0.1, max_tokens: 4096, stream: false,
+    });
+    const raw = completion.choices[0]?.message?.content ?? "";
+    res.json(parseNvidiaJson(raw));
+  } catch (error: any) {
+    console.warn("[NVIDIA /resume-screening] Failed, using fallback:", error.message || error);
+    try { res.json({ ...screenCandidateFallback(resumeText, jobRequirements || {}), provider: "fallback" }); }
+    catch { res.status(500).json({ error: "Resume screening failed." }); }
+  }
+});
+
+// POST /api/nvidia/interview — meta/llama-3.3-70b-instruct (supports streaming)
+app.post("/api/nvidia/interview", async (req, res) => {
+  const { candidateName, role, company, jd, resume, history, stream: enableStream } = req.body;
+  try {
+    if (!process.env.NVIDIA_API_KEY) throw new Error("NVIDIA_API_KEY is not configured.");
+    const systemMessage = `You are "HireAI Assistant", a professional AI recruiter for ${company || "the company"}.
+Conducting a structured 1st-level screening interview with ${candidateName || "the candidate"} for the ${role || "open"} role.
+JOB DESCRIPTION: ${jd || "Not provided"}
+CANDIDATE RESUME: ${resume || "Not provided"}
+PROTOCOL: 1) Greet & ask if ready (first message only). 2) Ask ONE targeted technical question at a time. 3) Include STAR-method behavioral prompts. 4) Follow up when vague. 5) 5-8 questions total then wrap up.
+STYLE: Professional, warm, focused. Never ask multiple questions at once.`;
+    const messages: { role: "system" | "user" | "assistant"; content: string }[] = [{ role: "system", content: systemMessage }];
+    if (Array.isArray(history)) {
+      for (const h of history) {
+        const mappedRole = h.role === "model" ? "assistant" : (h.role === "user" || h.role === "assistant" ? h.role : null);
+        if (mappedRole) messages.push({ role: mappedRole, content: h.text || h.content || "" });
+      }
+    }
+    if (enableStream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders();
+      const stream = await getNvidiaClient().chat.completions.create({ model: NVIDIA_MODELS.interview, messages, temperature: 0.7, max_tokens: 512, stream: true });
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content;
+        if (delta) res.write(`data: ${JSON.stringify({ text: delta })}\n\n`);
+      }
+      res.write("data: [DONE]\n\n");
+      res.end();
+    } else {
+      const completion = await getNvidiaClient().chat.completions.create({ model: NVIDIA_MODELS.interview, messages, temperature: 0.7, max_tokens: 512, stream: false });
+      res.json({ text: completion.choices[0]?.message?.content ?? "" });
+    }
+  } catch (error: any) {
+    console.warn("[NVIDIA /interview] Failed, using fallback:", error.message || error);
+    try { res.json({ ...chatFallback(candidateName, role, company, jd, resume, history || []), provider: "fallback" }); }
+    catch { res.status(500).json({ error: "Interview simulation failed." }); }
+  }
+});
+
+// POST /api/nvidia/summarize — nvidia/llama-3.1-nemotron-70b-instruct
+app.post("/api/nvidia/summarize", async (req, res) => {
+  const { history } = req.body;
+  if (!Array.isArray(history) || history.length === 0) return res.status(400).json({ error: "Interview history is required." });
+  try {
+    if (!process.env.NVIDIA_API_KEY) throw new Error("NVIDIA_API_KEY is not configured.");
+    const transcript = history.map((h: any) => `${h.role === "model" || h.role === "assistant" ? "Interviewer" : "Candidate"}: ${h.text || h.content || ""}`).join("\n\n");
+    const systemPrompt = `You are a Principal HR Intelligence Analyst. Analyze the interview transcript and return ONLY a valid JSON object:
+{
+  "rating": 82, "summary": "Detailed executive summary (2-3 paragraphs)",
+  "keyInsights": ["High-signal observation", "Risk or concern", "Competitive advantage"],
+  "categoryScores": { "technical": 80, "communication": 85, "cultural": 78, "experience": 82, "problemSolving": 79 },
+  "verdict": "STRONG_CONTENDER",
+  "strengths": ["string"], "developmentAreas": ["string"],
+  "hiringRecommendation": "string", "nextSteps": ["string"]
+}
+verdict MUST be exactly: "HIKE", "STRONG_CONTENDER", "POTENTIAL", or "PASS". Cite specific things said. Return ONLY JSON.`;
+    const completion = await getNvidiaClient().chat.completions.create({
+      model: NVIDIA_MODELS.hrAgent,
+      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: `TRANSCRIPT:\n\n${transcript}\n\nReturn ONLY the JSON evaluation.` }],
+      temperature: 0.2, max_tokens: 2048, stream: false,
+    });
+    res.json(parseNvidiaJson(completion.choices[0]?.message?.content ?? ""));
+  } catch (error: any) {
+    console.warn("[NVIDIA /summarize] Failed, using fallback:", error.message || error);
+    try { res.json({ ...summarizeFallback(history), provider: "fallback" }); }
+    catch { res.status(500).json({ error: "Interview summarization failed." }); }
+  }
+});
+
+// ==========================================
+// END NVIDIA NIM ROUTES
+// ==========================================
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

@@ -62,11 +62,11 @@
   }
 
   .saas-card {
-    @apply bg-white border border-slate-200/60 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-300;
+    @apply bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   .saas-button {
-    @apply relative overflow-hidden active:scale-[0.98] transition-all;
+    @apply relative overflow-hidden active:translate-y-[1px] transition-all duration-200;
   }
 }
 
