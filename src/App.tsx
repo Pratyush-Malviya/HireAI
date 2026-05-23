@@ -412,6 +412,107 @@ const botVoiceOptions: BotVoiceOption[] = [
   { id: 'ja-JP', label: '日本語 (Japan)', lang: 'ja-JP', flag: '🇯🇵', voiceNameQuery: 'Google 日本語' },
 ];
 
+function AudioWaveform({ analyserRef, isListening }: { analyserRef: React.RefObject<AnalyserNode | null>; isListening: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    let animationId: number;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const currentAnalyser = analyserRef.current;
+    const bufferLength = currentAnalyser ? currentAnalyser.frequencyBinCount : 64;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      animationId = requestAnimationFrame(draw);
+      
+      const width = canvas.width;
+      const height = canvas.height;
+      
+      ctx.clearRect(0, 0, width, height);
+
+      if (isListening && currentAnalyser) {
+        currentAnalyser.getByteFrequencyData(dataArray);
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#6366f1'; 
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
+        ctx.beginPath();
+
+        const sliceWidth = width / 12;
+        for (let i = 0; i < 12; i++) {
+          const idx = Math.floor((i / 12) * bufferLength);
+          const val = dataArray[idx]; 
+          const percent = val / 255;
+          const barHeight = Math.max(4, percent * height * 0.85);
+          const x = i * (width / 11) + (width / 22);
+          
+          ctx.moveTo(x, height / 2 - barHeight / 2);
+          ctx.lineTo(x, height / 2 + barHeight / 2);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ec4899'; 
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(236, 72, 153, 0.4)';
+        ctx.beginPath();
+        for (let i = 0; i < 12; i++) {
+          const idx = Math.floor(((i + 2) % 12 / 12) * bufferLength);
+          const val = dataArray[idx];
+          const percent = val / 255;
+          const barHeight = Math.max(3, percent * height * 0.65);
+          const x = i * (width / 11) + (width / 22);
+          
+          ctx.moveTo(x, height / 2 - barHeight / 2);
+          ctx.lineTo(x, height / 2 + barHeight / 2);
+        }
+        ctx.stroke();
+      } else {
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#334155'; 
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        
+        const barHeight = 4;
+        for (let i = 0; i < 12; i++) {
+          const x = i * (width / 11) + (width / 22);
+          ctx.moveTo(x, height / 2 - barHeight / 2);
+          ctx.lineTo(x, height / 2 + barHeight / 2);
+        }
+        ctx.stroke();
+      }
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [analyserRef, isListening]);
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-1.5 mb-4 shrink-0">
+      <span className={cn(
+        "text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300",
+        isListening ? "text-indigo-400 animate-pulse" : "text-slate-500"
+      )}>
+        {isListening ? "● LISTENING (SPEAK NOW)" : "MIC IDLE"}
+      </span>
+      <canvas 
+        ref={canvasRef} 
+        width={192} 
+        height={32} 
+        className="w-48 h-8 rounded-full bg-slate-950/40 border border-slate-900 shadow-inner px-2"
+      />
+    </div>
+  );
+}
+
 function InterviewRoom() {
   const { candidateId } = useParams();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
@@ -705,11 +806,29 @@ function InterviewRoom() {
     utterance.onstart = () => {
       setIsSpeaking(true);
       // Cancel any active listening to prevent feedback loops
-      if (isListening) recognitionRef.current?.stop();
+      if (isListening) {
+        try {
+          recognitionRef.current?.stop();
+        } catch (e) {}
+      }
     };
     utterance.onend = () => {
       setIsSpeaking(false);
-      if (onEnd) onEnd();
+      if (onEnd) {
+        onEnd();
+      } else if (!isKeyboardMode) {
+        // Automatically start listening for response in voice mode!
+        setTimeout(() => {
+          try {
+            if (recognitionRef.current) {
+              setIsListening(true);
+              recognitionRef.current.start();
+            }
+          } catch (e) {
+            console.warn("Could not auto-start recognition after speak end:", e);
+          }
+        }, 150);
+      }
     };
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
