@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -393,6 +393,25 @@ function Card({ children, className, ...props }: React.HTMLAttributes<HTMLDivEle
   );
 }
 
+interface BotVoiceOption {
+  id: string;
+  label: string;
+  lang: string;
+  flag: string;
+  voiceNameQuery?: string;
+}
+
+const botVoiceOptions: BotVoiceOption[] = [
+  { id: 'en-US', label: 'English (US Accent)', lang: 'en-US', flag: '🇺🇸', voiceNameQuery: 'Google US English' },
+  { id: 'en-GB', label: 'English (UK Accent)', lang: 'en-GB', flag: '🇬🇧', voiceNameQuery: 'Google UK English' },
+  { id: 'en-IN', label: 'English (Indian Accent)', lang: 'en-IN', flag: '🇮🇳', voiceNameQuery: 'Google Hindi' },
+  { id: 'en-AU', label: 'English (Aussie Accent)', lang: 'en-AU', flag: '🇦🇺', voiceNameQuery: 'Google English' },
+  { id: 'es-ES', label: 'Español (Spain)', lang: 'es-ES', flag: '🇪🇸', voiceNameQuery: 'Google Español' },
+  { id: 'fr-FR', label: 'Français (France)', lang: 'fr-FR', flag: '🇫🇷', voiceNameQuery: 'Google Français' },
+  { id: 'de-DE', label: 'Deutsch (Germany)', lang: 'de-DE', flag: '🇩🇪', voiceNameQuery: 'Google Deutsch' },
+  { id: 'ja-JP', label: '日本語 (Japan)', lang: 'ja-JP', flag: '🇯🇵', voiceNameQuery: 'Google 日本語' },
+];
+
 function InterviewRoom() {
   const { candidateId } = useParams();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
@@ -416,6 +435,30 @@ function InterviewRoom() {
   const { confirm, notify } = useNotification();
   const navigate = useNavigate();
 
+  // Web permissions error fallbacks tracking states
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+  const [isKeyboardMode, setIsKeyboardMode] = useState(false);
+
+  // Selected Accent / Language state
+  const [selectedVoice, setSelectedVoice] = useState<BotVoiceOption>(() => {
+    const saved = localStorage.getItem('hirenow_selected_voice');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const found = botVoiceOptions.find(v => v.id === parsed.id);
+        if (found) return found;
+      } catch (e) {}
+    }
+    return botVoiceOptions[0];
+  });
+
+  const changeVoice = (voice: BotVoiceOption) => {
+    setSelectedVoice(voice);
+    localStorage.setItem('hirenow_selected_voice', JSON.stringify(voice));
+    notify(`Interviewer language & accent updated to ${voice.label}`, 'success');
+  };
+
   // Initialize Video/Audio Stream
   useEffect(() => {
     let localStream: MediaStream | null = null;
@@ -423,35 +466,65 @@ function InterviewRoom() {
 
     async function setupStream() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        notify("Media devices not supported in this browser. Running in text interview mode.", "info");
+        setMediaError("NotSupported");
+        setIsKeyboardMode(true);
+        notify("Media devices not supported in this browser environment. Standard keyboard entry mode activated.", "info");
         return;
       }
+
+      const isPermissionError = (e: any) => {
+        const errName = e?.name || "";
+        const errMsg = e?.message || "";
+        return errName === "NotAllowedError" || 
+               errName === "PermissionDeniedError" || 
+               errMsg.includes("Permission denied") || 
+               errMsg.includes("NotAllowedError") || 
+               errMsg.includes("Denied") ||
+               errMsg.includes("permission denied");
+      };
 
       try {
         // Fallback Step 1: Try both video and audio
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      } catch (err) {
+        setMediaError(null);
+      } catch (err: any) {
+        if (isPermissionError(err)) {
+          console.warn("Media devices permission denied by user or iframe sandbox policy:", err);
+          setMediaError("PermissionDenied");
+          setIsKeyboardMode(true);
+          notify("Microphone & Camera permissions denied or blocked. Keyboard backup activated.", "info");
+          return;
+        }
+
         console.warn("Could not access both video and audio. Trying audio-only fallback...", err);
         try {
           // Fallback Step 2: Try audio only (for users without cameras or when camera is blocked)
           localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-        } catch (err2) {
+          setMediaError("CameraBlocked");
+        } catch (err2: any) {
+          if (isPermissionError(err2)) {
+            setMediaError("PermissionDenied");
+            setIsKeyboardMode(true);
+            notify("Microphone permissions denied. Keyboard backup activated.", "info");
+            return;
+          }
           console.warn("Could not access audio. Trying video-only fallback...", err2);
           try {
             // Fallback Step 3: Try video only (for setups with camera but no mic)
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            setMediaError("MicrophoneBlocked");
+            setIsKeyboardMode(true);
           } catch (err3) {
             console.error("Error accessing media devices:", err3);
-            notify("Could not access camera or microphone. Standard text interview mode is enabled.", "info");
+            setMediaError("BothBlocked");
+            setIsKeyboardMode(true);
+            notify("Microphone and Camera accesses restricted or unavailable. Keyboard backup activated.", "info");
           }
         }
       }
 
       if (localStream) {
         setStream(localStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = localStream;
-        }
 
         // Sound intensity analysis (only if we have audio tracks)
         if (localStream.getAudioTracks().length > 0) {
@@ -496,6 +569,20 @@ function InterviewRoom() {
     };
   }, []);
 
+  // Securely bind the media stream on mount, even if candidate is fetched asynchronously
+  const bindVideo = (el: HTMLVideoElement | null) => {
+    if (el) {
+      if (el.srcObject !== stream) {
+        el.srcObject = stream;
+      }
+      if (stream) {
+        el.play().catch(e => {
+          console.debug("Video playback stream start prevented or interrupted:", e);
+        });
+      }
+    }
+  };
+
   const toggleMute = () => {
     if (stream) {
       const audioTrack = stream.getAudioTracks()[0];
@@ -522,22 +609,38 @@ function InterviewRoom() {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'en-US';
+      recognition.lang = selectedVoice.lang;
 
       recognition.onresult = (event: any) => {
+        let finalTranscript = '';
         let interimTranscript = '';
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result: any) => {
-            if (!result.isFinal) interimTranscript += result.transcript;
-            return result.transcript;
-          })
-          .join('');
-        setInput(transcript);
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const item = event.results[i];
+          if (item.isFinal) {
+            finalTranscript += item[0].transcript;
+          } else {
+            interimTranscript += item[0].transcript;
+          }
+        }
+        
+        const combined = finalTranscript || interimTranscript;
+        if (combined.trim()) {
+          setInput(combined);
+        }
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        // Automatically submit final speech text if substantial input was recorded
+        setInput((prev) => {
+          const trimmed = prev.trim();
+          if (trimmed.length > 2) {
+            setTimeout(() => {
+              handleSend(trimmed);
+            }, 600);
+          }
+          return prev;
+        });
       };
 
       recognition.onerror = (event: any) => {
@@ -547,15 +650,29 @@ function InterviewRoom() {
           // Silent error, just don't notify user with a big toast
           console.debug('No speech detected before timeout.');
         } else if (event.error === 'not-allowed') {
-          notify('Microphone access denied. Please check your browser permissions.', 'error');
+          setSpeechError("PermissionDenied");
+          setIsKeyboardMode(true);
+          notify('Chrome / browser Speech recognition access was blocked. Typing mode is ready.', 'info');
         } else {
+          setSpeechError(event.error);
           notify(`Microphone error: ${event.error}`, 'error');
         }
       };
 
       recognitionRef.current = recognition;
+    } else {
+      setSpeechError("NotSupported");
+      setIsKeyboardMode(true);
     }
-  }, []);
+
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
+    };
+  }, [selectedVoice.lang]);
 
   const speak = (text: string, onEnd?: () => void) => {
     // Remove markdown symbols for better speech
@@ -563,6 +680,28 @@ function InterviewRoom() {
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 1.05; // Slightly faster for responsiveness
     utterance.pitch = 1.0;
+    
+    // Core dialect configurations
+    utterance.lang = selectedVoice.lang;
+
+    // Custom voice selection based on system voices if available
+    if (window.speechSynthesis) {
+      const voices = window.speechSynthesis.getVoices();
+      let match = voices.find(v => v.lang === selectedVoice.lang && v.name.includes(selectedVoice.voiceNameQuery || ''));
+      if (!match) {
+        // Fallback 1: Match by exact locale string
+        match = voices.find(v => v.lang === selectedVoice.lang);
+      }
+      if (!match) {
+        // Fallback 2: Match by first part of language code (e.g. "en")
+        const prefix = selectedVoice.lang.split('-')[0];
+        match = voices.find(v => v.lang.startsWith(prefix));
+      }
+      if (match) {
+        utterance.voice = match;
+      }
+    }
+
     utterance.onstart = () => {
       setIsSpeaking(true);
       // Cancel any active listening to prevent feedback loops
@@ -577,11 +716,23 @@ function InterviewRoom() {
   };
 
   const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-    } else {
-      setIsListening(true);
-      recognitionRef.current?.start();
+    if (!recognitionRef.current) {
+      notify("Speech recognition is not supported or was blocked. Keyboard entry mode is enabled.", "info");
+      setIsKeyboardMode(true);
+      return;
+    }
+    try {
+      if (isListening) {
+        recognitionRef.current.stop();
+      } else {
+        setIsListening(true);
+        recognitionRef.current.start();
+      }
+    } catch (err) {
+      console.warn("Error starting speech recognition:", err);
+      setIsListening(false);
+      setIsKeyboardMode(true);
+      notify("Failed to initialize voice capture. Please type your reply.", "info");
     }
   };
 
@@ -769,8 +920,53 @@ function InterviewRoom() {
   if (!candidate) return <div className="p-12 text-center text-slate-400">Loading Interview Room...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto py-6 px-4 min-h-[calc(100vh-140px)] lg:h-[calc(100vh-140px)] flex flex-col lg:flex-row gap-6">
-      {/* Side Information Panel */}
+    <div className="max-w-7xl mx-auto py-6 px-4 min-h-[calc(100vh-140px)] flex flex-col gap-6">
+      
+      {/* Dynamic Iframe and Device Permission Warning Alert Banner */}
+      {(mediaError || speechError) && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-amber-500/10 border border-amber-500/30 rounded-[2rem] p-6 text-left flex flex-col sm:flex-row items-start gap-4"
+        >
+          <div className="p-3 bg-amber-500/20 rounded-2xl text-amber-500 shrink-0">
+             <AlertTriangle className="w-6 h-6" />
+          </div>
+          <div className="space-y-2 flex-1">
+             <h4 className="text-sm font-black text-amber-200 uppercase tracking-wide">Webcam, Microphone or Voice Recognition Blocked</h4>
+             <p className="text-xs text-slate-300 leading-relaxed">
+               We detected potential browser constraints (<strong>{mediaError || speechError}</strong>) limiting live mic/camera capture. This is common when running inside an <strong>iframe sandbox</strong> like Google AI Studio's preview panel.
+             </p>
+             <div className="pt-2 flex flex-wrap gap-2">
+               <a 
+                 href={window.location.href} 
+                 target="_blank" 
+                 rel="noopener noreferrer" 
+                 className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-md shadow-indigo-650/10 cursor-pointer"
+               >
+                 <ExternalLink className="w-3.5 h-3.5" /> Open in a New Tab
+               </a>
+               <button 
+                 type="button"
+                 onClick={() => {
+                   setIsKeyboardMode(prev => !prev);
+                   notify("Keyboard input mode toggled.", "info");
+                 }}
+                 className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-slate-800 hover:bg-slate-750 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+               >
+                 <Keyboard className="w-3.5 h-3.5" /> {isKeyboardMode ? "Switch to Voice" : "Switch to Keyboard"}
+               </button>
+             </div>
+             
+             <div className="pt-2 text-[10px] text-amber-400 font-medium">
+               💡 <strong>Quick Fix:</strong> Click the <strong>lock icon</strong> next to the browser URL and change Camera/Microphone to <strong>Allow</strong>, or open the page in a new full tab. No progress will be lost.
+             </div>
+          </div>
+        </motion.div>
+      )}
+
+      <div className="w-full flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-140px)] flex-1">
+        {/* Side Information Panel */}
       <div className="w-full lg:w-80 flex flex-col gap-4">
         {/* Profile Card */}
         <Card className="p-5 bg-white border-slate-200 shadow-sm relative overflow-hidden shrink-0">
@@ -779,7 +975,7 @@ function InterviewRoom() {
             <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-50 flex items-center justify-center border-4 border-white shadow-lg overflow-hidden shrink-0">
               {stream?.getVideoTracks()[0]?.enabled !== false ? (
                  <video 
-                   ref={(el) => { if (el) el.srcObject = stream; }} 
+                   ref={bindVideo} 
                    autoPlay 
                    muted 
                    className="w-full h-full object-cover scale-150 rotate-y-180" 
@@ -801,6 +997,60 @@ function InterviewRoom() {
                   <span className="text-[9px] font-black text-green-600 uppercase">Secure</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Bot Accent & Language Setting Card */}
+        <Card className="p-5 bg-white border-slate-200 shadow-sm relative overflow-hidden shrink-0">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
+          <div className="flex items-center gap-2.5 mb-3 border-b border-slate-50 pb-2">
+            <Volume2 className="w-4 h-4 text-indigo-600" />
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bot Voice & Accent</h4>
+          </div>
+          <div className="space-y-3 text-left">
+            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+              Calibrate the conversational language and synthesized accent of your AI interviewer.
+            </p>
+            
+            <div className="relative">
+              <select
+                value={selectedVoice.id}
+                onChange={(e) => {
+                  const target = botVoiceOptions.find(opt => opt.id === e.target.value);
+                  if (target) changeVoice(target);
+                }}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
+              >
+                {botVoiceOptions.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.flag} {opt.label}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {botVoiceOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  title={opt.label}
+                  onClick={() => changeVoice(opt)}
+                  className={cn(
+                    "px-2 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg border transition-all cursor-pointer flex items-center gap-1",
+                    selectedVoice.id === opt.id 
+                      ? "bg-slate-900 border-slate-900 text-white shadow-sm"
+                      : "bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-100"
+                  )}
+                >
+                  <span>{opt.flag}</span>
+                  <span>{opt.id.split('-')[1]}</span>
+                </button>
+              ))}
             </div>
           </div>
         </Card>
@@ -961,97 +1211,125 @@ function InterviewRoom() {
                  <Play className="w-10 h-10 text-indigo-500" />
               </div>
               <h2 className="text-2xl font-black text-white tracking-tight mb-4">Screening Room Initialized</h2>
-              <p className="text-slate-400 text-sm font-medium mb-8">HireNow Assistant is calibrated and ready. Ensure your environment is calm before beginning.</p>
+              <p className="text-slate-400 text-sm font-medium mb-6">HireNow Assistant is calibrated and ready. Ensure your environment is calm before beginning.</p>
+              
+              {/* Voice / Accent Selection Box in Pre-Start */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-8 text-left">
+                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-2">Interviewer Accent & Language</span>
+                
+                <div className="relative mb-3">
+                  <select
+                    value={selectedVoice.id}
+                    onChange={(e) => {
+                      const target = botVoiceOptions.find(opt => opt.id === e.target.value);
+                      if (target) changeVoice(target);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-2xl px-4 py-3 font-bold text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer transition-all appearance-none"
+                  >
+                    {botVoiceOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id} className="font-bold text-slate-800 bg-white">
+                        {opt.flag} {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-slate-500 leading-normal">
+                  Changing the language also optimizes the Speech Recognition model to match your dialect dynamically.
+                </p>
+              </div>
+
               <Button onClick={startInterview} disabled={loading} className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl shadow-indigo-600/20 font-black tracking-tight text-lg transition-transform hover:scale-[1.02] active:scale-[0.98]">
                 Start Recording
               </Button>
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col">
-              <div className="flex-1 relative flex items-center justify-center">
-                 {/* Large Video Feed */}
-                 <div className="w-full h-full px-4 sm:px-8 pt-16 sm:pt-20 pb-8 sm:pb-12 flex items-center justify-center relative">
-                    <div className="relative w-full max-w-4xl aspect-video rounded-3xl sm:rounded-[2rem] overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 group">
-                       {/* Recursive Scan Animation */}
-                       <motion.div 
-                          className="absolute inset-x-0 h-1 bg-indigo-500/20 z-10 pointer-events-none"
-                          animate={{ top: ['0%', '100%', '0%'] }}
-                          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                       />
-                        <video 
-                          ref={(el) => { if (el && stream) el.srcObject = stream; }} 
-                          autoPlay 
-                          playsInline 
-                          muted 
-                          className={cn("w-full h-full object-cover transition-all duration-700 rotate-y-180", 
-                            stream?.getVideoTracks()[0]?.enabled === false ? "opacity-0" : "opacity-100",
-                            (isMuted || isThinking) ? "grayscale-[0.5]" : "grayscale-0",
-                            isThinking && "scale-[1.05] brightness-125 saturate-[1.2]",
-                            isSpeaking && "animate-video-breathing"
-                          )}
-                        />
-                       {/* Thinking Pulse */}
-                       {isThinking && (
-                         <div className="absolute inset-0 bg-indigo-900/10 animate-pulse pointer-events-none z-10" />
-                       )}
-                       {stream?.getVideoTracks()[0]?.enabled === false && (
-                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900">
-                            <CameraOff className="w-16 h-16 text-slate-700" />
-                            <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Camera Disabled</p>
-                         </div>
-                       )}
-                       
-                       {/* Overlay Text Bubbles */}
-                       <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col items-center text-center">
-                          <AnimatePresence mode="wait">
-                            {concluded ? (
-                              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-green-600/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-green-500/50 shadow-xl">
-                                 <h4 className="text-white text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4" /> Session Concluded
-                                 </h4>
-                              </motion.div>
-                            ) : (
-                              <motion.div 
-                                key={messages[messages.length - 1]?.text}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="max-w-2xl"
-                              >
-                                {messages[messages.length - 1]?.role === 'model' ? (
-                                  <div className="bg-slate-900/60 backdrop-blur-md px-6 py-4 rounded-3xl border border-white/5 shadow-2xl">
-                                    <div className="text-white text-lg font-bold leading-relaxed tracking-tight">
-                                       <Markdown>{messages[messages.length - 1]?.text}</Markdown>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="bg-indigo-600/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-indigo-500/50 shadow-xl">
-                                    <p className="text-white text-sm font-medium italic">"{messages[messages.length - 1]?.text}"</p>
-                                  </div>
-                                )}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                          
-                          {/* Real-time Subtitle Overlay for Input */}
-                          {input && !concluded && !isListening && (
-                            <motion.div 
-                              initial={{ opacity: 0, y: 10 }} 
-                              animate={{ opacity: 1, y: 0 }}
-                              className="mt-4 bg-indigo-500/95 backdrop-blur-md px-6 py-3 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-lg"
-                            >
-                               <p className="text-white text-[10px] font-black uppercase tracking-widest mb-2 opacity-70">Live Transcription Preview</p>
-                               <p className="text-white text-base font-bold italic leading-relaxed">"{input}"</p>
-                               <div className="mt-3 flex items-center justify-center">
-                                  <Button onClick={() => handleSend()} size="sm" className="h-8 bg-white text-indigo-600 hover:bg-slate-100 text-[10px] font-black uppercase tracking-widest rounded-full px-5">
-                                    <Send className="w-3 h-3 mr-2" /> Confirm & Send
-                                  </Button>
-                               </div>
-                            </motion.div>
-                          )}
-                       </div>
+            <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar">
+              <div className="flex-1 flex flex-col items-center justify-center p-6 pt-20 sm:p-8 sm:pt-24 min-h-0">
+                {/* Clean, Unobstructed Video Container */}
+                <div className="relative w-full max-w-4xl aspect-video rounded-3xl sm:rounded-[2rem] overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 group mb-6 shrink-0">
+                  {/* Recursive Scan Animation */}
+                  <motion.div 
+                     className="absolute inset-x-0 h-1 bg-indigo-500/20 z-10 pointer-events-none"
+                     animate={{ top: ['0%', '100%', '0%'] }}
+                     transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
+                  <video 
+                    ref={bindVideo} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                    className={cn("w-full h-full object-cover transition-all duration-700 rotate-y-180", 
+                      stream?.getVideoTracks()[0]?.enabled === false ? "opacity-0" : "opacity-100",
+                      (isMuted || isThinking) ? "grayscale-[0.5]" : "grayscale-0",
+                      isThinking && "scale-[1.05] brightness-125 saturate-[1.2]",
+                      isSpeaking && "animate-video-breathing"
+                    )}
+                  />
+                  {/* Thinking Pulse */}
+                  {isThinking && (
+                    <div className="absolute inset-0 bg-indigo-900/10 animate-pulse pointer-events-none z-10" />
+                  )}
+                  {stream?.getVideoTracks()[0]?.enabled === false && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900">
+                       <CameraOff className="w-16 h-16 text-slate-700" />
+                       <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Camera Disabled</p>
                     </div>
-                 </div>
+                  )}
+                </div>
+                 
+                {/* Elegant Captions Box (Nicely positioned below the video frame) */}
+                <div className="w-full max-w-3xl flex flex-col items-center justify-center space-y-4">
+                  <AnimatePresence mode="wait">
+                    {concluded ? (
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-green-600/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-green-500/50 shadow-xl">
+                         <h4 className="text-white text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4" /> Session Concluded
+                         </h4>
+                      </motion.div>
+                    ) : (
+                      <motion.div 
+                        key={messages[messages.length - 1]?.text}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="w-full text-center"
+                      >
+                        {messages[messages.length - 1]?.role === 'model' ? (
+                          <div className="bg-slate-900/80 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-800/80 shadow-2xl inline-block max-w-2xl text-left">
+                            <div className="text-white text-base font-bold leading-relaxed tracking-tight">
+                               <Markdown>{messages[messages.length - 1]?.text}</Markdown>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-indigo-650/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-indigo-550/50 shadow-xl inline-block max-w-xl text-center">
+                            <p className="text-white text-sm font-medium italic">"{messages[messages.length - 1]?.text}"</p>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  
+                  {/* Real-time Subtitle Overlay for Input */}
+                  {input && !concluded && !isListening && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }} 
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-indigo-500/95 backdrop-blur-md px-6 py-3 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-lg w-full text-center"
+                    >
+                       <p className="text-white text-[10px] font-black uppercase tracking-widest mb-2 opacity-70">Live Transcription Preview</p>
+                       <p className="text-white text-sm font-bold italic leading-relaxed">"{input}"</p>
+                       <div className="mt-3 flex items-center justify-center">
+                          <Button onClick={() => handleSend()} size="sm" className="h-8 bg-white text-indigo-600 hover:bg-slate-100 text-[10px] font-black uppercase tracking-widest rounded-full px-5">
+                            <Send className="w-3 h-3 mr-2" /> Confirm & Send
+                          </Button>
+                       </div>
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -1081,6 +1359,22 @@ function InterviewRoom() {
                     className="w-12 h-12 rounded-full p-0 border-slate-700 bg-slate-900/50 hover:bg-slate-800 text-white"
                   >
                     {stream?.getVideoTracks()[0]?.enabled === false ? <CameraOff className="w-5 h-5 text-red-500" /> : <Camera className="w-5 h-5" />}
+                  </Button>
+
+                  {/* Keyboard Backup Toggler */}
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsKeyboardMode(prev => !prev);
+                      notify(!isKeyboardMode ? "Keyboard typing mode activated." : "Voice mode activated.", "info");
+                    }}
+                    className={cn(
+                      "w-12 h-12 rounded-full p-0 border-slate-700 transition-all",
+                      isKeyboardMode ? "bg-indigo-500/20 text-indigo-400 border-indigo-500/50" : "bg-slate-900/50 hover:bg-slate-800 text-white"
+                    )}
+                    title={isKeyboardMode ? "Switch to Voice Response Mode" : "Switch to Keyboard Typing Mode"}
+                  >
+                    <Keyboard className="w-5 h-5" />
                   </Button>
 
                   {/* Main Listening Toggle */}
@@ -1146,6 +1440,33 @@ function InterviewRoom() {
                            </Button>
                          )}
                       </motion.div>
+                    ) : isKeyboardMode ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-full flex gap-3 pt-2 pointer-events-auto"
+                      >
+                        <input
+                          type="text"
+                          value={input}
+                          disabled={loading || isThinking}
+                          onChange={(e) => setInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && input.trim() && !loading && !isThinking) {
+                              handleSend();
+                            }
+                          }}
+                          placeholder={isThinking ? "Please wait for AI response..." : "Type your answer here..."}
+                          className="flex-1 bg-slate-900/90 border border-slate-800 text-white rounded-2xl px-5 h-12 text-xs focus:outline-none focus:border-indigo-500 font-bold transition-all"
+                        />
+                        <Button 
+                          onClick={() => handleSend()} 
+                          disabled={loading || isThinking || !input.trim()}
+                          className="bg-indigo-600 hover:bg-indigo-700 h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest shrink-0"
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </motion.div>
                     ) : (
                       <div className="text-center py-2">
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
@@ -1172,6 +1493,7 @@ function InterviewRoom() {
         )}
       </div>
     </div>
+  </div>
   );
 }
 
@@ -3825,6 +4147,46 @@ function CandidateDetail() {
   const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string, label: string} | null>(null);
   const [sendingInvite, setSendingInvite] = useState(false);
 
+  // HireFlow OS Enhanced Feature States
+  const [activeDetailTab, setActiveDetailTab] = useState<'core' | 'offer' | 'campaign' | 'proctoring'>('core');
+
+  // Offer Letter Generation OS States
+  const [offerSalary, setOfferSalary] = useState(1200000);
+  const [offerCurrency, setOfferCurrency] = useState('INR');
+  const [offerBenefits, setOfferBenefits] = useState('Standard comprehensive medical insurance, remote-work allowance, and performance bonuses.');
+  const [offerStartDate, setOfferStartDate] = useState(() => {
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    nextMonth.setDate(1);
+    return nextMonth.toISOString().split('T')[0];
+  });
+  const [offerState, setOfferState] = useState<'draft' | 'sent' | 'viewed' | 'accepted' | 'declined'>('draft');
+  const [isSigning, setIsSigning] = useState(false);
+
+  // Outbound Email & WhatsApp Campaign States
+  const [campaignTemplate, setCampaignTemplate] = useState<'invite' | 'reminder' | 'offer_link'>('invite');
+  const [outboundLogs, setOutboundLogs] = useState<{
+    id: string;
+    channel: 'email' | 'whatsapp';
+    template: string;
+    recipient: string;
+    status: 'delivered' | 'read' | 'clicked' | 'sent';
+    timestamp: string;
+  }[]>([
+    { id: '1', channel: 'email', template: 'Application Confirmed', recipient: '', status: 'delivered', timestamp: '2 mins ago' }
+  ]);
+  const [sendingOutbound, setSendingOutbound] = useState(false);
+
+  // Multi-Language Support
+  const [selectedBotLanguage, setSelectedBotLanguage] = useState('en-US');
+
+  // Advanced Proctoring Audits State
+  const [activeCameraTest, setActiveCameraTest] = useState(false);
+  const [cameraAnomalyMock, setCameraAnomalyMock] = useState(false);
+  const [tabSwitchCountMock, setTabSwitchCountMock] = useState(0);
+  const [gazeDeviationMock, setGazeDeviationMock] = useState(false);
+
+
   useEffect(() => {
     fetch('/api/calendar/status')
       .then(r => r.json())
@@ -4528,8 +4890,66 @@ function CandidateDetail() {
         </div>
       </Card>
 
-      {/* Deep Research Section */}
-      <Card className="overflow-hidden border-indigo-100 shadow-lg shadow-indigo-100/50">
+      {/* State-of-the-art Sub-Tab Navigation Bar */}
+      <div id="candidate-detail-tabs" className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 shadow-sm relative z-20">
+        <Button
+          variant="ghost"
+          onClick={() => setActiveDetailTab('core')}
+          className={cn(
+            "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+            activeDetailTab === 'core' 
+              ? "bg-white text-indigo-700 shadow-md scale-102 font-extrabold" 
+              : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+          )}
+        >
+          <FileText className="w-4 h-4" />
+          Evaluation Report
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveDetailTab('offer')}
+          className={cn(
+            "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+            activeDetailTab === 'offer' 
+              ? "bg-white text-indigo-700 shadow-md scale-102 font-extrabold" 
+              : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+          )}
+        >
+          <Award className="w-4 h-4" />
+          Offer Letter OS
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveDetailTab('campaign')}
+          className={cn(
+            "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+            activeDetailTab === 'campaign' 
+              ? "bg-white text-indigo-700 shadow-md scale-102 font-extrabold" 
+              : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+          )}
+        >
+          <Send className="w-4 h-4" />
+          Outbound Campaigns
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setActiveDetailTab('proctoring')}
+          className={cn(
+            "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+            activeDetailTab === 'proctoring' 
+              ? "bg-white text-indigo-700 shadow-md scale-102 font-extrabold" 
+              : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+          )}
+        >
+          <ShieldCheck className="w-4 h-4" />
+          Anti-Cheat Proctoring
+        </Button>
+      </div>
+
+      {activeDetailTab === 'core' && (
+        <>
+          {/* Deep Research Section */}
+          <Card className="overflow-hidden border-indigo-100 shadow-lg shadow-indigo-100/50">
         <div className="bg-slate-900 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-500 rounded-lg">
@@ -5434,6 +5854,710 @@ function CandidateDetail() {
           </Card>
         </div>
       </div>
+        </>
+      )}
+
+      {/* Offer Letter OS Sandbox Tab */}
+      {activeDetailTab === 'offer' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Controls Form */}
+          <Card className="p-8 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Sliders className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 text-base uppercase tracking-wider">Offer Letter Builder</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Configure Official Offer Parameters</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Base Salary (Annual Amount)</label>
+                <div className="flex gap-4 items-center">
+                  <input 
+                    type="range" 
+                    min={300000} 
+                    max={12000000} 
+                    step={50000}
+                    value={offerSalary} 
+                    onChange={(e) => setOfferSalary(Number(e.target.value))}
+                    className="flex-1 accent-indigo-600"
+                  />
+                  <input 
+                    type="number"
+                    value={offerSalary}
+                    onChange={(e) => setOfferSalary(Number(e.target.value))}
+                    className="w-36 p-2 rounded-xl border border-slate-200 text-xs font-black text-slate-850"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Currency Selector</label>
+                  <select 
+                    value={offerCurrency} 
+                    onChange={(e) => setOfferCurrency(e.target.value)}
+                    className="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white"
+                  >
+                    <option value="INR">INR (₹) - Indian Rupee</option>
+                    <option value="USD">USD ($) - US Dollar</option>
+                    <option value="GBP">GBP (£) - British Pound</option>
+                    <option value="EUR">EUR (€) - Euro</option>
+                    <option value="SGD">SGD ($) - Singapore Dollar</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Expected Start Date</label>
+                  <input 
+                    type="date" 
+                    value={offerStartDate} 
+                    onChange={(e) => setOfferStartDate(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-705 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Perks & Core Benefits Ledger</label>
+                <textarea 
+                  rows={3}
+                  value={offerBenefits} 
+                  onChange={(e) => setOfferBenefits(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed font-sans focus:border-indigo-500 focus:outline-none"
+                  placeholder="Provide details on health insurance, stock units, equity, or work setups..."
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Employment Level</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Standard Full-time', 'Consultant Contract', 'Internship Trial'].map((type) => (
+                    <button 
+                      key={type}
+                      type="button"
+                      className="p-2.5 rounded-xl border border-slate-200 text-center text-[10px] font-extrabold uppercase tracking-wider text-slate-650 hover:bg-slate-50"
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <Button 
+                onClick={() => {
+                  setOfferState('sent');
+                  notify('Offer letter transmitted to candidate successfully!', 'success');
+                  
+                  // Append Campaign Log
+                  setOutboundLogs(prev => [
+                    {
+                      id: String(prev.length + 1),
+                      channel: 'email',
+                      template: 'Official Offer Released',
+                      recipient: candidate.email,
+                      status: 'sent',
+                      timestamp: 'Just now'
+                    },
+                    ...prev
+                  ]);
+                }}
+                disabled={offerState !== 'draft'}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs font-black uppercase tracking-wider h-11"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {offerState === 'draft' ? 'Release & Dispatch Offer' : 'Offer Already Dispatched'}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setOfferSalary(1200000);
+                  setOfferCurrency('INR');
+                  setOfferBenefits('Standard comprehensive medical insurance, remote-work allowance, and performance bonuses.');
+                  setOfferState('draft');
+                  notify('Offer contract draft cleared.', 'info');
+                }}
+                className="sm:w-32 border-slate-250 text-slate-500 text-xs font-black uppercase tracking-wider h-11"
+              >
+                Reset Draft
+              </Button>
+            </div>
+          </Card>
+
+          {/* Interactive Document Preview */}
+          <div className="space-y-4">
+            {/* Status Visual Tracking Progress Bar */}
+            <Card className="p-4 bg-slate-900 border-none text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full -mr-12 -mt-12 blur-3xl" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                <div>
+                  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-0.5">Integration Outbound State</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <h4 className="text-xs font-black uppercase tracking-widest">{offerState} / AWAITING SIGNATURE</h4>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
+                  {['draft', 'sent', 'viewed', 'accepted'].map((st, idx) => (
+                    <div key={st} className="flex items-center">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider",
+                        offerState === st ? "bg-indigo-600 text-white shadow" : "text-slate-400"
+                      )}>
+                        {st}
+                      </span>
+                      {idx < 3 && <div className="w-2 h-px bg-slate-700" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* Document sheet */}
+            <Card className="bg-white border border-slate-100 shadow-2xl rounded-2xl overflow-hidden min-h-[550px] relative flex flex-col justify-between">
+              {/* Top Letterhead banner */}
+              <div className="bg-slate-900 text-white px-8 py-8 border-b-4 border-indigo-600 flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-black uppercase tracking-widest text-indigo-400 leading-none mb-1">
+                    {organization?.name || 'HIREFLOW OS'}
+                  </h2>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Official Talent Agreement Letter</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] text-slate-400 font-mono">ID: OFF_{candidateId?.slice(0,6)}</p>
+                  <p className="text-[9px] text-slate-400 font-mono">DATE: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+              </div>
+
+              {/* Main Page Sheet Content */}
+              <div className="p-8 sm:p-12 space-y-6 flex-1 text-slate-750 text-xs sm:text-sm leading-relaxed font-sans max-h-[550px] overflow-y-auto custom-scrollbar">
+                <div className="space-y-1">
+                  <p className="font-extrabold text-slate-900 text-left">Dear {candidate.fullName},</p>
+                  <p className="text-left">Applied Email: <span className="font-mono text-slate-500 font-semibold">{candidate.email}</span></p>
+                </div>
+
+                <p className="text-left">
+                  Following the meticulous evaluation of your credentials and your high-signal technical voice interview, we are absolutely delighted to extend our official offer of employment at <strong className="text-slate-900 font-extrabold">{organization?.name || 'our organization'}</strong>.
+                </p>
+
+                {/* Offer key ledger parameters */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 font-sans text-left">
+                  <div>
+                    <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest block mb-0.5">Proposed Position / Job Title</span>
+                    <p className="font-black text-indigo-950 text-sm">{job?.title || 'Unknown Role'}</p>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest block mb-0.5">Annual Package (CTC)</span>
+                    <p className="font-black text-indigo-950 text-sm">
+                      {offerCurrency === 'INR' && '₹'}
+                      {offerCurrency === 'USD' && '$'}
+                      {offerCurrency === 'GBP' && '£'}
+                      {offerCurrency === 'EUR' && '€'}
+                      {offerCurrency === 'SGD' && 'S$'}
+                      {offerSalary.toLocaleString()} / Annual
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest block mb-0.5">Joining Commencement Date</span>
+                    <p className="font-black text-slate-800 text-xs">{offerStartDate}</p>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-black text-indigo-900 uppercase tracking-widest block mb-0.5">Compliance Isolation</span>
+                    <p className="font-black text-slate-800 text-xs">Section 06 ISO Certified</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider">Compensations & Benefits Ledger</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed italic pr-2">
+                    {offerBenefits}
+                  </p>
+                </div>
+
+                <p className="text-[11px] text-slate-400 italic text-left">
+                  To confirm your acceptance, kindly click the simulated e-signature simulation block below. Signing this document constitutes your legal binding of employment.
+                </p>
+
+                {/* Simulated Handwritten Candidate Sign Block */}
+                <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className="text-left">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Authorized Signatory</span>
+                    <p className="font-semibold text-slate-800">HR Director</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{organization?.name || 'HIREFLOW'}</p>
+                  </div>
+
+                  <div className="border-2 border-dashed border-indigo-150 rounded-2xl p-4 bg-slate-50 min-w-[200px] text-center relative group">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Candidate Signatory Signature</span>
+                    
+                    {offerState === 'accepted' ? (
+                      <div className="py-2">
+                        <p className="text-center text-indigo-600 text-2xl rotate-[-4deg] tracking-wider select-none font-sans font-black">
+                          {candidate.fullName.split(' ').map(n=>n.charAt(0)).join('. ') + '. ' + candidate.fullName.split(' ').slice(-1)}
+                        </p>
+                        <p className="text-[10px] text-emerald-600 font-extrabold uppercase mt-1">✓ Signature Recorded Securely</p>
+                      </div>
+                    ) : (
+                      <div className="py-2">
+                        <Button 
+                          onClick={() => {
+                            setIsSigning(true);
+                            setTimeout(() => {
+                              setOfferState('accepted');
+                              setIsSigning(false);
+                              notify('Simulated Acceptance & E-Signature Recorded Successfully!', 'success');
+                              
+                              // Append Campaign Log
+                              setOutboundLogs(prev => [
+                                {
+                                  id: String(prev.length + 1),
+                                  channel: 'email',
+                                  template: 'Offer Signed & Accepted',
+                                  recipient: candidate.email,
+                                  status: 'clicked',
+                                  timestamp: 'Just now'
+                                },
+                                ...prev
+                              ]);
+                            }, 1200);
+                          }}
+                          disabled={isSigning || offerState === 'draft'}
+                          className="bg-indigo-600 hover:bg-slate-900 border-none text-[10px] font-black uppercase tracking-widest px-4 py-2 h-auto text-white"
+                        >
+                          {isSigning ? 'Signing...' : offerState === 'draft' ? 'Awaiting Release' : 'Simulate E-Sign Acceptance'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* PDF Print and Standalone footer */}
+              <div className="bg-slate-50 py-3 px-8 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                <p>© 2026 {organization?.name || 'HireFlow OS'} • Confidentially Guarded</p>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="flex items-center gap-1 hover:text-slate-600 font-semibold"
+                  >
+                    <Printer className="w-3.5 h-3.5" /> Print Draft
+                  </button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Outbound Messaging campaigns Tab */}
+      {activeDetailTab === 'campaign' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Email/WhatsApp form configuration */}
+          <Card className="p-8 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                <Send className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 text-base uppercase tracking-wider">Automated Campaigns Workspace</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Configure Multi-Channel Outbound Triggers</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Message Template Picker</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'invite', label: 'Invite to AI Voice Assessment', icon: Mic },
+                    { id: 'reminder', label: 'Complete Screening Reminder', icon: Clock },
+                    { id: 'offer_link', label: 'Release Offer Agreement Letter', icon: FileText }
+                  ].map((temp) => {
+                    const TIcon = temp.icon;
+                    return (
+                      <button
+                        key={temp.id}
+                        type="button"
+                        onClick={() => setCampaignTemplate(temp.id as any)}
+                        className={cn(
+                          "p-3 rounded-xl border flex items-center gap-2 text-left text-xs font-bold transition-all flex-1 min-w-[200px]",
+                          campaignTemplate === temp.id 
+                            ? "bg-emerald-50 border-emerald-300 text-emerald-700 shadow-sm" 
+                            : "bg-white border-slate-200 text-slate-550 hover:bg-slate-50"
+                        )}
+                      >
+                        <TIcon className="w-4 h-4 text-emerald-500" />
+                        <span>{temp.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">WhatsApp / SMS Dynamic Template Text</label>
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 font-mono text-xs text-slate-600 leading-relaxed text-left relative pl-10">
+                  <div className="absolute top-4 left-4 bg-emerald-100 p-1 rounded-full text-emerald-650">
+                    <Send className="w-3 h-3" />
+                  </div>
+                  {campaignTemplate === 'invite' && (
+                    <p>
+                      Hello <span className="text-emerald-600 font-extrabold">{candidate.fullName}</span>, we are excited to invite you to complete our automated AI Voice Assessment for <span className="text-emerald-600 font-extrabold">{job?.title}</span> at <span className="text-emerald-500 font-black">{organization?.name || 'our company'}</span>. Access your secure lobby via this link: {window.location.origin}/interview/{candidateId}
+                    </p>
+                  )}
+                  {campaignTemplate === 'reminder' && (
+                    <p>
+                      Hi <span className="text-emerald-600 font-extrabold">{candidate.fullName}</span>, this is a friendly reminder to complete your AI Voice Assessment for the <span className="text-emerald-600 font-extrabold">{job?.title}</span> position with <span className="text-emerald-500 font-black">{organization?.name || 'our company'}</span>. Our screening panel requires this to advance!
+                    </p>
+                  )}
+                  {campaignTemplate === 'offer_link' && (
+                    <p>
+                      Incredible news <span className="text-emerald-600 font-extrabold">{candidate.fullName}</span>! Your assessment score was outstanding. We have officially released your Offer Agreement letter. View and E-sign the document at your earliest convenience: {window.location.origin}/candidates/{candidateId}?tab=offer
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
+                <div className="text-left">
+                  <h4 className="text-[10px] font-black text-emerald-950 uppercase tracking-widest block mb-0.5">Campaign Outbound Targets</h4>
+                  <p className="text-xs text-slate-600 leading-normal font-sans">
+                    Email address: <span className="font-semibold text-slate-900">{candidate.email}</span> • Mobile: <span className="font-semibold text-slate-900">Registered</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => {
+                setSendingOutbound(true);
+                setTimeout(() => {
+                  setSendingOutbound(false);
+                  notify('Campaign messages triggered on both WhatsApp and Email!', 'success');
+                  
+                  // Add to log list
+                  setOutboundLogs(prev => [
+                    {
+                      id: String(prev.length + 1),
+                      channel: 'whatsapp',
+                      template: campaignTemplate === 'invite' ? 'Voice Invite Bot' : campaignTemplate === 'reminder' ? 'Assessment Reminder' : 'Offer Dispatch Notification',
+                      recipient: candidate.fullName,
+                      status: 'delivered',
+                      timestamp: 'Just now'
+                    },
+                    {
+                      id: String(prev.length + 2),
+                      channel: 'email',
+                      template: campaignTemplate === 'invite' ? 'Voice Invite Bot' : campaignTemplate === 'reminder' ? 'Assessment Reminder' : 'Offer Dispatch Notification',
+                      recipient: candidate.email,
+                      status: 'delivered',
+                      timestamp: 'Just now'
+                    },
+                    ...prev
+                  ]);
+                }, 1000);
+              }}
+              disabled={sendingOutbound}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 font-black uppercase tracking-widest text-xs h-11"
+            >
+              {sendingOutbound ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+              Dispatch Campaign Trigger
+            </Button>
+          </Card>
+
+          {/* Interactive Mobile Whatsapp Device Mock & logs */}
+          <div className="space-y-6">
+            {/* WhatsApp Mock Mobile Frame */}
+            <div className="border-[12px] border-slate-950 rounded-[40px] bg-slate-905 w-full max-w-[340px] mx-auto overflow-hidden shadow-2xl relative min-h-[460px] flex flex-col justify-between">
+              {/* Top notch bar */}
+              <div className="bg-slate-950 text-white py-1 px-8 text-[9px] font-bold font-mono tracking-widest flex justify-between items-center shrink-0">
+                <span>9:41</span>
+                <span className="w-16 h-4 bg-slate-950 rounded-b-xl absolute top-0 left-1/2 -translate-x-1/2" />
+                <div className="flex gap-1.5 items-center">
+                  <span>5G</span>
+                  <div className="w-4 h-2.5 bg-white rounded-sm shrink-0" />
+                </div>
+              </div>
+
+              {/* Chat header contact */}
+              <div className="bg-slate-800 text-white px-5 py-3 flex items-center gap-3 shrink-0">
+                <div className="w-7 h-7 bg-indigo-500 rounded-full text-[10px] font-black text-center flex items-center justify-center border-2 border-white shadow">
+                  HF
+                </div>
+                <div className="text-left">
+                  <h4 className="text-[11px] font-black uppercase tracking-tight leading-none mb-0.5">{organization?.name || 'HIREFLOW OS'}</h4>
+                  <p className="text-[8px] text-emerald-400 font-bold uppercase tracking-widest">Active Verification Profile</p>
+                </div>
+              </div>
+
+              {/* Chat background layout wrapper with dots pattern */}
+              <div className="flex-1 bg-teal-50/50 px-4 py-6 overflow-y-auto space-y-4 max-h-[300px] text-left">
+                {/* Outgoing template WhatsApp bubble */}
+                <div className="bg-white p-3.5 rounded-2xl border border-teal-100 shadow-sm max-w-[90%] relative">
+                  <div className="text-slate-650 text-[11px] leading-relaxed font-sans pr-2">
+                    {campaignTemplate === 'invite' && (
+                      <p>
+                        Hello <strong>{candidate.fullName}</strong>, we are excited to invite you to complete our automated AI Voice Assessment for <strong>{job?.title}</strong> with <strong>{organization?.name || 'our company'}</strong>. Access your secure lobby via this link: {window.location.origin}/interview/{candidateId}
+                      </p>
+                    )}
+                    {campaignTemplate === 'reminder' && (
+                      <p>
+                        Hi <strong>{candidate.fullName}</strong>, this is a friendly reminder to complete your AI Voice Assessment for the <strong>{job?.title}</strong> position with <strong>{organization?.name || 'our company'}</strong>. Our screening panel requires this to advance!
+                      </p>
+                    )}
+                    {campaignTemplate === 'offer_link' && (
+                      <p>
+                        Incredible news <strong>{candidate.fullName}</strong>! Your assessment score was outstanding. We have officially released your Offer Agreement letter. View and E-sign the document at your earliest convenience: {window.location.origin}/candidates/{candidateId}?tab=offer
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Whatsapp tick timing footer */}
+                  <div className="flex justify-end gap-1 items-center mt-2 pb-0.5 pointer-events-none">
+                    <span className="text-[8px] text-slate-400">9:41 AM</span>
+                    <div className="flex items-center text-blue-500 scale-90">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chat input footer mocker */}
+              <div className="bg-slate-950 p-2 text-white/50 text-[10px] items-center flex justify-between shrink-0">
+                <span>Message</span>
+                <Send className="w-3.5 h-3.5" />
+              </div>
+            </div>
+
+            {/* Campaign Metrics Ledger Ledger */}
+            <Card className="p-6">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Outbound Delivery Campaign Log</h4>
+              <div className="space-y-3">
+                {outboundLogs.map((log) => (
+                  <div key={log.id} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs gap-4 font-sans text-left">
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg shrink-0",
+                        log.channel === 'whatsapp' ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
+                      )}>
+                        <MessageSquare className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-extrabold text-slate-900">{log.template}</p>
+                        <p className="text-[10px] text-slate-400 truncate max-w-[200px]">{log.recipient}</p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest",
+                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-indigo-100 text-indigo-800" : "bg-slate-100 text-slate-600"
+                      )}>
+                        {log.status}
+                      </span>
+                      <p className="text-[9px] text-slate-400 mt-1">{log.timestamp}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Advanced Proctoring Screen Tab */}
+      {activeDetailTab === 'proctoring' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          
+          {/* Simulated Webcam Viewport */}
+          <div className="lg:col-span-2 space-y-4">
+            <Card className="bg-slate-950 rounded-3xl overflow-hidden relative border-none aspect-video flex flex-col justify-between shadow-2xl">
+              {/* Video elements overlay parameters */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/30 font-sans pointer-events-none" />
+              
+              {/* Canvas Simulation */}
+              <div className="absolute inset-x-8 inset-y-16 flex items-center justify-center border-4 border-dashed border-indigo-500/20 rounded-2xl bg-slate-905/30 backdrop-blur-sm z-10 transition-all duration-300">
+                {activeCameraTest ? (
+                  <div className="text-center space-y-4 font-sans">
+                    {cameraAnomalyMock ? (
+                      <div className="mx-auto w-16 h-16 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center animate-bounce">
+                        <AlertTriangle className="w-8 h-8 text-red-500" />
+                      </div>
+                    ) : (
+                      <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center relative animate-pulse">
+                        <Users className="w-6 h-6 text-emerald-400" />
+                        {/* Eye tracking point mockup boxes */}
+                        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
+                        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs font-black text-indigo-400 uppercase tracking-widest animate-pulse">
+                        {cameraAnomalyMock ? 'SECURITY VIOLATION TRIGGERED' : 'BIOMETRIC ANOMALY SYSTEM ACTIVE'}
+                      </p>
+                      <p className="text-sm font-extrabold text-white">
+                        {cameraAnomalyMock ? 'Multiple Faces Observed inside Feed!' : 'Verified: Single Candidate Presence'}
+                      </p>
+                      {gazeDeviationMock && <p className="text-[10px] text-red-400 uppercase tracking-widest font-black animate-pulse">GAZE DEVIATION DETECTED: Looking offscreen</p>}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-2 py-10 font-sans">
+                    <Camera className="w-12 h-12 text-slate-600 mx-auto" />
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">PROCTORING MONITORING FEED STANDBY</p>
+                    <p className="text-[10px] text-slate-500 p-2 max-w-sm mx-auto leading-relaxed">Simulate live visual checks & eye trace mapping used during voice sessions.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Absolute watermark trackers */}
+              <div className="p-6 flex justify-between items-start relative z-20">
+                <span className="text-[10px] font-black bg-slate-900/80 text-indigo-400 px-3 py-1.5 rounded-xl uppercase tracking-widest backdrop-blur border border-slate-700/50">
+                  CAMERA CHECKPOINT FEED • 1080P
+                </span>
+                <span className={cn(
+                  "text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest border font-sans animate-pulse",
+                  (cameraAnomalyMock || tabSwitchCountMock > 0 || gazeDeviationMock) ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                )}>
+                  {(cameraAnomalyMock || tabSwitchCountMock > 0 || gazeDeviationMock) ? 'POTENTIAL ADVERSARIAL ALERT' : 'SECURE SESSION'}
+                </span>
+              </div>
+
+              {/* Camera layout controls footer */}
+              <div className="p-6 bg-slate-900 border-t border-slate-800 flex justify-between items-center relative z-20 shrink-0">
+                <Button 
+                  onClick={() => {
+                    setActiveCameraTest(prev => !prev);
+                    setCameraAnomalyMock(false);
+                    setTabSwitchCountMock(0);
+                    setGazeDeviationMock(false);
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700 font-black text-xs uppercase tracking-widest h-10 px-5"
+                >
+                  {activeCameraTest ? 'STANDBY SYSTEM' : 'BOOT CAM TESTER'}
+                </Button>
+
+                <div className="flex gap-2">
+                  <span className="text-[10px] text-slate-400 uppercase tracking-widest font-mono">INTEGRITY MATRIX ACTIVE</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Simulated candidate actions launcher */}
+            <Card className="p-6">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Simulate Candidate Adversarial Cheating Patterns</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Button 
+                  onClick={() => {
+                    if (!activeCameraTest) return notify('Please BOOT CAM TESTER first', 'info');
+                    setTabSwitchCountMock(prev => prev + 1);
+                    notify('Simulated Candidate switched browser tab!', 'error');
+                  }}
+                  variant="outline"
+                  className="border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
+                >
+                  Simulate Tab Switch
+                </Button>
+                <Button 
+                  onClick={() => {
+                    if (!activeCameraTest) return notify('Please BOOT CAM TESTER first', 'info');
+                    setGazeDeviationMock(prev => !prev);
+                    notify('Simulated Candidate looking offscreen!', 'error');
+                  }}
+                  variant="outline"
+                  className="border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
+                >
+                  Simulate Left-Gaze Bias
+                </Button>
+                <Button 
+                  onClick={() => {
+                    if (!activeCameraTest) return notify('Please BOOT CAM TESTER first', 'info');
+                    setCameraAnomalyMock(prev => !prev);
+                    notify('Simulated secondary face inside feed!', 'error');
+                  }}
+                  variant="outline"
+                  className="border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
+                >
+                  Simulate Joint Presence
+                </Button>
+              </div>
+            </Card>
+          </div>
+
+          {/* Proctoring telemetry stats */}
+          <div className="space-y-6">
+            <Card className="p-6 space-y-4">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-2 border-b border-slate-100">Integrity Telemetry Index</h4>
+              
+              <div className="flex gap-3 items-center py-2 text-left">
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black text-xl border shadow-inner",
+                  (tabSwitchCountMock > 2 || cameraAnomalyMock) ? "bg-red-50 border-red-200 text-red-600 animate-pulse" : (tabSwitchCountMock > 0 || gazeDeviationMock) ? "bg-amber-100 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+                )}>
+                  {Math.max(0, 100 - (tabSwitchCountMock * 25) - (cameraAnomalyMock ? 50 : 0) - (gazeDeviationMock ? 15 : 0))}%
+                </div>
+                <div>
+                  <span className="text-[9px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
+                  <p className="text-xs font-bold text-slate-800">
+                    {(tabSwitchCountMock > 2 || cameraAnomalyMock) ? 'Severe Security Penalty Alert' : (tabSwitchCountMock > 0 || gazeDeviationMock) ? 'Anomalous Integrity' : 'Elite Verified Safe Profile'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2 text-left">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500 font-medium">Off-screen Outbreaks</span>
+                  <span className="font-extrabold text-slate-800">{gazeDeviationMock ? '1 active' : '0 detected'}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500 font-medium">Tab Switch Deviations</span>
+                  <span className="font-extrabold text-slate-800">{tabSwitchCountMock} triggers</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-500 font-medium">Secondary Audio Signal</span>
+                  <span className="font-extrabold text-slate-800">0.0dB Stable</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Adversarial Violation Ledger</h4>
+              <div className="space-y-3">
+                {tabSwitchCountMock > 0 && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs flex justify-between items-center font-sans text-left">
+                    <span className="text-red-700 font-extrabold uppercase">Tab Switched ({tabSwitchCountMock}x)</span>
+                    <span className="text-red-400 font-mono">Just now</span>
+                  </div>
+                )}
+                {gazeDeviationMock && (
+                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs flex justify-between items-center font-sans text-left">
+                    <span className="text-amber-700 font-extrabold uppercase">Gaze Bias Detected</span>
+                    <span className="text-amber-400 font-mono">Active</span>
+                  </div>
+                )}
+                {cameraAnomalyMock && (
+                  <div className="p-3 bg-red-100 border border-red-200 rounded-xl text-xs flex justify-between items-center font-sans text-left">
+                    <span className="text-red-800 font-black uppercase">Multi-face Warning</span>
+                    <span className="text-red-500 font-mono">Triggered</span>
+                  </div>
+                )}
+                {!cameraAnomalyMock && !gazeDeviationMock && tabSwitchCountMock === 0 && (
+                  <div className="py-6 text-center border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
+                    <p className="text-xs text-slate-400 italic">No violation blocks detected.</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -5500,6 +6624,21 @@ function OrgAdminPanel() {
 
   const [savingSettings, setSavingSettings] = useState(false);
   const [testingSmtp, setTestingSmtp] = useState(false);
+
+  // White-Label Customization States
+  const [logoUrl, setLogoUrl] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80');
+  const [primaryColor, setPrimaryColor] = useState('#4f46e5');
+  const [brandingName, setBrandingName] = useState('HireFlow OS Portal');
+  const [markupFactor, setMarkupFactor] = useState(1.35);
+  const [resellerModel, setResellerModel] = useState<'per_seat' | 'per_interview'>('per_interview');
+  const [clientTenants, setClientTenants] = useState([
+    { id: 'ct-1', name: 'Zeta Software Solutions', jobs: 6, candidates: 184, billableAmt: 5400, markup: 1.30 },
+    { id: 'ct-2', name: 'Stellar Tech Labs', jobs: 3, candidates: 49, billableAmt: 1950, markup: 1.40 },
+    { id: 'ct-3', name: 'Infinity Healthcare Corp', jobs: 8, candidates: 298, billableAmt: 11200, markup: 1.25 }
+  ]);
+  const [editingTenantId, setEditingTenantId] = useState<string | null>(null);
+  const [editingTenantName, setEditingTenantName] = useState('');
+  const [editingTenantMarkup, setEditingTenantMarkup] = useState(1.35);
 
   const isReadOnly = profile?.role === 'recruiter';
   
@@ -6397,6 +7536,364 @@ function OrgAdminPanel() {
               </div>
             </Card>
           </div>
+
+          {/* White-Label Customization Workspace Panel */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            {/* Customiser Controls Card */}
+            <Card className="p-8 space-y-6 bg-white border border-slate-100 shadow-sm rounded-3xl text-left">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                  <Sliders className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide">Brand customizer</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">White-Label Portal Customization Settings</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Interactive Portal Brand Name</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={brandingName}
+                    onChange={e => setBrandingName(e.target.value)}
+                    placeholder="e.g. HireFlow Pro"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Corporate Branding Logo URL</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    value={logoUrl}
+                    onChange={e => setLogoUrl(e.target.value)}
+                    placeholder="Provide logo image URL..."
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-2.5 font-mono text-slate-900 focus:border-indigo-500 outline-none transition-all text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Primary Color Scheme Accent</label>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {[
+                      { hex: '#4f46e5', label: 'Indigo' },
+                      { hex: '#10b981', label: 'Mint' },
+                      { hex: '#ef4444', label: 'Crimson' },
+                      { hex: '#f59e0b', label: 'Amber' },
+                      { hex: '#2563eb', label: 'Classic' },
+                      { hex: '#9333ea', label: 'Orchid' }
+                    ].map((col) => (
+                      <button
+                        key={col.hex}
+                        type="button"
+                        onClick={() => setPrimaryColor(col.hex)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-xl border-2 text-[10px] font-black uppercase tracking-wider transition-all",
+                          primaryColor === col.hex 
+                            ? "bg-slate-900 text-white shadow-md scale-102" 
+                            : "bg-white border-slate-200 text-slate-650 hover:bg-slate-50"
+                        )}
+                      >
+                        <span 
+                          className="inline-block w-2.5 h-2.5 rounded-full mr-2" 
+                          style={{ backgroundColor: col.hex }}
+                        />
+                        {col.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Enterprise Reseller Parameters</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Licensing Fee Markup Factor</label>
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="range" 
+                          min={1.0} 
+                          max={3.0} 
+                          step={0.05}
+                          value={markupFactor}
+                          onChange={(e) => setMarkupFactor(Number(e.target.value))}
+                          className="flex-1 accent-indigo-600"
+                        />
+                        <span className="text-xs font-black bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg shrink-0">{markupFactor.toFixed(2)}x</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Client Reseller Model</label>
+                      <select
+                        value={resellerModel}
+                        onChange={(e) => setResellerModel(e.target.value as any)}
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-3 py-2 font-bold text-slate-700 text-xs"
+                      >
+                        <option value="per_seat">Per Active Seat License ($)</option>
+                        <option value="per_interview">Per Candidate voice screening ($)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Portal Real-time Interface Rendering Mock */}
+            <Card className="p-8 space-y-6 bg-slate-900 border-none text-white rounded-3xl overflow-hidden relative flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 -mr-16 -mt-16" style={{ backgroundColor: primaryColor }} />
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-800/80">
+                  <div>
+                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-0.5">Custom white label preview</span>
+                    <h3 className="font-extrabold text-white text-xs uppercase tracking-widest leading-none">Live Render Portal Mockup</h3>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-[8px] font-semibold uppercase px-2 py-0.5 bg-slate-800 border border-slate-700/60 rounded text-slate-400">ACTIVE CUSTOMIZER</span>
+                  </div>
+                </div>
+
+                <div className="border border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-950 font-sans text-left text-xs text-slate-400 min-h-[220px] flex flex-col justify-between">
+                  {/* Mock Portal Header */}
+                  <div className="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <img 
+                        src={logoUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80'} 
+                        referrerPolicy="no-referrer"
+                        alt="Portal Core Logo" 
+                        className="w-5 h-5 rounded-lg object-cover"
+                        onError={(e) => {
+                          // Fallback
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80';
+                        }}
+                      />
+                      <span className="font-extrabold text-white text-xs tracking-wider uppercase">{brandingName}</span>
+                    </div>
+
+                    <div className="flex gap-2 text-[9px] font-bold">
+                      <span className="text-white">Assesments</span>
+                      <span>Candidates</span>
+                      <span>Settings</span>
+                    </div>
+                  </div>
+
+                  {/* Mock Portal Landing content body */}
+                  <div className="p-6 space-y-3 flex-1 flex flex-col justify-center">
+                    <h2 className="text-sm font-black text-white leading-tight uppercase tracking-wide">
+                      Welcome to your Automated screening Lobby
+                    </h2>
+                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                      Powered under secure sandbox protocols. All transcripts and audio evaluation logs are analyzed securely with dynamic pricing variables.
+                    </p>
+
+                    <div className="pt-2">
+                      <button 
+                        type="button"
+                        style={{ backgroundColor: primaryColor }}
+                        className="px-4 py-2 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-md transition-all scale-102"
+                      >
+                        Enter Assessment Lobby
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Mock Portal Footer banner */}
+                  <div className="p-3 bg-slate-900 border-t border-slate-800/50 flex justify-between items-center text-[8px] text-slate-500 font-mono">
+                    <p>© 2026 {brandingName} Portal Client Isolation</p>
+                    <span 
+                      className="w-2 h-2 rounded-full shrink-0 animate-ping" 
+                      style={{ backgroundColor: primaryColor }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary details */}
+              <div className="p-4 bg-slate-850 border border-slate-800/80 rounded-2xl flex items-center justify-between text-left">
+                <div>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Calculated Mark-Up Pricing Factor</span>
+                  <p className="text-xs text-slate-300 leading-normal font-sans">
+                    Reselling standard rates with a calculated markup factor of <strong className="text-white">{(markupFactor).toFixed(2)}x</strong> over base licensing models.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Section 4: Multi-Tenant Workspaces Directory Ledger */}
+          <Card className="p-8 mt-8 space-y-6 bg-white border border-slate-100 shadow-sm rounded-3xl text-left">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide font-sans">Multi-Tenant Client Workspaces Matrix</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Reseller Client Billing Profiles & Consumption Dashboard</p>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  const name = prompt("Enter new Client Tenant Org Name:", "Aperture Labs");
+                  const markup = Number(prompt("Enter pricing markup multiplier factor for this client:", "1.35"));
+                  if (name) {
+                    setClientTenants(prev => [
+                      ...prev,
+                      {
+                        id: 'ct-' + (prev.length + 1),
+                        name: name,
+                        jobs: 0,
+                        candidates: 0,
+                        billableAmt: 0,
+                        markup: isNaN(markup) ? 1.35 : markup
+                      }
+                    ]);
+                    notify('New Client Tenant Account Active and Ready!', 'success');
+                  }
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-[10px] font-black uppercase tracking-widest px-4 h-9"
+              >
+                <Plus className="w-3.5 h-3.5 mr-1" /> Add Client Workspace
+              </Button>
+            </div>
+
+            {/* List Table of Tenant client workspaces */}
+            <div className="overflow-x-auto rounded-2xl border border-slate-100">
+              <table className="w-full text-left border-collapse font-sans">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <th className="py-4 px-6">Client Organization Name</th>
+                    <th className="py-4 px-4 text-center">Jobs Ordered</th>
+                    <th className="py-4 px-4 text-center">Screened Evaluated</th>
+                    <th className="py-4 px-4 text-right">Raw Platform Usage</th>
+                    <th className="py-4 px-4 text-center">Reseller Markup Mode</th>
+                    <th className="py-4 px-6 text-right">CLIENT BILLABLE TOTAL</th>
+                    <th className="py-4 px-6 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs text-slate-650">
+                  {clientTenants.map((ten) => {
+                    // Raw consumption calculation depending on model
+                    const baseConsumption = resellerModel === 'per_interview' 
+                      ? ten.candidates * 12 // $12 per interview
+                      : ten.jobs * 150; // $150 per active vacancy seat
+
+                    // Combine global markupFactor and tenant-level specific markup multiplier
+                    const combinedMarkup = markupFactor * ten.markup;
+                    const calculatedBillBytes = baseConsumption * combinedMarkup;
+
+                    return (
+                      <tr key={ten.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 px-6">
+                          {editingTenantId === ten.id ? (
+                            <input 
+                              type="text"
+                              value={editingTenantName}
+                              onChange={(e) => setEditingTenantName(e.target.value)}
+                              className="w-48 p-1.5 rounded border border-indigo-200 text-xs font-bold font-sans text-slate-800"
+                            />
+                          ) : (
+                            <div>
+                              <p className="font-extrabold text-slate-900">{ten.name}</p>
+                              <p className="text-[10px] text-slate-450 font-mono">WORKSPACE_ID: {ten.id}</p>
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-4 px-4 text-center font-extrabold text-slate-800">
+                          {ten.jobs}
+                        </td>
+                        <td className="py-4 px-4 text-center font-extrabold text-slate-800">
+                          {ten.candidates}
+                        </td>
+                        <td className="py-4 px-4 text-right font-mono font-medium text-slate-500">
+                          ${baseConsumption.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          {editingTenantId === ten.id ? (
+                            <div className="flex items-center gap-1.5 justify-center">
+                              <input 
+                                type="number"
+                                step={0.05}
+                                min={1.0}
+                                value={editingTenantMarkup}
+                                onChange={(e) => setEditingTenantMarkup(Number(e.target.value))}
+                                className="w-16 p-1 rounded border border-indigo-200 text-center font-bold"
+                              />
+                              <span className="text-[10px] text-slate-400 font-bold font-mono">x</span>
+                            </div>
+                          ) : (
+                            <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                              {(combinedMarkup).toFixed(2)}x combined
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-right text-emerald-650 font-black font-mono text-sm">
+                          ${calculatedBillBytes.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          {editingTenantId === ten.id ? (
+                            <div className="flex gap-2 justify-center">
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  setClientTenants(prev => prev.map(p => p.id === ten.id ? { ...p, name: editingTenantName, markup: editingTenantMarkup } : p));
+                                  setEditingTenantId(null);
+                                  notify('Client configuration parameters updated.', 'success');
+                                }}
+                                className="p-1 px-2.5 bg-emerald-100 hover:bg-[#e2f1e5] rounded text-[10px] font-extrabold uppercase mt-0.5 text-emerald-700"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2 justify-center">
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  setEditingTenantId(ten.id);
+                                  setEditingTenantName(ten.name);
+                                  setEditingTenantMarkup(ten.markup);
+                                }}
+                                className="p-1 text-indigo-600 hover:text-indigo-850 font-bold font-sans"
+                              >
+                                Edit
+                              </button>
+                              <span className="text-slate-350 font-mono">|</span>
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`Are you sure you want to suspend client workspace '${ten.name}'?`)) {
+                                    setClientTenants(prev => prev.filter(p => p.id !== ten.id));
+                                    notify(`Workspace ${ten.name} suspended on client matrix.`, 'info');
+                                  }
+                                }}
+                                className="p-1 text-red-600 hover:text-red-800 font-bold font-sans"
+                              >
+                                Suspend
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center justify-between text-[11px] text-amber-900 leading-relaxed">
+              <p>
+                <strong>Calculation Audit ledger Logic:</strong> Combined pricing is automatically derived via the dynamic equation: <code>Billable CTC = usageUnitCount * unitCostPrice * ResellerMarkupMultiplier * clientSpecificFactor</code>. All invoices are isolate-persisted inside the client workspace domains respectively.
+              </p>
+            </div>
+          </Card>
 
           {/* Action Controls */}
           <div className="flex items-center justify-end gap-4 border-t border-slate-100 pt-6">
