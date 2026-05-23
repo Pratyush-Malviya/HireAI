@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -6427,7 +6427,7 @@ function OrgAdminPanel() {
 
 function SuperAdminPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations') || 'overview';
+  const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
   const [stats, setStats] = useState({ jobs: 0, candidates: 0, users: 0, organizations: 0 });
   const [loading, setLoading] = useState(true);
@@ -6447,6 +6447,635 @@ function SuperAdminPanel() {
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
   const isSuperAdmin = auth.currentUser?.email === 'malviya.pratyush26@gmail.com';
+
+  const handleDownloadPDF = () => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const margin = 20;
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const contentWidth = pageWidth - (margin * 2);
+      let currentPage = 1;
+
+      // Helper to draw Header and Footer
+      const drawPageDecoration = (pNum: number) => {
+        // Small Header
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 116, 139); // Slate-500
+        doc.text('AI CORE HIRE  •  ENTERPRISE OPERATIONAL MANUAL', margin, 12);
+        
+        doc.setDrawColor(226, 232, 240); // Slate-200
+        doc.setLineWidth(0.2);
+        doc.line(margin, 14, pageWidth - margin, 14);
+
+        // Footer
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184); // Slate-400
+        doc.text(`Page ${pNum}`, pageWidth - margin - 12, pageHeight - 12);
+        doc.text('CONFIDENTIAL HR WORKSPACE GUIDE', margin, pageHeight - 12);
+      };
+
+      // --- PAGE 1: COVER PAGE ---
+      // Dark deep cover background bar on left
+      doc.setFillColor(15, 23, 42); // Slate-900
+      doc.rect(0, 0, 15, pageHeight, 'F');
+
+      // Indigo accent bar
+      doc.setFillColor(79, 70, 229); // Indigo-600
+      doc.rect(15, 0, 5, pageHeight, 'F');
+
+      // Content container starts at x = 30
+      let cy = 60;
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(79, 70, 229);
+      doc.text('ENTERPRISE USER ENABLEMENT', 30, cy);
+      cy += 10;
+
+      doc.setFontSize(32);
+      doc.setTextColor(15, 23, 42);
+      doc.text('AI Core Hire', 30, cy);
+      cy += 12;
+
+      doc.setFontSize(18);
+      doc.setTextColor(51, 65, 85);
+      doc.text('HR Operations Manual', 30, cy);
+      cy += 8;
+
+      doc.setFontSize(12);
+      doc.setTextColor(100, 116, 139);
+      doc.text('& Onboarding Handbook', 30, cy);
+      cy += 20;
+
+      // Line divider
+      doc.setDrawColor(79, 70, 229);
+      doc.setLineWidth(1.5);
+      doc.line(30, cy, 140, cy);
+      cy += 15;
+
+      // Metadata block
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(15, 23, 42);
+      doc.text('DOCUMENT SCOPE:', 30, cy);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Master Tenant Configuration, D6 Calibration & Fast Sourcing Ingestion', 65, cy);
+      cy += 8;
+
+      doc.setFont('Helvetica', 'bold');
+      doc.text('TARGET AUDIENCE:', 30, cy);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Corporate Recruiters, HR Managers and Talent Acquisition Teams', 65, cy);
+      cy += 8;
+
+      doc.setFont('Helvetica', 'bold');
+      doc.text('PUBLISHED DATE:', 30, cy);
+      doc.setFont('Helvetica', 'normal');
+      doc.text(new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }), 65, cy);
+      cy += 8;
+
+      doc.setFont('Helvetica', 'bold');
+      doc.text('SECURITY STATE:', 30, cy);
+      doc.setTextColor(16, 185, 129); // Emerald
+      doc.text('RESTRICTED ACCESS - VERIFIED ORGANIZATIONS ONLY', 65, cy);
+      
+      // Bottom logo tag
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text('AI CORE HIRE INC. 2026', 30, pageHeight - 30);
+
+      // --- PAGE 2: INSTRUCTION DETAILS ---
+      doc.addPage();
+      currentPage++;
+      drawPageDecoration(currentPage);
+
+      let y = 25;
+
+      const heading = (title: string) => {
+        if (y > pageHeight - 35) {
+          doc.addPage();
+          currentPage++;
+          drawPageDecoration(currentPage);
+          y = 25;
+        }
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(15, 23, 42);
+        doc.text(title, margin, y);
+        y += 6;
+        doc.setDrawColor(241, 245, 249);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y - 2, pageWidth - margin, y - 2);
+        y += 4;
+      };
+
+      const subHeading = (title: string) => {
+        if (y > pageHeight - 25) {
+          doc.addPage();
+          currentPage++;
+          drawPageDecoration(currentPage);
+          y = 25;
+        }
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(79, 70, 229); // indigo
+        doc.text(title, margin, y);
+        y += 5;
+      };
+
+      const paragraph = (text: string) => {
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(51, 65, 85);
+        const lines = doc.splitTextToSize(text, contentWidth);
+        lines.forEach((line: string) => {
+          if (y > pageHeight - 20) {
+            doc.addPage();
+            currentPage++;
+            drawPageDecoration(currentPage);
+            y = 25;
+          }
+          doc.text(line, margin, y);
+          y += 5.2;
+        });
+        y += 3; // bottom body gap
+      };
+
+      const listItem = (bullet: string, text: string) => {
+        doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(9.5);
+        doc.setTextColor(15, 23, 42);
+        
+        const bWidth = doc.getTextWidth(bullet + " ");
+        doc.text(bullet, margin, y);
+        
+        doc.setFont('Helvetica', 'normal');
+        doc.setTextColor(51, 65, 85);
+        const wrappedLines = doc.splitTextToSize(text, contentWidth - bWidth - 2);
+        
+        wrappedLines.forEach((line: string) => {
+          if (y > pageHeight - 20) {
+            doc.addPage();
+            currentPage++;
+            drawPageDecoration(currentPage);
+            y = 25;
+          }
+          doc.text(line, margin + bWidth + 2, y);
+          y += 5.2;
+        });
+        y += 2.5;
+      };
+
+      heading('1. The Intelligent D6 Assessment Framework');
+      paragraph('AI Core Hire implements an elite, multi-layered resume scoring protocol known as the D6 Assessment. This design evaluates candidate applications across six highly contextual dimensions, going far beyond legacy literal keyword searches to evaluate qualitative alignment:');
+
+      listItem('• D1: Technical Core:', 'Grades actual hands-on familiarity with programming frameworks, package libraries, and database servers requested in the standard Job Description.');
+      listItem('• D2: Pragmatic Tenure:', 'Cross-matches candidate total professional years, relevance of past job descriptions, leadership roles, and domain longevity.');
+      listItem('• D3: Educational Foundation:', 'Examines completed degrees, major/minor subject alignments, certifications, and university prestige rankings.');
+      listItem('• D4: Quantifiable Outcomes:', 'A specialized grading pipeline that checks for metric-driven Achievements like percent improvements, revenue KPIs, system scalability scale, and official awards.');
+      listItem('• D5: Cultural Coherence:', 'Audits historic patterns of employment stability, chronological timeline gaps, job-hopping rates, and career progression structure.');
+      listItem('• D6: Generative Sincerity:', 'A modern adversarial screening block highlighting copy-paste resume templates, inflated synthetic bullet points, or auto-generated descriptors.');
+
+      y += 4;
+      heading('2. Operations Implementation Blueprint');
+      paragraph('HR Organizations can launch active campaigns in four simple operational steps:');
+
+      listItem('1.', 'Tenant Onboarding: Securely configure your specialized Workspace Tenant ID using the invitation key supplied by your Platform Super Administrator.');
+      listItem('2.', 'Campaign Creation: Click "New Job" inside the dashboard. Enter standard candidate credentials alongside the original JD template. The NLP system automatically creates requirements.');
+      listItem('3.', 'Evaluation Customization: Open "Evaluation Settings" to dynamically scale weight settings for D1-D5 to match the exact demands of your opening role.');
+      listItem('4.', 'Resume Bulk Upload: Drop candidate PDF or DOCX files into the ingest system to parse and cache details for screen runs.');
+
+      // --- PAGE 3 ---
+      doc.addPage();
+      currentPage++;
+      drawPageDecoration(currentPage);
+      y = 25;
+
+      heading('3. Adjusting Evaluation & Re-scoring Guidelines');
+      paragraph('To calibrate job scoring parameters, HR Recruiters can fully custom-tune target dimensions. Click "Evaluation Settings" to open the custom slider control dashboard:');
+      
+      subHeading('Weight Constraints:');
+      paragraph('The sum of custom parameters (Metric Weights D1-D5) must equal exactly 100%. After saving, clicking the "Save & Re-score All" trigger automatically runs structural text files through the parsing system to dynamically calculate upgraded match scores.');
+
+      subHeading('Match Ranges:');
+      paragraph('Passed Match (Default: 80%+) classifies top-performing resume matches on candidate dashboards, while Low Match (Default: <40%) triggers alerts for easy isolation.');
+
+      y += 4;
+      heading('4. Dynamic Candidate Scorecards');
+      paragraph('Every single parsed candidate gets a detail workspace highlighting:');
+      listItem('• Narrative Summary:', 'An auto-generated, brief 3-sentence summary of actual qualifications, strengths, and role alignment.');
+      listItem('• Targeted Interview Questions:', 'Three custom-crafted probing questions generated based on exact potential weak spots and tenure discrepancies.');
+      listItem('• Radar Evaluation Visualization:', 'A responsive grid showcasing individual performance in D1 through D6.');
+
+      y += 4;
+      heading('5. Configuring Mail Server credentials');
+      paragraph('Select the "Settings" menu inside the Super Admin panel to connect the corporate mail servers. Input authorized Host headers (e.g. smtp.com), port configurations (465 SSL or 587 TLS), and credentials. Verify connection viability with the "Test Config" block before sending candidate invite mailings.');
+
+      // Save
+      doc.save('AI_Core_Hire_HR_Organization_User_Manual.pdf');
+      notify('Operations & Onboarding User PDF Manual downloaded successfully!', 'success');
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      notify('Failed to generate high-fidelity PDF. Standalone HTML is fully available.', 'error');
+    }
+  };
+
+  const handleDownloadManual = () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Core Hire - HR Organization Operations & Onboarding Manual</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --emerald-700: #047857;
+      --indigo-50: #e0e7ff;
+      --indigo-100: #c7d2fe;
+      --indigo-600: #4f46e5;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--slate-50);
+      color: var(--slate-800);
+      line-height: 1.6;
+      padding-bottom: 5rem;
+    }
+    header {
+      background: linear-gradient(135deg, var(--slate-900) 0%, #1e1b4b 100%);
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+      border-bottom: 4px solid var(--primary);
+    }
+    .header-tag {
+      display: inline-block;
+      background: rgba(79, 70, 229, 0.2);
+      border: 1px solid var(--indigo-100);
+      color: var(--indigo-100);
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      margin-bottom: 1.5rem;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+    header p {
+      color: var(--slate-300);
+      font-size: 1.1rem;
+      max-w: 600px;
+      margin: 0 auto;
+    }
+    .container {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+    .sidebar-toc {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .sidebar-toc h3 {
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--slate-400);
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--slate-100);
+      padding-bottom: 0.5rem;
+    }
+    .sidebar-toc ul {
+      list-style-type: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 2rem;
+    }
+    @media (max-width: 640px) {
+      .sidebar-toc ul {
+        grid-template-columns: 1fr;
+      }
+    }
+    .sidebar-toc a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .sidebar-toc a:hover {
+      text-decoration: underline;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--slate-100);
+      padding-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    p {
+      margin-bottom: 1.25rem;
+      color: var(--slate-600);
+      font-size: 0.95rem;
+    }
+    ul, ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+      color: var(--slate-600);
+      font-size: 0.95rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    .grid-dim {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .grid-dim {
+        grid-template-columns: 1fr;
+      }
+    }
+    .dim-box {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+    .dim-box h4 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .dim-box p {
+      font-size: 0.85rem;
+      margin-bottom: 0;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--slate-100);
+      color: var(--slate-900);
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+    }
+    pre {
+      display: block;
+      padding: 1rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--slate-200);
+    }
+    .alert-banner {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid var(--emerald-500);
+      padding: 1.25rem;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .alert-banner.warning {
+      background-color: #fffbeb;
+      border-color: #fef3c7;
+      border-left-color: #f59e0b;
+    }
+    .alert-banner p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--slate-700);
+    }
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-right: 0.5rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--slate-200);
+      color: var(--slate-400);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-tag">HR Operations Kit</div>
+    <h1>AI Hire Platform Manual</h1>
+    <p>The Complete Operations & Onboarding Guide for HR Teams & Recruiters</p>
+  </header>
+  <div class="container">
+    <div class="sidebar-toc">
+      <h3>Table of Contents</h3>
+      <ul>
+        <li><a href="#overview">1. D6 Intelligent Assessment Overview</a></li>
+        <li><a href="#quickstart">2. Quickstart Blueprint for HR Teams</a></li>
+        <li><a href="#parameters">3. Tuning Scoring Parameters & Weights</a></li>
+        <li><a href="#resumes">4. Resume Processing & Ingest</a></li>
+        <li><a href="#scorecards">5. Understanding Scorecards & Radar Charts</a></li>
+        <li><a href="#smtp">6. Configuring custom Mail Servers</a></li>
+      </ul>
+    </div>
+
+    <div class="card" id="overview">
+      <h2>1. The D6 Assessment Architecture</h2>
+      <p>The AI Core Hire enterprise system leverages a state-of-the-art multi-dimensional screening algorithm. Rather than relying on simple keyword density matching, resumes undergo rigorous evaluation across six distinct core metrics:</p>
+      
+      <div class="grid-dim">
+        <div class="dim-box">
+          <h4>Technical Core (D1)</h4>
+          <p>Grades practical alignment with required frameworks, programming languages, and industry tooling stacks based on explicit past experience.</p>
+        </div>
+        <div class="dim-box">
+          <h4>Pragmatic Tenure (D2)</h4>
+          <p>Analyzes total career years, proximity of past roles to target specifications, structural management depth, and industry longevity.</p>
+        </div>
+        <div class="dim-box">
+          <h4>Educational Base (D3)</h4>
+          <p>Assesses academic background relevance, completed credentials, majors/subjects alignment, and target institution matches.</p>
+        </div>
+        <div class="dim-box">
+          <h4>Quantizable Outcomes (D4)</h4>
+          <p>Scans and audits resumes for metric improvements, revenue or efficiency KPIs, cost reductions, system scale growth, and quantitative awards.</p>
+        </div>
+        <div class="dim-box">
+          <h4>Cultural Match (D5)</h4>
+          <p>Measures career path consistency, team structure adaptability, and checks for historic patterns of job-hopping or domain misalignment.</p>
+        </div>
+        <div class="dim-box">
+          <h4>Generative Sincerity (D6)</h4>
+          <p>A sophisticated adversarial screening dimension that audits the resume for generic copywriting patterns, copy-pasted content templates, and potential resume padding.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="quickstart">
+      <h2>2. Quickstart Blueprint for HR Teams</h2>
+      <p>Follow these four simple operational steps to get your screening campaigns live in minutes:</p>
+      
+      <ol>
+        <li>
+          <strong><span class="step-badge">1</span>Join the Space:</strong> Use your platform administrator's custom workspace invite link to securely create your professional team profile and join your company's master tenant registry.
+        </li>
+        <li>
+          <strong><span class="step-badge">2</span>Establish a Job Opening:</strong> Click "New Job" in the main dashboard. Specify the title, target department, and provide the official Job Description. The platform will automatically parse requirements using high-speed language processing models.
+        </li>
+        <li>
+          <strong><span class="step-badge">3</span>Tune Scoring Parameters:</strong> Open the "Evaluation Settings" panel on your Job Dashboard to tailor custom criteria titles, weight percentages, and top/low tier pass ranges.
+        </li>
+        <li>
+          <strong><span class="step-badge">4</span>Bulk Ingest Candidates:</strong> Drag and drop candidate CVs (supports .pdf and .docx formats) directly into the file portal. Inside seconds, the AI will immediately queue them into parallel processing lanes.
+        </li>
+      </ol>
+    </div>
+
+    <div class="card" id="parameters">
+      <h2>3. Tuning Scoring Parameters & Weights</h2>
+      <p>By default, the platform initiates jobs with standard, field-tested weights (30% Technical, 30% Tenure, 15% Education, 15% Achievements, and 10% Cultural Fit). However, HR Managers can fully configure these dimensions at any time from the Job view:</p>
+      
+      <div class="alert-banner">
+        <div>
+          <p><strong>💡 Pro Tip:</strong> Weights must always sum to exactly 100%. If you increase the significance of "Technical Core" by 10%, decrease "Educational Base" or "Pragmatic Tenure" accordingly inside the "Evaluation Settings" drawer to preserve aggregate scoring sanity.</p>
+        </div>
+      </div>
+
+      <h3>Custom Evaluation Sliders:</h3>
+      <ul>
+        <li><strong>Passed Match Threshold:</strong> Candidates achieving scorecards equal to or above this percentage will be automatically highlighted on the hiring visualizer as <em>Passed Match</em> (default: 80%).</li>
+        <li><strong>Low Match (Fail) Threshold:</strong> Candidates scoring below this limit (default: 40%) are flagged with low-match colors, allowing filters to easily separate them.</li>
+      </ul>
+    </div>
+
+    <div class="card" id="resumes">
+      <h2>4. Resume Processing & Ingest</h2>
+      <p>Shortened instruction details to process high volumes of resumes:</p>
+      <ul>
+        <li><strong>Batch Capacity:</strong> Parallel uploads support handling up to 50 resumes simultaneously. Ingress speed averages 4.5 seconds per candidate.</li>
+        <li><strong>Dynamic Fail-safes:</strong> If a resume contains corrupted blocks or password encryptions, the system safely isolates the entry, flags it as "failed", and logs a descriptive, clear recovery notice so you can resolve it without disrupting other candidate processing.</li>
+      </ul>
+    </div>
+
+    <div class="card" id="scorecards">
+      <h2>5. Deep-Dive Scorecards & Interactive Reports</h2>
+      <p>Click on any candidate row on the workspace to pop open their comprehensive interactive scorecard panel:</p>
+      
+      <h3>Key Sections rendered for processed candidates:</h3>
+      <ul>
+        <li><strong>Executive Summary & Verdict:</strong> A highly compressed, objective 3-sentence summary of the candidate's core strengths, notable credentials, and suitability.</li>
+        <li><strong>Forensic Auditing Bulleted Lists:</strong> Highlighted list outlining detected resume padding, unexplained career tenure gaps, or generic generative patterns in description styling.</li>
+        <li><strong>Weakness-Point Tailored Interview Prompts:</strong> 3 curated interview question prompts engineered by the AI targeting the candidate's exact identified weaknesses. These allow recruiters to conduct precise screening sessions.</li>
+        <li><strong>Dynamic Radar Visual:</strong> A beautiful custom-rendered visual grid demonstrating performance across the 6 core D-dimensions directly aligned to your campaign priorities.</li>
+      </ul>
+    </div>
+
+    <div class="card" id="smtp">
+      <h2>6. SMTP Mail Server Configuration</h2>
+      <p>Configure custom outbound mail servers to invite shortlisted candidates directly from corporate email domains:</p>
+      
+      <h3>Configuration Requirements:</h3>
+      <ol>
+        <li>Navigate to the <strong>Super Admin Registry</strong> page and select the <strong>Settings</strong> panel (or Mail settings if dedicated).</li>
+        <li>Enter your SMTP Server host name (e.g. <code>smtp.sendgrid.net</code>, <code>smtp.gmail.com</code>).</li>
+        <li>Provide port parameters: <code>465</code> for secure default SSL, or <code>587</code> for TLS (STARTTLS).</li>
+        <li>Specify the corporate Sender Display Name (From) and Email address so candidates instantly recognize your brand.</li>
+        <li>Use the <strong>"Test Config"</strong> button to send a real-time validation test mail to any test account, verifying connection integrity within seconds!</li>
+      </ol>
+    </div>
+
+    <footer>
+      AI Core Hire Enterprise Platform License • Operations Group 2026
+    </footer>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'AI_Core_Hire_HR_Organization_User_Manual.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    notify('Operations & HR Onboarding User Manual downloaded successfully! Perfect for attaching to emails.', 'success');
+  };
 
   if (!isSuperAdmin) {
     return (
@@ -6884,6 +7513,12 @@ function SuperAdminPanel() {
              >
                Settings
              </button>
+             <button 
+               onClick={() => setTab('manual')}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
+             >
+               User Manual
+             </button>
           </div>
 
           {activeTab === 'overview' ? (
@@ -7148,6 +7783,159 @@ function SuperAdminPanel() {
                        </p>
                     </div>
                   </div>
+                </div>
+              </Card>
+            </div>
+          ) : activeTab === 'manual' ? (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-6 bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-xl shadow-slate-900/10">
+                <div>
+                  <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2 mb-0.5" id="operations-handbook-title">
+                    <BookOpen className="w-5 h-5 text-indigo-400 shrink-0 animate-pulse" />
+                    HR Operations Handbook
+                  </h2>
+                  <p className="text-slate-400 text-xs">Download and send this complete onboarding kit to corporate organizations via email.</p>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  <Button
+                    onClick={handleDownloadPDF}
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-750 text-white flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download PDF Manual
+                  </Button>
+                  <Button
+                    onClick={handleDownloadManual}
+                    variant="outline"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Download HTML Manual
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      notify('Preparing Print Document layout...', 'info');
+                      window.print();
+                    }}
+                    variant="outline"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white flex items-center gap-2"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    Print Layout
+                  </Button>
+                </div>
+              </div>
+
+              {/* The Manual Document Screen Preview */}
+              <Card className="p-6 md:p-10 space-y-12 bg-white border border-slate-100 shadow-sm rounded-3xl max-h-[70vh] overflow-y-auto custom-scrollbar">
+                {/* Visual Header */}
+                <div className="text-center pb-8 border-b border-slate-100 space-y-3.5">
+                  <span className="px-3.5 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-[9px] font-black uppercase tracking-widest text-indigo-600 inline-block font-mono">
+                    Enterprise HR Kit
+                  </span>
+                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">AI Hire Operations & Onboarding Manual</h1>
+                  <p className="text-slate-500 text-sm max-w-xl mx-auto font-medium lead-relaxed">
+                    This official guide details the integrated calibration, batch sourcing pipeline, and custom grading frameworks for registered HR organizations.
+                  </p>
+                </div>
+
+                {/* Section 1 */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2 mb-3">
+                    <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs font-mono">01</span> The D6 Screening Philosophy
+                  </h3>
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
+                    The platform evaluates candidate resumes across six deep screening dimensions. Rather than matching flat keywords, language parsing engines grade professional experiences dynamically:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { name: 'Technical Core (D1)', desc: 'Analyzes knowledge of languages, libraries, platforms, and package ecosystems demanded by the target Job Specification.' },
+                      { name: 'Pragmatic Tenure (D2)', desc: 'Inspects career length, closeness of previous job titles, management seniority, and sector-related longevity.' },
+                      { name: 'Educational Foundation (D3)', desc: 'Grades academic credentials, major alignment, and university ranking filters.' },
+                      { name: 'Quantifiable Outcomes (D4)', desc: 'Reviews bullet points for metric KPI improvements, cost reductions, system scale, and quantitative awards.' },
+                      { name: 'Cultural Coherence (D5)', desc: 'Flags chronological professional timeline gaps, tenure patterns, and career trajectory stability.' },
+                      { name: 'Generative Sincerity (D6)', desc: 'Audits the resume forensically for templated generic explanations, resume padding, and copy-paste indicators.' }
+                    ].map(dim => (
+                      <div key={dim.name} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-indigo-100 transition-colors">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-indigo-600 mb-1.5 flex items-center gap-1.5">
+                          <Target className="w-3.5 h-3.5 shrink-0" />
+                          {dim.name}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">{dim.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 2 */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2 mb-3">
+                    <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs font-mono">02</span> Operational Action Blueprint
+                  </h3>
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
+                    Onboard new hiring teams to live status within minutes by walking them through these 4 primary operational phases:
+                  </p>
+                  <div className="space-y-4">
+                    {[
+                      { step: '1', title: 'Register Workspace Space', text: 'Onboarded teams use the Super Admin’s tenant invitation link (copied from the Organization list) to securely establish their business identity and connect with shared DB clusters.' },
+                      { step: '2', title: 'Publish Screening Campaigns', text: 'Corporate recruiters click "New Job" to instantiate campaigns. Specify title, seniority tier, and input standard Job descriptions. The system parses structural requirements immediately.' },
+                      { step: '3', title: 'Fine-tune Grading Weights', text: 'Click "Evaluation Settings" on any job to modify weight ratios of D1-D5 criteria. Adjusting thresholds recalculates match categorization rules automatically.' },
+                      { step: '4', title: 'Sbatch Ingestion Files', text: 'Drag and drop candidate resumes (.pdf, .docx). Parallel pipelines parse files simultaneously, caching texts for re-evaluation runs.' }
+                    ].map(st => (
+                      <div key={st.step} className="flex gap-4 items-start p-3 bg-indigo-50/25 rounded-2xl border border-indigo-100/30">
+                        <div className="w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full font-black text-xs flex items-center justify-center shrink-0">
+                          {st.step}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 leading-none mb-1">{st.title}</h4>
+                          <p className="text-[11px] text-slate-500 leading-relaxed font-semibold mt-1">{st.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 3 */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2 mb-3">
+                    <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs font-mono">03</span> Grading Settings & Calibration
+                  </h3>
+                  <p className="text-slate-600 text-xs font-semibold leading-relaxed">
+                    Recruitment managers can completely overrule standard weights to map criteria directly with physical job types:
+                  </p>
+                  <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-[11px] text-emerald-800 leading-relaxed font-semibold">
+                    💡 IMPORTANT INVARIANT: Aggregate weights of custom D1-D5 dimensions (such as Tech Skill, Tenure, Degree Alignment) must equal exactly 100%. Adjusting Job thresholds sets visual match guidelines in list cards directly. Saving configurations allows triggering immediate bulk re-scoring for all past uploaded applicants with a single button!
+                  </div>
+                </div>
+
+                {/* Section 4 */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                    <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs font-mono">04</span> Reading Interactive Candidate Dashboards
+                  </h3>
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
+                    Opening any scored candidate row triggers the specialized evaluation scorecard report, showing the following forensic information:
+                  </p>
+                  <ul className="list-disc pl-5 text-xs text-slate-500 space-y-2 leading-relaxed font-semibold">
+                    <li><span className="text-slate-700 font-bold">Executive Verdict Narrative:</span> A objective 3-sentence summary analyzing qualifications and general job suitability.</li>
+                    <li><span className="text-slate-700 font-bold">Chronological Padding Checklists:</span> Spots gaps in tenure, rapid changes of employer, or suspiciously generic candidate summaries.</li>
+                    <li><span className="text-slate-700 font-bold">Tailored Interview Prompts:</span> 3 intelligent discussion templates custom-built for interviewers to probe exact weaknesses identified during parsing.</li>
+                  </ul>
+                </div>
+
+                {/* Section 5 */}
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                    <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs font-mono">05</span> Configuration of SMTP Outgoing Servers
+                  </h3>
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
+                    Shortlisted candidates receive automated invite emails dispatched directly from the organization’s domain setup:
+                  </p>
+                  <ol className="list-decimal pl-5 text-xs text-slate-500 space-y-2 leading-relaxed font-semibold">
+                    <li>Visit the <strong>Super Admin Registry</strong> settings panel to specify outgoing details.</li>
+                    <li>Key in SMTP server address (e.g. <code>smtp.gmail.com</code>) with authorized credentials. Select Secure SSL (Port 465) or TLS (Port 587).</li>
+                    <li>Verify setup using the inline connection verification test block before rolling out mail systems to recruiting staffs.</li>
+                  </ol>
                 </div>
               </Card>
             </div>
