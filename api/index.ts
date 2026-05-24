@@ -1257,12 +1257,45 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const d5_desc = custom.culturalRoleFit?.description || "Tenure patterns (job-hopping), growth trajectory consistency.";
 
     const scoringProtocol = `SCORING PROTOCOL (D6+ v2.0):
-      Analyze and score the candidate on 5 core dimensions (Each 0-100), mapping your analysis to these json keys: 'skillsMatch', 'experienceFit', 'education', 'achievements', 'culturalRoleFit':
+      Analyze and score the candidate on 5 core dimensions (Each 0-100), mapping your analysis to these json keys: 'skillsMatch', 'experienceFit', 'education', 'achievements', 'culturalRoleFit'.
+      To ensure absolute rigidity, accuracy, and consistency superior to manual human evaluations, you MUST strictly grade each dimension according to the following objective rubric:
+
       1. skillsMatch (D1, Custom Criteria/Name: "${d1_name}"): ${d1_desc}
+         RUBRIC:
+         - 100: Resume matches ALL must-have skills and nice-to-have skills.
+         - 85: Matches ALL must-have skills but misses nice-to-have skills.
+         - 70: Matches at least 70% of must-have skills, missing some.
+         - 50: Matches between 30% and 69% of must-have skills.
+         - 20: Matches fewer than 30% of must-have skills or lacks primary technology.
+         
       2. experienceFit (D2, Custom Criteria/Name: "${d2_name}"): ${d2_desc}
+         RUBRIC:
+         - 100: Matches or exceeds target experience years (e.g. has ${jobRequirements?.min_experience_years || 'X'}+ years), and matches seniority/role scope.
+         - 85: Within 1-2 years of target experience years, or matches years but has slight seniority mismatch.
+         - 70: Within 3 years of target experience years.
+         - 50: Experience is 4+ years below target, or highly overqualified/seniority mismatch.
+         - 20: Complete misalignment of experience and track.
+         
       3. education (D3, Custom Criteria/Name: "${d3_name}"): ${d3_desc}
+         RUBRIC:
+         - 100: Matches or exceeds required degree level (e.g. ${jobRequirements?.required_education || "Bachelor's"}) in the exact relevant field.
+         - 85: Matches required degree level but in a related/different field, or has a higher degree in different field.
+         - 70: One degree level below requirement, but in the exact relevant field.
+         - 50: Lacks the required degree level and is in a completely different field.
+         
       4. achievements (D4, Custom Criteria/Name: "${d4_name}"): ${d4_desc}
-      5. culturalRoleFit (D5, Custom Criteria/Name: "${d5_name}"): ${d5_desc}`;
+         RUBRIC:
+         - 100: Contains multiple quantifiable achievements (percentages, revenue, numbers, scale) representing high impact.
+         - 85: Contains at least one quantifiable high-impact achievement.
+         - 70: Details qualitative achievements but lacks clear quantifiable markers.
+         - 50: Generic description of job duties with minimal mention of achievements or impact.
+         
+      5. culturalRoleFit (D5, Custom Criteria/Name: "${d5_name}"): ${d5_desc}
+         RUBRIC:
+         - 100: Stable work history (average tenure > 2 years per company) and clean, progressive growth.
+         - 85: Average tenure is 1.5 to 2 years, stable progression.
+         - 70: Average tenure is 1 to 1.5 years, minor job hopping or horizontal progression.
+         - 50: Significant job hopping (average tenure < 1 year per job) or substantial employment gaps (> 12 months).`;
 
     const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
@@ -1302,7 +1335,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
       
       Return ONLY valid JSON matching the schema precisely.`,
       config: {
-        temperature: 0.1,
+        temperature: 0.0,
         responseMimeType: "application/json",
         responseSchema: CANDIDATE_SCREENING_SCHEMA,
       },
@@ -1856,7 +1889,7 @@ Rules:
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.1,
+      temperature: 0.0,
       max_tokens: 4096,
       stream: false,
     });

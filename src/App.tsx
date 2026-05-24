@@ -147,6 +147,49 @@ async function hashString(str: string) {
     .join('');
 }
 
+async function getCachedScreening(resumeText: string, jobRequirements: any): Promise<any | null> {
+  try {
+    const combinedString = `${resumeText}||${JSON.stringify(jobRequirements)}`;
+    const cacheHash = await hashString(combinedString);
+    const cacheQuery = query(
+      collection(db, 'screening_cache'),
+      where('cacheHash', '==', cacheHash)
+    );
+    const snap = await getDocs(cacheQuery);
+    if (!snap.empty) {
+      console.log("[Screening Cache] Found identical resume and requirements evaluation in Firestore cache.");
+      return snap.docs[0].data().result;
+    }
+  } catch (err) {
+    console.warn("Failed to check screening cache:", err);
+  }
+  return null;
+}
+
+async function setCachedScreening(resumeText: string, jobRequirements: any, result: any): Promise<void> {
+  try {
+    const combinedString = `${resumeText}||${JSON.stringify(jobRequirements)}`;
+    const cacheHash = await hashString(combinedString);
+    await addDoc(collection(db, 'screening_cache'), {
+      cacheHash,
+      result,
+      createdAt: serverTimestamp()
+    });
+    console.log("[Screening Cache] Saved new evaluation results to Firestore cache.");
+  } catch (err) {
+    console.warn("Failed to write to screening cache:", err);
+  }
+}
+
+async function getScreeningResultWithCache(resumeText: string, jobRequirements: any): Promise<any> {
+  const cached = await getCachedScreening(resumeText, jobRequirements);
+  if (cached) return cached;
+
+  const fresh = await screenCandidate(resumeText, jobRequirements);
+  await setCachedScreening(resumeText, jobRequirements, fresh);
+  return fresh;
+}
+
 enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',
@@ -2906,7 +2949,7 @@ function JobDetail() {
       let successCount = 0;
       for (const candidate of targetCandidates) {
         try {
-          const rawScreeningResult = await screenCandidate(candidate.resumeText || '', job?.requirements || '');
+          const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText || '', job?.requirements || '');
           const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job?.requirements);
           
           await updateDoc(doc(db, 'candidates', candidate.id), {
@@ -3066,7 +3109,7 @@ function JobDetail() {
               return;
             }
 
-            const rawScreeningResult = await screenCandidate(text, job.requirements);
+            const rawScreeningResult = await getScreeningResultWithCache(text, job.requirements);
             const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
             
             await addDoc(collection(db, 'candidates'), {
@@ -3200,7 +3243,7 @@ function JobDetail() {
 
     setRetryingScreening(candidate.id);
     try {
-      const rawScreeningResult = await screenCandidate(candidate.resumeText || '', job?.requirements || '');
+      const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText || '', job?.requirements || '');
       const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job?.requirements);
       
       await updateDoc(doc(db, 'candidates', candidate.id), {
