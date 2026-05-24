@@ -9,6 +9,7 @@ import nodemailer from "nodemailer";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
+import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 
 dotenv.config({ path: ".env" });
 dotenv.config({ path: ".env.local", override: true });
@@ -1646,6 +1647,88 @@ app.post("/api/ai/summarize", async (req, res) => {
     } catch (fallbackError) {
       res.status(500).json({ error: "Summarization failed" });
     }
+  }
+});
+
+// ==========================================
+// EDGE TTS — Natural Human-Like Voice Route
+// ==========================================
+
+const EDGE_VOICE_MAP: Record<string, string> = {
+  "en-US": "en-US-JennyNeural",
+  "en-GB": "en-GB-SoniaNeural",
+  "en-IN": "en-IN-NeerjaNeural",
+  "en-AU": "en-AU-NatashaNeural",
+  "es-ES": "es-ES-ElviraNeural",
+  "fr-FR": "fr-FR-DeniseNeural",
+  "de-DE": "de-DE-KatjaNeural",
+  "ja-JP": "ja-JP-NanamiNeural",
+};
+
+// Cache TTS instances per voice to reuse WebSocket connections
+const ttsInstances: Record<string, MsEdgeTTS> = {};
+
+async function getTtsInstance(voiceName: string): Promise<MsEdgeTTS> {
+  if (!ttsInstances[voiceName]) {
+    const instance = new MsEdgeTTS();
+    await instance.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
+    ttsInstances[voiceName] = instance;
+  }
+  return ttsInstances[voiceName];
+}
+
+app.post("/api/tts", async (req, res) => {
+  const { text, voice: voiceId, rate: speakingRate } = req.body;
+  if (!text || typeof text !== "string") {
+    return res.status(400).json({ error: "text is required." });
+  }
+
+  try {
+    // Resolve neural voice name from frontend voice ID
+    const voiceName = EDGE_VOICE_MAP[voiceId] || EDGE_VOICE_MAP["en-US"];
+
+    // Sanitize text: strip markdown and escape XML entities for SSML safety
+    const cleanText = text
+      .replace(/[*#_`~]/g, "")
+      .replace(/https?:\/\/\S+/g, "link");
+
+    // Get or create a cached TTS instance for this voice
+    let ttsInstance: MsEdgeTTS;
+    try {
+      ttsInstance = await getTtsInstance(voiceName);
+    } catch {
+      // If cached instance is stale, create a fresh one
+      delete ttsInstances[voiceName];
+      ttsInstance = await getTtsInstance(voiceName);
+    }
+
+    // Build prosody options: rate as a relative number (1.0 = normal)
+    const prosody: any = {};
+    if (speakingRate && typeof speakingRate === "number" && speakingRate !== 1) {
+      prosody.rate = speakingRate;
+    }
+
+    const { audioStream } = ttsInstance.toStream(cleanText, prosody);
+
+    // Collect stream into buffer
+    const chunks: Buffer[] = [];
+    await new Promise<void>((resolve, reject) => {
+      audioStream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      audioStream.on("end", resolve);
+      audioStream.on("error", reject);
+    });
+
+    const audioBuffer = Buffer.concat(chunks);
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", audioBuffer.length.toString());
+    res.setHeader("Cache-Control", "no-cache");
+    res.send(audioBuffer);
+  } catch (error: any) {
+    console.error("[TTS] Edge TTS synthesis failed:", error.message || error);
+    // Clear cached instance on failure so next request gets a fresh one
+    const voiceName = EDGE_VOICE_MAP[voiceId] || EDGE_VOICE_MAP["en-US"];
+    delete ttsInstances[voiceName];
+    res.status(500).json({ error: "Text-to-speech synthesis failed." });
   }
 });
 

@@ -534,6 +534,7 @@ function InterviewRoom() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
   const { confirm, notify } = useNotification();
   const navigate = useNavigate();
 
@@ -777,63 +778,110 @@ function InterviewRoom() {
     };
   }, [selectedVoice.lang]);
 
-  const speak = (text: string, onEnd?: () => void) => {
-    // Remove markdown symbols for better speech
+  // Fallback: use browser SpeechSynthesis (robotic but always available)
+  const speakFallback = (text: string, onEnd?: () => void) => {
     const cleanText = text.replace(/[*#_`~]/g, '').replace(/https?:\/\/\S+/g, 'link');
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = botSpeakingPace; // Configured via HR Admin or defaults to 1.05
+    utterance.rate = botSpeakingPace;
     utterance.pitch = 1.0;
-    
-    // Core dialect configurations
     utterance.lang = selectedVoice.lang;
-
-    // Custom voice selection based on system voices if available
     if (window.speechSynthesis) {
       const voices = window.speechSynthesis.getVoices();
       let match = voices.find(v => v.lang === selectedVoice.lang && v.name.includes(selectedVoice.voiceNameQuery || ''));
-      if (!match) {
-        // Fallback 1: Match by exact locale string
-        match = voices.find(v => v.lang === selectedVoice.lang);
-      }
-      if (!match) {
-        // Fallback 2: Match by first part of language code (e.g. "en")
-        const prefix = selectedVoice.lang.split('-')[0];
-        match = voices.find(v => v.lang.startsWith(prefix));
-      }
-      if (match) {
-        utterance.voice = match;
-      }
+      if (!match) match = voices.find(v => v.lang === selectedVoice.lang);
+      if (!match) { const prefix = selectedVoice.lang.split('-')[0]; match = voices.find(v => v.lang.startsWith(prefix)); }
+      if (match) utterance.voice = match;
     }
-
     utterance.onstart = () => {
       setIsSpeaking(true);
-      // Cancel any active listening to prevent feedback loops
-      if (isListening) {
-        try {
-          recognitionRef.current?.stop();
-        } catch (e) {}
-      }
+      if (isListening) { try { recognitionRef.current?.stop(); } catch (e) {} }
     };
     utterance.onend = () => {
       setIsSpeaking(false);
-      if (onEnd) {
-        onEnd();
-      } else if (!isKeyboardMode) {
-        // Automatically start listening for response in voice mode!
-        setTimeout(() => {
-          try {
-            if (recognitionRef.current) {
-              setIsListening(true);
-              recognitionRef.current.start();
-            }
-          } catch (e) {
-            console.warn("Could not auto-start recognition after speak end:", e);
-          }
-        }, 150);
+      if (onEnd) { onEnd(); }
+      else if (!isKeyboardMode) {
+        setTimeout(() => { try { if (recognitionRef.current) { setIsListening(true); recognitionRef.current.start(); } } catch (e) { console.warn("Could not auto-start recognition after speak end:", e); } }, 150);
       }
     };
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
+  };
+
+  // Primary: use Edge Neural TTS (natural human-like voice)
+  const speak = (text: string, onEnd?: () => void) => {
+    // Stop any currently playing TTS audio
+    if (ttsAudioRef.current) {
+      ttsAudioRef.current.pause();
+      ttsAudioRef.current = null;
+    }
+    window.speechSynthesis?.cancel();
+
+    setIsSpeaking(true);
+    // Cancel any active listening to prevent feedback loops
+    if (isListening) {
+      try { recognitionRef.current?.stop(); } catch (e) {}
+    }
+
+    fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        voice: selectedVoice.id,
+        rate: botSpeakingPace,
+      }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`TTS API error: ${res.status}`);
+        return res.blob();
+      })
+      .then(blob => {
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        ttsAudioRef.current = audio;
+
+        audio.onended = () => {
+          setIsSpeaking(false);
+          URL.revokeObjectURL(audioUrl);
+          ttsAudioRef.current = null;
+          if (onEnd) {
+            onEnd();
+          } else if (!isKeyboardMode) {
+            // Automatically start listening for response in voice mode
+            setTimeout(() => {
+              try {
+                if (recognitionRef.current) {
+                  setIsListening(true);
+                  recognitionRef.current.start();
+                }
+              } catch (e) {
+                console.warn("Could not auto-start recognition after speak end:", e);
+              }
+            }, 150);
+          }
+        };
+
+        audio.onerror = () => {
+          console.warn("Edge TTS audio playback failed, falling back to browser TTS");
+          URL.revokeObjectURL(audioUrl);
+          ttsAudioRef.current = null;
+          setIsSpeaking(false);
+          speakFallback(text, onEnd);
+        };
+
+        audio.play().catch(() => {
+          console.warn("Audio play blocked, falling back to browser TTS");
+          URL.revokeObjectURL(audioUrl);
+          ttsAudioRef.current = null;
+          setIsSpeaking(false);
+          speakFallback(text, onEnd);
+        });
+      })
+      .catch(err => {
+        console.warn("Edge TTS fetch failed, falling back to browser TTS:", err);
+        setIsSpeaking(false);
+        speakFallback(text, onEnd);
+      });
   };
 
   const toggleListening = () => {

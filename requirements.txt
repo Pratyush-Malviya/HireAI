@@ -1,0 +1,23 @@
+# AI Interview Agent — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Speech-to-Text ───────────────────────────
+openai-whisper          # Local STT, MIT license
+sounddevice             # Microphone input / audio playback
+soundfile               # WAV read/write
+numpy                   # Audio processing
+
+# ── LLM (Cloud APIs) ─────────────────────────
+google-generativeai     # Gemini API client
+requests                # HTTP calls (NVIDIA NIM + general)
+
+# ── Text-to-Speech ───────────────────────────
+TTS                     # Coqui XTTS-v2, multi-accent, multi-language
+# Note: First run auto-downloads XTTS-v2 model (~2GB)
+
+# ── Voice Sample Generation (one-time) ───────
+gTTS                    # Google TTS for placeholder voice files
+
+# ── Optional: GPU acceleration ───────────────
+# torch                 # Uncomment if you have CUDA GPU
+# torchaudio            # Uncomment for GPU-accelerated audio
