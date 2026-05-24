@@ -535,6 +535,8 @@ function InterviewRoom() {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
+  const silenceTimeoutRef = useRef<any>(null);
+  const latestInputRef = useRef<string>('');
   const { confirm, notify } = useNotification();
   const navigate = useNavigate();
 
@@ -951,9 +953,15 @@ function InterviewRoom() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = selectedVoice.lang;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setInput("");
+        latestInputRef.current = "";
+      };
 
       recognition.onresult = (event: any) => {
         let finalTranscript = '';
@@ -970,21 +978,31 @@ function InterviewRoom() {
         const combined = finalTranscript || interimTranscript;
         if (combined.trim()) {
           setInput(combined);
+          latestInputRef.current = combined;
+
+          // Clear any active silence timer to reset the pause window
+          if (silenceTimeoutRef.current) {
+            clearTimeout(silenceTimeoutRef.current);
+          }
+
+          // Automatically submit response after 1.8 seconds of silence / no speech activity
+          silenceTimeoutRef.current = setTimeout(() => {
+            const textToSubmit = latestInputRef.current.trim();
+            if (textToSubmit.length > 1) {
+              console.log("Speech finished (1.8s silence detected). Auto-submitting response:", textToSubmit);
+              try { recognition.stop(); } catch (e) {}
+              handleSend(textToSubmit);
+            }
+          }, 1800);
         }
       };
 
       recognition.onend = () => {
         setIsListening(false);
-        // Automatically submit final speech text if substantial input was recorded
-        setInput((prev) => {
-          const trimmed = prev.trim();
-          if (trimmed.length > 2) {
-            setTimeout(() => {
-              handleSend(trimmed);
-            }, 600);
-          }
-          return prev;
-        });
+        if (silenceTimeoutRef.current) {
+          clearTimeout(silenceTimeoutRef.current);
+          silenceTimeoutRef.current = null;
+        }
       };
 
       recognition.onerror = (event: any) => {
@@ -1229,6 +1247,7 @@ function InterviewRoom() {
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput('');
+    latestInputRef.current = '';
     setLoading(true);
     setIsThinking(true);
 
