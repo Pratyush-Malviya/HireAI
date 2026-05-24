@@ -1564,25 +1564,39 @@ app.post("/api/ai/chat", async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("AI Key missing");
     }
-    const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash", 
-      contents: [
-        { 
-          role: "user", 
-          parts: [{ text: `SYSTEM INSTRUCTIONS:
-You are "HireNow Assistant", an intelligent AI Recruiter for ${company}. 
+
+    const systemInstruction = `You are "HireNow Assistant", an intelligent AI Recruiter for ${company}. 
 You are conducting a 1st-level professional screening interview with ${candidateName} for the position of ${role}.
 JOB DESCRIPTION: ${jd}
 CANDIDATE RESUME: ${resume}
 YOUR PROTOCOL:
-1. GREETING & CONSENT (MANDATORY START): greet polite and ask if ready. ONLY proceed after consent.
+1. GREETING & CONSENT (MANDATORY START): greet politely and ask if ready. ONLY proceed after consent.
 2. TECHNICAL SCREENING (ONLY AFTER CONSENT): Evaluate competence, test must-have skills, explore discrepancies.
-STYLE: Ask ONE question at a time. Follow up for specifics. 5-8 questions.
-END with: "Thank you for your time, ${candidateName}. We have gathered sufficient initial information. I will now process your interview for our human recruiting team."` }] 
-        },
-        { role: "model", parts: [{ text: "Understood. I am HireNow Assistant. I will follow the protocol strictly." }] },
-        ...history.map((h: any) => ({ role: h.role, parts: [{ text: h.text }] }))
-      ],
+STYLE: Ask ONE question at a time. Follow up for specifics. Ask 5-8 questions.
+END with: "Thank you for your time, ${candidateName}. We have gathered sufficient initial information. I will now process your interview for our human recruiting team."`;
+
+    // Map conversation history, prepending a simulated user start message if the first message is a model greeting.
+    // This is required because Gemini's multi-turn chat API mandates that the conversation begins with a 'user' turn,
+    // and that 'user' and 'model' roles strictly alternate.
+    const contents: any[] = [];
+    if (Array.isArray(history) && history.length > 0) {
+      if (history[0].role === "model") {
+        contents.push({ role: "user", parts: [{ text: "Start the interview screening." }] });
+      }
+      for (const h of history) {
+        const role = h.role === "model" ? "model" : "user";
+        contents.push({ role, parts: [{ text: h.text || h.content || "" }] });
+      }
+    } else {
+      contents.push({ role: "user", parts: [{ text: "Start the interview screening." }] });
+    }
+
+    const response = await generateContentWithRetry({
+      model: "gemini-3.5-flash", 
+      contents,
+      config: {
+        systemInstruction,
+      }
     });
 
     res.json({ text: response.text || "" });

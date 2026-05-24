@@ -1238,7 +1238,7 @@ function InterviewRoom() {
         job.title,
         job.company || 'The Company',
         job.description,
-        JSON.stringify(candidate.parsedData),
+        candidate.resumeText || JSON.stringify(candidate.parsedData) || '',
         newMessages.map(m => ({ role: m.role, text: m.text }))
       );
 
