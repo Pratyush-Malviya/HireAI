@@ -557,6 +557,246 @@ function InterviewRoom() {
     return botVoiceOptions[0];
   });
 
+  // --- Proctoring State ---
+  const [tabWarnings, setTabWarnings] = useState(0);
+  const [faceWarnings, setFaceWarnings] = useState(0);
+  const [noiseWarnings, setNoiseWarnings] = useState(0);
+  
+  const [faceStatus, setFaceStatus] = useState<'loading' | 'detected' | 'not_detected' | 'disabled'>('loading');
+  const [noiseStatus, setNoiseStatus] = useState<'quiet' | 'noise_detected'>('quiet');
+  const [activeWarning, setActiveWarning] = useState<{ type: 'tab' | 'face' | 'noise'; count: number } | null>(null);
+  
+  const [faceapiLoaded, setFaceapiLoaded] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<'monitor' | 'transcript'>('monitor');
+
+  const noFaceTimeRef = useRef(0);
+  const noiseTimeRef = useRef(0);
+  
+  const volumeRef = useRef(0);
+  const isSpeakingRef = useRef(false);
+  const isThinkingRef = useRef(false);
+  const isListeningRef = useRef(false);
+
+  useEffect(() => { volumeRef.current = volume; }, [volume]);
+  useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
+  useEffect(() => { isThinkingRef.current = isThinking; }, [isThinking]);
+  useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+
+  // Dynamically load face-api.js script
+  useEffect(() => {
+    if ((window as any).faceapi) {
+      setFaceapiLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js';
+    script.async = true;
+    script.onload = async () => {
+      try {
+        const faceapi = (window as any).faceapi;
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights');
+        setFaceapiLoaded(true);
+        setFaceStatus('detected');
+      } catch (err) {
+        console.error("Failed to load face-api models:", err);
+        setFaceStatus('disabled');
+      }
+    };
+    script.onerror = () => {
+      console.error("Failed to download face-api script");
+      setFaceStatus('disabled');
+    };
+    document.body.appendChild(script);
+  }, []);
+
+  // Warnings and auto-conclusion triggers
+  const triggerWarning = (type: 'tab' | 'face' | 'noise', count: number) => {
+    setActiveWarning({ type, count });
+    let warningMsg = "";
+    if (type === 'tab') {
+      warningMsg = `Warning! Tab switch detected. This is warning number ${count} of three. Please stay focused.`;
+    } else if (type === 'face') {
+      warningMsg = `Warning! Face is not visible. This is warning number ${count} of three. Please look at the camera.`;
+    } else if (type === 'noise') {
+      warningMsg = `Warning! Ambient noise detected. This is warning number ${count} of three. Please find a quiet space.`;
+    }
+    speak(warningMsg);
+    
+    setTimeout(() => {
+      setActiveWarning(prev => (prev?.type === type && prev?.count === count) ? null : prev);
+    }, 4500);
+  };
+
+  const logProctoringViolation = async (type: string, count: number) => {
+    if (!session?.id) return;
+    try {
+      const systemLog = `[SYSTEM LOG]: Proctoring warning: ${type.toUpperCase()} - Warning ${count} of 3.`;
+      const currentMessages = [...messages, { role: 'model' as const, text: systemLog, timestamp: Date.now() }];
+      setMessages(currentMessages);
+      await updateDoc(doc(db, 'interviews', session.id), { messages: currentMessages });
+    } catch (e) {
+      console.error("Error logging proctoring violation:", e);
+    }
+  };
+
+  const handleViolation = async (type: 'tab' | 'face' | 'noise') => {
+    if (concluded) return;
+
+    let currentWarnings = 0;
+    if (type === 'tab') {
+      setTabWarnings(prev => {
+        const nextVal = prev + 1;
+        currentWarnings = nextVal;
+        return nextVal;
+      });
+    } else if (type === 'face') {
+      setFaceWarnings(prev => {
+        const nextVal = prev + 1;
+        currentWarnings = nextVal;
+        return nextVal;
+      });
+    } else if (type === 'noise') {
+      setNoiseWarnings(prev => {
+        const nextVal = prev + 1;
+        currentWarnings = nextVal;
+        return nextVal;
+      });
+    }
+
+    setTimeout(async () => {
+      if (currentWarnings > 3) {
+        await autoEndInterview(`${type.toUpperCase()} policy violations exceeded allowed limit of 3 warnings`);
+      } else {
+        triggerWarning(type, currentWarnings);
+        await logProctoringViolation(type, currentWarnings);
+      }
+    }, 10);
+  };
+
+  const autoEndInterview = async (reason: string) => {
+    if (!candidate || !session || concluded) return;
+    setLoading(true);
+    try {
+      setConcluded(true);
+      
+      const systemMessageText = `[SYSTEM TERMINATION]: This interview session was automatically concluded due to repeated policy violations: ${reason}.`;
+      const finalMessages = [...messages, { role: 'model' as const, text: systemMessageText, timestamp: Date.now() }];
+      setMessages(finalMessages);
+
+      const feedback = await summarizeInterview(finalMessages.map(m => ({ role: m.role, text: m.text })));
+      
+      await updateDoc(doc(db, 'interviews', session.id), { 
+        messages: finalMessages, 
+        completed: true, 
+        feedback: `${feedback}\n\n[System Log]: Session auto-terminated due to: ${reason}`,
+        completedAt: serverTimestamp() 
+      });
+      
+      await updateDoc(doc(db, 'candidates', candidate.id), { 
+        interviewStatus: 'completed'
+      });
+      
+      notify(`Interview concluded automatically: ${reason}`, 'error');
+      speak(`The interview has been concluded automatically because of ${reason}.`);
+    } catch (err) {
+      console.error(err);
+      notify('Error concluding interview automatically.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Tab switch visibility tracking
+  useEffect(() => {
+    if (concluded || messages.length === 0) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab hidden
+      } else {
+        // Tab visible again -> trigger violation!
+        handleViolation('tab');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [concluded, messages.length, session?.id]);
+
+  // Face visibility tracking loop (1 second interval)
+  useEffect(() => {
+    if (concluded || messages.length === 0 || !faceapiLoaded || !stream) {
+      setFaceStatus('disabled');
+      return;
+    }
+
+    const videoTrack = stream.getVideoTracks()[0];
+    if (!videoTrack || !videoTrack.enabled) {
+      setFaceStatus('disabled');
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      const faceapi = (window as any).faceapi;
+      const videoEl = videoRef.current;
+      if (!faceapi || !videoEl || concluded) return;
+
+      try {
+        const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions());
+        if (detection) {
+          setFaceStatus('detected');
+          noFaceTimeRef.current = 0;
+        } else {
+          setFaceStatus('not_detected');
+          noFaceTimeRef.current += 1;
+
+          if (noFaceTimeRef.current >= 5) {
+            noFaceTimeRef.current = 0;
+            handleViolation('face');
+          }
+        }
+      } catch (err) {
+        console.error("Face detection check failed:", err);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [faceapiLoaded, stream, concluded, messages.length, session?.id]);
+
+  // Background Noise tracking loop (1 second interval)
+  useEffect(() => {
+    if (concluded || messages.length === 0 || !stream || isMuted) {
+      setNoiseStatus('quiet');
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const vol = volumeRef.current;
+      const speaking = isSpeakingRef.current;
+      const thinking = isThinkingRef.current;
+      const listening = isListeningRef.current;
+
+      if (vol > 30 && (speaking || thinking || !listening)) {
+        noiseTimeRef.current += 1;
+        setNoiseStatus('noise_detected');
+        
+        if (noiseTimeRef.current >= 3) {
+          noiseTimeRef.current = 0;
+          setNoiseStatus('quiet');
+          handleViolation('noise');
+        }
+      } else {
+        noiseTimeRef.current = 0;
+        setNoiseStatus('quiet');
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [concluded, messages.length, stream, isMuted, session?.id]);
+
   const changeVoice = (voice: BotVoiceOption) => {
     setSelectedVoice(voice);
     localStorage.setItem('hirenow_selected_voice', JSON.stringify(voice));
@@ -1099,29 +1339,65 @@ function InterviewRoom() {
   if (!candidate) return <div className="p-12 text-center text-slate-400">Loading Interview Room...</div>;
 
   return (
-    <div className="w-full py-6 px-4 min-h-[calc(100vh-140px)] flex flex-col gap-6">
+    <div className="w-full py-6 px-4 min-h-[calc(100vh-140px)] flex flex-col gap-6 bg-slate-950 rounded-[2rem] text-slate-100 border border-slate-900 shadow-2xl relative overflow-hidden">
       
-      {/* Dynamic Iframe and Device Permission Warning Alert Banner */}
+      {/* Proctoring Alert Notification Overlay */}
+      <AnimatePresence>
+        {activeWarning && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: -40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -40 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] w-full max-w-md px-4"
+          >
+            <div className="bg-red-955/95 backdrop-blur-xl border border-red-500/50 rounded-2xl p-4 flex items-start gap-4 shadow-[0_16px_40px_rgba(239,68,68,0.25)]">
+              <div className="p-2.5 bg-red-500/20 rounded-xl text-red-500 shrink-0 animate-pulse">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-black text-red-200 uppercase tracking-widest leading-none mb-1.5">
+                  Proctoring Violation
+                </h4>
+                <p className="text-xs text-red-300 font-medium leading-relaxed">
+                  {activeWarning.type === 'tab' && "You switched tabs/windows! Stay focused on this screen."}
+                  {activeWarning.type === 'face' && "Webcam face presence not detected! Keep your face visible."}
+                  {activeWarning.type === 'noise' && "Excessive background noise/talking detected! Quiet room is required."}
+                </p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase bg-red-650 text-white px-2 py-0.5 rounded-full tracking-wider">
+                    Warning {activeWarning.count} / 3
+                  </span>
+                  <span className="text-[10px] text-red-400 font-medium">
+                    (Next violation will auto-terminate session)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Web permissions error fallbacks tracking states banner */}
       {(mediaError || speechError) && (
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-amber-500/10 border border-amber-500/30 rounded-[2rem] p-6 text-left flex flex-col sm:flex-row items-start gap-4"
+          className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-5 text-left flex flex-col sm:flex-row items-start gap-4 z-10"
         >
           <div className="p-3 bg-amber-500/20 rounded-2xl text-amber-500 shrink-0">
              <AlertTriangle className="w-6 h-6" />
           </div>
           <div className="space-y-2 flex-1">
              <h4 className="text-sm font-black text-amber-200 uppercase tracking-wide">Webcam, Microphone or Voice Recognition Blocked</h4>
-             <p className="text-xs text-slate-300 leading-relaxed">
-               We detected potential browser constraints (<strong>{mediaError || speechError}</strong>) limiting live mic/camera capture. This is common when running inside an <strong>iframe sandbox</strong> like Google AI Studio's preview panel.
+             <p className="text-xs text-slate-300 leading-relaxed font-medium">
+               We detected potential browser constraints (<strong>{mediaError || speechError}</strong>) limiting live mic/camera capture.
              </p>
-             <div className="pt-2 flex flex-wrap gap-2">
+             <div className="pt-1.5 flex flex-wrap gap-2">
                <a 
                  href={window.location.href} 
                  target="_blank" 
                  rel="noopener noreferrer" 
-                 className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-md shadow-indigo-650/10 cursor-pointer"
+                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
                >
                  <ExternalLink className="w-3.5 h-3.5" /> Open in a New Tab
                </a>
@@ -1131,548 +1407,591 @@ function InterviewRoom() {
                    setIsKeyboardMode(prev => !prev);
                    notify("Keyboard input mode toggled.", "info");
                  }}
-                 className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-slate-800 hover:bg-slate-750 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-800 hover:bg-slate-750 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
                >
                  <Keyboard className="w-3.5 h-3.5" /> {isKeyboardMode ? "Switch to Voice" : "Switch to Keyboard"}
                </button>
-             </div>
-             
-             <div className="pt-2 text-[10px] text-amber-400 font-medium">
-               💡 <strong>Quick Fix:</strong> Click the <strong>lock icon</strong> next to the browser URL and change Camera/Microphone to <strong>Allow</strong>, or open the page in a new full tab. No progress will be lost.
              </div>
           </div>
         </motion.div>
       )}
 
-      <div className="w-full flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-140px)] flex-1">
-        {/* Side Information Panel */}
-      <div className="w-full lg:w-80 flex flex-col gap-4">
-        {/* Profile Card */}
-        <Card className="p-5 bg-white border-slate-200 shadow-sm relative overflow-hidden shrink-0">
-          <div className="absolute top-0 left-0 w-full h-1 bg-indigo-600" />
-          <div className="flex items-center gap-4 lg:flex-col lg:items-center lg:text-center">
-            <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-slate-50 flex items-center justify-center border-4 border-white shadow-lg overflow-hidden shrink-0">
-              {stream?.getVideoTracks()[0]?.enabled !== false ? (
-                 <video 
-                   ref={bindVideo} 
-                   autoPlay 
-                   muted 
-                   className="w-full h-full object-cover scale-150 rotate-y-180" 
-                 />
-              ) : (
-                <Users className="w-8 h-8 text-slate-300" />
-              )}
-            </div>
-            <div className="flex-1 lg:w-full">
-              <h3 className="text-base lg:text-lg font-black text-slate-900 tracking-tight leading-none mb-1">{candidate.fullName}</h3>
-              <p className="text-[9px] font-black text-indigo-600 uppercase tracking-widest leading-none mb-3">{job?.title}</p>
-              <div className="flex lg:grid lg:grid-cols-2 gap-2 w-full pt-3 border-t border-slate-50">
-                <div className="flex-1 text-center py-1 bg-slate-50 rounded-lg">
-                  <span className="block text-[8px] font-black text-slate-400 uppercase tracking-tighter">Status</span>
-                  <span className="text-[9px] font-black text-indigo-600 uppercase">Live</span>
-                </div>
-                <div className="flex-1 text-center py-1 bg-slate-50 rounded-lg">
-                  <span className="block text-[8px] font-black text-slate-400 uppercase tracking-tighter">Signal</span>
-                  <span className="text-[9px] font-black text-green-600 uppercase">Secure</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Bot Accent & Language Setting Card */}
-        <Card className="p-5 bg-white border-slate-200 shadow-sm relative overflow-hidden shrink-0">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
-          <div className="flex items-center gap-2.5 mb-3 border-b border-slate-50 pb-2">
-            <Volume2 className="w-4 h-4 text-indigo-600" />
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bot Voice & Accent</h4>
-          </div>
-          <div className="space-y-3 text-left">
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-              Calibrate the conversational language and synthesized accent of your AI interviewer.
-            </p>
-            
-            <div className="relative">
-              <select
-                value={selectedVoice.id}
-                onChange={(e) => {
-                  const target = botVoiceOptions.find(opt => opt.id === e.target.value);
-                  if (target) changeVoice(target);
-                }}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
-              >
-                {botVoiceOptions.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.flag} {opt.label}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
-                <ChevronDown className="w-3.5 h-3.5" />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {botVoiceOptions.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  title={opt.label}
-                  onClick={() => changeVoice(opt)}
-                  className={cn(
-                    "px-2 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg border transition-all cursor-pointer flex items-center gap-1",
-                    selectedVoice.id === opt.id 
-                      ? "bg-slate-900 border-slate-900 text-white shadow-sm"
-                      : "bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-slate-100"
-                  )}
-                >
-                  <span>{opt.flag}</span>
-                  <span>{opt.id.split('-')[1]}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        {/* Real-time Transcription Log */}
-        <Card className="flex-1 p-5 bg-white border-slate-200 shadow-sm flex flex-col overflow-hidden min-h-[300px]">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-50 pb-2">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Transcription Log</h4>
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse" />
-              <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest">Live Feed</span>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar scroll-smooth">
-            {messages.map((m, i) => (
-              <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={cn(
-                    "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
-                    m.role === 'model' ? "bg-indigo-50 text-indigo-600" : "bg-slate-100 text-slate-500"
-                  )}>
-                    {m.role === 'model' ? 'AI' : 'You'}
-                  </span>
-                  <span className="text-[8px] font-medium text-slate-300">{formatDateTime(new Date(m.timestamp))}</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed pl-1">
-                  {m.text}
-                </p>
-              </div>
-            ))}
-            
-            {/* Live Interim Transcription */}
-            {input && !concluded && (
-               <div className="animate-in fade-in duration-200 opacity-60">
-                 <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 animate-pulse">Capturing</span>
-                 </div>
-                 <p className="text-xs text-slate-500 italic leading-relaxed pl-1">
-                   {input}...
-                 </p>
-               </div>
-            )}
-            
-            {messages.length === 0 && !input && (
-              <div className="h-full flex flex-col items-center justify-center opacity-20 py-12">
-                <RotateCcw className="w-6 h-6 mb-2" />
-                <p className="text-[9px] font-bold uppercase tracking-widest">Log Empty</p>
-              </div>
-            )}
-            <div ref={scrollRef} />
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Video & Controls Panel */}
-      <div className="flex-1 bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col relative border border-slate-800">
-        {/* Header Overlay */}
-        <div className="absolute top-0 left-0 w-full p-6 flex items-center justify-between z-20 pointer-events-none">
-          <div className="flex items-center gap-3">
-            <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800 px-3 py-1.5 rounded-xl flex items-center gap-2 px-4 shadow-2xl">
-              <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
-              <span className="text-[10px] font-black text-white uppercase tracking-widest">On Air</span>
-              <div className="h-3 w-px bg-slate-800 mx-1" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Session ID: {candidateId.substring(0, 8)}</span>
-            </div>
-          </div>
+      {/* Main Workspace Frame */}
+      <div className="w-full flex flex-col lg:flex-row gap-6 h-[720px] lg:h-[calc(100vh-180px)] flex-1 overflow-hidden">
+        
+        {/* Sleek Tabbed Sidebar (Replaces cluttered multi-card sidebar) */}
+        <div className="w-full lg:w-80 flex flex-col bg-slate-900/60 border border-slate-800/80 rounded-3xl overflow-hidden shrink-0 shadow-2xl relative">
           
-          {!concluded && (
-            <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800 px-4 py-2 rounded-xl flex items-center gap-4">
-               <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Speaker Volume</span>
+          {/* Header Tabs Navigation */}
+          <div className="flex border-b border-slate-800/80 bg-slate-950/40 p-1.5 rounded-t-3xl shrink-0">
+            <button
+              onClick={() => setSidebarTab('monitor')}
+              className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
+                sidebarTab === 'monitor' ? "bg-indigo-650 text-white shadow-md shadow-indigo-900/20" : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              <Shield className="w-3.5 h-3.5" /> Monitor
+            </button>
+            <button
+              onClick={() => setSidebarTab('transcript')}
+              className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
+                sidebarTab === 'transcript' ? "bg-indigo-650 text-white shadow-md shadow-indigo-900/20" : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              <FileText className="w-3.5 h-3.5" /> Transcript
+            </button>
+          </div>
+
+          {/* Scrollable Side Content */}
+          <div className="flex-1 overflow-y-auto p-5 custom-scrollbar space-y-5">
+            {sidebarTab === 'monitor' ? (
+              <div className="space-y-5">
+                
+                {/* Candidate Overview Pill */}
+                <div className="bg-slate-955/40 border border-slate-850 rounded-2xl p-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-600" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800 shrink-0 overflow-hidden">
+                      {stream?.getVideoTracks()[0]?.enabled !== false ? (
+                         <video 
+                           ref={bindVideo} 
+                           autoPlay 
+                           muted 
+                           className="w-full h-full object-cover scale-150 rotate-y-180" 
+                         />
+                      ) : (
+                        <Users className="w-5 h-5 text-slate-500" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-slate-100 tracking-tight leading-none mb-1">{candidate.fullName}</h3>
+                      <p className="text-[8px] font-black text-indigo-400 uppercase tracking-wider leading-none mb-1">{job?.title}</p>
+                      <span className="text-[8px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" /> Connection secure
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Proctoring Integrity Dashboard */}
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-1.5 border-b border-slate-800 pb-2">
+                    <Sliders className="w-4 h-4 text-indigo-500" />
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Integrity Dashboard</h4>
+                  </div>
+
+                  {/* Tab Tracking Pill */}
+                  <div className="bg-slate-950/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
+                    <div>
+                      <span className="block text-[10px] font-black text-slate-200 uppercase tracking-wider mb-0.5">Tab Focus</span>
+                      <span className="text-[9px] text-slate-400 font-medium">Warnings: {tabWarnings} / 3</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3].map(i => (
+                        <div 
+                          key={i} 
+                          className={cn("w-3.5 h-3.5 rounded-full border transition-all duration-300", 
+                            tabWarnings >= i 
+                              ? "bg-red-500 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                              : "bg-slate-900 border-slate-800"
+                          )} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Face Presence Pill */}
+                  <div className="bg-slate-950/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
+                    <div>
+                      <span className="block text-[10px] font-black text-slate-200 uppercase tracking-wider mb-0.5">Face Tracking</span>
+                      <span className={cn("text-[9px] font-black uppercase tracking-wider", 
+                        faceStatus === 'detected' ? "text-green-400" : faceStatus === 'not_detected' ? "text-red-400 animate-pulse" : "text-indigo-400"
+                      )}>
+                        {faceStatus === 'detected' ? "Detected" : faceStatus === 'not_detected' ? "No Face Detected" : "Analyzing..."}
+                      </span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3].map(i => (
+                        <div 
+                          key={i} 
+                          className={cn("w-3.5 h-3.5 rounded-full border transition-all duration-300", 
+                            faceWarnings >= i 
+                              ? "bg-red-500 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                              : "bg-slate-900 border-slate-800"
+                          )} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Room Sound Meter Pill */}
+                  <div className="bg-slate-955/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
+                    <div>
+                      <span className="block text-[10px] font-black text-slate-200 uppercase tracking-wider mb-0.5">Room Noise</span>
+                      <span className={cn("text-[9px] font-black uppercase tracking-wider", 
+                        noiseStatus === 'noise_detected' ? "text-amber-400" : "text-green-400"
+                      )}>
+                        {noiseStatus === 'noise_detected' ? "Noise Detected" : "Quiet Room"}
+                      </span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3].map(i => (
+                        <div 
+                          key={i} 
+                          className={cn("w-3.5 h-3.5 rounded-full border transition-all duration-300", 
+                            noiseWarnings >= i 
+                              ? "bg-red-500 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
+                              : "bg-slate-900 border-slate-800"
+                          )} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Voice Dialect Configuration */}
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-1.5 border-b border-slate-800 pb-2">
+                    <Volume2 className="w-4 h-4 text-indigo-500" />
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interviewer Voice</h4>
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={selectedVoice.id}
+                      onChange={(e) => {
+                        const target = botVoiceOptions.find(opt => opt.id === e.target.value);
+                        if (target) changeVoice(target);
+                      }}
+                      className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2.5 font-bold text-slate-200 text-xs focus:ring-1 focus:ring-indigo-500 outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
+                    >
+                      {botVoiceOptions.map((opt) => (
+                        <option key={opt.id} value={opt.id} className="bg-slate-950 text-slate-300 font-bold">
+                          {opt.flag} {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500">
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              
+              /* Real-time Transcription Log Tab */
+              <div className="flex flex-col h-full min-h-[350px] relative">
+                <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+                  {messages.map((m, i) => (
+                    <div key={i} className="animate-in fade-in duration-300">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={cn(
+                          "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
+                          m.role === 'model' ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-slate-800 text-slate-400"
+                        )}>
+                          {m.role === 'model' ? 'AI' : 'You'}
+                        </span>
+                        <span className="text-[8px] font-medium text-slate-500">{formatDateTime(new Date(m.timestamp))}</span>
+                      </div>
+                      <p className="text-xs text-slate-303 leading-relaxed pl-1">
+                        {m.text}
+                      </p>
+                    </div>
+                  ))}
+                  
+                  {input && !concluded && (
+                     <div className="animate-in fade-in duration-200 opacity-60">
+                       <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 animate-pulse border border-indigo-500/20">Capturing</span>
+                       </div>
+                       <p className="text-xs text-slate-405 italic leading-relaxed pl-1">
+                         {input}...
+                       </p>
+                     </div>
+                  )}
+                  
+                  {messages.length === 0 && !input && (
+                    <div className="h-full flex flex-col items-center justify-center opacity-25 py-24">
+                      <RotateCcw className="w-8 h-8 mb-2 animate-pulse text-indigo-400" />
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Feed Calibrated</p>
+                    </div>
+                  )}
+                  <div ref={scrollRef} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Cinematic Video Panel */}
+        <div className="flex-1 bg-slate-900/60 border border-slate-800 rounded-3xl overflow-hidden flex flex-col relative shadow-2xl">
+          
+          {/* Dashboard Header Overlay */}
+          <div className="absolute top-0 left-0 w-full p-5 flex items-center justify-between z-20 pointer-events-none">
+            <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 shadow-2xl pointer-events-auto">
+              <div className="w-2 h-2 rounded-full bg-red-655 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+              <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Room</span>
+              <div className="h-3 w-px bg-slate-800" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {candidateId.substring(0, 8)}</span>
+            </div>
+            
+            {!concluded && (
+              <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-3.5 shadow-2xl pointer-events-auto">
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Room Signal</span>
                   <div className="w-24 h-1 bg-slate-800 rounded-full overflow-hidden">
                      <motion.div 
-                        className={cn("h-full transition-all duration-75", volume > 80 ? "bg-red-500" : "bg-indigo-500 h-full")}
+                        className={cn("h-full transition-all duration-75", volume > 80 ? "bg-red-500" : "bg-indigo-500")}
                         animate={{ width: `${Math.min(volume * 1.5, 100)}%` }}
                      />
                   </div>
-               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Video Canvas Area */}
-        <div className="flex-1 relative flex items-center justify-center bg-slate-950 overflow-hidden">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,0.3)_0%,transparent_70%)]" />
-          
-          {/* 2026 AI HUD Elements */}
-          {!concluded && messages.length > 0 && (
-            <div className="absolute inset-0 pointer-events-none z-30">
-               {/* Thinking/Speaking Ripple */}
-               <AnimatePresence>
-                 {(isThinking || isSpeaking) && (
-                   <motion.div 
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     exit={{ opacity: 0 }}
-                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
-                   >
-                     <div className={cn(
-                       "absolute w-[400px] h-[400px] rounded-full border border-indigo-500/30 animate-ping",
-                       isSpeaking ? "animate-[ping_3s_infinite]" : "animate-[ping_5s_infinite]"
-                     )} />
-                     <div className={cn(
-                       "absolute w-[300px] h-[300px] rounded-full border border-indigo-500/20 animate-ping delay-75",
-                       isSpeaking ? "animate-[ping_4s_infinite]" : "animate-[ping_6s_infinite]"
-                     )} />
-                   </motion.div>
-                 )}
-               </AnimatePresence>
-
-               {/* Progress Indicator HUD */}
-               <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-                 <AnimatePresence mode="wait">
-                    {isThinking ? (
-                      <motion.div 
-                        key="thinking"
-                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="bg-indigo-600/90 backdrop-blur-xl px-4 py-1.5 rounded-full border border-indigo-500/50 flex items-center gap-3 shadow-2xl"
-                      >
-                        <div className="flex gap-1">
-                          <motion.div className="w-1 h-1 bg-white rounded-full" animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1 }} />
-                          <motion.div className="w-1 h-1 bg-white rounded-full" animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} />
-                          <motion.div className="w-1 h-1 bg-white rounded-full" animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} />
-                        </div>
-                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">HireNow is reasoning</span>
-                      </motion.div>
-                    ) : isSpeaking ? (
-                      <motion.div 
-                        key="speaking"
-                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="bg-emerald-600/90 backdrop-blur-xl px-4 py-1.5 rounded-full border border-emerald-500/50 flex items-center gap-3 shadow-2xl"
-                      >
-                        <div className="flex items-center gap-0.5 h-3">
-                           {[1,2,3,4,5].map(i => (
-                             <motion.div 
-                               key={i} 
-                               className="w-0.5 bg-white" 
-                               animate={{ height: ['4px', '12px', '4px'] }} 
-                               transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }} 
-                             />
-                           ))}
-                        </div>
-                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Live Synthesis</span>
-                      </motion.div>
-                    ) : null}
-                 </AnimatePresence>
-               </div>
-            </div>
-          )}
-          
-          {messages.length === 0 ? (
-            <div className="relative z-10 text-center max-w-sm mx-auto p-12">
-              <div className="w-20 h-20 rounded-full bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center mb-8 mx-auto">
-                 <Play className="w-10 h-10 text-indigo-500" />
+                </div>
               </div>
-              <h2 className="text-2xl font-black text-white tracking-tight mb-4">Screening Room Initialized</h2>
-              <p className="text-slate-400 text-sm font-medium mb-6">HireNow Assistant is calibrated and ready. Ensure your environment is calm before beginning.</p>
-              
-              {/* Voice / Accent Selection Box in Pre-Start */}
-              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-8 text-left">
-                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-2">Interviewer Accent & Language</span>
+            )}
+          </div>
+
+          {/* Interactive Screen Sandbox */}
+          <div className="flex-1 relative flex items-center justify-center bg-slate-950 overflow-hidden p-6 pt-16">
+            <div className="absolute inset-0 opacity-15 bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,0.35)_0%,transparent_70%)]" />
+            
+            {/* HUD ripples & statuses */}
+            {!concluded && messages.length > 0 && (
+              <div className="absolute inset-0 pointer-events-none z-30">
+                 <AnimatePresence>
+                   {(isThinking || isSpeaking) && (
+                     <motion.div 
+                       initial={{ opacity: 0 }}
+                       animate={{ opacity: 1 }}
+                       exit={{ opacity: 0 }}
+                       className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                     >
+                       <div className={cn(
+                         "absolute w-[360px] h-[360px] rounded-full border border-indigo-500/25 animate-ping",
+                         isSpeaking ? "animate-[ping_3.5s_infinite]" : "animate-[ping_5s_infinite]"
+                       )} />
+                       <div className={cn(
+                         "absolute w-[260px] h-[260px] rounded-full border border-indigo-500/15 animate-ping delay-75",
+                         isSpeaking ? "animate-[ping_4.5s_infinite]" : "animate-[ping_6s_infinite]"
+                       )} />
+                     </motion.div>
+                   )}
+                 </AnimatePresence>
+
+                 {/* Active HUD indicators */}
+                 <div className="absolute bottom-28 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+                   <AnimatePresence mode="wait">
+                      {isThinking ? (
+                        <motion.div 
+                          key="thinking"
+                          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.85 }}
+                          className="bg-indigo-650/90 backdrop-blur-xl px-4 py-1.5 rounded-full border border-indigo-555/40 flex items-center gap-3 shadow-2xl"
+                        >
+                          <div className="flex gap-1.5">
+                            <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} />
+                            <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.25 }} />
+                            <motion.div className="w-1.5 h-1.5 bg-white rounded-full" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.5 }} />
+                          </div>
+                          <span className="text-[9px] font-black text-white uppercase tracking-[0.25em]">Reasoning</span>
+                        </motion.div>
+                      ) : isSpeaking ? (
+                        <motion.div 
+                          key="speaking"
+                          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.85 }}
+                          className="bg-emerald-655/90 backdrop-blur-xl px-4 py-1.5 rounded-full border border-emerald-500/40 flex items-center gap-3 shadow-2xl"
+                        >
+                          <div className="flex items-center gap-0.5 h-3">
+                             {[1,2,3,4,5].map(i => (
+                               <motion.div 
+                                 key={i} 
+                                 className="w-0.5 bg-white" 
+                                 animate={{ height: ['4px', '12px', '4px'] }} 
+                                 transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }} 
+                               />
+                             ))}
+                          </div>
+                          <span className="text-[9px] font-black text-white uppercase tracking-[0.25em]">Synthesizing</span>
+                        </motion.div>
+                      ) : null}
+                   </AnimatePresence>
+                 </div>
+              </div>
+            )}
+            
+            {messages.length === 0 ? (
+              <div className="relative z-10 text-center max-w-sm mx-auto p-8 animate-in fade-in zoom-in-95 duration-500">
+                <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 mx-auto">
+                   <Play className="w-7 h-7 text-indigo-400" />
+                </div>
+                <h2 className="text-xl font-black text-white tracking-tight mb-3 uppercase">Interactivity Calibrated</h2>
+                <p className="text-slate-400 text-xs font-medium mb-6 leading-relaxed">Ensure webcam presence is visible and background ambient noise is calm before starting.</p>
                 
-                <div className="relative mb-3">
-                  <select
-                    value={selectedVoice.id}
-                    onChange={(e) => {
-                      const target = botVoiceOptions.find(opt => opt.id === e.target.value);
-                      if (target) changeVoice(target);
-                    }}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-2xl px-4 py-3 font-bold text-white text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer transition-all appearance-none"
-                  >
-                    {botVoiceOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id} className="font-bold text-slate-800 bg-white">
-                        {opt.flag} {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                    <ChevronDown className="w-4 h-4" />
+                <Button onClick={startInterview} disabled={loading} className="w-full h-12 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-900/30 font-black tracking-wider uppercase text-xs cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.98]">
+                  Initialize Screening
+                </Button>
+              </div>
+            ) : (
+              <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar relative">
+                <div className="flex-1 flex flex-col items-center justify-center p-4 pt-10 min-h-0">
+                  
+                  {/* Glowing Video Frame Container */}
+                  <div className={cn(
+                    "relative w-full max-w-2xl aspect-video rounded-2xl overflow-hidden shadow-2xl border transition-all duration-500 bg-slate-950 group shrink-0 mb-4",
+                    faceStatus === 'detected' ? "border-emerald-500/25 shadow-emerald-950/10" :
+                    faceStatus === 'not_detected' ? "border-red-500/50 shadow-red-950/20 animate-pulse" :
+                    faceStatus === 'loading' ? "border-indigo-500/20 shadow-indigo-955/5 animate-pulse" :
+                    "border-slate-800"
+                  )}>
+                    {/* Security scan scan-line */}
+                    <motion.div 
+                       className="absolute inset-x-0 h-0.5 bg-indigo-500/10 z-10 pointer-events-none"
+                       animate={{ top: ['0%', '100%', '0%'] }}
+                       transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+                    />
+                    
+                    <video 
+                      ref={bindVideo} 
+                      autoPlay 
+                      playsInline 
+                      muted 
+                      className={cn("w-full h-full object-cover transition-all duration-700 rotate-y-180", 
+                        stream?.getVideoTracks()[0]?.enabled === false ? "opacity-0" : "opacity-100",
+                        (isMuted || isThinking) ? "grayscale-[0.4]" : "grayscale-0",
+                        isThinking && "scale-[1.02] brightness-110",
+                        isSpeaking && "animate-video-breathing"
+                      )}
+                    />
+                    
+                    {isThinking && (
+                      <div className="absolute inset-0 bg-indigo-950/10 animate-pulse pointer-events-none z-10" />
+                    )}
+                    
+                    {stream?.getVideoTracks()[0]?.enabled === false && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900">
+                         <CameraOff className="w-12 h-12 text-slate-700 animate-pulse" />
+                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Webcam Inactive</p>
+                      </div>
+                    )}
+                  </div>
+                   
+                  {/* Clean subtitles/captions HUD */}
+                  <div className="w-full max-w-xl flex flex-col items-center justify-center space-y-4">
+                    <AnimatePresence mode="wait">
+                      {concluded ? (
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-green-600/90 backdrop-blur-md px-5 py-2.5 rounded-xl border border-green-500/50 shadow-xl">
+                           <h4 className="text-white text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4" /> Session Finalized
+                           </h4>
+                        </motion.div>
+                      ) : (
+                        <motion.div 
+                          key={messages[messages.length - 1]?.text}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -15 }}
+                          className="w-full text-center"
+                        >
+                          {messages[messages.length - 1]?.role === 'model' ? (
+                            <div className="bg-slate-900/90 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-slate-800 shadow-2xl inline-block max-w-lg text-left">
+                              <div className="text-slate-200 text-xs font-semibold leading-relaxed tracking-wide">
+                                 <Markdown>{messages[messages.length - 1]?.text}</Markdown>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-indigo-650/90 backdrop-blur-md px-5 py-2.5 rounded-xl border border-indigo-500/40 shadow-xl inline-block max-w-md text-center">
+                              <p className="text-white text-xs font-semibold italic">"{messages[messages.length - 1]?.text}"</p>
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    {/* Live speech recognition captions */}
+                    {input && !concluded && !isListening && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }} 
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-indigo-500/95 backdrop-blur-xl px-5 py-3 rounded-2xl border border-indigo-400/40 shadow-2xl max-w-md w-full text-center"
+                      >
+                         <p className="text-white text-[9px] font-black uppercase tracking-widest mb-1.5 opacity-80">Speech Preview</p>
+                         <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
+                         <div className="mt-2.5 flex items-center justify-center">
+                            <Button onClick={() => handleSend()} size="sm" className="h-7 bg-white text-indigo-650 hover:bg-slate-100 text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
+                              <Send className="w-3 h-3 mr-1.5" /> Confirm & Send
+                            </Button>
+                         </div>
+                      </motion.div>
+                    )}
                   </div>
                 </div>
-
-                <p className="text-[10px] text-slate-500 leading-normal">
-                  Changing the language also optimizes the Speech Recognition model to match your dialect dynamically.
-                </p>
               </div>
+            )}
+          </div>
 
-              <Button onClick={startInterview} disabled={loading} className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl shadow-indigo-600/20 font-black tracking-tight text-lg transition-transform hover:scale-[1.02] active:scale-[0.98]">
-                Start Recording
-              </Button>
-            </div>
-          ) : (
-            <div className="w-full h-full flex flex-col overflow-y-auto custom-scrollbar">
-              <div className="flex-1 flex flex-col items-center justify-center p-6 pt-20 sm:p-8 sm:pt-24 min-h-0">
-                {/* Clean, Unobstructed Video Container */}
-                <div className="relative w-full max-w-4xl aspect-video rounded-3xl sm:rounded-[2rem] overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 group mb-6 shrink-0">
-                  {/* Recursive Scan Animation */}
-                  <motion.div 
-                     className="absolute inset-x-0 h-1 bg-indigo-500/20 z-10 pointer-events-none"
-                     animate={{ top: ['0%', '100%', '0%'] }}
-                     transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  />
-                  <video 
-                    ref={bindVideo} 
-                    autoPlay 
-                    playsInline 
-                    muted 
-                    className={cn("w-full h-full object-cover transition-all duration-700 rotate-y-180", 
-                      stream?.getVideoTracks()[0]?.enabled === false ? "opacity-0" : "opacity-100",
-                      (isMuted || isThinking) ? "grayscale-[0.5]" : "grayscale-0",
-                      isThinking && "scale-[1.05] brightness-125 saturate-[1.2]",
-                      isSpeaking && "animate-video-breathing"
-                    )}
-                  />
-                  {/* Thinking Pulse */}
-                  {isThinking && (
-                    <div className="absolute inset-0 bg-indigo-900/10 animate-pulse pointer-events-none z-10" />
-                  )}
-                  {stream?.getVideoTracks()[0]?.enabled === false && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900">
-                       <CameraOff className="w-16 h-16 text-slate-700" />
-                       <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Camera Disabled</p>
-                    </div>
-                  )}
-                </div>
-                 
-                {/* Elegant Captions Box (Nicely positioned below the video frame) */}
-                <div className="w-full max-w-3xl flex flex-col items-center justify-center space-y-4">
-                  <AnimatePresence mode="wait">
-                    {concluded ? (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-green-600/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-green-500/50 shadow-xl">
-                         <h4 className="text-white text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4" /> Session Concluded
-                         </h4>
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        key={messages[messages.length - 1]?.text}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="w-full text-center"
-                      >
-                        {messages[messages.length - 1]?.role === 'model' ? (
-                          <div className="bg-slate-900/80 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-800/80 shadow-2xl inline-block max-w-2xl text-left">
-                            <div className="text-white text-base font-bold leading-relaxed tracking-tight">
-                               <Markdown>{messages[messages.length - 1]?.text}</Markdown>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-indigo-650/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-indigo-550/50 shadow-xl inline-block max-w-xl text-center">
-                            <p className="text-white text-sm font-medium italic">"{messages[messages.length - 1]?.text}"</p>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  
-                  {/* Real-time Subtitle Overlay for Input */}
-                  {input && !concluded && !isListening && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }} 
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-indigo-500/95 backdrop-blur-md px-6 py-3 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-lg w-full text-center"
-                    >
-                       <p className="text-white text-[10px] font-black uppercase tracking-widest mb-2 opacity-70">Live Transcription Preview</p>
-                       <p className="text-white text-sm font-bold italic leading-relaxed">"{input}"</p>
-                       <div className="mt-3 flex items-center justify-center">
-                          <Button onClick={() => handleSend()} size="sm" className="h-8 bg-white text-indigo-600 hover:bg-slate-100 text-[10px] font-black uppercase tracking-widest rounded-full px-5">
-                            <Send className="w-3 h-3 mr-2" /> Confirm & Send
-                          </Button>
-                       </div>
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Controls Area */}
-        {!concluded && messages.length > 0 && (
-          <div className="p-8 bg-black/40 backdrop-blur-xl border-t border-slate-800/50 relative z-30">
-            <div className="max-w-xl mx-auto flex flex-col items-center gap-6">
-                <div className="flex items-center gap-6">
-                  {/* Mute Control */}
-                  <Button
-                    variant="outline"
-                    onClick={toggleMute}
-                    className={cn(
-                      "w-12 h-12 rounded-full p-0 border-slate-700 transition-all",
-                      isMuted ? "bg-red-500/20 text-red-500 border-red-500/50" : "bg-slate-900/50 hover:bg-slate-800 text-white"
-                    )}
-                  >
-                    {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                  </Button>
-
-                  {/* Camera Control */}
-                  <Button
-                    variant="outline"
-                    onClick={toggleCamera}
-                    className="w-12 h-12 rounded-full p-0 border-slate-700 bg-slate-900/50 hover:bg-slate-800 text-white"
-                  >
-                    {stream?.getVideoTracks()[0]?.enabled === false ? <CameraOff className="w-5 h-5 text-red-500" /> : <Camera className="w-5 h-5" />}
-                  </Button>
-
-                  {/* Keyboard Backup Toggler */}
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsKeyboardMode(prev => !prev);
-                      notify(!isKeyboardMode ? "Keyboard typing mode activated." : "Voice mode activated.", "info");
-                    }}
-                    className={cn(
-                      "w-12 h-12 rounded-full p-0 border-slate-700 transition-all",
-                      isKeyboardMode ? "bg-indigo-500/20 text-indigo-400 border-indigo-500/50" : "bg-slate-900/50 hover:bg-slate-800 text-white"
-                    )}
-                    title={isKeyboardMode ? "Switch to Voice Response Mode" : "Switch to Keyboard Typing Mode"}
-                  >
-                    <Keyboard className="w-5 h-5" />
-                  </Button>
-
-                  {/* Main Listening Toggle */}
-                  <div className="relative">
-                    {isListening && (
-                      <motion.div 
-                        layoutId="mic-pulse"
-                        className="absolute inset-[-8px] bg-indigo-600/20 rounded-full"
-                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0, 1] }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                      />
-                    )}
-                    <Button 
-                      onClick={toggleListening} 
-                      disabled={loading || isSpeaking || isMuted}
+          {/* Cinematic controls deck bar */}
+          {!concluded && messages.length > 0 && (
+            <div className="p-6 bg-slate-955/65 backdrop-blur-xl border-t border-slate-800/80 relative z-30 shrink-0">
+              <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    
+                    {/* Mute toggle button */}
+                    <Button
+                      variant="outline"
+                      onClick={toggleMute}
                       className={cn(
-                        "w-14 h-14 rounded-full shadow-2xl transition-all relative z-10 flex items-center justify-center p-0",
-                        isListening ? "bg-red-500 hover:bg-red-600" : "bg-indigo-600 hover:bg-indigo-700",
-                        isMuted && "opacity-50 grayscale cursor-not-allowed text-white/50"
+                        "w-11 h-11 rounded-full p-0 border-slate-800 transition-all cursor-pointer",
+                        isMuted ? "bg-red-500/20 text-red-500 border-red-500/50" : "bg-slate-900 hover:bg-slate-850 text-slate-200"
                       )}
                     >
-                      {isListening ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <MessageSquare className="w-5 h-5 text-white" />}
+                      {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </Button>
+
+                    {/* Camera toggle button */}
+                    <Button
+                      variant="outline"
+                      onClick={toggleCamera}
+                      className="w-11 h-11 rounded-full p-0 border-slate-800 bg-slate-900 hover:bg-slate-850 text-slate-200 cursor-pointer"
+                    >
+                      {stream?.getVideoTracks()[0]?.enabled === false ? <CameraOff className="w-4 h-4 text-red-500" /> : <Camera className="w-4 h-4" />}
+                    </Button>
+
+                    {/* Input backup mode button */}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsKeyboardMode(prev => !prev);
+                        notify(!isKeyboardMode ? "Keyboard typing mode activated." : "Voice mode activated.", "info");
+                      }}
+                      className={cn(
+                        "w-11 h-11 rounded-full p-0 border-slate-800 transition-all cursor-pointer",
+                        isKeyboardMode ? "bg-indigo-500/20 text-indigo-400 border-indigo-500/50" : "bg-slate-900 hover:bg-slate-850 text-slate-200"
+                      )}
+                      title={isKeyboardMode ? "Switch to Voice mode" : "Switch to Keyboard mode"}
+                    >
+                      <Keyboard className="w-4 h-4" />
+                    </Button>
+
+                    {/* Speech Capture Core Trigger */}
+                    <div className="relative">
+                      {isListening && (
+                        <motion.div 
+                          layoutId="mic-pulse"
+                          className="absolute inset-[-6px] bg-indigo-650/20 rounded-full"
+                          animate={{ scale: [1, 1.25, 1], opacity: [1, 0, 1] }}
+                          transition={{ repeat: Infinity, duration: 1.8 }}
+                        />
+                      )}
+                      <Button 
+                        onClick={toggleListening} 
+                        disabled={loading || isSpeaking || isMuted}
+                        className={cn(
+                          "w-13 h-13 rounded-full shadow-2xl transition-all relative z-10 flex items-center justify-center p-0 cursor-pointer",
+                          isListening ? "bg-red-650 hover:bg-red-700 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white",
+                          isMuted && "opacity-40 grayscale cursor-not-allowed"
+                        )}
+                      >
+                        {isListening ? <Loader2 className="w-4.5 h-4.5 animate-spin text-white" /> : <MessageSquare className="w-4.5 h-4.5 text-white" />}
+                      </Button>
+                    </div>
+
+                    {/* Terminate interview button */}
+                    <Button
+                      variant="outline"
+                      onClick={manualEndInterview}
+                      disabled={loading}
+                      className="w-11 h-11 rounded-full p-0 border-red-500/30 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all shadow-md cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
 
-                  {/* End Interview Control */}
-                  <Button
-                    variant="outline"
-                    onClick={manualEndInterview}
-                    disabled={loading}
-                    className="w-12 h-12 rounded-full p-0 border-red-500/30 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all shadow-lg"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
-                </div>
-
-               {/* Transcript Bubble Overlay */}
-               <div className="w-full">
-                  <AnimatePresence mode="wait">
-                    {isThinking ? (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 flex flex-col items-center gap-3 shadow-2xl"
-                      >
-                         <div className="flex items-center gap-2">
-                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
-                         </div>
-                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">HireNow Assistant is thinking...</p>
-                      </motion.div>
-                    ) : input ? (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center gap-3 shadow-2xl"
-                      >
-                         <p className="text-indigo-400 text-xs font-medium italic overflow-hidden text-ellipsis whitespace-nowrap w-full text-center">"{input}"</p>
-                         {!isListening && (
-                           <Button onClick={() => handleSend()} size="sm" className="h-8 bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest rounded-lg px-4">
-                             <Send className="w-3 h-3 mr-2" /> Confirm & Send
-                           </Button>
-                         )}
-                      </motion.div>
-                    ) : isKeyboardMode ? (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="w-full flex gap-3 pt-2 pointer-events-auto"
-                      >
-                        <input
-                          type="text"
-                          value={input}
-                          disabled={loading || isThinking}
-                          onChange={(e) => setInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && input.trim() && !loading && !isThinking) {
-                              handleSend();
-                            }
-                          }}
-                          placeholder={isThinking ? "Please wait for AI response..." : "Type your answer here..."}
-                          className="flex-1 bg-slate-900/90 border border-slate-800 text-white rounded-2xl px-5 h-12 text-xs focus:outline-none focus:border-indigo-500 font-bold transition-all"
-                        />
-                        <Button 
-                          onClick={() => handleSend()} 
-                          disabled={loading || isThinking || !input.trim()}
-                          className="bg-indigo-600 hover:bg-indigo-700 h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest shrink-0"
+                 {/* Text keyboard entry container */}
+                 <div className="w-full">
+                   <AnimatePresence mode="wait">
+                      {isThinking ? (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.98 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-slate-905 border border-indigo-500/20 rounded-xl p-3 flex flex-col items-center gap-2"
                         >
-                          <Send className="w-4 h-4" />
-                        </Button>
-                      </motion.div>
-                    ) : (
-                      <div className="text-center py-2">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                           {isSpeaking ? "Receiving Data..." : isListening ? "Listening..." : "Tap Mic to Respond"}
-                        </span>
-                      </div>
-                    )}
-                  </AnimatePresence>
-               </div>
+                           <div className="flex gap-1">
+                             <div className="w-1 h-1 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                             <div className="w-1 h-1 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                             <div className="w-1 h-1 bg-indigo-400 rounded-full animate-bounce" />
+                           </div>
+                           <p className="text-indigo-300 text-[9px] font-black uppercase tracking-[0.2em] animate-pulse">Assistant is compiling response...</p>
+                        </motion.div>
+                      ) : input ? (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.98 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-slate-950 border border-slate-855 rounded-xl p-3.5 flex flex-col items-center gap-2"
+                        >
+                           <p className="text-indigo-400 text-xs font-semibold italic overflow-hidden text-ellipsis whitespace-nowrap w-full text-center">"{input}"</p>
+                           {!isListening && (
+                             <Button onClick={() => handleSend()} size="sm" className="h-7 bg-indigo-600 hover:bg-indigo-755 text-[9px] font-black uppercase tracking-wider rounded-lg px-4.5 cursor-pointer">
+                               <Send className="w-3.5 h-3.5 mr-1.5" /> Confirm & Send
+                             </Button>
+                           )}
+                        </motion.div>
+                      ) : isKeyboardMode ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.98 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="w-full flex gap-2.5 pt-1"
+                        >
+                          <input
+                            type="text"
+                            value={input}
+                            disabled={loading || isThinking}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && input.trim() && !loading && !isThinking) {
+                                handleSend();
+                              }
+                            }}
+                            placeholder={isThinking ? "Please wait for AI response..." : "Type your answer here..."}
+                            className="flex-1 bg-slate-950 border border-slate-855 text-white rounded-xl px-4 h-11 text-xs focus:outline-none focus:border-indigo-500 font-semibold transition-all"
+                          />
+                          <Button 
+                            onClick={() => handleSend()} 
+                            disabled={loading || isThinking || !input.trim()}
+                            className="bg-indigo-650 hover:bg-indigo-700 h-11 px-5 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer text-white"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <div className="text-center py-1 bg-slate-950/40 rounded-full border border-slate-900/60 max-w-[200px] mx-auto">
+                          <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                             {isSpeaking ? "Receiving Data" : isListening ? "Listening" : "Idle mic status"}
+                          </span>
+                        </div>
+                      )}
+                   </AnimatePresence>
+                 </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {concluded && (
-          <div className="p-10 bg-slate-950 border-t border-slate-800 flex flex-col items-center gap-6">
-             <div className="flex items-center gap-4 text-green-500">
-                <ShieldCheck className="w-6 h-6" />
-                <p className="text-sm font-black uppercase tracking-widest">End-to-End Encryption Terminated • Log Saved</p>
-             </div>
-             <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-14 px-10 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest rounded-2xl text-base shadow-2xl transition-transform hover:scale-105 active:scale-95">
-                Review Session Evaluation
-             </Button>
-          </div>
-        )}
+          {concluded && (
+            <div className="p-8 bg-slate-955 border-t border-slate-850 flex flex-col items-center gap-5 shrink-0 z-30">
+               <div className="flex items-center gap-3 text-green-500">
+                  <ShieldCheck className="w-5 h-5 animate-pulse" />
+                  <p className="text-xs font-black uppercase tracking-widest">End-to-End Proctoring Log Saved</p>
+               </div>
+               <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-12 px-8 bg-white hover:bg-slate-200 text-slate-955 font-black uppercase tracking-widest rounded-xl text-xs shadow-2xl transition-transform hover:scale-102 active:scale-98 cursor-pointer">
+                  Review Session Evaluation
+               </Button>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
-  </div>
   );
 }
 
