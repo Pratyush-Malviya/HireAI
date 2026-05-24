@@ -15,6 +15,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const ROLE_WEIGHTS = {
   'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
@@ -10675,6 +10676,7 @@ export default function App() {
         </div>
       </ProfileContext.Provider>
     </NotificationContext.Provider>
+    <SpeedInsights />
   </Router>
 );
 }
