@@ -4296,22 +4296,6 @@ function JobDetail() {
                                    setActiveInviteCandidate(candidate);
                                    const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
                                    setInviteEmailInput(emailVal);
-                                   setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
-                                   setInviteBodyInput(
-`Dear ${candidate.fullName},
-
-Thank you for your interest in the ${job?.title || 'Applied Position'} role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).
-
-Platform: HireNow Automated Lobby
-Duration: ~15-20 minutes
-Requirements: Please ensure you are in a quiet room with a working microphone and camera.
-
-⚠️ CRITICAL PROCTORING RULES:
-1. Camera & Mic Obligatory: Your camera and microphone must remain active at all times. Do not turn off your camera feed.
-2. Strict Tab Switching Detection: Do not navigate away from the interview screen, switch tabs, or minimize the browser window. Doing so will trigger automatic system warnings.
-3. Quiet Testing Environment: Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.`
-                                   );
-                                   setShowInviteModal(true);
                                  }}
                                  disabled={invitingCandidateId === candidate.id}
                                >
@@ -5381,9 +5365,14 @@ function CandidateDetail() {
                  <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
                  Review
                </Button>
-                    setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
-                    setInviteBodyInput(
-`Dear ${candidate.fullName},
+             ) : (
+               <Button
+                 variant="secondary"
+                 className="flex-1 lg:flex-none text-xs py-2 h-auto"
+                 disabled={sendingInvite}
+                 onClick={() => {
+                   setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
+                   setInviteBodyInput(`Dear ${candidate.fullName},
 
 Thank you for your interest in the ${job?.title || 'Applied Position'} role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).
 
@@ -5394,11 +5383,9 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
 ⚠️ CRITICAL PROCTORING RULES:
 1. Camera & Mic Obligatory: Your camera and microphone must remain active at all times. Do not turn off your camera feed.
 2. Strict Tab Switching Detection: Do not navigate away from the interview screen, switch tabs, or minimize the browser window. Doing so will trigger automatic system warnings.
-3. Quiet Testing Environment: Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.`
-                    );
-                    setShowInviteModal(true);
-                  }}
-                 disabled={sendingInvite}
+3. Quiet Testing Environment: Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.`);
+                   setShowInviteModal(true);
+                 }}
                >
                  {sendingInvite ? (
                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" />
@@ -5934,9 +5921,8 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                         </div>
                       </div>
 
-                      {/* Row 4: Risk Signals (Section 6) */}
+                      
                       <div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
-                        <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
                           <div className="flex items-center gap-2">
                             <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-rose-500' : 'text-emerald-500'}`} />
                             <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">6. Risk Signals</h4>
