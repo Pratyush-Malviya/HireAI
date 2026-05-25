@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -448,8 +448,8 @@ interface BotVoiceOption {
 const botVoiceOptions: BotVoiceOption[] = [
   { id: 'en-US', label: 'English (US Accent)', lang: 'en-US', flag: '🇺🇸', voiceNameQuery: 'Google US English' },
   { id: 'en-GB', label: 'English (UK Accent)', lang: 'en-GB', flag: '🇬🇧', voiceNameQuery: 'Google UK English' },
-  { id: 'en-IN', label: 'English (Indian Accent)', lang: 'en-IN', flag: '🇮🇳', voiceNameQuery: 'Google Hindi' },
-  { id: 'en-AU', label: 'English (Aussie Accent)', lang: 'en-AU', flag: '🇦🇺', voiceNameQuery: 'Google English' },
+  { id: 'en-IN', label: 'English (Indian Accent)', lang: 'en-IN', flag: '🇮🇳', voiceNameQuery: 'India' },
+  { id: 'en-AU', label: 'English (Aussie Accent)', lang: 'en-AU', flag: '🇦🇺', voiceNameQuery: 'Australia' },
   { id: 'es-ES', label: 'Español (Spain)', lang: 'es-ES', flag: '🇪🇸', voiceNameQuery: 'Google Español' },
   { id: 'fr-FR', label: 'Français (France)', lang: 'fr-FR', flag: '🇫🇷', voiceNameQuery: 'Google Français' },
   { id: 'de-DE', label: 'Deutsch (Germany)', lang: 'de-DE', flag: '🇩🇪', voiceNameQuery: 'Google Deutsch' },
@@ -616,16 +616,29 @@ function InterviewRoom() {
 
   const noFaceTimeRef = useRef(0);
   const noiseTimeRef = useRef(0);
+  const tabWarningsRef = useRef(0);
+  const faceWarningsRef = useRef(0);
+  const noiseWarningsRef = useRef(0);
+  const lastTabWarningRef = useRef(0);
   
   const volumeRef = useRef(0);
   const isSpeakingRef = useRef(false);
   const isThinkingRef = useRef(false);
   const isListeningRef = useRef(false);
+  // Prevents double-submission from both the silence-timeout and onend firing together
+  const hasSubmittedRef = useRef(false);
 
   useEffect(() => { volumeRef.current = volume; }, [volume]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
   useEffect(() => { isThinkingRef.current = isThinking; }, [isThinking]);
   useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+
+  // Pre-warm Speech Synthesis voices
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+    }
+  }, []);
 
   // Dynamically load face-api.js script
   useEffect(() => {
@@ -690,33 +703,29 @@ function InterviewRoom() {
 
     let currentWarnings = 0;
     if (type === 'tab') {
-      setTabWarnings(prev => {
-        const nextVal = prev + 1;
-        currentWarnings = nextVal;
-        return nextVal;
-      });
+      const now = Date.now();
+      if (now - lastTabWarningRef.current < 2000) return; // 2-second cooldown to avoid double events
+      lastTabWarningRef.current = now;
+
+      tabWarningsRef.current += 1;
+      currentWarnings = tabWarningsRef.current;
+      setTabWarnings(currentWarnings);
     } else if (type === 'face') {
-      setFaceWarnings(prev => {
-        const nextVal = prev + 1;
-        currentWarnings = nextVal;
-        return nextVal;
-      });
+      faceWarningsRef.current += 1;
+      currentWarnings = faceWarningsRef.current;
+      setFaceWarnings(currentWarnings);
     } else if (type === 'noise') {
-      setNoiseWarnings(prev => {
-        const nextVal = prev + 1;
-        currentWarnings = nextVal;
-        return nextVal;
-      });
+      noiseWarningsRef.current += 1;
+      currentWarnings = noiseWarningsRef.current;
+      setNoiseWarnings(currentWarnings);
     }
 
-    setTimeout(async () => {
-      if (currentWarnings > 3) {
-        await autoEndInterview(`${type.toUpperCase()} policy violations exceeded allowed limit of 3 warnings`);
-      } else {
-        triggerWarning(type, currentWarnings);
-        await logProctoringViolation(type, currentWarnings);
-      }
-    }, 10);
+    if (currentWarnings > 3) {
+      await autoEndInterview(`${type.toUpperCase()} policy violations exceeded allowed limit of 3 warnings`);
+    } else {
+      triggerWarning(type, currentWarnings);
+      await logProctoringViolation(type, currentWarnings);
+    }
   };
 
   const autoEndInterview = async (reason: string) => {
@@ -752,22 +761,28 @@ function InterviewRoom() {
     }
   };
 
-  // Tab switch visibility tracking
+  // Tab switch and window focus loss tracking
   useEffect(() => {
     if (concluded || messages.length === 0) return;
 
-    const handleVisibilityChange = () => {
+    const handleTabSwitch = () => {
       if (document.hidden) {
-        // Tab hidden
-      } else {
-        // Tab visible again -> trigger violation!
+        // Tab switched away immediately!
         handleViolation('tab');
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const handleWindowBlur = () => {
+      // Window lost focus!
+      handleViolation('tab');
+    };
+
+    document.addEventListener('visibilitychange', handleTabSwitch);
+    window.addEventListener('blur', handleWindowBlur);
+
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleTabSwitch);
+      window.removeEventListener('blur', handleWindowBlur);
     };
   }, [concluded, messages.length, session?.id]);
 
@@ -778,20 +793,31 @@ function InterviewRoom() {
       return;
     }
 
-    const videoTrack = stream.getVideoTracks()[0];
-    if (!videoTrack || !videoTrack.enabled) {
-      setFaceStatus('disabled');
-      return;
-    }
-
     const interval = setInterval(async () => {
       const faceapi = (window as any).faceapi;
       const videoEl = videoRef.current;
-      if (!faceapi || !videoEl || concluded) return;
+      if (!faceapi || concluded) return;
+
+      const videoTrack = stream.getVideoTracks()[0];
+      const cameraDisabled = !videoTrack || !videoTrack.enabled;
 
       try {
-        const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions());
-        if (detection) {
+        let detected = false;
+        // readyState >= 2 (HAVE_CURRENT_DATA) ensures a real frame is available
+        if (!cameraDisabled && videoEl && videoEl.readyState >= 2) {
+          const detection = await faceapi.detectSingleFace(
+            videoEl,
+            new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.3 })
+          );
+          if (detection) detected = true;
+        } else if (cameraDisabled) {
+          // Camera deliberately disabled — don't count against the user
+          noFaceTimeRef.current = 0;
+          setFaceStatus('disabled');
+          return;
+        }
+
+        if (detected) {
           setFaceStatus('detected');
           noFaceTimeRef.current = 0;
         } else {
@@ -960,6 +986,8 @@ function InterviewRoom() {
 
   // Securely bind the media stream on mount, even if candidate is fetched asynchronously
   const bindVideo = (el: HTMLVideoElement | null) => {
+    // Also update videoRef so the face-detection loop can always access the live element
+    videoRef.current = el;
     if (el) {
       if (el.srcObject !== stream) {
         el.srcObject = stream;
@@ -1004,6 +1032,7 @@ function InterviewRoom() {
         setIsListening(true);
         setInput("");
         latestInputRef.current = "";
+        hasSubmittedRef.current = false; // reset guard for each new speech turn
       };
 
       recognition.onresult = (event: any) => {
@@ -1031,7 +1060,9 @@ function InterviewRoom() {
           // Automatically submit response after 1.8 seconds of silence / no speech activity
           silenceTimeoutRef.current = setTimeout(() => {
             const textToSubmit = latestInputRef.current.trim();
-            if (textToSubmit.length > 1) {
+            if (textToSubmit.length > 1 && !hasSubmittedRef.current) {
+              hasSubmittedRef.current = true;
+              latestInputRef.current = ''; // clear so onend won't re-submit
               console.log("Speech finished (1.8s silence detected). Auto-submitting response:", textToSubmit);
               try { recognition.stop(); } catch (e) {}
               handleSend(textToSubmit);
@@ -1042,19 +1073,31 @@ function InterviewRoom() {
 
       recognition.onend = () => {
         setIsListening(false);
+        // Cancel the silence timer — recognition already ended
         if (silenceTimeoutRef.current) {
           clearTimeout(silenceTimeoutRef.current);
           silenceTimeoutRef.current = null;
         }
+        const textToSubmit = latestInputRef.current.trim();
+        // Only submit here if the silence-timeout path didn't already submit
+        if (!isKeyboardMode && textToSubmit.length > 1 && !hasSubmittedRef.current) {
+          hasSubmittedRef.current = true;
+          latestInputRef.current = '';
+          console.log("Speech ended naturally. Auto-submitting response:", textToSubmit);
+          handleSend(textToSubmit);
+        }
       };
 
       recognition.onerror = (event: any) => {
+        if (event.error === 'no-speech') {
+          // Expected: browser fires this when mic opens but user hasn't spoken yet.
+          // Not a real error — do not log as error, do not notify user.
+          console.debug('Speech recognition: no-speech (expected, ignoring).');
+          return;
+        }
         console.error('Speech recognition error', event.error);
         setIsListening(false);
-        if (event.error === 'no-speech') {
-          // Silent error, just don't notify user with a big toast
-          console.debug('No speech detected before timeout.');
-        } else if (event.error === 'not-allowed') {
+        if (event.error === 'not-allowed') {
           setSpeechError("PermissionDenied");
           setIsKeyboardMode(true);
           notify('Chrome / browser Speech recognition access was blocked. Typing mode is ready.', 'info');
@@ -1088,10 +1131,17 @@ function InterviewRoom() {
     utterance.lang = selectedVoice.lang;
     if (window.speechSynthesis) {
       const voices = window.speechSynthesis.getVoices();
-      let match = voices.find(v => v.lang === selectedVoice.lang && v.name.includes(selectedVoice.voiceNameQuery || ''));
-      if (!match) match = voices.find(v => v.lang === selectedVoice.lang);
-      if (!match) { const prefix = selectedVoice.lang.split('-')[0]; match = voices.find(v => v.lang.startsWith(prefix)); }
-      if (match) utterance.voice = match;
+      if (voices.length > 0) {
+        // Highly prioritize premium online/natural/neural voices
+        let match = voices.find(v => v.lang === selectedVoice.lang && (v.name.includes('Online') || v.name.includes('Natural') || v.name.includes('Neural')));
+        if (!match) match = voices.find(v => v.lang === selectedVoice.lang && v.name.includes(selectedVoice.voiceNameQuery || ''));
+        if (!match) match = voices.find(v => v.lang === selectedVoice.lang);
+        if (!match) { const prefix = selectedVoice.lang.split('-')[0]; match = voices.find(v => v.lang.startsWith(prefix)); }
+        if (match) {
+          utterance.voice = match;
+          console.debug("Selected premium browser voice fallback:", match.name);
+        }
+      }
     }
     utterance.onstart = () => {
       setIsSpeaking(true);
@@ -1252,7 +1302,19 @@ function InterviewRoom() {
     if (!candidate || !job) return;
     setLoading(true);
     try {
-      const intro = `Hello ${candidate.fullName}, I am HireNow Assistant. Thank you for joining this session for the ${job.title} position at ${job.company || 'our firm'}. Before we begin our structured technical screening, I'd like to ask: are you ready and in a quiet environment to start the interview now?`;
+      const roleType = job.requirements?.role_type || 'Operations / Generalist';
+      let intro = '';
+      if (roleType === 'Technical / Engineering') {
+        // Opener C — Direct (Technical Roles)
+        intro = `Hi ${candidate.fullName}, thanks for being here. I'm Alex. We've got about 15 minutes — I'll cover your background, check some technical areas, and ask a couple of situational questions. Feel free to ask me to clarify anything. Let's jump in — walk me through your most recent role and what you were actually building day-to-day.`;
+      } else {
+        // Random selection between Opener A and Opener B
+        const openers = [
+          `Hey ${candidate.fullName}, thanks for taking the time — really appreciate it. I'm Alex, I'll be chatting with you today. We'll keep it conversational, so no pressure to have perfect answers. Just talk me through things the way you normally would. Sound good? Let's start with you — give me the quick version of your background and what brought you to this kind of role.`,
+          `Good to meet you, ${candidate.fullName}. I'm Alex. Today's pretty informal — I'll ask you some questions, you talk me through your experience, and we'll have a real conversation. Before we get into it, is there anything you want to flag upfront? Great. So tell me a bit about yourself — where you're coming from and what's drawing you toward this role.`
+        ];
+        intro = openers[Math.floor(Math.random() * openers.length)];
+      }
       
       const newSession = {
         candidateId: candidate.id,
@@ -1320,7 +1382,19 @@ function InterviewRoom() {
 
       if (!currentSessionId) throw new Error("Interview session not found. Please refresh.");
 
-      if (aiResponse.toLowerCase().includes('process your interview') || aiResponse.toLowerCase().includes('sufficient initial information')) {
+      const isClosingText = 
+        aiResponse.toLowerCase().includes('process your interview') || 
+        aiResponse.toLowerCase().includes('sufficient initial information') ||
+        aiResponse.toLowerCase().includes('be in touch about next steps') ||
+        aiResponse.toLowerCase().includes('really enjoyed learning about your background') ||
+        aiResponse.toLowerCase().includes('really helpful conversation. before i let you go') ||
+        aiResponse.toLowerCase().includes('take care. we\'ll be in touch') ||
+        aiResponse.toLowerCase().includes('take care. we\'ll be in touch') ||
+        aiResponse.toLowerCase().includes('we\'ll be in touch about next steps') ||
+        aiResponse.toLowerCase().includes('we\'ll be in touch soon') ||
+        aiResponse.toLowerCase().includes('we will be in touch');
+
+      if (isClosingText) {
         setConcluded(true);
         const feedback = await summarizeInterview(finalMessages.map(m => ({ role: m.role, text: m.text })));
         try {
@@ -1872,20 +1946,36 @@ function InterviewRoom() {
                     </AnimatePresence>
                     
                     {/* Live speech recognition captions */}
-                    {input && !concluded && !isListening && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }} 
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-indigo-500/95 backdrop-blur-xl px-5 py-3 rounded-2xl border border-indigo-400/40 shadow-2xl max-w-md w-full text-center"
-                      >
-                         <p className="text-white text-[9px] font-black uppercase tracking-widest mb-1.5 opacity-80">Speech Preview</p>
-                         <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
-                         <div className="mt-2.5 flex items-center justify-center">
-                            <Button onClick={() => handleSend()} size="sm" className="h-7 bg-white text-indigo-650 hover:bg-slate-100 text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
-                              <Send className="w-3 h-3 mr-1.5" /> Confirm & Send
-                            </Button>
-                         </div>
-                      </motion.div>
+                    {input && !concluded && (
+                      !isKeyboardMode ? (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }} 
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-indigo-600/90 backdrop-blur-xl px-6 py-3.5 rounded-2xl border border-indigo-500/30 shadow-2xl max-w-md w-full text-center"
+                        >
+                           <p className="text-white/80 text-[9px] font-black uppercase tracking-widest mb-1.5 flex items-center justify-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Transcription
+                           </p>
+                           <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
+                           <p className="text-white/60 text-[8px] font-semibold tracking-wider uppercase mt-2">Pause speaking to automatically submit response</p>
+                        </motion.div>
+                      ) : (
+                        !isListening && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }} 
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-indigo-500/95 backdrop-blur-xl px-5 py-3 rounded-2xl border border-indigo-400/40 shadow-2xl max-w-md w-full text-center"
+                          >
+                             <p className="text-white text-[9px] font-black uppercase tracking-widest mb-1.5 opacity-80">Speech Preview</p>
+                             <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
+                             <div className="mt-2.5 flex items-center justify-center">
+                                <Button onClick={() => handleSend()} size="sm" className="h-7 bg-white text-indigo-650 hover:bg-slate-100 text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
+                                  <Send className="w-3 h-3 mr-1.5" /> Confirm & Send
+                                </Button>
+                             </div>
+                          </motion.div>
+                        )
+                      )
                     )}
                   </div>
                 </div>
@@ -1986,7 +2076,7 @@ function InterviewRoom() {
                            </div>
                            <p className="text-indigo-300 text-[9px] font-black uppercase tracking-[0.2em] animate-pulse">Assistant is compiling response...</p>
                         </motion.div>
-                      ) : input ? (
+                      ) : (input && isKeyboardMode) ? (
                         <motion.div 
                           initial={{ opacity: 0, scale: 0.98 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -2850,6 +2940,11 @@ function JobDetail() {
   const [reevaluatingAll, setReevaluatingAll] = useState(false);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
 
+  // Verification & Custom Invite States
+  const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
+  const [inviteEmailInput, setInviteEmailInput] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
   // Editable configuration states for the drawer:
   const [editPassedThresh, setEditPassedThresh] = useState(80);
   const [editLowThresh, setEditLowThresh] = useState(40);
@@ -3277,19 +3372,24 @@ function JobDetail() {
     }
   };
 
-  const handleSendInviteForCandidate = async (candidate: Candidate) => {
+  const handleSendInviteForCandidate = async (candidate: Candidate, emailOverride?: string) => {
     setInvitingCandidateId(candidate.id);
     const link = `${window.location.origin}/interview/${candidate.id}`;
+    const targetEmail = emailOverride || candidate.email;
     try {
-      // 1. Update status in db
-      await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
+      // 1. Update status and email in db
+      const updates: any = { interviewStatus: 'invited' };
+      if (emailOverride && emailOverride !== candidate.email) {
+        updates.email = emailOverride;
+      }
+      await updateDoc(doc(db, 'candidates', candidate.id), updates);
       
       // 2. Try to send email via backend endpoint
       const res = await fetch('/api/candidate/send-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          candidateEmail: candidate.email,
+          candidateEmail: targetEmail,
           candidateName: candidate.fullName,
           interviewLink: link,
           jobTitle: job?.title || 'Applied Position',
@@ -3319,6 +3419,8 @@ function JobDetail() {
       notify('Invite created! Copied link to clipboard.', 'info');
     } finally {
       setInvitingCandidateId(null);
+      setShowInviteModal(false);
+      setActiveInviteCandidate(null);
     }
   };
 
@@ -4223,7 +4325,9 @@ function JobDetail() {
                                  className="h-8 text-[10px] font-black uppercase tracking-widest border-indigo-100 text-indigo-600 hover:bg-indigo-50 min-w-[150px] flex items-center justify-center gap-1.5"
                                  onClick={(e) => {
                                    e.stopPropagation();
-                                   handleSendInviteForCandidate(candidate);
+                                   setActiveInviteCandidate(candidate);
+                                   setInviteEmailInput(candidate.email || '');
+                                   setShowInviteModal(true);
                                  }}
                                  disabled={invitingCandidateId === candidate.id}
                                >
@@ -4498,6 +4602,107 @@ function JobDetail() {
           </Button>
         </div>
       </Modal>
+
+      {/* Invite Verification and Settings Modal */}
+      <Modal
+        isOpen={showInviteModal}
+        onClose={() => {
+          setShowInviteModal(false);
+          setActiveInviteCandidate(null);
+        }}
+        title="Verify Applicant Info & Send Invite"
+      >
+        {activeInviteCandidate && (
+          <div className="space-y-6">
+            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+              Review and confirm the applicant's contact details before sending the interactive voice assessment invite. You can correct the email address if needed.
+            </p>
+
+            <div className="space-y-4">
+              {/* Applicant Name (Read-Only) */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Name</label>
+                <div className="w-full text-xs font-bold px-3.5 py-3 bg-slate-50 border border-slate-200/60 rounded-xl text-slate-800 pointer-events-none select-none">
+                  {activeInviteCandidate.fullName}
+                </div>
+              </div>
+
+              {/* Applicant Email (Editable) */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Email</label>
+                <input
+                  type="email"
+                  className="w-full text-xs font-extrabold px-3.5 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm"
+                  placeholder="Enter email address"
+                  value={inviteEmailInput}
+                  onChange={(e) => setInviteEmailInput(e.target.value)}
+                />
+              </div>
+
+              {/* Generated Meeting/Interview Link */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Generated Lobby Link</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 text-[10px] font-mono font-semibold px-3 py-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-indigo-600 truncate select-all flex items-center">
+                    {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
+                  </div>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="px-3 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-1.5"
+                    onClick={() => {
+                      const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
+                      navigator.clipboard.writeText(link);
+                      notify('Interview link copied to clipboard.', 'success');
+                    }}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                type="button"
+                className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-600 border-slate-200 rounded-xl"
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setActiveInviteCandidate(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                className="flex-1 h-12 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                disabled={!inviteEmailInput.trim() || invitingCandidateId === activeInviteCandidate.id}
+                onClick={() => {
+                  if (activeInviteCandidate) {
+                    handleSendInviteForCandidate(activeInviteCandidate, inviteEmailInput);
+                  }
+                }}
+              >
+                {invitingCandidateId === activeInviteCandidate.id ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4" />
+                    Send Invite Email
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
@@ -4599,6 +4804,11 @@ function CandidateDetail() {
   const [selectedSlot, setSelectedSlot] = useState<{start: string, end: string, label: string} | null>(null);
   const [sendingInvite, setSendingInvite] = useState(false);
 
+  // Verification & Custom Invite States
+  const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
+  const [inviteEmailInput, setInviteEmailInput] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
   // HireNow Enhanced Feature States
   const [activeDetailTab, setActiveDetailTab] = useState<'core' | 'offer' | 'campaign' | 'proctoring'>('core');
 
@@ -4670,20 +4880,25 @@ function CandidateDetail() {
     }
   };
 
-  const handleSendInvite = async () => {
+  const handleSendInvite = async (emailOverride?: string) => {
     if (!candidate) return;
     setSendingInvite(true);
     const link = `${window.location.origin}/interview/${candidate.id}`;
+    const targetEmail = emailOverride || candidate.email;
     try {
-      // 1. Update status in db
-      await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
+      // 1. Update status and email in db
+      const updates: any = { interviewStatus: 'invited' };
+      if (emailOverride && emailOverride !== candidate.email) {
+        updates.email = emailOverride;
+      }
+      await updateDoc(doc(db, 'candidates', candidate.id), updates);
       
       // 2. Try to send email via backend endpoint
       const res = await fetch('/api/candidate/send-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          candidateEmail: candidate.email,
+          candidateEmail: targetEmail,
           candidateName: candidate.fullName,
           interviewLink: link,
           jobTitle: job?.title || 'Applied Position',
@@ -4699,7 +4914,7 @@ function CandidateDetail() {
           notify(data.message || `Email interview invitation sent to ${candidate.fullName}!`, 'success');
         }
         // Refresh local state inside CandidateDetail
-        setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
+        setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited', email: targetEmail } : null);
       } else {
         if (data.reason === 'NOT_AUTHENTICATED') {
           navigator.clipboard.writeText(link);
@@ -4708,15 +4923,17 @@ function CandidateDetail() {
           navigator.clipboard.writeText(link);
           notify(`Invite created! Copied link to clipboard. (Email error: ${data.error || 'unknown'})`, 'info');
         }
-        setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
+        setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited', email: targetEmail } : null);
       }
     } catch (err: any) {
       console.error(err);
       navigator.clipboard.writeText(link);
       notify('Invite created! Copied link to clipboard.', 'info');
-      setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited' } : null);
+      setCandidate(prev => prev ? { ...prev, interviewStatus: 'invited', email: targetEmail } : null);
     } finally {
       setSendingInvite(false);
+      setShowInviteModal(false);
+      setActiveInviteCandidate(null);
     }
   };
 
@@ -5152,7 +5369,11 @@ function CandidateDetail() {
                <Button 
                  variant="secondary" 
                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs py-2 h-auto flex items-center justify-center gap-2" 
-                 onClick={handleSendInvite}
+                 onClick={() => {
+                   setActiveInviteCandidate(candidate);
+                   setInviteEmailInput(candidate.email || '');
+                   setShowInviteModal(true);
+                 }}
                  disabled={sendingInvite}
                >
                  {sendingInvite ? (
@@ -7010,6 +7231,107 @@ function CandidateDetail() {
           </div>
         </div>
       )}
+
+      {/* Invite Verification and Settings Modal */}
+      <Modal
+        isOpen={showInviteModal}
+        onClose={() => {
+          setShowInviteModal(false);
+          setActiveInviteCandidate(null);
+        }}
+        title="Verify Applicant Info & Send Invite"
+      >
+        {activeInviteCandidate && (
+          <div className="space-y-6">
+            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
+              Review and confirm the applicant's contact details before sending the interactive voice assessment invite. You can correct the email address if needed.
+            </p>
+
+            <div className="space-y-4">
+              {/* Applicant Name (Read-Only) */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Name</label>
+                <div className="w-full text-xs font-bold px-3.5 py-3 bg-slate-50 border border-slate-200/60 rounded-xl text-slate-800 pointer-events-none select-none">
+                  {activeInviteCandidate.fullName}
+                </div>
+              </div>
+
+              {/* Applicant Email (Editable) */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Email</label>
+                <input
+                  type="email"
+                  className="w-full text-xs font-extrabold px-3.5 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm"
+                  placeholder="Enter email address"
+                  value={inviteEmailInput}
+                  onChange={(e) => setInviteEmailInput(e.target.value)}
+                />
+              </div>
+
+              {/* Generated Meeting/Interview Link */}
+              <div className="space-y-1.5 text-left">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Generated Lobby Link</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 text-[10px] font-mono font-semibold px-3 py-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-indigo-600 truncate select-all flex items-center">
+                    {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
+                  </div>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="px-3 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-1.5"
+                    onClick={() => {
+                      const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
+                      navigator.clipboard.writeText(link);
+                      notify('Interview link copied to clipboard.', 'success');
+                    }}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                type="button"
+                className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-600 border-slate-200 rounded-xl"
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setActiveInviteCandidate(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                type="button"
+                className="flex-1 h-12 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                disabled={!inviteEmailInput.trim() || sendingInvite}
+                onClick={() => {
+                  if (activeInviteCandidate) {
+                    handleSendInvite(inviteEmailInput);
+                  }
+                }}
+              >
+                {sendingInvite ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4" />
+                    Send Invite Email
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

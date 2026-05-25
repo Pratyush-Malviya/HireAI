@@ -97,6 +97,16 @@ service cloud.firestore {
       allow delete: if isSignedIn() && (isSuperAdmin() || (existing().organizationId == getUserOrg() && isAdmin()));
     }
 
+    // Screening cache (resume evaluation dedup cache)
+    // Any signed-in user can read and create entries; no mutation after creation
+    match /screening_cache/{cacheId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn()
+        && incoming().keys().hasAll(['cacheHash', 'result', 'createdAt'])
+        && incoming().cacheHash is string;
+      allow update, delete: if false;
+    }
+
     // Interview rules
     match /interviews/{interviewId} {
       allow read, list: if isSignedIn() && (
