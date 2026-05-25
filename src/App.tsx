@@ -24,6 +24,12 @@ const ROLE_WEIGHTS = {
   'Operations / Generalist': { skillsMatch: 0.25, experienceFit: 0.25, education: 0.20, achievements: 0.20, culturalRoleFit: 0.10 },
 } as const;
 
+function extractEmailFromText(text: string | undefined | null): string {
+  if (!text) return '';
+  const match = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  return match ? match[0] : '';
+}
+
 function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) {
   if (!screeningResult) {
     screeningResult = {};
@@ -2943,6 +2949,8 @@ function JobDetail() {
   // Verification & Custom Invite States
   const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
   const [inviteEmailInput, setInviteEmailInput] = useState('');
+  const [inviteSubjectInput, setInviteSubjectInput] = useState('');
+  const [inviteBodyInput, setInviteBodyInput] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Editable configuration states for the drawer:
@@ -3111,10 +3119,6 @@ function JobDetail() {
     const files = e.target.files;
     if (!files || !job || !jobId) return;
 
-    setActiveUploadsCount(prev => prev + 1);
-    const batchId = Date.now().toString();
-    localStorage.setItem(`lastBatch_${jobId}`, batchId);
-    
     const newFilesToUpload = Array.from(files).map((f, i) => ({
       id: `${f.name}_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 7)}`,
       file: f,
@@ -3147,23 +3151,24 @@ function JobDetail() {
       }
     });
 
-    // Process in small batches to avoid rate limits
+    // Run processing as fire-and-forget
+    processUploadQueue(newFilesToUpload, job, jobId);
+  };
+
+  const processUploadQueue = async (newFilesToUpload: any[], currentJob: Job, jId: string) => {
+    setActiveUploadsCount(prev => prev + 1);
+    const batchId = Date.now().toString();
     const BATCH_SIZE = 1;
-    
+
     try {
       for (let i = 0; i < newFilesToUpload.length; i += BATCH_SIZE) {
         const currentBatch = newFilesToUpload.slice(i, i + BATCH_SIZE);
-        
-        // Delay between batches to respect rate limits
-        if (i > 0) {
-          // Longer delay to be safe
-          await new Promise(resolve => setTimeout(resolve, 3500));
-        }
+        if (i > 0) await new Promise(resolve => setTimeout(resolve, 3500));
         
         await Promise.all(currentBatch.map(async (item) => {
-          const file = item.file;
-          const fileId = item.id;
-          
+          if (!isMounted.current) return;
+          const { file, id: fileId } = item;
+
           setUploadProgress(prev => {
             if (!prev) return null;
             return { 
@@ -3179,71 +3184,32 @@ function JobDetail() {
 
             const dupQuery = query(
               collection(db, 'candidates'), 
-              where('jobId', '==', jobId),
-              where('resumeHash', '==', resumeHash),
-              where('createdBy', '==', auth.currentUser.uid)
+              where('jobId', '==', jId),
+              where('resumeHash', '==', resumeHash)
             );
             const dupSnap = await getDocs(dupQuery);
             
             if (!dupSnap.empty) {
-              setUploadProgress(prev => {
-                if (!prev) return null;
-                const newCurrent = Math.min(prev.total, prev.current + 1);
-                const elapsed = Date.now() - (prev.startTime || Date.now());
-                const avgTimePerFile = elapsed / newCurrent;
-                const remaining = Math.round((prev.total - newCurrent) * (avgTimePerFile / 1000));
-                
-                return { 
-                  ...prev, 
-                  current: newCurrent, 
-                  skipped: prev.skipped + 1,
-                  estimatedSecondsRemaining: remaining,
-                  files: prev.files.map(f => f.id === fileId ? { ...f, status: 'skipped' as const, message: 'Duplicate' } : f) 
-                };
-              });
+              updateProgressState(fileId, 'skipped', 'Duplicate');
               return;
             }
 
-            const rawScreeningResult = await getScreeningResultWithCache(text, job.requirements);
-            const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
+            const rawScreeningResult = await getScreeningResultWithCache(text, currentJob.requirements);
+            const screeningResult = calculateEnhancedScorecard(rawScreeningResult, currentJob.requirements);
             
             await addDoc(collection(db, 'candidates'), {
               ...screeningResult,
-              jobId,
-              organizationId: profile.organizationId,
-              createdBy: auth.currentUser.uid,
+              jobId: jId,
+              organizationId: profile!.organizationId,
+              createdBy: auth.currentUser!.uid,
               resumeHash,
-              resumeText: text, // Store original text for retry
+              resumeText: text,
               batchId,
               createdAt: serverTimestamp(),
               status: 'processed'
             });
-
-            setUploadProgress(prev => {
-              if (!prev) return null;
-              const newCurrent = Math.min(prev.total, prev.current + 1);
-              const elapsed = Date.now() - (prev.startTime || Date.now());
-              const avgTimePerFile = elapsed / newCurrent;
-              const remaining = Math.round((prev.total - newCurrent) * (avgTimePerFile / 1000));
-
-              return { 
-                ...prev, 
-                current: newCurrent, 
-                success: prev.success + 1,
-                estimatedSecondsRemaining: remaining,
-                files: prev.files.map(f => f.id === fileId ? { ...f, status: 'success' as const } : f) 
-              };
-            });
-          } catch (err: any) {
-            setUploadProgress(prev => {
-              if (!prev) return null;
-              const newCurrent = Math.min(prev.total, prev.current + 1);
-              return { 
-                ...prev, 
-                current: newCurrent, 
-                files: prev.files.map(f => f.id === fileId ? { ...f, status: 'error' as const, message: err.message } : f) 
-              };
-            });
+          } catch (err) {
+            updateProgressState(fileId, 'error', 'Failed');
           }
         }));
       }
@@ -3372,7 +3338,7 @@ function JobDetail() {
     }
   };
 
-  const handleSendInviteForCandidate = async (candidate: Candidate, emailOverride?: string) => {
+  const handleSendInviteForCandidate = async (candidate: Candidate, emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     setInvitingCandidateId(candidate.id);
     const link = `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
@@ -3393,7 +3359,9 @@ function JobDetail() {
           candidateName: candidate.fullName,
           interviewLink: link,
           jobTitle: job?.title || 'Applied Position',
-          customSmtp: organization?.emailSettings || null
+          customSmtp: organization?.emailSettings || null,
+          subject: subjectOverride,
+          emailBody: bodyOverride
         })
       });
 
@@ -4326,7 +4294,23 @@ function JobDetail() {
                                  onClick={(e) => {
                                    e.stopPropagation();
                                    setActiveInviteCandidate(candidate);
-                                   setInviteEmailInput(candidate.email || '');
+                                   const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
+                                   setInviteEmailInput(emailVal);
+                                   setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
+                                   setInviteBodyInput(
+`Dear ${candidate.fullName},
+
+Thank you for your interest in the ${job?.title || 'Applied Position'} role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).
+
+Platform: HireNow Automated Lobby
+Duration: ~15-20 minutes
+Requirements: Please ensure you are in a quiet room with a working microphone and camera.
+
+⚠️ CRITICAL PROCTORING RULES:
+1. Camera & Mic Obligatory: Your camera and microphone must remain active at all times. Do not turn off your camera feed.
+2. Strict Tab Switching Detection: Do not navigate away from the interview screen, switch tabs, or minimize the browser window. Doing so will trigger automatic system warnings.
+3. Quiet Testing Environment: Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.`
+                                   );
                                    setShowInviteModal(true);
                                  }}
                                  disabled={invitingCandidateId === candidate.id}
@@ -4610,94 +4594,147 @@ function JobDetail() {
           setShowInviteModal(false);
           setActiveInviteCandidate(null);
         }}
-        title="Verify Applicant Info & Send Invite"
+        title="Candidate Interview Invitation"
       >
         {activeInviteCandidate && (
           <div className="space-y-6">
-            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-              Review and confirm the applicant's contact details before sending the interactive voice assessment invite. You can correct the email address if needed.
-            </p>
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Candidate Profile</span>
+                {inviteEmailInput ? (
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5" /> Email Extracted
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100/50">
+                    Missing Email
+                  </span>
+                )}
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-extrabold text-slate-800">{activeInviteCandidate.fullName}</h4>
+                <p className="text-xs text-slate-500 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+              </div>
+            </div>
 
-            <div className="space-y-4">
-              {/* Applicant Name (Read-Only) */}
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Name</label>
-                <div className="w-full text-xs font-bold px-3.5 py-3 bg-slate-50 border border-slate-200/60 rounded-xl text-slate-800 pointer-events-none select-none">
-                  {activeInviteCandidate.fullName}
+            <div className="space-y-5">
+              {/* Option 1: Send via Email */}
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-indigo-100/80 transition-all shadow-sm bg-white">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl mt-0.5">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                  </div>
                 </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recipient Email Address</label>
+                    <input
+                      type="email"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white"
+                      placeholder="Enter candidate email address"
+                      value={inviteEmailInput}
+                      onChange={(e) => setInviteEmailInput(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Subject</label>
+                    <input
+                      type="text"
+                      className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white"
+                      placeholder="Enter email subject"
+                      value={inviteSubjectInput}
+                      onChange={(e) => setInviteSubjectInput(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Body Message</label>
+                    <textarea
+                      rows={6}
+                      className="w-full text-xs font-semibold px-3.5 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white resize-y font-sans leading-relaxed"
+                      placeholder="Enter invitation message details"
+                      value={inviteBodyInput}
+                      onChange={(e) => setInviteBodyInput(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  type="button"
+                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                  disabled={!inviteEmailInput.trim() || invitingCandidateId === activeInviteCandidate.id}
+                  onClick={() => {
+                    if (activeInviteCandidate) {
+                      handleSendInviteForCandidate(activeInviteCandidate, inviteEmailInput, inviteSubjectInput, inviteBodyInput);
+                    }
+                  }}
+                >
+                  {invitingCandidateId === activeInviteCandidate.id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending Invitation...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      Send Invite via Email
+                    </>
+                  )}
+                </Button>
               </div>
 
-              {/* Applicant Email (Editable) */}
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Email</label>
-                <input
-                  type="email"
-                  className="w-full text-xs font-extrabold px-3.5 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm"
-                  placeholder="Enter email address"
-                  value={inviteEmailInput}
-                  onChange={(e) => setInviteEmailInput(e.target.value)}
-                />
-              </div>
+              {/* Option 2: Copy Invite Link */}
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm bg-white">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
+                  </div>
+                </div>
 
-              {/* Generated Meeting/Interview Link */}
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Generated Lobby Link</label>
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-semibold px-3 py-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-indigo-600 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 bg-slate-50 border border-slate-200/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-3 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-1.5"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
-                      notify('Interview link copied to clipboard.', 'success');
+                      notify('Interview lobby link copied to clipboard.', 'success');
                     }}
                   >
                     <Copy className="w-3.5 h-3.5" />
-                    Copy
+                    Copy Link
                   </Button>
                 </div>
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
               <Button
                 variant="outline"
                 type="button"
-                className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-600 border-slate-200 rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-500 border-slate-200 rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
                 }}
               >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                type="button"
-                className="flex-1 h-12 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:opacity-50"
-                disabled={!inviteEmailInput.trim() || invitingCandidateId === activeInviteCandidate.id}
-                onClick={() => {
-                  if (activeInviteCandidate) {
-                    handleSendInviteForCandidate(activeInviteCandidate, inviteEmailInput);
-                  }
-                }}
-              >
-                {invitingCandidateId === activeInviteCandidate.id ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="w-4 h-4" />
-                    Send Invite Email
-                  </>
-                )}
+                Close
               </Button>
             </div>
           </div>
@@ -4807,6 +4844,8 @@ function CandidateDetail() {
   // Verification & Custom Invite States
   const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
   const [inviteEmailInput, setInviteEmailInput] = useState('');
+  const [inviteSubjectInput, setInviteSubjectInput] = useState('');
+  const [inviteBodyInput, setInviteBodyInput] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   // HireNow Enhanced Feature States
@@ -4880,7 +4919,7 @@ function CandidateDetail() {
     }
   };
 
-  const handleSendInvite = async (emailOverride?: string) => {
+  const handleSendInvite = async (emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     if (!candidate) return;
     setSendingInvite(true);
     const link = `${window.location.origin}/interview/${candidate.id}`;
@@ -4902,7 +4941,9 @@ function CandidateDetail() {
           candidateName: candidate.fullName,
           interviewLink: link,
           jobTitle: job?.title || 'Applied Position',
-          customSmtp: organization?.emailSettings || null
+          customSmtp: organization?.emailSettings || null,
+          subject: subjectOverride,
+          emailBody: bodyOverride
         })
       });
 
@@ -5370,10 +5411,26 @@ function CandidateDetail() {
                  variant="secondary" 
                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs py-2 h-auto flex items-center justify-center gap-2" 
                  onClick={() => {
-                   setActiveInviteCandidate(candidate);
-                   setInviteEmailInput(candidate.email || '');
-                   setShowInviteModal(true);
-                 }}
+                    setActiveInviteCandidate(candidate);
+                    const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
+                    setInviteEmailInput(emailVal);
+                    setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
+                    setInviteBodyInput(
+`Dear ${candidate.fullName},
+
+Thank you for your interest in the ${job?.title || 'Applied Position'} role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).
+
+Platform: HireNow Automated Lobby
+Duration: ~15-20 minutes
+Requirements: Please ensure you are in a quiet room with a working microphone and camera.
+
+⚠️ CRITICAL PROCTORING RULES:
+1. Camera & Mic Obligatory: Your camera and microphone must remain active at all times. Do not turn off your camera feed.
+2. Strict Tab Switching Detection: Do not navigate away from the interview screen, switch tabs, or minimize the browser window. Doing so will trigger automatic system warnings.
+3. Quiet Testing Environment: Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.`
+                    );
+                    setShowInviteModal(true);
+                  }}
                  disabled={sendingInvite}
                >
                  {sendingInvite ? (
@@ -7239,94 +7296,147 @@ function CandidateDetail() {
           setShowInviteModal(false);
           setActiveInviteCandidate(null);
         }}
-        title="Verify Applicant Info & Send Invite"
+        title="Candidate Interview Invitation"
       >
         {activeInviteCandidate && (
           <div className="space-y-6">
-            <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-              Review and confirm the applicant's contact details before sending the interactive voice assessment invite. You can correct the email address if needed.
-            </p>
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Candidate Profile</span>
+                {inviteEmailInput ? (
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5" /> Email Extracted
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100/50">
+                    Missing Email
+                  </span>
+                )}
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-extrabold text-slate-800">{activeInviteCandidate.fullName}</h4>
+                <p className="text-xs text-slate-500 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+              </div>
+            </div>
 
-            <div className="space-y-4">
-              {/* Applicant Name (Read-Only) */}
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Name</label>
-                <div className="w-full text-xs font-bold px-3.5 py-3 bg-slate-50 border border-slate-200/60 rounded-xl text-slate-800 pointer-events-none select-none">
-                  {activeInviteCandidate.fullName}
+            <div className="space-y-5">
+              {/* Option 1: Send via Email */}
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-indigo-100/80 transition-all shadow-sm bg-white">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl mt-0.5">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                  </div>
                 </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recipient Email Address</label>
+                    <input
+                      type="email"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white"
+                      placeholder="Enter candidate email address"
+                      value={inviteEmailInput}
+                      onChange={(e) => setInviteEmailInput(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Subject</label>
+                    <input
+                      type="text"
+                      className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white"
+                      placeholder="Enter email subject"
+                      value={inviteSubjectInput}
+                      onChange={(e) => setInviteSubjectInput(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Body Message</label>
+                    <textarea
+                      rows={6}
+                      className="w-full text-xs font-semibold px-3.5 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white resize-y font-sans leading-relaxed"
+                      placeholder="Enter invitation message details"
+                      value={inviteBodyInput}
+                      onChange={(e) => setInviteBodyInput(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  type="button"
+                  className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:opacity-50"
+                  disabled={!inviteEmailInput.trim() || sendingInvite}
+                  onClick={() => {
+                    if (activeInviteCandidate) {
+                      handleSendInvite(inviteEmailInput, inviteSubjectInput, inviteBodyInput);
+                    }
+                  }}
+                >
+                  {sendingInvite ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending Invitation...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      Send Invite via Email
+                    </>
+                  )}
+                </Button>
               </div>
 
-              {/* Applicant Email (Editable) */}
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Applicant Email</label>
-                <input
-                  type="email"
-                  className="w-full text-xs font-extrabold px-3.5 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm"
-                  placeholder="Enter email address"
-                  value={inviteEmailInput}
-                  onChange={(e) => setInviteEmailInput(e.target.value)}
-                />
-              </div>
+              {/* Option 2: Copy Invite Link */}
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm bg-white">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
+                    <p className="text-[11px] text-slate-500 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
+                  </div>
+                </div>
 
-              {/* Generated Meeting/Interview Link */}
-              <div className="space-y-1.5 text-left">
-                <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Generated Lobby Link</label>
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-semibold px-3 py-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-indigo-600 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 bg-slate-50 border border-slate-200/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-3 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-1.5"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
-                      notify('Interview link copied to clipboard.', 'success');
+                      notify('Interview lobby link copied to clipboard.', 'success');
                     }}
                   >
                     <Copy className="w-3.5 h-3.5" />
-                    Copy
+                    Copy Link
                   </Button>
                 </div>
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
               <Button
                 variant="outline"
                 type="button"
-                className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-600 border-slate-200 rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-500 border-slate-200 rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
                 }}
               >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                type="button"
-                className="flex-1 h-12 bg-indigo-600 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:opacity-50"
-                disabled={!inviteEmailInput.trim() || sendingInvite}
-                onClick={() => {
-                  if (activeInviteCandidate) {
-                    handleSendInvite(inviteEmailInput);
-                  }
-                }}
-              >
-                {sendingInvite ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="w-4 h-4" />
-                    Send Invite Email
-                  </>
-                )}
+                Close
               </Button>
             </div>
           </div>

@@ -231,7 +231,7 @@ app.post("/api/calendar/schedule", async (req, res) => {
 
 app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
-  const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp } = req.body;
+  const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp, emailBody, subject: subjectOverride } = req.body;
 
   // Validate email format strictly to protect against mailing injections or header manipulation
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -255,43 +255,138 @@ app.post("/api/candidate/send-invite", async (req, res) => {
     }
   }
 
-  const subject = `Interview Invitation: ${cleanTitle} with HireNow`;
-  const htmlBody = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.05em;">HireNow</h1>
-        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Intelligent Recruitment Platform</p>
-      </div>
-      
-      <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700;">Hi ${cleanName},</h2>
-        
-        <p style="font-size: 16px; margin-bottom: 24px;">Thank you for your interest in the <strong>${cleanTitle}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).</p>
-        
-        <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; border-left: 4px solid #4f46e5; margin-bottom: 24px;">
-          <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Your Interview Details</h3>
-          <p style="margin: 0; font-size: 15px; color: #1e293b;"><strong>Platform:</strong> HireNow Automated Lobby</p>
-          <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b;"><strong>Duration:</strong> ~15-20 minutes</p>
-          <p style="margin: 4px 0 0 0; font-size: 15px; color: #1e293b;"><strong>Requirements:</strong> Please ensure you are in a quiet room with a working microphone/camera.</p>
-        </div>
+  const subject = subjectOverride || `Interview Invitation: ${cleanTitle} with HireNow`;
+  let htmlBody = "";
+  if (emailBody && typeof emailBody === "string") {
+    const safeBody = safeSanitize(emailBody).replace(/\n/g, "<br/>");
+    htmlBody = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${subject}</title>
+          <style>
+            body {
+              margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            }
+            @media only screen and (max-width: 600px) {
+              .email-container {
+                width: 100% !important; padding: 20px 12px !important;
+              }
+              .email-card {
+                padding: 24px 16px !important; border-radius: 16px !important;
+              }
+              .email-button {
+                display: block !important; width: auto !important; text-align: center !important; padding: 14px 0 !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container" style="max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.05em; font-family: 'Space Grotesk', -apple-system, sans-serif;">HireNow</h1>
+              <p style="color: #64748b; font-size: 11px; margin-top: 4px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em;">Intelligent Recruitment Platform</p>
+            </div>
+            
+            <div class="email-card" style="background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 40px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+              <div style="font-size: 14px; color: #475569; font-weight: 500; line-height: 1.7; text-align: left;">
+                ${safeBody}
+              </div>
+              
+              <div style="text-align: center; margin: 36px 0;">
+                <a href="${cleanLink}" target="_blank" class="email-button" style="background-color: #4f46e5; color: #ffffff; padding: 14px 32px; font-weight: 700; text-decoration: none; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); font-size: 15px; transition: all 0.2s;">
+                  Join Interview Room
+                </a>
+              </div>
 
-        <div style="text-align: center; margin: 32px 0;">
-          <a href="${cleanLink}" target="_blank" style="background-color: #4f46e5; color: #ffffff; padding: 14px 28px; font-weight: 600; text-decoration: none; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); font-size: 16px;">
-            Join Interview Room
-          </a>
-        </div>
-
-        <p style="font-size: 14px; color: #64748b; text-align: center; margin-bottom: 0;">
-          If the button above does not work, copy and paste this link into your browser:<br/>
-          <a href="${cleanLink}" style="color: #4f46e5; word-break: break-all;">${cleanLink}</a>
-        </p>
-      </div>
-      
-      <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #94a3b8;">
-        <p style="margin: 0;">This invitation was sent automatically via HireNow on behalf of the recruitment team.</p>
-      </div>
-    </div>
-  `;
+              <p style="font-size: 13px; color: #64748b; text-align: center; margin-bottom: 0; line-height: 1.5;">
+                If the button above does not work, copy and paste this link into your browser:<br/>
+                <a href="${cleanLink}" style="color: #4f46e5; word-break: break-all; font-weight: 600;">${cleanLink}</a>
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 28px; font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+              <p style="margin: 0;">This invitation was sent automatically via HireNow on behalf of the recruitment team.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  } else {
+    htmlBody = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Interview Invitation</title>
+          <style>
+            body {
+              margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            }
+            @media only screen and (max-width: 600px) {
+              .email-container {
+                width: 100% !important; padding: 20px 12px !important;
+              }
+              .email-card {
+                padding: 24px 16px !important; border-radius: 16px !important;
+              }
+              .email-button {
+                display: block !important; width: auto !important; text-align: center !important; padding: 14px 0 !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container" style="max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.05em; font-family: 'Space Grotesk', -apple-system, sans-serif;">HireNow</h1>
+              <p style="color: #64748b; font-size: 11px; margin-top: 4px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em;">Intelligent Recruitment Platform</p>
+            </div>
+            
+            <div class="email-card" style="background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 40px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+              <h2 style="color: #0f172a; margin-top: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em;">Hi ${cleanName},</h2>
+              
+              <p style="font-size: 15px; margin-bottom: 24px; color: #475569; font-weight: 500;">Thank you for your interest in the <strong style="color: #0f172a;">${cleanTitle}</strong> role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).</p>
+              
+              <div style="background-color: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #f1f5f9; border-left: 4px solid #4f46e5; margin-bottom: 24px;">
+                <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 12px; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;">Your Interview Details</h3>
+                <p style="margin: 0; font-size: 14px; color: #334155;"><strong style="color: #475569;">Platform:</strong> HireNow Automated Lobby</p>
+                <p style="margin: 6px 0 0 0; font-size: 14px; color: #334155;"><strong style="color: #475569;">Duration:</strong> ~15-20 minutes</p>
+                <p style="margin: 6px 0 0 0; font-size: 14px; color: #334155;"><strong style="color: #475569;">Requirements:</strong> Please ensure you are in a quiet room with a working microphone and camera.</p>
+              </div>
+  
+              <div style="background-color: #fffbeb; border-radius: 12px; padding: 20px; border: 1px solid #fef3c7; border-left: 4px solid #d97706; margin-bottom: 28px; text-align: left;">
+                <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 12px; color: #d97706; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;">⚠️ Critical Proctoring Rules</h3>
+                <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #78350f; font-weight: 500; line-height: 1.6;">
+                  <li style="margin-bottom: 6px;"><strong>Camera & Mic Obligatory:</strong> Your camera and microphone must remain active at all times. Do not turn off your camera feed.</li>
+                  <li style="margin-bottom: 6px;"><strong>Strict Tab Switching Detection:</strong> Do not navigate away from the interview screen, switch tabs, or minimize the browser window. Doing so will trigger automatic system warnings.</li>
+                  <li style="margin-bottom: 0;"><strong>Quiet Testing Environment:</strong> Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.</li>
+                </ul>
+              </div>
+  
+              <div style="text-align: center; margin: 36px 0;">
+                <a href="${cleanLink}" target="_blank" class="email-button" style="background-color: #4f46e5; color: #ffffff; padding: 14px 32px; font-weight: 700; text-decoration: none; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); font-size: 15px; transition: all 0.2s;">
+                  Join Interview Room
+                </a>
+              </div>
+  
+              <p style="font-size: 13px; color: #64748b; text-align: center; margin-bottom: 0; line-height: 1.5;">
+                If the button above does not work, copy and paste this link into your browser:<br/>
+                <a href="${cleanLink}" style="color: #4f46e5; word-break: break-all; font-weight: 600;">${cleanLink}</a>
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 28px; font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+              <p style="margin: 0;">This invitation was sent automatically via HireNow on behalf of the recruitment team.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
 
   let emailSent = false;
   let fallbackInfo = "";
@@ -552,15 +647,43 @@ app.post("/api/admin/broadcast-email", async (req, res) => {
         to: targetMail,
         subject: cleanSubject,
         html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
-            <div style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-              <h2 style="color: #4f46e5; margin-top: 0; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">Platform Broadcast Update</h2>
-              <div style="margin: 20px 0; line-height: 1.8; font-size: 15px; color: #1e293b; white-space: pre-wrap;">${body}</div>
-              <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 25px; font-size: 11px; color: #94a3b8; text-align: center;">
-                This update email was dispatched regarding global platform governance by HireNow.
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Platform Update</title>
+              <style>
+                body {
+                  margin: 0; padding: 0; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                }
+                @media only screen and (max-width: 600px) {
+                  .email-container {
+                    width: 100% !important; padding: 20px 12px !important;
+                  }
+                  .email-card {
+                    padding: 24px 16px !important; border-radius: 16px !important;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="email-container" style="max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #334155; line-height: 1.6;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                  <h1 style="color: #4f46e5; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.05em; font-family: 'Space Grotesk', -apple-system, sans-serif;">HireNow</h1>
+                  <p style="color: #64748b; font-size: 9px; margin-top: 4px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em;">Intelligent Recruitment Platform</p>
+                </div>
+                
+                <div class="email-card" style="background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 36px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border-top: 4px solid #4f46e5;">
+                  <h2 style="color: #0f172a; margin-top: 0; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">Platform Broadcast Update</h2>
+                  <div style="margin: 20px 0; line-height: 1.8; font-size: 14px; color: #1e293b; white-space: pre-wrap; font-weight: 500;">${body}</div>
+                  <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 28px; font-size: 11px; color: #94a3b8; text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                    This update email was dispatched regarding global platform governance by HireNow.
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </body>
+          </html>
         `
       });
       successCount++;
@@ -1305,6 +1428,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
       ${scoringProtocol}
   
       SIGNAL REQUIREMENTS:
+      - Extract the candidate's personal contact details: 'fullName', 'email' (parse carefully from the header or contact section of the resume), 'phone', 'location', 'currentRole', 'currentCompany', 'totalExperience', and a brief 'oneLineSummary'.
       - Identify specific "Penalties" (e.g., gaps > 12mo, job-hopping < 1yr avg tenure, resume < 300 words).
       - Identify specific "Bonuses" (e.g., exact match on 5+ keywords, referral, previous hire from tier-1 firms).
       - Detect "Red Flags" with severity levels.
@@ -1345,6 +1469,14 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     const jsonString = jsonMatch ? jsonMatch[0] : rawText.trim();
     const result = JSON.parse(jsonString);
+
+    // Fallback: extract email address if missing/empty in AI response
+    if (!result.email || typeof result.email !== 'string' || !result.email.includes('@')) {
+      const emailMatch = (resumeText || "").match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      if (emailMatch) {
+        result.email = emailMatch[0];
+      }
+    }
 
     // Normalize enums safely
     if (result.scorecard) {
