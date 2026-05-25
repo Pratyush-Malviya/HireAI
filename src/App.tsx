@@ -2916,6 +2916,13 @@ function JobDetail() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeUploadsCount, setActiveUploadsCount] = useState(0);
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   const uploading = activeUploadsCount > 0;
   const [researchingAll, setResearchingAll] = useState(false);
   const [retryingScreening, setRetryingScreening] = useState<string | null>(null);
@@ -3208,6 +3215,7 @@ function JobDetail() {
               createdAt: serverTimestamp(),
               status: 'processed'
             });
+            updateProgressState(fileId, 'success', 'Processed');
           } catch (err) {
             updateProgressState(fileId, 'error', 'Failed');
           }
@@ -3216,6 +3224,19 @@ function JobDetail() {
     } finally {
       setActiveUploadsCount(prev => Math.max(0, prev - 1));
     }
+  };
+
+  const updateProgressState = (fileId: string, status: 'success' | 'skipped' | 'error', message?: string) => {
+    setUploadProgress(prev => {
+      if (!prev) return null;
+      const updatedFiles = prev.files.map(f =>
+        f.id === fileId ? { ...f, status, message: message ?? f.message } : f
+      );
+      const successCount = updatedFiles.filter(f => f.status === 'success').length;
+      const skippedCount = updatedFiles.filter(f => f.status === 'skipped').length;
+      const total = updatedFiles.length;
+      return { ...prev, files: updatedFiles, success: successCount, skipped: skippedCount, total };
+    });
   };
 
   const handleResearchAll = async () => {
@@ -5905,7 +5926,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                                 C: {communicationScore}%
                               </span>
                             </div>
-                          </div>
+                          
 
                           <div className="space-y-4 font-sans">
                             <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1">
@@ -5919,10 +5940,11 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                             </div>
                           </div>
                         </div>
-                      </div>
+                      
 
                       
-                      <div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
+                      {/* Row 4: Risk Signals (Section 6) */}
+<div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
                           <div className="flex items-center gap-2">
                             <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-rose-500' : 'text-emerald-500'}`} />
                             <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">6. Risk Signals</h4>
@@ -5934,7 +5956,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                           }`}>
                             {riskScore > 40 ? 'High Risk' : riskScore > 15 ? 'Medium Risk' : 'Low Risk'}
                           </span>
-                        </div>
+                        
                         
       
                           <div className={`mt-0.5 p-2 rounded-lg ${riskScore > 20 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
@@ -5950,8 +5972,8 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    
+
 
                   {/* Row 5: Evidence Sources (Section 8) & Refresh Analysis Container */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
@@ -6006,9 +6028,13 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                       </Button>
                     </div>
                   </div>
+                    </div>
+                  )}
                 </div>
-              );
-            })()
+              )})()
+
+              
+            
 
           ) : (
             <div className="py-12 flex flex-col items-center text-center">
