@@ -4691,7 +4691,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm bg-white">
+              <div className="hidden p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm bg-white">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
@@ -5375,45 +5375,12 @@ function CandidateDetail() {
              Link
            </Button>
 
-           {!calendarConnected ? (
-             <Button 
-               variant="outline" 
-               className="border-amber-200 text-amber-700 hover:bg-amber-50 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
-               onClick={handleConnectCalendar}
-             >
-               <Calendar className="w-3.5 h-3.5 mr-1 sm:mr-2" />
-               Connect
-             </Button>
-           ) : (
-             <Button 
-               variant="outline" 
-               className="border-green-200 text-green-700 hover:bg-green-50 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
-               onClick={fetchAvailability}
-             >
-               <Clock className="w-3.5 h-3.5 mr-1 sm:mr-2" />
-               Schedule
-             </Button>
-           )}
-
            <div className="grid grid-cols-1 md:grid-cols-2 lg:flex gap-2">
              {candidate.interviewStatus === 'completed' ? (
                <Button variant="secondary" className="flex-1 bg-green-600 hover:bg-green-700 text-xs py-2 h-auto" onClick={() => navigate(`/interview/${candidate.id}`)}>
                  <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
                  Review
                </Button>
-             ) : candidate.interviewStatus === 'invited' || candidate.interviewStatus === 'in_progress' ? (
-               <Button variant="secondary" className="flex-1 bg-indigo-600 animate-pulse text-xs py-2 h-auto" onClick={() => navigate(`/interview/${candidate.id}`)}>
-                 <Play className="w-3.5 h-3.5 mr-2" />
-                 Lobby
-               </Button>
-             ) : (
-               <Button 
-                 variant="secondary" 
-                 className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs py-2 h-auto flex items-center justify-center gap-2" 
-                 onClick={() => {
-                    setActiveInviteCandidate(candidate);
-                    const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
-                    setInviteEmailInput(emailVal);
                     setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
                     setInviteBodyInput(
 `Dear ${candidate.fullName},
@@ -5464,7 +5431,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
             exit={{ opacity: 0, scale: 0.95 }}
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md"
           >
-            <Card className="w-full max-w-2xl overflow-hidden shadow-2xl border-indigo-200">
+            <Card className="hidden w-full max-w-2xl overflow-hidden shadow-2xl border-indigo-200">
               <div className="bg-indigo-600 p-6 flex justify-between items-center text-white">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white/20 rounded-lg">
@@ -5943,7 +5910,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                               <Brain className="w-5 h-5 text-indigo-500" />
                               <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">5. Leadership & Communication</h4>
                             </div>
-                            <div className="flex gap-2">
+          
                               <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded tracking-wider">
                                 L: {leadershipScore}%
                               </span>
@@ -5983,7 +5950,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                           </span>
                         </div>
                         
-                        <div className="flex items-start gap-3">
+      
                           <div className={`mt-0.5 p-2 rounded-lg ${riskScore > 20 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
                             {riskScore > 20 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
                           </div>
