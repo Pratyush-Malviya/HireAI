@@ -16,12 +16,13 @@ service cloud.firestore {
     }
 
     function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      let path = /databases/$(database)/documents/users/$(request.auth.uid);
+      return exists(path) ? get(path).data : null;
     }
 
     function getUserOrg() {
       let data = getUserData();
-      return data.keys().hasAll(['organizationId']) ? data.organizationId : null;
+      return data != null && data.keys().hasAll(['organizationId']) ? data.organizationId : null;
     }
 
     function isInOrg(orgId) {
@@ -45,7 +46,7 @@ service cloud.firestore {
       return isSignedIn() && (
         isSuperAdmin() ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        (data.keys().hasAll(['role']) && (data.role == "admin" || data.role == "owner"))
+        (data != null && data.keys().hasAll(['role']) && (data.role == "admin" || data.role == "owner"))
       );
     }
 

@@ -619,6 +619,7 @@ function InterviewRoom() {
   
   const [faceapiLoaded, setFaceapiLoaded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'monitor' | 'transcript'>('monitor');
+  const [unauthorized, setUnauthorized] = useState(false);
 
   const noFaceTimeRef = useRef(0);
   const noiseTimeRef = useRef(0);
@@ -1281,7 +1282,8 @@ function InterviewRoom() {
         }
       }
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, `candidates/${candidateId}`);
+      console.warn("Firestore access check: Unauthorized or permission denied for candidate", candidateId, error);
+      setUnauthorized(true);
     });
 
     // Check for existing session
@@ -1294,7 +1296,8 @@ function InterviewRoom() {
         if (s.data().completed) setConcluded(true);
       }
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, `interviews (query by candidateId ${candidateId})`);
+      console.warn("Firestore access check: Unauthorized or permission denied for interviews query", candidateId, error);
+      setUnauthorized(true);
     });
 
     return () => { unsub(); unsubSession(); };
@@ -1477,6 +1480,41 @@ function InterviewRoom() {
       setLoading(false);
     }
   };
+
+  if (unauthorized) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-slate-950 p-6">
+        <div className="max-w-md w-full bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto border border-red-500/20">
+            <AlertTriangle className="w-8 h-8 text-red-500" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-lg font-black text-slate-100 uppercase tracking-wide">Access Denied</h3>
+            <p className="text-xs text-slate-400 leading-relaxed font-medium">
+              You are not authorized to access this interview lobby. Please ensure you are logged in with the correct email address associated with your invitation.
+            </p>
+          </div>
+          <div className="pt-2 flex flex-col gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="h-11 bg-indigo-650 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg transition-all cursor-pointer"
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={async () => {
+                await signOut(auth);
+                window.location.reload();
+              }}
+              className="h-11 bg-slate-800 hover:bg-slate-750 text-slate-300 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all cursor-pointer"
+            >
+              Sign Out / Switch Account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!candidate) return <div className="p-12 text-center text-slate-400">Loading Interview Room...</div>;
 
@@ -5097,7 +5135,9 @@ function CandidateDetail() {
       }
       setLoading(false);
     }, (error) => {
-      handleFirestoreError(error, OperationType.GET, `candidates/${candidateId}`);
+      console.warn("Firestore access check: Unauthorized or permission denied for candidate", candidateId, error);
+      notify('Unauthorized access to this candidate profile.', 'error');
+      navigate('/');
     });
     return unsub;
   }, [candidateId, profile]);
