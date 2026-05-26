@@ -2,7 +2,7 @@ import { LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
-import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
@@ -1481,7 +1481,7 @@ function InterviewRoom() {
   if (!candidate) return <div className="p-12 text-center text-slate-400">Loading Interview Room...</div>;
 
   return (
-    <div className="w-full py-6 px-4 min-h-[calc(100vh-140px)] flex flex-col gap-6 bg-slate-950 rounded-[2rem] text-slate-100 border border-slate-900 shadow-2xl relative overflow-hidden">
+    <div className="w-full min-h-screen flex flex-col gap-6 bg-slate-950 text-slate-100 relative overflow-hidden p-4 sm:p-6 md:p-8 rounded-none">
       
       {/* Proctoring Alert Notification Overlay */}
       <AnimatePresence>
@@ -1559,7 +1559,7 @@ function InterviewRoom() {
       )}
 
       {/* Main Workspace Frame */}
-      <div className="w-full flex flex-col lg:flex-row gap-6 h-[720px] lg:h-[calc(100vh-180px)] flex-1 overflow-hidden">
+      <div className="w-full flex flex-col lg:flex-row gap-6 h-[calc(100vh-160px)] lg:h-[calc(100vh-140px)] flex-1 overflow-hidden">
         
         {/* Sleek Tabbed Sidebar (Replaces cluttered multi-card sidebar) */}
         <div className="w-full lg:w-80 flex flex-col bg-slate-900/60 border border-slate-800/80 rounded-3xl overflow-hidden shrink-0 shadow-2xl relative">
@@ -2154,6 +2154,7 @@ function InterviewRoom() {
 }
 
 function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.ReactNode; user: any; isAdmin: boolean }) {
+  const location = useLocation();
   const [clearing, setClearing] = useState(false);
   const navigate = useNavigate();
   const { confirm, notify, signIn } = useNotification();
@@ -2260,6 +2261,17 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
   ];
 
   if (user) {
+    const isImmersive = location.pathname.includes('/interview/') || location.pathname.includes('/join/');
+    if (isImmersive) {
+      return (
+        <div className="flex h-screen w-screen bg-slate-950 font-sans text-slate-100 overflow-hidden">
+          <main className="flex-1 overflow-y-auto bg-slate-950 w-full h-full">
+            {children}
+          </main>
+        </div>
+      );
+    }
+
     return (
       <div className="flex h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 overflow-hidden">
                 {/* Sidebar */}
@@ -3664,7 +3676,7 @@ function JobDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Sidebar Filters */}
-        <aside className="lg:col-span-3">
+        <aside className="hidden lg:block lg:col-span-3">
           <div className="sticky top-24 space-y-10">
             <details className="lg:block group open:mb-8 lg:open:mb-0" open>
               <summary className="list-none cursor-pointer lg:cursor-default flex items-center justify-between lg:mb-4">
@@ -3718,7 +3730,7 @@ function JobDetail() {
         </aside>
 
         {/* Main Content */}
-        <div className="lg:col-span-9 space-y-8">
+        <div className="col-span-12 lg:col-span-9 space-y-8">
           {uploadProgress && (
             <div className="bg-slate-900 text-white rounded-xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800 animate-in fade-in-50 slide-in-from-top-4 duration-300">
               <div className="flex items-center gap-3 w-full md:w-auto">
