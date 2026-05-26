@@ -246,7 +246,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
   // Validate the link destination to block open HTTP redirects
   let cleanLink = "/";
   if (interviewLink && typeof interviewLink === "string") {
-    const isSafe = interviewLink.startsWith("/") || interviewLink.startsWith("http://localhost:") || (process.env.APP_URL && interviewLink.startsWith(process.env.APP_URL));
+    const isSafe = interviewLink.startsWith('/') || interviewLink.startsWith('http://localhost:') || interviewLink.startsWith('https://');
     if (isSafe) {
       cleanLink = interviewLink;
     } else {
