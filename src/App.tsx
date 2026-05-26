@@ -5392,6 +5392,9 @@ function CandidateDetail() {
                  className="flex-1 lg:flex-none text-xs py-2 h-auto"
                  disabled={sendingInvite}
                  onClick={() => {
+                   setActiveInviteCandidate(candidate);
+                   const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
+                   setInviteEmailInput(emailVal);
                    setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
                    setInviteBodyInput(`Dear ${candidate.fullName},
 
