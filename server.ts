@@ -232,6 +232,7 @@ app.post("/api/calendar/schedule", async (req, res) => {
 app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
   const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp, emailBody, subject: subjectOverride } = req.body;
+  console.log('🔎 send-invite request body:', req.body);
 
   // Validate email format strictly to protect against mailing injections or header manipulation
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -246,9 +247,10 @@ app.post("/api/candidate/send-invite", async (req, res) => {
   // Validate the link destination to block open HTTP redirects
   let cleanLink = "/";
   if (interviewLink && typeof interviewLink === "string") {
-    const isSafe = interviewLink.startsWith('/') || /^(https?:\/\/)/.test(interviewLink);
+    const trimmedLink = interviewLink.trim();
+    const isSafe = trimmedLink.startsWith('/') || /^(https?:\/\/)/i.test(trimmedLink);
     if (isSafe) {
-      cleanLink = interviewLink;
+      cleanLink = trimmedLink;
     } else {
       console.warn("Suspicious redirect link blocked during security checks:", interviewLink);
       return res.status(400).json({ success: false, error: "Security Exception: Invalid invite link destination" });
