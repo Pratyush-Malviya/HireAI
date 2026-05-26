@@ -2956,8 +2956,7 @@ function JobDetail() {
   // Verification & Custom Invite States
   const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
   const [inviteEmailInput, setInviteEmailInput] = useState('');
-  const [inviteSubjectInput, setInviteSubjectInput] = useState('');
-  const [inviteBodyInput, setInviteBodyInput] = useState('');
+
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Editable configuration states for the drawer:
@@ -4647,26 +4646,9 @@ function JobDetail() {
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Subject</label>
-                    <input
-                      type="text"
-                      className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white"
-                      placeholder="Enter email subject"
-                      value={inviteSubjectInput}
-                      onChange={(e) => setInviteSubjectInput(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Body Message</label>
-                    <textarea
-                      rows={6}
-                      className="w-full text-xs font-semibold px-3.5 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white resize-y font-sans leading-relaxed"
-                      placeholder="Enter invitation message details"
-                      value={inviteBodyInput}
-                      onChange={(e) => setInviteBodyInput(e.target.value)}
-                    />
+                  <div className="px-3.5 py-2.5 bg-indigo-50 border border-indigo-100 rounded-xl text-[11px] font-semibold text-indigo-600 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 20H5a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V18a2 2 0 01-2 2h-2" /></svg>
+                    A beautiful branded HTML invitation email will be sent automatically.
                   </div>
                 </div>
 
@@ -4677,7 +4659,7 @@ function JobDetail() {
                   disabled={!inviteEmailInput.trim() || invitingCandidateId === activeInviteCandidate.id}
                   onClick={() => {
                     if (activeInviteCandidate) {
-                      handleSendInviteForCandidate(activeInviteCandidate, inviteEmailInput, inviteSubjectInput, inviteBodyInput);
+                      handleSendInviteForCandidate(activeInviteCandidate, inviteEmailInput);
                     }
                   }}
                 >
@@ -4849,8 +4831,7 @@ function CandidateDetail() {
   // Verification & Custom Invite States
   const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
   const [inviteEmailInput, setInviteEmailInput] = useState('');
-  const [inviteSubjectInput, setInviteSubjectInput] = useState('');
-  const [inviteBodyInput, setInviteBodyInput] = useState('');
+
   const [showInviteModal, setShowInviteModal] = useState(false);
 
   // HireNow Enhanced Feature States
@@ -5395,19 +5376,6 @@ function CandidateDetail() {
                    setActiveInviteCandidate(candidate);
                    const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
                    setInviteEmailInput(emailVal);
-                   setInviteSubjectInput(`Interview Invitation: ${job?.title || 'Applied Position'} with HireNow`);
-                   setInviteBodyInput(`Dear ${candidate.fullName},
-
-Thank you for your interest in the ${job?.title || 'Applied Position'} role. We were highly impressed with your profile and would love to invite you to complete a virtual interview on our automated voice intelligence platform (HireNow).
-
-Platform: HireNow Automated Lobby
-Duration: ~15-20 minutes
-Requirements: Please ensure you are in a quiet room with a working microphone and camera.
-
-⚠️ CRITICAL PROCTORING RULES:
-1. Camera & Mic Obligatory: Your camera and microphone must remain active at all times. Do not turn off your camera feed.
-2. Strict Tab Switching Detection: Do not navigate away from the interview screen, switch tabs, or minimize the browser window. Doing so will trigger automatic system warnings.
-3. Quiet Testing Environment: Conduct the session in a quiet, isolated space. Noise anomalies, background voices, or multiple faces in the camera frame will be flagged.`);
                    setShowInviteModal(true);
                  }}
                >
@@ -7326,26 +7294,9 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Subject</label>
-                    <input
-                      type="text"
-                      className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white"
-                      placeholder="Enter email subject"
-                      value={inviteSubjectInput}
-                      onChange={(e) => setInviteSubjectInput(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Email Body Message</label>
-                    <textarea
-                      rows={6}
-                      className="w-full text-xs font-semibold px-3.5 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 transition-all shadow-sm focus:bg-white resize-y font-sans leading-relaxed"
-                      placeholder="Enter invitation message details"
-                      value={inviteBodyInput}
-                      onChange={(e) => setInviteBodyInput(e.target.value)}
-                    />
+                  <div className="px-3.5 py-2.5 bg-indigo-50 border border-indigo-100 rounded-xl text-[11px] font-semibold text-indigo-600 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 20H5a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V18a2 2 0 01-2 2h-2" /></svg>
+                    A beautiful branded HTML invitation email will be sent automatically.
                   </div>
                 </div>
 
@@ -7356,7 +7307,7 @@ Requirements: Please ensure you are in a quiet room with a working microphone an
                   disabled={!inviteEmailInput.trim() || sendingInvite}
                   onClick={() => {
                     if (activeInviteCandidate) {
-                      handleSendInvite(inviteEmailInput, inviteSubjectInput, inviteBodyInput);
+                      handleSendInvite(inviteEmailInput);
                     }
                   }}
                 >
