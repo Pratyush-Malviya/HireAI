@@ -636,6 +636,8 @@ function InterviewRoom() {
   const isSpeakingRef = useRef(false);
   const isThinkingRef = useRef(false);
   const isListeningRef = useRef(false);
+  const concludedRef = useRef(false);
+  const isKeyboardModeRef = useRef(false);
   // Prevents double-submission from both the silence-timeout and onend firing together
   const hasSubmittedRef = useRef(false);
 
@@ -653,6 +655,8 @@ function InterviewRoom() {
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
   useEffect(() => { isThinkingRef.current = isThinking; }, [isThinking]);
   useEffect(() => { isListeningRef.current = isListening; }, [isListening]);
+  useEffect(() => { concludedRef.current = concluded; }, [concluded]);
+  useEffect(() => { isKeyboardModeRef.current = isKeyboardMode; }, [isKeyboardMode]);
 
   // Pre-warm Speech Synthesis voices
   useEffect(() => {
@@ -1144,11 +1148,24 @@ function InterviewRoom() {
         }
         const textToSubmit = latestInputRef.current.trim();
         // Only submit here if the silence-timeout path didn't already submit
-        if (!isKeyboardMode && textToSubmit.length > 1 && !hasSubmittedRef.current) {
+        if (!isKeyboardModeRef.current && textToSubmit.length > 1 && !hasSubmittedRef.current) {
           hasSubmittedRef.current = true;
           latestInputRef.current = '';
           console.log("Speech ended naturally. Auto-submitting response:", textToSubmit);
           handleSend(textToSubmit);
+        } else if (!isKeyboardModeRef.current && !isSpeakingRef.current && !concludedRef.current) {
+          // Restart recognition if it ended without input (e.g. Chrome silent timeout) and we are still in voice mode
+          console.log("Speech recognition stopped on silence. Restarting automatically...");
+          setTimeout(() => {
+            try {
+              if (recognitionRef.current && !isSpeakingRef.current && !isListeningRef.current && !concludedRef.current && !isKeyboardModeRef.current) {
+                setIsListening(true);
+                recognitionRef.current.start();
+              }
+            } catch (e) {
+              console.warn("Auto-restart recognition failed:", e);
+            }
+          }, 300);
         }
       };
 
@@ -1436,7 +1453,6 @@ function InterviewRoom() {
       const aiMsg = { role: 'model' as const, text: aiResponse, timestamp: Date.now() };
       const finalMessages = [...newMessages, aiMsg];
       setMessages(finalMessages);
-      speak(aiResponse);
 
       // Ensure session exists (retry mechanism if race condition occurred)
       let currentSessionId = session?.id;
@@ -1455,13 +1471,21 @@ function InterviewRoom() {
         aiResponse.toLowerCase().includes('really enjoyed learning about your background') ||
         aiResponse.toLowerCase().includes('really helpful conversation. before i let you go') ||
         aiResponse.toLowerCase().includes('take care. we\'ll be in touch') ||
-        aiResponse.toLowerCase().includes('take care. we\'ll be in touch') ||
         aiResponse.toLowerCase().includes('we\'ll be in touch about next steps') ||
         aiResponse.toLowerCase().includes('we\'ll be in touch soon') ||
         aiResponse.toLowerCase().includes('we will be in touch');
 
       if (isClosingText) {
         setConcluded(true);
+        const thankYouMessage = aiResponse.toLowerCase().includes('thank') 
+          ? aiResponse 
+          : `${aiResponse} Thank you.`;
+        speak(thankYouMessage, () => {
+          setTimeout(() => {
+            window.close();
+          }, 1000);
+        });
+
         const feedback = await summarizeInterview(finalMessages.map(m => ({ role: m.role, text: m.text })));
         try {
           await updateDoc(doc(db, 'interviews', currentSessionId), { 
@@ -1480,6 +1504,7 @@ function InterviewRoom() {
         }
         notify('Interview completed and success summary generated!', 'success');
       } else {
+        speak(aiResponse);
         try {
           await updateDoc(doc(db, 'interviews', currentSessionId), { messages: finalMessages });
         } catch (error) {
