@@ -372,6 +372,14 @@ const ProfileContext = createContext<{
   organization: Organization | null;
   isAdmin: boolean;
   refreshProfile: () => Promise<void>;
+  whiteLabelBrandingName: string;
+  setWhiteLabelBrandingName: (name: string) => void;
+  whiteLabelMarkupFactor: number;
+  setWhiteLabelMarkupFactor: (factor: number) => void;
+  whiteLabelLogoUrl: string;
+  setWhiteLabelLogoUrl: (url: string) => void;
+  stripeModalOpen: boolean;
+  setStripeModalOpen: (open: boolean) => void;
 } | null>(null);
 
 function useNotification() {
@@ -2336,7 +2344,372 @@ function InterviewRoom() {
   );
 }
 
+
+// --- Simulated Stripe Checkout Modal ---
+function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }: { isOpen: boolean; onClose: () => void; defaultPlan?: string; onPaymentSuccess: (creditsAdded: number) => void }) {
+  const [selectedPlan, setSelectedPlan] = useState<string>(defaultPlan || 'credits-100');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [step, setStep] = useState<'checkout' | 'processing' | 'success'>('checkout');
+  const [processingLog, setProcessingLog] = useState<string[]>([]);
+  const { notify } = useNotification();
+
+  // Credit card details
+  const [cardName, setCardName] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+
+  const plans = {
+    'credits-50': { name: '50 Credits Pack', price: '$49', value: 50 },
+    'credits-100': { name: '100 Credits Pack', price: '$89', value: 100 },
+    'pro-monthly': { name: 'Agency Pro (Monthly Subscription)', price: '$1,299/mo', value: 1000 },
+  };
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cardName || !cardNumber || !cardExpiry || !cardCvc) {
+      notify('Please fill out all card details.', 'error');
+      return;
+    }
+
+    setIsProcessing(true);
+    setStep('processing');
+    setProcessingLog(["Initializing Stripe secure handshakes...", "Creating checkout session intent..."]);
+
+    let timeoutLogs = [
+      { text: "Tokenizing payment instruments with Stripe vault...", delay: 800 },
+      { text: "Routing payment to Stripe Gateway network...", delay: 1800 },
+      { text: "Verifying 3D-Secure authentication... OK", delay: 2800 },
+      { text: "Payment authorized successfully!", delay: 3800 },
+      { text: "Triggering Stripe webhook listener: payment_intent.succeeded...", delay: 4800 },
+      { text: "Provisioning credits in Firestore user database...", delay: 5600 }
+    ];
+
+    timeoutLogs.forEach((item) => {
+      setTimeout(() => {
+        setProcessingLog(prev => [...prev, item.text]);
+      }, item.delay);
+    });
+
+    setTimeout(() => {
+      const selected = plans[selectedPlan as keyof typeof plans];
+      onPaymentSuccess(selected.value);
+      setStep('success');
+      setIsProcessing(false);
+    }, 6200);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-300">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 shadow-sm">
+              <CreditCard className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="font-display font-light text-xl text-slate-900 tracking-tight">Stripe Secure Checkout</h3>
+          </div>
+          <button onClick={onClose} disabled={isProcessing} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-250">
+            <Plus className="w-5 h-5 rotate-45 text-slate-400" />
+          </button>
+        </div>
+
+        <div className="p-8 overflow-y-auto flex-1 space-y-6">
+          {step === 'checkout' && (
+            <form onSubmit={handlePay} className="space-y-6">
+              {/* Plan selector */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Choose Package / Plan</label>
+                <div className="grid grid-cols-1 gap-3">
+                  {(Object.keys(plans) as Array<keyof typeof plans>).map(planKey => (
+                    <button
+                      type="button"
+                      key={planKey}
+                      onClick={() => setSelectedPlan(planKey)}
+                      className={cn(
+                        "p-4 rounded-2xl border text-left flex justify-between items-center transition-all min-h-[44px]",
+                        selectedPlan === planKey ? "border-slate-900 bg-slate-50 ring-1 ring-slate-900" : "border-slate-200 hover:bg-slate-50"
+                      )}
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{plans[planKey].name}</p>
+                        <p className="text-[10px] text-slate-400">Credit addition or upgrade</p>
+                      </div>
+                      <span className="text-sm font-bold text-slate-900">{plans[planKey].price}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Secure details */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <ShieldCheck className="w-4 h-4 text-slate-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secure Payment Details</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Cardholder Name</label>
+                    <input
+                      required
+                      type="text"
+                      value={cardName}
+                      onChange={e => setCardName(e.target.value)}
+                      placeholder="Jane Doe"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Card Number</label>
+                    <input
+                      required
+                      type="text"
+                      value={cardNumber}
+                      onChange={e => setCardNumber(e.target.value.replace(/\D/g, '').substring(0, 16))}
+                      placeholder="4242 4242 4242 4242"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Expiration</label>
+                      <input
+                        required
+                        type="text"
+                        value={cardExpiry}
+                        onChange={e => setCardExpiry(e.target.value.substring(0, 5))}
+                        placeholder="MM/YY"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">CVC</label>
+                      <input
+                        required
+                        type="text"
+                        value={cardCvc}
+                        onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                        placeholder="123"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-3 rounded-full border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest min-h-[44px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 rounded-full bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold uppercase tracking-widest shadow-sm min-h-[44px]"
+                >
+                  Authorize Payment
+                </button>
+              </div>
+            </form>
+          )}
+
+          {step === 'processing' && (
+            <div className="flex flex-col items-center justify-center py-10 space-y-6">
+              <Loader2 className="w-12 h-12 text-slate-800 animate-spin" />
+              <div className="space-y-1 text-center">
+                <p className="text-sm font-semibold text-slate-900">Authorizing Card Transaction</p>
+                <p className="text-xs text-slate-400">Secured via Stripe Gateway Protocols</p>
+              </div>
+
+              {/* Console log display */}
+              <div className="w-full bg-slate-950 rounded-2xl p-4 font-mono text-[9px] text-slate-400 h-40 overflow-y-auto border border-slate-900 text-left space-y-1">
+                {processingLog.map((log, i) => (
+                  <div key={i} className={cn(log.includes('successfully') ? "text-emerald-400" : "text-slate-300")}>
+                    <span className="text-cyan-400">➜</span> {log}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 'success' && (
+            <div className="flex flex-col items-center text-center py-8 space-y-6">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-display font-light text-slate-900">Payment Completed!</h3>
+                <p className="text-slate-500 text-sm max-w-sm">
+                  Your payment was verified. {plans[selectedPlan as keyof typeof plans].name} has been provisioned to your workspace.
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="px-8 py-3 bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold uppercase tracking-widest rounded-full min-h-[44px]"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+// --- Public Shared Scorecard View ---
+function PublicSharedScorecard() {
+  const { candidateId } = useParams();
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [job, setJob] = useState<Job | null>(null);
+  const [interview, setInterview] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchShared = async () => {
+      if (!candidateId) return;
+      try {
+        const cSnap = await getDoc(doc(db, 'candidates', candidateId));
+        if (cSnap.exists()) {
+          const cData = { ...cSnap.data(), id: cSnap.id } as Candidate;
+          setCandidate(cData);
+          
+          if (cData.jobId) {
+            const jSnap = await getDoc(doc(db, 'jobs', cData.jobId));
+            if (jSnap.exists()) {
+              setJob({ ...jSnap.data(), id: jSnap.id } as Job);
+            }
+          }
+
+          const qInt = query(collection(db, 'interviews'), where('candidateId', '==', candidateId));
+          const iSnap = await getDocs(qInt);
+          if (!iSnap.empty) {
+            setInterview({ ...iSnap.docs[0].data(), id: iSnap.docs[0].id });
+          }
+        }
+      } catch (err) {
+        console.error("Shared scorecard fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchShared();
+  }, [candidateId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center flex-col gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-700" />
+        <span className="text-xs uppercase font-bold text-slate-400">Loading Shared Scorecard...</span>
+      </div>
+    );
+  }
+
+  if (!candidate) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center flex-col gap-4">
+        <AlertCircle className="w-12 h-12 text-red-500" />
+        <h2 className="text-xl font-display font-light text-slate-900">Scorecard Not Found</h2>
+        <p className="text-slate-500 text-sm">The requested talent evaluation profile does not exist or link expired.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-700 p-6 md:p-12 relative">
+      <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+        
+        {/* Header Branding */}
+        <div className="flex justify-between items-center border-b border-slate-200 pb-6">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center shadow-sm">
+              <Search className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-display font-light text-lg tracking-tight text-slate-900">HireAI Shared Talent Review</span>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-200/50 px-3 py-1 rounded-full">
+            Verified Evaluation
+          </span>
+        </div>
+
+        {/* Candidate Profile Details */}
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+            <div>
+              <h1 className="text-3xl font-display font-light text-slate-900 mb-1">{candidate.fullName}</h1>
+              <p className="text-slate-500 text-sm font-medium">{candidate.currentRole} Candidate</p>
+              {job && <p className="text-xs text-slate-400 mt-1">Applying for: {job.title}</p>}
+            </div>
+            
+            <div className="flex items-center gap-4 bg-slate-50 px-6 py-4 rounded-2xl border border-slate-200/60">
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Match Rating</p>
+                <p className="text-2xl font-display text-slate-900 mt-0.5">{candidate.scorecard?.compositeScore}%</p>
+              </div>
+              <div className="w-2 h-10 rounded-full bg-slate-200 overflow-hidden">
+                <div className="h-full bg-slate-900" style={{ height: `${candidate.scorecard?.compositeScore}%` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* D6 Scorecard */}
+          <div className="pt-6 border-t border-slate-100">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">D6 Assessment Scorecard</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {Object.entries(candidate.scorecard?.dimensions || {}).map(([key, value]: any) => {
+                if (key === 'redFlags' || key === 'signalDensity') return null;
+                return (
+                  <div key={key} className="bg-slate-50/50 border border-slate-200/40 p-4 rounded-2xl text-center">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
+                    <p className="text-lg font-display text-slate-900 font-medium mt-1">{value?.score}%</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Summary */}
+          {candidate.scorecard?.recommendation?.summary && (
+            <div className="pt-6 border-t border-slate-100 space-y-2">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Executive Summary</h3>
+              <p className="text-sm leading-relaxed text-slate-600 bg-slate-50/40 p-4 rounded-2xl border border-slate-200/30">{candidate.scorecard.recommendation.summary}</p>
+            </div>
+          )}
+
+          {/* Interview logs */}
+          {interview && (
+            <div className="pt-6 border-t border-slate-100 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Conversation Transcripts</h3>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-slate-200/50 rounded-2xl p-4 bg-slate-50/30">
+                {interview.messages?.map((msg: any, i: number) => (
+                  <div key={i} className="text-xs leading-relaxed">
+                    <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-slate-900")}>
+                      {msg.role === 'assistant' ? 'AI Screener' : 'Candidate'}
+                    </p>
+                    <p className="text-slate-600 mt-0.5">{msg.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.ReactNode; user: any; isAdmin: boolean }) {
+  const { whiteLabelBrandingName, setStripeModalOpen, profile } = useProfile();
   const location = useLocation();
   const [clearing, setClearing] = useState(false);
   const navigate = useNavigate();
@@ -2464,7 +2837,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                <div className={cn("bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm shrink-0", isSidebarCollapsed ? "w-10 h-10" : "w-8 h-8 mr-3")}>
                   <Search className="w-4 h-4 text-white" />
                </div>
-               {!isSidebarCollapsed && <span className="font-display font-black text-xl tracking-tighter uppercase">HireAI</span>}
+               {!isSidebarCollapsed && <span className="font-display font-light text-xl tracking-tight uppercase">{whiteLabelBrandingName || "HireAI"}</span>}
              </div>
              <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors">
                <Menu className="w-4 h-4" />
@@ -2491,6 +2864,28 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
              )}
           </nav>
           <div className={cn("p-4 border-t border-slate-800 flex flex-col shrink-0 gap-4", isSidebarCollapsed ? "items-center" : "")}>
+            {/* Workspace Credits Meter */}
+            {!isSidebarCollapsed && (
+              <div className="px-3 py-2 bg-slate-800/40 border border-slate-700/30 rounded-xl space-y-1.5 mx-2 text-[10px]">
+                <div className="flex justify-between font-semibold text-slate-300">
+                  <span>Balance</span>
+                  <span className="text-white">{(profile?.credits !== undefined ? profile.credits : 50)} Left</span>
+                </div>
+                <div className="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-cyan-400" 
+                    style={{ width: `${Math.min(100, (((profile?.credits !== undefined ? profile.credits : 50)) / 50) * 100)}%` }} 
+                  />
+                </div>
+                <button 
+                  onClick={() => setStripeModalOpen(true)}
+                  className="w-full py-1 bg-slate-900 hover:bg-slate-950 text-white rounded text-[8px] font-bold uppercase tracking-wider transition-colors border border-slate-750"
+                >
+                  Buy Credits
+                </button>
+              </div>
+            )}
+
             <div className={cn("flex items-center gap-3", isSidebarCollapsed ? "justify-center" : "px-2")}>
               <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-sm font-bold shrink-0">{user.email.charAt(0).toUpperCase()}</div>
               {!isSidebarCollapsed && (
@@ -2518,7 +2913,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                    <div className="bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm shrink-0 w-8 h-8 mr-2">
                       <Search className="w-4 h-4 text-white" />
                    </div>
-                   <span className="font-display font-black text-xl tracking-tighter uppercase text-slate-900">HireAI</span>
+                   <span className="font-display font-light text-xl tracking-tight uppercase text-slate-900">{whiteLabelBrandingName || "HireAI"}</span>
                 </Link>
              </div>
              <div className="flex items-center gap-4">
@@ -3159,11 +3554,12 @@ function JobDetail() {
     currentFileName?: string;
     startTime?: number;
     estimatedSecondsRemaining?: number;
-    files: { id?: string; name: string; status: 'queued' | 'processing' | 'success' | 'skipped' | 'error'; message?: string }[]
+    files: { id?: string; name: string; status: 'queued' | 'processing' | 'success' | 'skipped' | 'error'; message?: string }[];
+    logs?: string[];
   } | null>(null);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
-  const { profile, organization, isAdmin } = useProfile();
+  const { profile, organization, isAdmin, setStripeModalOpen, refreshProfile } = useProfile();
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [bulkInviting, setBulkInviting] = useState(false);
 
@@ -3401,8 +3797,27 @@ function JobDetail() {
             };
           });
 
+          // 1. Quota Validation Check
+          const currentCredits = profile?.credits !== undefined ? profile.credits : 50;
+          if (currentCredits <= 0) {
+            updateProgressState(fileId, 'skipped', 'Out of Credits');
+            notify("Out of credits! Please purchase more credits via Stripe in Admin Settings.", "error");
+            setStripeModalOpen(true);
+            return;
+          }
+
+          // Ingest telemetry logger
+          setUploadProgress(prev => ({
+            ...prev,
+            logs: [...(prev?.logs || []), `[${file.name}] Initializing file parser ingestion pipeline...`]
+          }));
+
           try {
             const text = await extractTextFromFile(file);
+            setUploadProgress(prev => ({
+              ...prev,
+              logs: [...(prev?.logs || []), `[${file.name}] Extraction complete. Running layout analysis & metadata mapping...`]
+            }));
             const resumeHash = await hashString(text);
 
             const dupQuery = query(
@@ -3431,6 +3846,18 @@ function JobDetail() {
               createdAt: serverTimestamp(),
               status: 'processed'
             });
+
+            // Deduct credits from user document
+            await updateDoc(doc(db, 'users', auth.currentUser!.uid), {
+              credits: currentCredits - 1
+            });
+            refreshProfile();
+
+            setUploadProgress(prev => ({
+              ...prev,
+              logs: [...(prev?.logs || []), `[${file.name}] D6 dimensions matched and credits updated. Ingestion completed. [Pass]`]
+            }));
+
             updateProgressState(fileId, 'success', 'Processed');
           } catch (err) {
             updateProgressState(fileId, 'error', 'Failed');
@@ -3937,59 +4364,72 @@ function JobDetail() {
         {/* Main Content */}
         <div className="col-span-12 lg:col-span-9 space-y-8">
           {uploadProgress && (
-            <div className="bg-slate-900 text-white rounded-xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800 animate-in fade-in-50 slide-in-from-top-4 duration-300">
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                  <Cpu className="w-4 h-4 text-indigo-400 animate-pulse" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs font-black tracking-widest uppercase text-indigo-400 leading-none">
-                      {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Batch Pipeline'}
-                    </p>
-                    <span className="text-[10px] font-mono font-bold bg-slate-800 px-1.5 py-0.5 rounded text-indigo-300 border border-indigo-500/20">
-                      {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
-                    </span>
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 animate-in fade-in-50 slide-in-from-top-4 duration-300">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                    <Cpu className="w-4 h-4 text-slate-800 animate-pulse" />
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1 truncate">
-                    {uploadProgress.current === uploadProgress.total ? 'Processing complete' : `Target: ${uploadProgress.currentFileName || 'Initializing...'}`}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-bold tracking-widest uppercase text-slate-850 leading-none">
+                        {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Ingestion Pipeline'}
+                      </p>
+                      <span className="text-[10px] font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 border border-slate-200/50">
+                        {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1.5 truncate">
+                      {uploadProgress.current === uploadProgress.total ? 'Processing complete' : `Target: ${uploadProgress.currentFileName || 'Initializing...'}`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress and indicators */}
+                <div className="flex items-center gap-4 w-full md:w-auto md:justify-end">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-500 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-700" /> {uploadProgress.success}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-500 shrink-0">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> {uploadProgress.skipped}
+                  </div>
+
+                  <div className="hidden sm:block w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                    <div 
+                      className="h-full bg-slate-900 transition-all duration-300"
+                      style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                    />
+                  </div>
+
+                  {uploadProgress.current === uploadProgress.total && !uploading ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="text-[9px] uppercase tracking-wider h-7 px-3 rounded-full"
+                      onClick={() => setUploadProgress(null)}
+                    >
+                      Dismiss
+                    </Button>
+                  ) : (
+                    uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && (
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                        <Clock className="w-3.5 h-3.5 animate-spin" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
+                      </span>
+                    )
+                  )}
                 </div>
               </div>
 
-              {/* Progress and indicators */}
-              <div className="flex items-center gap-4 w-full md:w-auto md:justify-end">
-                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> {uploadProgress.success}
+              {/* Dynamic Console Telemetry Logs */}
+              {uploadProgress.logs && uploadProgress.logs.length > 0 && (
+                <div className="bg-slate-950 rounded-xl p-4 font-mono text-[9px] text-slate-400 h-32 overflow-y-auto border border-slate-900 space-y-1 text-left">
+                  {uploadProgress.logs.map((log, i) => (
+                    <div key={i} className={cn(log.includes('[Pass]') ? "text-emerald-400" : "text-slate-300")}>
+                      <span className="text-cyan-400">➜</span> {log}
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> {uploadProgress.skipped}
-                </div>
-
-                <div className="hidden sm:block w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/30 shrink-0">
-                  <div 
-                    className="h-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)] transition-all duration-300"
-                    style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
-                  />
-                </div>
-
-                {uploadProgress.current === uploadProgress.total && !uploading ? (
-                  <Button 
-                    variant="brand" 
-                    size="sm"
-                    className="bg-indigo-600 hover:bg-indigo-700 font-extrabold text-[9px] uppercase tracking-wider h-7 px-3 rounded-lg text-white"
-                    onClick={() => setUploadProgress(null)}
-                  >
-                    Dismiss
-                  </Button>
-                ) : (
-                  uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && (
-                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
-                      <Clock className="w-3.5 h-3.5 animate-spin" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
-                    </span>
-                  )
-                )}
-              </div>
+              )}
             </div>
           )}
 
@@ -5029,7 +5469,7 @@ function parseD6Sections(markdown: string): {
 
 function CandidateDetail() {
   const { candidateId } = useParams();
-  const { profile, organization, isAdmin } = useProfile();
+  const { profile, organization, isAdmin, setStripeModalOpen, refreshProfile } = useProfile();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [job, setJob] = useState<Job | null>(null);
   const [interview, setInterview] = useState<any>(null);
@@ -5601,6 +6041,15 @@ function CandidateDetail() {
              <ExternalLink className="w-3.5 h-3.5 mr-1 sm:mr-2" />
              Link
            </Button>
+
+            <Button variant="outline" className="text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 border-emerald-100" onClick={() => {
+              const url = `${window.location.origin}/shared/${candidate.id}`;
+              navigator.clipboard.writeText(url);
+              notify('Shareable candidate profile link copied!', 'success');
+            }}>
+              <Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" />
+              Share Profile
+            </Button>
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:flex gap-2">
              {candidate.interviewStatus === 'completed' ? (
@@ -8731,7 +9180,7 @@ function OrgAdminPanel() {
 }
 
 function SuperAdminPanel() {
-  const { isAdmin } = useProfile();
+  const { isAdmin, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, setStripeModalOpen } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
@@ -9841,6 +10290,12 @@ function SuperAdminPanel() {
              >
                User Manual
              </button>
+                       <button 
+                onClick={() => setTab('white-label')}
+                className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
+              >
+                White-Label
+              </button>
           </div>
 
           {activeTab === 'overview' ? (
@@ -10143,7 +10598,7 @@ function SuperAdminPanel() {
                      </div>
                      <h3 className="font-black text-slate-900 uppercase">Stripe Integration</h3>
                      <p className="text-slate-500 text-xs font-medium max-w-[200px]">Enterprise billing and recurring subscriptions.</p>
-                     <Button variant="secondary" className="text-[10px] font-black uppercase px-6">Manage Stripe</Button>
+                     <Button variant="secondary" onClick={() => setStripeModalOpen(true)} className="text-[10px] font-black uppercase px-6">Manage Stripe</Button>
                   </Card>
                   <Card className="p-8 flex flex-col items-center justify-center text-center space-y-4">
                      <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
@@ -10242,6 +10697,69 @@ function SuperAdminPanel() {
                   </div>
                 </div>
               </Card>
+            </div>
+          ) : activeTab === 'white-label' ? (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+                <div>
+                  <h2 className="text-xl font-display font-light text-slate-900">White-Label & Reseller Portal</h2>
+                  <p className="text-slate-500 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Portal Identity</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Application Brand Name</label>
+                      <input 
+                        type="text" 
+                        value={whiteLabelBrandingName} 
+                        onChange={(e) => setWhiteLabelBrandingName(e.target.value)} 
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Custom Logo URL</label>
+                      <input 
+                        type="text" 
+                        value={whiteLabelLogoUrl} 
+                        onChange={(e) => setWhiteLabelLogoUrl(e.target.value)} 
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Reseller Markup Policies</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Markup Multiplier ({whiteLabelMarkupFactor}x)</label>
+                      <input 
+                        type="range" 
+                        min="1.0" 
+                        max="3.0" 
+                        step="0.05" 
+                        value={whiteLabelMarkupFactor} 
+                        onChange={(e) => setWhiteLabelMarkupFactor(parseFloat(e.target.value))} 
+                        className="mt-1 block w-full cursor-pointer"
+                      />
+                      <span className="text-[10px] text-slate-400 mt-1 block">Increases landing page pricing to multiply reseller margins.</span>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Billing Currency</label>
+                      <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-slate-900 focus:outline-none min-h-[44px]">
+                        <option>USD ($)</option>
+                        <option>EUR (€)</option>
+                        <option>GBP (£)</option>
+                        <option>INR (₹)</option>
+                      </select>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </div>
           ) : activeTab === 'manual' ? (
             <div className="space-y-6">
@@ -10766,6 +11284,7 @@ function Onboarding() {
 
 function LandingPage() {
   const { signIn, notify } = useNotification();
+  const { whiteLabelBrandingName, whiteLabelMarkupFactor } = useProfile();
   const [activeRole, setActiveRole] = useState<'ai-engineer' | 'cloud-architect' | 'security-lead'>('ai-engineer');
   const [simulationStep, setSimulationStep] = useState<number>(0);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
@@ -10917,7 +11436,7 @@ function LandingPage() {
                 <Search className="w-5 h-5 text-white" />
               </div>
               <span className="font-display text-2xl font-light tracking-tight text-slate-900">
-                HireAI
+                {whiteLabelBrandingName || "HireAI"}
               </span>
             </div>
             
@@ -11238,7 +11757,7 @@ function LandingPage() {
                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Starter</h3>
                  <p className="text-slate-400 text-xs mb-6">For boutique operations.</p>
                  <div className="mb-6">
-                   <span className="text-3xl font-display font-light text-slate-900">$499</span>
+                   <span className="text-3xl font-display font-light text-slate-900">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
                    <span className="text-slate-400 text-xs"> / month</span>
                  </div>
                  <ul className="space-y-3.5 mb-8 flex-1">
@@ -11263,7 +11782,7 @@ function LandingPage() {
                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Agency Pro</h3>
                  <p className="text-slate-400 text-xs mb-6">For scaling recruitment firms.</p>
                  <div className="mb-6">
-                   <span className="text-3xl font-display font-light text-slate-900">$1,299</span>
+                   <span className="text-3xl font-display font-light text-slate-900">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
                    <span className="text-slate-400 text-xs"> / month</span>
                  </div>
                  <ul className="space-y-3.5 mb-8 flex-1">
@@ -11334,6 +11853,32 @@ function LandingPage() {
 
 
 export default function App() {
+  // Global Reseller & White-Label Settings (Context Bindings)
+  const [whiteLabelBrandingName, setWhiteLabelBrandingName] = useState(() => localStorage.getItem('wl_brand_name') || 'HireAI');
+  const [whiteLabelMarkupFactor, setWhiteLabelMarkupFactor] = useState(() => parseFloat(localStorage.getItem('wl_markup') || '1.0'));
+  const [whiteLabelLogoUrl, setWhiteLabelLogoUrl] = useState(() => localStorage.getItem('wl_logo') || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80');
+  const [stripeModalOpen, setStripeModalOpen] = useState(false);
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem('wl_brand_name', whiteLabelBrandingName);
+    localStorage.setItem('wl_markup', whiteLabelMarkupFactor.toString());
+    localStorage.setItem('wl_logo', whiteLabelLogoUrl);
+  }, [whiteLabelBrandingName, whiteLabelMarkupFactor, whiteLabelLogoUrl]);
+
+  // Provider hooks
+  const handlePaymentSuccess = async (creditsAdded: number) => {
+    if (!auth.currentUser) return;
+    try {
+      const newCredits = (profile?.credits || 50) + creditsAdded;
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), { credits: newCredits });
+      notify(`Successfully purchased ${creditsAdded} credits via Stripe Checkout!`, 'success');
+      refreshProfile();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -11482,10 +12027,11 @@ export default function App() {
   return (
     <Router>
       <NotificationContext.Provider value={{ confirm, notify, signIn: handleSignIn }}>
-        <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile }}>
+        <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, stripeModalOpen, setStripeModalOpen }}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
               <Routes>
+                <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
                 <Route path="/join/:orgId" element={<Onboarding />} />
                 <Route path="/interview/:candidateId" element={<InterviewRoom />} />
                 {!profile ? (
@@ -11503,8 +12049,12 @@ export default function App() {
                 )}
               </Routes>
             ) : (
-              <LandingPage />
+              <Routes>
+                <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
+                <Route path="*" element={<LandingPage />} />
+              </Routes>
             )}
+          <StripeCheckoutModal isOpen={stripeModalOpen} onClose={() => setStripeModalOpen(false)} onPaymentSuccess={handlePaymentSuccess} />
           </Layout>
 
           {/* ... existing modals ... */}

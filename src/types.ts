@@ -40,6 +40,7 @@ export interface UserProfile {
   organizationId: string;
   role: 'owner' | 'admin' | 'recruiter';
   fullName: string;
+  credits?: number;
   createdAt: any;
 }
 
