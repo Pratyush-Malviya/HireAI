@@ -12409,9 +12409,13 @@ export default function App() {
         let retries = 3;
         while (retries > 0) {
           try {
-            // System Admins collection (Super Admins)
-            const adminDoc = await getDoc(doc(db, 'admins', u.uid));
-            if (adminDoc.exists()) {
+            // Super Admin check: Firestore collection + email bootstrap list
+            const ADMIN_EMAILS = ['malviya.pratyush26@gmail.com'];
+            const [adminDoc, adminQuerySnap] = await Promise.all([
+              getDoc(doc(db, 'admins', u.uid)),
+              getDocs(query(collection(db, 'admins'), where('email', '==', u.email)))
+            ]);
+            if (adminDoc.exists() || !adminQuerySnap.empty || ADMIN_EMAILS.includes(u.email || '')) {
               setIsAdmin(true);
             }
             
