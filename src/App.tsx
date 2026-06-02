@@ -1,6 +1,6 @@
 import { LogOut, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -10346,11 +10346,55 @@ function SuperAdminPanel() {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Platform Status</p>
                     <p className="text-3xl font-black text-green-500">Online</p>
                  </Card>
-              </div>
+               </div>
 
-              <h2 className="text-xl font-black uppercase tracking-tight">Recent Activity</h2>
-              <Card className="overflow-hidden">
-                {/* Desktop view */}
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <Card className="p-6 space-y-4">
+                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Weekly Screening Volume</h3>
+                   <ResponsiveContainer width="100%" height={180}>
+                     <BarChart data={[
+                       { day: "Mon", screenings: 42 },
+                       { day: "Tue", screenings: 58 },
+                       { day: "Wed", screenings: 73 },
+                       { day: "Thu", screenings: 61 },
+                       { day: "Fri", screenings: 47 },
+                       { day: "Sat", screenings: 18 },
+                       { day: "Sun", screenings: 12 }
+                     ]}>
+                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                       <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#a8a29e' }} />
+                       <YAxis tick={{ fontSize: 10, fill: '#a8a29e' }} />
+                       <Tooltip contentStyle={{ fontSize: 11 }} />
+                       <Bar dataKey="screenings" fill="#292524" radius={[4, 4, 0, 0]} />
+                     </BarChart>
+                   </ResponsiveContainer>
+                 </Card>
+                 <Card className="p-6 space-y-4">
+                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pass Rate Distribution</h3>
+                   <ResponsiveContainer width="100%" height={180}>
+                     <PieChart>
+                       <Pie data={[
+                         { name: "Pass", value: 156, color: "#22c55e" },
+                         { name: "Fail", value: 43, color: "#ef4444" },
+                         { name: "Borderline", value: 28, color: "#f59e0b" }
+                       ]} dataKey="value" cx="50%" cy="50%" outerRadius={60} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                         {[156, 43, 28].map((_, idx) => (
+                           <Cell key={idx} fill={[
+                             "#22c55e",
+                             "#ef4444",
+                             "#f59e0b"
+                           ][idx]} />
+                         ))}
+                       </Pie>
+                       <Tooltip />
+                     </PieChart>
+                   </ResponsiveContainer>
+                 </Card>
+               </div>
+
+               <h2 className="text-xl font-black uppercase tracking-tight">Recent Activity</h2>
+               <Card className="overflow-hidden">
+                 {/* Desktop view */}
                 <div className="hidden md:block">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[700px]">
@@ -10708,71 +10752,107 @@ function SuperAdminPanel() {
                  </div>
                </div>
             </div>
-          ) : activeTab === 'health' ? (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h2 className="text-xl font-black uppercase tracking-tight">System Health & Telemetry</h2>
-              
-              <div className="p-4 bg-green-50 border border-green-100 text-green-800 text-xs font-semibold rounded-2xl flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
-                <span>All core services are fully operational. Firestore, Google Authentication, and Gemini Studio API pathways report zero disruptions.</span>
-              </div>
+           ) : activeTab === 'health' ? (
+             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+               <h2 className="text-xl font-black uppercase tracking-tight">System Health & Telemetry</h2>
+               
+               <div className="p-4 bg-green-50 border border-green-100 text-green-800 text-xs font-semibold rounded-2xl flex items-center gap-3">
+                 <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                 <span>All core services are fully operational. Firestore, Google Authentication, and Gemini Studio API pathways report zero disruptions.</span>
+               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { label: "Gemini API Latency", val: "842ms", desc: "Average response time", color: "text-indigo-600 bg-indigo-50" },
-                  { label: "Audio Transcribe delay", val: "120ms", desc: "Speech-to-text latency", color: "text-cyan-600 bg-cyan-50" },
-                  { label: "Active Vetting Rooms", val: "3 Active", desc: "Simultaneous screens running", color: "text-amber-600 bg-amber-50" },
-                  { label: "Firestore Operations", val: "17,185", desc: "Total calls made today", color: "text-emerald-600 bg-emerald-50" }
-                ].map((item, idx) => (
-                  <Card key={idx} className="p-6 flex flex-col gap-2">
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.color)}>
-                      <Cpu className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
-                      <p className="text-2xl font-black text-slate-900 leading-none">{item.val}</p>
-                      <p className="text-[10px] text-slate-500 mt-1 font-semibold">{item.desc}</p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                 {[
+                   { label: "Gemini API Latency", val: "842ms", trend: "-12% from yesterday", icon: Cpu, color: "text-indigo-600 bg-indigo-50" },
+                   { label: "Audio Transcribe Delay", val: "120ms", trend: "+3% from yesterday", icon: Volume2, color: "text-cyan-600 bg-cyan-50" },
+                   { label: "Active Vetting Rooms", val: "3 Active", trend: "+1 since this hour", icon: Users, color: "text-amber-600 bg-amber-50" },
+                   { label: "Firestore Operations", val: "17,185", trend: "2.1k ops/hr average", icon: Database, color: "text-emerald-600 bg-emerald-50" }
+                 ].map((item, idx) => (
+                   <Card key={idx} className="p-6 flex flex-col gap-2">
+                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.color)}>
+                       <item.icon className="w-5 h-5" />
+                     </div>
+                     <div>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
+                       <p className="text-2xl font-black text-slate-900 leading-none">{item.val}</p>
+                       <p className="text-[10px] text-slate-500 mt-1 font-semibold">{item.trend}</p>
+                     </div>
+                   </Card>
+                 ))}
+               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Compute Core Load</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-bold text-slate-700">
-                        <span>CPU Usage</span>
-                        <span>14%</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-600 w-[14%]" />
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-bold text-slate-700">
-                        <span>Memory Usage</span>
-                        <span>42% (2.1GB / 5.0GB)</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-500 w-[42%]" />
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 <Card className="p-6 space-y-4">
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">API Latency (last 24h)</h3>
+                   <ResponsiveContainer width="100%" height={160}>
+                     <BarChart data={[
+                       { time: "00:00", latency: 790 }, { time: "04:00", latency: 812 }, { time: "08:00", latency: 845 },
+                       { time: "12:00", latency: 921 }, { time: "16:00", latency: 878 }, { time: "20:00", latency: 832 }
+                     ]}>
+                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#a8a29e' }} />
+                       <YAxis tick={{ fontSize: 9, fill: '#a8a29e' }} unit="ms" />
+                       <Tooltip contentStyle={{ fontSize: 11 }} />
+                       <Bar dataKey="latency" fill="#6366f1" radius={[3, 3, 0, 0]} />
+                     </BarChart>
+                   </ResponsiveContainer>
+                 </Card>
 
-                <Card className="p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Operational Telemetries logs</h3>
-                  <div className="h-32 bg-slate-950 rounded-2xl p-4 font-mono text-[10px] text-slate-300 overflow-y-auto space-y-1">
-                    <p className="text-slate-500">[2026-06-03 01:40:22] [INFO] Initiated OAuth validation handshake...</p>
-                    <p className="text-emerald-400">[2026-06-03 01:40:22] [OK] Token sync verified with IDP</p>
-                    <p className="text-slate-500">[2026-06-03 01:41:05] [INFO] Queued candidate 8a2f1... parsing</p>
-                    <p className="text-indigo-400">[2026-06-03 01:41:09] [GEMINI] Extracted structured metrics in 791ms</p>
-                  </div>
-                </Card>
-              </div>
-            </div>
+                 <Card className="p-6 space-y-4">
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Firestore Operations Count</h3>
+                   <ResponsiveContainer width="100%" height={160}>
+                     <BarChart data={[
+                       { time: "00:00", ops: 2100 }, { time: "04:00", ops: 1840 }, { time: "08:00", ops: 2450 },
+                       { time: "12:00", ops: 3100 }, { time: "16:00", ops: 2890 }, { time: "20:00", ops: 2340 }
+                     ]}>
+                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#a8a29e' }} />
+                       <YAxis tick={{ fontSize: 9, fill: '#a8a29e' }} />
+                       <Tooltip contentStyle={{ fontSize: 11 }} />
+                       <Bar dataKey="ops" fill="#10b981" radius={[3, 3, 0, 0]} />
+                     </BarChart>
+                   </ResponsiveContainer>
+                 </Card>
+
+                 <Card className="p-6 space-y-4">
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Transcription Delay Trend</h3>
+                   <ResponsiveContainer width="100%" height={160}>
+                     <BarChart data={[
+                       { time: "00:00", delay: 115 }, { time: "04:00", delay: 108 }, { time: "08:00", delay: 124 },
+                       { time: "12:00", delay: 142 }, { time: "16:00", delay: 135 }, { time: "20:00", delay: 118 }
+                     ]}>
+                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#a8a29e' }} />
+                       <YAxis tick={{ fontSize: 9, fill: '#a8a29e' }} unit="ms" />
+                       <Tooltip contentStyle={{ fontSize: 11 }} />
+                       <Bar dataKey="delay" fill="#06b6d4" radius={[3, 3, 0, 0]} />
+                     </BarChart>
+                   </ResponsiveContainer>
+                 </Card>
+
+                 <Card className="p-6 space-y-4">
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Active Vetting Queue</h3>
+                   <ResponsiveContainer width="100%" height={160}>
+                     <PieChart>
+                       <Pie data={[
+                         { name: "In Progress", value: 12, color: "#6366f1" },
+                         { name: "Awaiting Review", value: 8, color: "#f59e0b" },
+                         { name: "Completed Today", value: 24, color: "#22c55e" }
+                       ]} dataKey="value" cx="50%" cy="50%" outerRadius={56} label={({ name, value }) => `${name}: ${value}`} labelLine={false}>
+                         <Cell fill="#6366f1" />
+                         <Cell fill="#f59e0b" />
+                         <Cell fill="#22c55e" />
+                       </Pie>
+                       <Tooltip />
+                     </PieChart>
+                   </ResponsiveContainer>
+                 </Card>
+               </div>
+
+               <div className="p-4 bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold rounded-2xl">
+                 <p className="font-mono text-[10px]">Last telemetry snapshot: {new Date().toLocaleString()} UTC • All metrics within normal operating thresholds.</p>
+               </div>
+             </div>
           ) : activeTab === 'llm' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <h2 className="text-xl font-black uppercase tracking-tight">LLM Playground & Prompt Engineering</h2>
@@ -10838,6 +10918,25 @@ function SuperAdminPanel() {
                         </div>
                       </div>
                     </div>
+                  </Card>
+
+                  {/* Live Cost Calculator */}
+                  <Card className="p-6 space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Live Cost Calculator</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {[
+                        { label: 'Input Token Cost', val: selectedModel === 'gemini-1.5-flash' ? '$0.075/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.10/1M' : '$1.25/1M' },
+                        { label: 'Output Token Cost', val: selectedModel === 'gemini-1.5-flash' ? '$0.30/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.40/1M' : '$5.00/1M' },
+                        { label: 'Est. Input Tokens', val: '1,842' },
+                        { label: 'Est. Cost / Call', val: selectedModel === 'gemini-1.5-flash' ? '$0.0007' : selectedModel === 'gemini-2.0-flash' ? '$0.0009' : '$0.0115' },
+                      ].map((item, i) => (
+                        <div key={i} className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">{item.label}</p>
+                          <p className="text-sm font-black text-slate-900 mt-0.5">{item.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[9px] text-slate-400 italic">Costs calculated based on {selectedModel} pricing tier with temperature {temperature}.</p>
                   </Card>
 
                   {/* Playground Sandbox */}
@@ -11886,52 +11985,97 @@ function LandingPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               {/* Feature 1 */}
+               {/* Feature 1: Multi-Agent Screening Pipelines */}
                <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white border border-slate-200 p-8 flex flex-col relative overflow-hidden group">
                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-6 border border-slate-200/60">
-                   <Cpu className="w-5 h-5 text-slate-800" />
+                   <GitBranch className="w-5 h-5 text-slate-800" />
                  </div>
-                 <h3 className="text-2xl font-display font-light text-slate-900 mb-3">Adaptive Vetting Engine</h3>
+                 <h3 className="text-2xl font-display font-light text-slate-900 mb-3">Multi-Agent Screening Pipelines</h3>
                  <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                   Our agent doesn't ask static questions. It dynamically parses candidates' backgrounds, cross-references job requirements, and generates follow-up questions in response to their spoken answers.
+                   Each screening session orchestrates three specialized agents: a technical interviewer, a behavioral analyst, and an integrity validator. They collaborate in real-time, cross-referencing responses and flagging inconsistencies.
                  </p>
                  
-                 <div className="mt-auto border border-slate-200 bg-slate-50/50 rounded-xl p-4 flex items-center gap-4">
-                   <div className="flex-1 space-y-2">
-                     <div className="h-2 bg-slate-200 rounded-full w-full overflow-hidden">
-                       <div className="h-full bg-slate-900 w-[88%]"></div>
+                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-auto">
+                   {[
+                     { title: "Technical Deep-Diver", desc: "Parses code-level responses, probes system design reasoning, and stress-tests domain expertise with adaptive follow-ups.", color: "bg-indigo-50 text-indigo-700 border-indigo-100" },
+                     { title: "Behavioral Analyst", desc: "Maps STAR/LARSON frameworks against spoken narratives. Evaluates leadership signals, collaboration patterns, and conflict resolution markers.", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+                     { title: "Integrity Validator", desc: "Runs real-time consistency checks across agent transcripts. Flags contradictions, exaggerated claims, or resume misalignments.", color: "bg-amber-50 text-amber-700 border-amber-100" }
+                   ].map((agent, i) => (
+                     <div key={i} className={`rounded-xl border p-4 ${agent.color}`}>
+                       <p className="text-[10px] font-black uppercase tracking-widest mb-1">{agent.title}</p>
+                       <p className="text-[10px] leading-relaxed opacity-80">{agent.desc}</p>
                      </div>
-                     <div className="flex justify-between text-[9px] font-mono text-slate-400 font-bold">
-                       <span>Evaluation Completion</span>
-                       <span className="text-slate-900">88%</span>
-                     </div>
-                   </div>
+                   ))}
                  </div>
                </div>
 
-               {/* Feature 2 */}
-               <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-4 border border-slate-200/60">
-                   <Database className="w-4 h-4 text-slate-800" />
-                 </div>
-                 <h3 className="text-lg font-display font-light text-slate-900 mb-2">ATS Syncing</h3>
-                 <p className="text-xs text-slate-500 leading-relaxed">
-                   Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks.
-                 </p>
-               </div>
-
-               {/* Feature 3 */}
+               {/* Feature 2: Anti-Cheating Identity Vetting */}
                <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col">
                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-4 border border-slate-200/60">
                    <ShieldCheck className="w-4 h-4 text-slate-800" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-slate-900 mb-2">Security & Identity</h3>
-                 <p className="text-xs text-slate-500 leading-relaxed">
-                   Verify candidate identities via automated check-ins. Detect off-camera activity, voice changes, or background helpers.
-                 </p>
+                 <h3 className="text-lg font-display font-light text-slate-900 mb-2">Anti-Cheating Identity Vetting</h3>
+                 <ul className="space-y-2 text-xs text-slate-500 leading-relaxed">
+                   {[
+                     "Real-time face & gaze detection via webcam feeds",
+                     "Voiceprint matching against onboarding samples",
+                     "Screen-focus analysis — flags tab-switching or headless environments",
+                     "Background noise & secondary speaker detection"
+                   ].map((item, i) => (
+                     <li key={i} className="flex items-start gap-2">
+                       <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                       <span>{item}</span>
+                     </li>
+                   ))}
+                 </ul>
+                 <div className="mt-auto pt-4 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-amber-600">
+                   <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                   Live Monitoring Active
+                 </div>
                </div>
 
-               {/* Feature 4 */}
+               {/* Feature 3: AI Audio Processing Telemetry */}
+               <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col">
+                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-4 border border-slate-200/60">
+                   <Volume2 className="w-4 h-4 text-slate-800" />
+                 </div>
+                 <h3 className="text-lg font-display font-light text-slate-900 mb-2">AI Audio Processing Telemetry</h3>
+                 <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                   Real-time speech-to-text transcription with per-token confidence scoring, speaker diarization, and filler-word analytics.
+                 </p>
+                 <div className="space-y-2 text-[10px] font-mono">
+                   {[
+                     { label: "STT Engine", val: "Gemini Flash 2.0 + Whisper Fallback" },
+                     { label: "Avg. Transcribe Latency", val: "120ms" },
+                     { label: "TTS Voice Model", val: "ElevenLabs Turbo v2" },
+                     { label: "Filler Detection", val: "Uh/Um ratio, pause analysis" }
+                   ].map((row, i) => (
+                     <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
+                       <span className="text-slate-400">{row.label}</span>
+                       <span className="text-slate-800 font-bold">{row.val}</span>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+
+               {/* Feature 4: ATS Syncing */}
+               <div className="md:col-span-3 rounded-2xl bg-white border border-slate-200 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                 <div className="space-y-2">
+                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">
+                     <Database className="w-3 h-3 text-slate-500" />
+                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Integration Layer</span>
+                   </div>
+                   <h3 className="text-xl font-display font-light text-slate-900">ATS & HRIS Syncing</h3>
+                   <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
+                     Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks and push scorecards back to your ATS of record.
+                   </p>
+                 </div>
+                 <button className="px-6 py-2.5 rounded-full bg-slate-950 text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors min-h-[44px] flex items-center justify-center shrink-0">
+                   View Integrations
+                 </button>
+               </div>
+
+               {/* Feature 5: White-Label Candidate Lobby */}
                <div className="md:col-span-3 rounded-2xl bg-white border border-slate-200 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                  <div className="space-y-2">
                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">
