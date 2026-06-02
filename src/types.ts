@@ -188,7 +188,7 @@ export interface Candidate {
     industry_visibility_score?: number;
     verified_profiles?: { name: string; url: string; status: 'Verified' | 'Unverified' }[];
   };
-
+  aiQuotaExceeded?: boolean;
 }
 
 export interface AdminUser {
