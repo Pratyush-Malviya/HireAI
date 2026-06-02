@@ -11808,22 +11808,22 @@ function LandingPage() {
         <main className="flex-1">
           
           {/* Hero Section */}
-          <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/80 mb-8 shadow-xs">
+          <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/80 mb-10 shadow-xs">
               <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Autonomous Talent Lobby Live</span>
             </div>
             
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-light text-slate-900 tracking-tight leading-[1.1] mb-8 max-w-5xl mx-auto">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-light text-slate-900 tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto">
               Scale your recruitment pipeline with <br className="hidden md:block"/>
               <span className="text-slate-400">Autonomous AI Interviews.</span>
             </h1>
             
-            <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-500 max-w-2xl mx-auto mb-12 leading-relaxed">
               Stop wasting builder and recruiter hours on initial screens. Deploy custom conversational AI agents to conduct rigorous, multi-dimensional screening interviews at absolute scale.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto px-4">
+            <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto px-4">
               <button 
                 onClick={signIn} 
                 className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
@@ -11840,8 +11840,8 @@ function LandingPage() {
           </section>
 
           {/* Trusted By Brand Ticker */}
-          <section className="py-10 border-y border-slate-200/60 bg-white/40 overflow-hidden backdrop-blur-xs">
-            <p className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6">Trusted by Elite Engineering Teams</p>
+          <section className="py-14 border-y border-slate-200/60 bg-white/40 overflow-hidden backdrop-blur-xs">
+            <p className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8">Trusted by Elite Engineering Teams</p>
             <div className="flex w-full overflow-hidden">
               <div className="flex animate-[marquee_35s_linear_infinite] min-w-full items-center justify-around gap-12 opacity-60">
                 {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
@@ -11852,10 +11852,10 @@ function LandingPage() {
           </section>
 
           {/* Interactive Simulation Console */}
-          <section id="simulation" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-slate-900 mb-3">See the AI in Action.</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-sm">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
+          <section id="simulation" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-light text-slate-900 mb-4">See the AI in Action.</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto text-sm leading-relaxed">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-5xl mx-auto">
@@ -11978,32 +11978,32 @@ function LandingPage() {
           </section>
 
           {/* Bento Grid Features */}
-          <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-slate-900 mb-3">Enterprise Vetting.</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-sm">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
+          <section id="features" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+             <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-display font-light text-slate-900 mb-4">Enterprise Vetting.</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                {/* Feature 1: Multi-Agent Screening Pipelines */}
-               <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white border border-slate-200 p-8 flex flex-col relative overflow-hidden group">
+               <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white border border-slate-200 p-10 flex flex-col relative overflow-hidden group">
                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-6 border border-slate-200/60">
                    <GitBranch className="w-5 h-5 text-slate-800" />
                  </div>
-                 <h3 className="text-2xl font-display font-light text-slate-900 mb-3">Multi-Agent Screening Pipelines</h3>
-                 <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                 <h3 className="text-2xl font-display font-light text-slate-900 mb-4">Multi-Agent Screening Pipelines</h3>
+                 <p className="text-slate-500 text-sm leading-relaxed mb-8">
                    Each screening session orchestrates three specialized agents: a technical interviewer, a behavioral analyst, and an integrity validator. They collaborate in real-time, cross-referencing responses and flagging inconsistencies.
                  </p>
                  
-                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-auto">
+                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-auto">
                    {[
                      { title: "Technical Deep-Diver", desc: "Parses code-level responses, probes system design reasoning, and stress-tests domain expertise with adaptive follow-ups.", color: "bg-indigo-50 text-indigo-700 border-indigo-100" },
                      { title: "Behavioral Analyst", desc: "Maps STAR/LARSON frameworks against spoken narratives. Evaluates leadership signals, collaboration patterns, and conflict resolution markers.", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
                      { title: "Integrity Validator", desc: "Runs real-time consistency checks across agent transcripts. Flags contradictions, exaggerated claims, or resume misalignments.", color: "bg-amber-50 text-amber-700 border-amber-100" }
                    ].map((agent, i) => (
-                     <div key={i} className={`rounded-xl border p-4 ${agent.color}`}>
-                       <p className="text-[10px] font-black uppercase tracking-widest mb-1">{agent.title}</p>
-                       <p className="text-[10px] leading-relaxed opacity-80">{agent.desc}</p>
+                     <div key={i} className={`rounded-xl border p-5 ${agent.color}`}>
+                       <p className="text-[10px] font-black uppercase tracking-widest mb-2">{agent.title}</p>
+                       <p className="text-[11px] leading-relaxed opacity-80">{agent.desc}</p>
                      </div>
                    ))}
                  </div>
@@ -12011,24 +12011,24 @@ function LandingPage() {
 
                {/* Feature 2: Anti-Cheating Identity Vetting */}
                <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-4 border border-slate-200/60">
+                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-5 border border-slate-200/60">
                    <ShieldCheck className="w-4 h-4 text-slate-800" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-slate-900 mb-2">Anti-Cheating Identity Vetting</h3>
-                 <ul className="space-y-2 text-xs text-slate-500 leading-relaxed">
+                 <h3 className="text-lg font-display font-light text-slate-900 mb-3">Anti-Cheating Identity Vetting</h3>
+                 <ul className="space-y-3 text-xs text-slate-500 leading-relaxed">
                    {[
                      "Real-time face & gaze detection via webcam feeds",
                      "Voiceprint matching against onboarding samples",
                      "Screen-focus analysis — flags tab-switching or headless environments",
                      "Background noise & secondary speaker detection"
                    ].map((item, i) => (
-                     <li key={i} className="flex items-start gap-2">
+                     <li key={i} className="flex items-start gap-2.5">
                        <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
                        <span>{item}</span>
                      </li>
                    ))}
                  </ul>
-                 <div className="mt-auto pt-4 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-amber-600">
+                 <div className="mt-auto pt-5 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-amber-600">
                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                    Live Monitoring Active
                  </div>
@@ -12036,21 +12036,21 @@ function LandingPage() {
 
                {/* Feature 3: AI Audio Processing Telemetry */}
                <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-4 border border-slate-200/60">
+                 <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-5 border border-slate-200/60">
                    <Volume2 className="w-4 h-4 text-slate-800" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-slate-900 mb-2">AI Audio Processing Telemetry</h3>
-                 <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                 <h3 className="text-lg font-display font-light text-slate-900 mb-3">AI Audio Processing Telemetry</h3>
+                 <p className="text-xs text-slate-500 leading-relaxed mb-5">
                    Real-time speech-to-text transcription with per-token confidence scoring, speaker diarization, and filler-word analytics.
                  </p>
-                 <div className="space-y-2 text-[10px] font-mono">
+                 <div className="space-y-3 text-[10px] font-mono">
                    {[
                      { label: "STT Engine", val: "Gemini Flash 2.0 + Whisper Fallback" },
                      { label: "Avg. Transcribe Latency", val: "120ms" },
                      { label: "TTS Voice Model", val: "ElevenLabs Turbo v2" },
                      { label: "Filler Detection", val: "Uh/Um ratio, pause analysis" }
                    ].map((row, i) => (
-                     <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-1.5 last:border-0">
+                     <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                        <span className="text-slate-400">{row.label}</span>
                        <span className="text-slate-800 font-bold">{row.val}</span>
                      </div>
@@ -12059,140 +12059,140 @@ function LandingPage() {
                </div>
 
                {/* Feature 4: ATS Syncing */}
-               <div className="md:col-span-3 rounded-2xl bg-white border border-slate-200 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                 <div className="space-y-2">
+               <div className="md:col-span-3 rounded-2xl bg-white border border-slate-200 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+                 <div className="space-y-3">
                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">
                      <Database className="w-3 h-3 text-slate-500" />
                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Integration Layer</span>
                    </div>
                    <h3 className="text-xl font-display font-light text-slate-900">ATS & HRIS Syncing</h3>
-                   <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
+                   <p className="text-sm text-slate-500 max-w-2xl leading-relaxed">
                      Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks and push scorecards back to your ATS of record.
                    </p>
                  </div>
-                 <button className="px-6 py-2.5 rounded-full bg-slate-950 text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors min-h-[44px] flex items-center justify-center shrink-0">
+                 <button className="px-8 py-3 rounded-full bg-slate-950 text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors min-h-[44px] flex items-center justify-center shrink-0">
                    View Integrations
                  </button>
                </div>
 
                {/* Feature 5: White-Label Candidate Lobby */}
-               <div className="md:col-span-3 rounded-2xl bg-white border border-slate-200 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                 <div className="space-y-2">
+               <div className="md:col-span-3 rounded-2xl bg-white border border-slate-200 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+                 <div className="space-y-3">
                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">
                      <Globe className="w-3 h-3 text-slate-500" />
                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Reseller & Tenant API</span>
                    </div>
                    <h3 className="text-xl font-display font-light text-slate-900">White-Label Candidate Lobby</h3>
-                   <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
+                   <p className="text-sm text-slate-500 max-w-2xl leading-relaxed">
                      Deploy under your own domain with fully custom layout components, logo parameters, emails, and interview invitations for corporate client lobbies.
                    </p>
                  </div>
                  <button 
                    onClick={signIn} 
-                   className="px-6 py-2.5 rounded-full bg-slate-950 text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors min-h-[44px] flex items-center justify-center"
+                   className="px-8 py-3 rounded-full bg-slate-950 text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors min-h-[44px] flex items-center justify-center"
                  >
                    Explore API
                  </button>
                </div>
-            </div>
-          </section>
+             </div>
+           </section>
 
           {/* Pricing Section */}
-          <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
-             <div className="text-center mb-16">
+          <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
+             <div className="text-center mb-20">
                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-4">
                  <CreditCard className="w-3.5 h-3.5 text-slate-500" />
                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Flexible Licensing</span>
                </div>
                <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Transparent Pricing.</h2>
-               <p className="text-slate-500 max-w-xl mx-auto text-sm">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
+               <p className="text-slate-500 max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-               {/* Starter Plan */}
-               <div className="rounded-3xl bg-white border border-slate-200/80 p-8 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
-                 <h3 className="text-xl font-display text-slate-900 mb-1">Starter</h3>
-                 <p className="text-slate-400 text-xs mb-6">Perfect for small boutique recruitment agencies.</p>
-                 <div className="mb-6 flex items-baseline gap-1">
-                   <span className="text-4xl font-display text-slate-900">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
-                   <span className="text-slate-400 text-xs">/month</span>
-                 </div>
-                 <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100 pt-6">
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
-                 </ul>
-                 <button 
-                   onClick={signIn} 
-                   className="w-full py-3 rounded-full border border-slate-305 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
-                 >
-                   Start Free Trial
-                 </button>
-               </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+                {/* Starter Plan */}
+                <div className="rounded-3xl bg-white border border-slate-200/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                  <h3 className="text-xl font-display text-slate-900 mb-2">Starter</h3>
+                  <p className="text-slate-400 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
+                  <div className="mb-8 flex items-baseline gap-1">
+                    <span className="text-4xl font-display text-slate-900">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
+                    <span className="text-slate-400 text-xs">/month</span>
+                  </div>
+                  <ul className="space-y-4 mb-10 flex-1 border-t border-slate-100 pt-6">
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
+                  </ul>
+                  <button 
+                    onClick={signIn} 
+                    className="w-full py-3.5 rounded-full border border-slate-305 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                  >
+                    Start Free Trial
+                  </button>
+                </div>
 
-               {/* Agency Pro Plan */}
-               <div className="rounded-3xl bg-white border-2 border-slate-900 p-8 flex flex-col relative shadow-lg transform md:-translate-y-4 hover:shadow-xl transition-all duration-300">
-                 <div className="absolute top-4 right-4 bg-slate-950 text-white text-[8px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                   Recommended
-                 </div>
-                 
-                 <h3 className="text-xl font-display text-slate-900 mb-1">Agency Pro</h3>
-                 <p className="text-slate-400 text-xs mb-6">For scaling HR departments and staffing firms.</p>
-                 <div className="mb-6 flex items-baseline gap-1">
-                   <span className="text-4xl font-display text-slate-900">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
-                   <span className="text-slate-400 text-xs">/month</span>
-                 </div>
-                 <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100 pt-6">
-                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
-                 </ul>
-                 <button 
-                   onClick={signIn} 
-                   className="w-full py-3 rounded-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
-                 >
-                   Deploy Pro Now
-                 </button>
-               </div>
+                {/* Agency Pro Plan */}
+                <div className="rounded-3xl bg-white border-2 border-slate-900 p-10 flex flex-col relative shadow-lg transform md:-translate-y-4 hover:shadow-xl transition-all duration-300">
+                  <div className="absolute top-5 right-5 bg-slate-950 text-white text-[8px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                    Recommended
+                  </div>
+                  
+                  <h3 className="text-xl font-display text-slate-900 mb-2">Agency Pro</h3>
+                  <p className="text-slate-400 text-sm mb-8">For scaling HR departments and staffing firms.</p>
+                  <div className="mb-8 flex items-baseline gap-1">
+                    <span className="text-4xl font-display text-slate-900">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
+                    <span className="text-slate-400 text-xs">/month</span>
+                  </div>
+                  <ul className="space-y-4 mb-10 flex-1 border-t border-slate-100 pt-6">
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
+                  </ul>
+                  <button 
+                    onClick={signIn} 
+                    className="w-full py-3.5 rounded-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
+                  >
+                    Deploy Pro Now
+                  </button>
+                </div>
 
-               {/* Enterprise Plan */}
-               <div className="rounded-3xl bg-white border border-slate-200/80 p-8 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
-                 <h3 className="text-xl font-display text-slate-900 mb-1">Enterprise</h3>
-                 <p className="text-slate-400 text-xs mb-6">For global corporations needing high customizability.</p>
-                 <div className="mb-6 flex items-baseline gap-1">
-                   <span className="text-4xl font-display text-slate-900">Custom</span>
-                 </div>
-                 <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100 pt-6">
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
-                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
-                 </ul>
-                 <button 
-                   onClick={signIn} 
-                   className="w-full py-3 rounded-full border border-slate-350 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
-                 >
-                   Request Demo
-                 </button>
-               </div>
-             </div>
-          </section>
+                {/* Enterprise Plan */}
+                <div className="rounded-3xl bg-white border border-slate-200/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                  <h3 className="text-xl font-display text-slate-900 mb-2">Enterprise</h3>
+                  <p className="text-slate-400 text-sm mb-8">For global corporations needing high customizability.</p>
+                  <div className="mb-8 flex items-baseline gap-1">
+                    <span className="text-4xl font-display text-slate-900">Custom</span>
+                  </div>
+                  <ul className="space-y-4 mb-10 flex-1 border-t border-slate-100 pt-6">
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
+                  </ul>
+                  <button 
+                    onClick={signIn} 
+                    className="w-full py-3.5 rounded-full border border-slate-350 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                  >
+                    Request Demo
+                  </button>
+                </div>
+              </div>
+           </section>
 
           {/* Testimonials Section */}
-          <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60 bg-white/10 backdrop-blur-xs">
-            <div className="text-center mb-16">
+          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60 bg-white/10 backdrop-blur-xs">
+            <div className="text-center mb-20">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-4">
                 <Star className="w-3.5 h-3.5 text-slate-500" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Customer Success</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Endorsed by Top Builders.</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-sm">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
+              <p className="text-slate-500 max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {[
                 {
                   quote: "HireAI completely restructured our initial candidate funnel. We went from spending 12 hours a week conducting introductory technical screen calls to zero hours, and candidate quality has actually improved.",
@@ -12210,9 +12210,9 @@ function LandingPage() {
                   role: "Founder, Infinity Healthcare Corp"
                 }
               ].map((t, index) => (
-                <div key={index} className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
-                  <p className="text-slate-600 text-xs italic leading-relaxed mb-6">"{t.quote}"</p>
-                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4">
+                <div key={index} className="bg-white border border-slate-200/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
+                  <p className="text-slate-600 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
+                  <div className="flex items-center gap-4 border-t border-slate-100 pt-5">
                     <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
                       {t.author.charAt(0)}
                     </div>
@@ -12227,17 +12227,17 @@ function LandingPage() {
           </section>
 
           {/* FAQ Accordion Section */}
-          <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-slate-200/60">
-            <div className="text-center mb-16">
+          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-slate-200/60">
+            <div className="text-center mb-20">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-4">
                 <Info className="w-3.5 h-3.5 text-slate-500" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Frequently Asked Questions</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Got Questions?</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-sm">Everything you need to know about the autonomous talent screening system.</p>
+              <p className="text-slate-500 max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               {[
                 {
                   q: "How does the AI verify the candidate's real identity?",
@@ -12285,16 +12285,16 @@ function LandingPage() {
           </section>
 
           {/* Footer CTA */}
-          <section className="py-24 px-4 text-center border-t border-slate-200 relative overflow-hidden bg-slate-100/40">
-            <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">
+          <section className="py-32 px-4 text-center border-t border-slate-200 relative overflow-hidden bg-slate-100/40">
+            <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-6">
               Upgrade your screening process.
             </h2>
-            <p className="text-slate-500 text-sm sm:text-base mb-8 max-w-xl mx-auto">
+            <p className="text-slate-500 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
               Join elite teams deploying autonomous interview lobbies. Verify and screen talent faster.
             </p>
             <button 
               onClick={signIn} 
-              className="px-10 py-3.5 rounded-full bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-xs min-h-[44px]"
+              className="px-12 py-4 rounded-full bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-xs min-h-[44px]"
             >
               Start Vetting Today
             </button>
@@ -12303,7 +12303,7 @@ function LandingPage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-8 border-t border-slate-200 bg-white text-center">
+        <footer className="py-12 border-t border-slate-200 bg-white text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             © 2026 HireAI Inc. All rights reserved.
           </p>
