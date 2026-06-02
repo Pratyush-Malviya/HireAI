@@ -1,4 +1,4 @@
-import { LogOut } from 'lucide-react';
+import { LogOut, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
@@ -380,6 +380,8 @@ const ProfileContext = createContext<{
   setWhiteLabelLogoUrl: (url: string) => void;
   stripeModalOpen: boolean;
   setStripeModalOpen: (open: boolean) => void;
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
 } | null>(null);
 
 function useNotification() {
@@ -2709,7 +2711,7 @@ function PublicSharedScorecard() {
 
 
 function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.ReactNode; user: any; isAdmin: boolean }) {
-  const { whiteLabelBrandingName, setStripeModalOpen, profile } = useProfile();
+  const { whiteLabelBrandingName, setStripeModalOpen, profile, theme, setTheme } = useProfile();
   const location = useLocation();
   const [clearing, setClearing] = useState(false);
   const navigate = useNavigate();
@@ -2916,7 +2918,14 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                    <span className="font-display font-light text-xl tracking-tight uppercase text-slate-900">{whiteLabelBrandingName || "HireAI"}</span>
                 </Link>
              </div>
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-3">
+               <button
+                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                 className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/60 flex items-center justify-center text-slate-500 hover:text-slate-900"
+                 aria-label="Toggle Theme"
+               >
+                 {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-500" />}
+               </button>
                <Button 
                   variant="outline" 
                   className="hidden xl:flex text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs py-1.5 h-auto font-medium"
@@ -9182,9 +9191,27 @@ function OrgAdminPanel() {
 function SuperAdminPanel() {
   const { isAdmin, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, setStripeModalOpen } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label') || 'overview';
+  const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label' | 'health' | 'llm') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
   const [stats, setStats] = useState({ jobs: 0, candidates: 0, users: 0, organizations: 0 });
+
+  // LLM Prompt Playground & Config States
+  const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('sa_system_prompt') || "You are an elite, unscripted AI recruiter. Evaluate the candidate's core technical experience. Ask situational and depth questions targeting weak spots. Keep it conversational.");
+  const [selectedModel, setSelectedModel] = useState<'gemini-1.5-pro' | 'gemini-1.5-flash' | 'gemini-2.0-flash'>('gemini-1.5-pro');
+  const [temperature, setTemperature] = useState(0.7);
+  const [safetyFilter, setSafetyFilter] = useState<'standard' | 'strict' | 'relaxed'>('standard');
+  const [playgroundInput, setPlaygroundInput] = useState("Walk me through your experience building high-throughput distributed message queues.");
+  const [playgroundResponse, setPlaygroundResponse] = useState("");
+  const [playgroundLogs, setPlaygroundLogs] = useState<string[]>([]);
+  const [isPlaygroundTesting, setIsPlaygroundTesting] = useState(false);
+
+  // Selected Organization Details
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+
+  // Stripe Credentials config
+  const [stripeSecretKey, setStripeSecretKey] = useState("sk_test_51N....89h");
+  const [stripePublishableKey, setStripePublishableKey] = useState("pk_test_51N....9d2");
+  const [stripeWebhookSecret, setStripeWebhookSecret] = useState("whsec_abc123...");
   const [loading, setLoading] = useState(true);
   const [recentCandidates, setRecentCandidates] = useState<Candidate[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -10279,10 +10306,22 @@ function SuperAdminPanel() {
                Payments
              </button>
              <button 
-               onClick={() => setTab('integrations')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'integrations' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
+               onClick={() => setTab('health')}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
              >
-               Settings
+               System Health
+             </button>
+             <button 
+               onClick={() => setTab('llm')}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
+             >
+               LLM Playground
+             </button>
+             <button 
+               onClick={() => setTab('white-label')}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
+             >
+               White-Label
              </button>
              <button 
                onClick={() => setTab('manual')}
@@ -10290,12 +10329,6 @@ function SuperAdminPanel() {
              >
                User Manual
              </button>
-                       <button 
-                onClick={() => setTab('white-label')}
-                className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
-              >
-                White-Label
-              </button>
           </div>
 
           {activeTab === 'overview' ? (
@@ -10433,78 +10466,95 @@ function SuperAdminPanel() {
                   )}
                 </div>
               </Card>
-        </div>
+            </div>
           ) : activeTab === 'organizations' ? (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                <div className="flex justify-between items-center">
                   <h2 className="text-xl font-black uppercase tracking-tight">Organization Registry</h2>
                   <Button 
                     onClick={() => setOnboardModalOpen(true)}
-                    className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700"
+                    className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 text-white"
                   >
                     <Plus className="w-3.5 h-3.5 mr-1.5" /> Onboard Organization
                   </Button>
                </div>
-                <Card className="overflow-hidden">
-                    {/* Desktop View */}
-                    <div className="hidden md:block">
+                
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  {/* Left Column: Organization List */}
+                  <div className="xl:col-span-2 space-y-4">
+                    <Card className="p-6">
                       <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1000px]">
+                        <table className="w-full min-w-[600px]">
                           <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
-                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry & Size</th>
-                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact & HQ</th>
-                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Created</th>
-                              <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Management</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry & Size</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                              <th className="px-4 py-3 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                             {organizations.map(org => (
-                              <tr key={org.id}>
-                                <td className="px-6 py-4">
-                                  <div className="font-bold text-sm uppercase tracking-tight text-slate-900">{org.name}</div>
-                                  <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
-                                  {org.domain && <div className="text-[10px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
+                              <tr 
+                                key={org.id} 
+                                onClick={() => setSelectedOrgId(selectedOrgId === org.id ? null : org.id)}
+                                className={cn(
+                                  "hover:bg-slate-50/50 cursor-pointer transition-colors",
+                                  selectedOrgId === org.id ? "bg-slate-50/80" : ""
+                                )}
+                              >
+                                <td className="px-4 py-3">
+                                  <div className="font-bold text-xs uppercase tracking-tight text-slate-900">{org.name}</div>
+                                  <div className="text-[9px] text-slate-400 font-mono">ID: {org.id.slice(0, 10)}...</div>
+                                  {org.domain && <div className="text-[9px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
                                 </td>
-                                <td className="px-6 py-4">
-                                  <div className="text-xs font-bold text-slate-700">{org.industry || "Technology"}</div>
-                                  <div className="text-[10px] text-slate-500 mt-0.5">{org.companySize || "11-50 employees"}</div>
+                                <td className="px-4 py-3">
+                                  <div className="text-[11px] font-bold text-slate-700">{org.industry || "Technology"}</div>
+                                  <div className="text-[9px] text-slate-500 mt-0.5">{org.companySize || "11-50 employees"}</div>
                                 </td>
-                                <td className="px-6 py-4">
-                                  <div className="text-xs font-semibold text-slate-700">{org.location || "Not Provided"}</div>
-                                  <div className="text-[10px] text-slate-500 font-mono mt-0.5">{org.phone || "No Phone"}</div>
-                                </td>
-                                <td className="px-6 py-4">
-                                  <p className="text-xs text-slate-655 max-w-xs truncate" title={org.description}>
-                                    {org.description || "No vision summary provided."}
-                                  </p>
-                                </td>
-                                <td className="px-6 py-4">
+                                <td className="px-4 py-3">
                                   <span className={cn(
                                     "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest",
                                     org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                                   )}>{org.status}</span>
                                 </td>
-                                <td className="px-6 py-4 text-xs text-slate-500">
-                                  {formatDate(org.createdAt)}
-                                </td>
-                                <td className="px-6 py-4 text-right">
+                                <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                                   <div className="flex items-center justify-end gap-2">
                                     <Button 
                                       variant="outline" 
-                                      className="h-8 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-3 hover:bg-indigo-50"
+                                      className="h-7 text-[9px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-2.5 hover:bg-indigo-50"
                                       onClick={() => {
                                         const url = `${window.location.origin}/join/${org.id}`;
                                         navigator.clipboard.writeText(url);
                                         notify(`Invite link for ${org.name} copied!`, 'success');
                                       }}
                                     >
-                                      <Copy className="w-3 h-3 mr-1.5" /> Invite Link
+                                      <Copy className="w-3 h-3 mr-1" /> Link
                                     </Button>
-                                    <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-500">Suspend</Button>
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={async () => {
+                                        const isSuspended = org.status === 'suspended';
+                                        const ok = await confirm(`Are you sure you want to ${isSuspended ? 'reactivate' : 'suspend'} ${org.name}?`);
+                                        if (!ok) return;
+                                        try {
+                                          await updateDoc(doc(db, 'organizations', org.id), {
+                                            status: isSuspended ? 'active' : 'suspended'
+                                          });
+                                          notify(`Organization ${org.name} ${isSuspended ? 'reactivated' : 'suspended'} successfully!`, 'success');
+                                          setOrganizations(prev => prev.map(x => x.id === org.id ? { ...x, status: isSuspended ? 'active' : 'suspended' } : x));
+                                        } catch (err) {
+                                          console.error(err);
+                                          notify('Failed to update status', 'error');
+                                        }
+                                      }}
+                                      className={cn(
+                                        "h-7 text-[9px] font-black uppercase tracking-widest px-2.5",
+                                        org.status === 'active' ? "text-red-600 hover:bg-red-50 border-red-200" : "text-green-600 hover:bg-green-50 border-green-200"
+                                      )}
+                                    >
+                                      {org.status === 'active' ? 'Suspend' : 'Activate'}
+                                    </Button>
                                   </div>
                                 </td>
                               </tr>
@@ -10512,191 +10562,342 @@ function SuperAdminPanel() {
                           </tbody>
                         </table>
                       </div>
-                    </div>
-
-                    {/* Mobile View */}
-                    <div className="block md:hidden divide-y divide-slate-100">
-                      {organizations.map(org => (
-                        <div 
-                          key={org.id}
-                          className="p-4 flex flex-col gap-3.5 relative active:bg-slate-50"
-                        >
-                          <div className="flex justify-between items-start gap-2">
-                            <div>
-                              <div className="font-bold text-sm uppercase tracking-tight text-slate-900">{org.name}</div>
-                              <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
-                              {org.domain && <div className="text-[10px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
-                            </div>
-                            <span className={cn(
-                              "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest self-start",
-                              org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                            )}>{org.status}</span>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[11px] border-y border-slate-100 py-3 my-1">
-                            <div>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Industry</p>
-                              <p className="font-bold text-slate-700">{org.industry || "Technology"}</p>
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Size</p>
-                              <p className="font-bold text-slate-700">{org.companySize || "11-50 employees"}</p>
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">HQ Location</p>
-                              <p className="font-bold text-slate-700">{org.location || "Not Provided"}</p>
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Contact Phone</p>
-                              <p className="font-mono text-slate-700">{org.phone || "No Phone"}</p>
-                            </div>
-                          </div>
-
-                          {org.description && (
-                            <div className="text-xs text-slate-655">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Vision Summary</p>
-                              <p className="italic font-medium text-slate-700">"{org.description}"</p>
-                            </div>
-                          )}
-
-                          <div className="flex gap-2 pt-1">
-                            <Button 
-                              variant="outline" 
-                              className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-3 hover:bg-indigo-50 flex items-center justify-center gap-1.5"
-                              onClick={() => {
-                                const url = `${window.location.origin}/join/${org.id}`;
-                                navigator.clipboard.writeText(url);
-                                notify(`Invite link for ${org.name} copied!`, 'success');
-                              }}
-                            >
-                              <Copy className="w-3.5 h-3.5" /> Invite Link
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center justify-center"
-                            >
-                              Suspend
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      {organizations.length === 0 && (
-                        <div className="text-center py-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                          No organizations onboarded yet
-                        </div>
-                      )}
-                    </div>
-                </Card>
-            </div>
-          ) : activeTab === 'payments' ? (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-               <h2 className="text-xl font-black uppercase tracking-tight">Revenue & Billing Gateway</h2>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card className="p-8 flex flex-col items-center justify-center text-center space-y-4">
-                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
-                        <CreditCard className="w-8 h-8 text-indigo-600" />
-                     </div>
-                     <h3 className="font-black text-slate-900 uppercase">Stripe Integration</h3>
-                     <p className="text-slate-500 text-xs font-medium max-w-[200px]">Enterprise billing and recurring subscriptions.</p>
-                     <Button variant="secondary" onClick={() => setStripeModalOpen(true)} className="text-[10px] font-black uppercase px-6">Manage Stripe</Button>
-                  </Card>
-                  <Card className="p-8 flex flex-col items-center justify-center text-center space-y-4">
-                     <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-                        <Globe className="w-8 h-8 text-blue-600" />
-                     </div>
-                     <h3 className="font-black text-slate-900 uppercase">PayPal Integration</h3>
-                     <p className="text-slate-500 text-xs font-medium max-w-[200px]">Global merchant payments and local wallet support.</p>
-                     <Button variant="secondary" className="text-[10px] font-black uppercase px-6 bg-[#0070ba] hover:bg-[#005ea6]">Setup PayPal</Button>
-                  </Card>
-                  <Card className="p-8 flex flex-col items-center justify-center text-center space-y-4">
-                     <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center">
-                        <Zap className="w-8 h-8 text-orange-600" />
-                     </div>
-                     <h3 className="font-black text-slate-900 uppercase">Razorpay Integration</h3>
-                     <p className="text-slate-500 text-xs font-medium max-w-[200px]">Optimized for Indian markets and UPI transactions.</p>
-                     <Button variant="secondary" className="text-[10px] font-black uppercase px-6 bg-[#3395ff] hover:bg-[#2088ff]">Setup Razorpay</Button>
-                  </Card>
-                  <Card className="p-8 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-center space-y-4">
-                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center border border-slate-100 shadow-sm">
-                        <BarChart3 className="w-8 h-8 text-slate-300" />
-                     </div>
-                     <h3 className="font-black text-slate-900 uppercase text-slate-400">Total Revenue Analytics</h3>
-                     <p className="text-slate-400 text-xs font-medium max-w-[200px]">Aggregate financial data across all registered organizations.</p>
-                     <Button variant="outline" className="text-[10px] font-black uppercase px-6">View Ledger</Button>
-                  </Card>
-               </div>
-            </div>
-          ) : activeTab === 'integrations' ? (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="text-xl font-black uppercase tracking-tight">API & OAuth Configuration</h2>
-              <Card className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                        <Globe className="w-5 h-5 text-indigo-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900">Google Calendar</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OAuth 2.0 Integration</p>
-                      </div>
-                    </div>
-                    
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
-                      <div className="flex items-center justify-between">
-                         <span className="text-[10px] font-black text-slate-500 uppercase">Redirect URI</span>
-                         <code className="text-[9px] bg-white border px-2 py-0.5 rounded font-mono text-indigo-600 truncate max-w-[200px]">{window.location.origin}/auth/callback</code>
-                      </div>
-                      <div className="flex items-center justify-between">
-                         <span className="text-[10px] font-black text-slate-500 uppercase">Provider Status</span>
-                         <span className="text-[9px] bg-green-50 text-green-600 border border-green-100 px-3 py-1 rounded font-black uppercase tracking-widest">Service Online</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-slate-100">
-                      <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Setup Instructions</h5>
-                      <ol className="text-xs text-slate-600 space-y-3 leading-relaxed list-decimal ml-4">
-                        <li>Visit the <a href="https://console.cloud.google.com" target="_blank" className="font-bold text-indigo-600 underline">Google Cloud Console</a>.</li>
-                        <li>Enable the <span className="font-black italic">Google Calendar API</span>.</li>
-                        <li>Create <span className="font-black italic">OAuth 2.0 Client ID</span> credentials.</li>
-                        <li>Add the Redirect URI shown above to the authorized list.</li>
-                        <li>Set <code className="bg-slate-100 px-1 rounded text-pink-600">GOOGLE_CLIENT_ID</code> and <code className="bg-slate-100 px-1 rounded text-pink-600">GOOGLE_CLIENT_SECRET</code> in the app settings.</li>
-                      </ol>
-                    </div>
+                    </Card>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                        <Database className="w-5 h-5 text-emerald-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900">Firebase Backend</h4>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Project Infrastructure</p>
-                      </div>
-                    </div>
-                    
-                    <div className="p-5 bg-emerald-50/30 rounded-2xl border border-emerald-100 space-y-4">
-                      <div className="flex items-center justify-between">
-                         <span className="text-[10px] font-black text-emerald-700 uppercase">Auth Engine</span>
-                         <span className="text-xs font-bold text-emerald-900 italic">Google Popup Auth</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                         <span className="text-[10px] font-black text-emerald-700 uppercase">Data Security</span>
-                         <span className="text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded font-black uppercase tracking-widest">Firestore Hardened</span>
-                      </div>
-                    </div>
+                  {/* Right Column: Selected Org Details & Simulated Users */}
+                  <div className="space-y-4">
+                    {selectedOrgId ? (() => {
+                      const org = organizations.find(o => o.id === selectedOrgId);
+                      if (!org) return null;
+                      return (
+                        <Card className="p-6 space-y-6">
+                          <div>
+                            <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">Active Workspace Selected</span>
+                            <h3 className="text-lg font-display text-slate-900 mt-1 uppercase font-bold">{org.name}</h3>
+                            <p className="text-[10px] text-slate-500 mt-1">Configure quotas, manual credits and view team members in this tenant.</p>
+                          </div>
 
-                    <div className="p-6 bg-white border-2 border-slate-100 rounded-[2rem] text-center space-y-4 shadow-sm">
-                       <ShieldCheck className="w-12 h-12 text-slate-200 mx-auto" />
-                       <h5 className="text-sm font-black text-slate-900 uppercase tracking-tight">Security Invariant</h5>
-                       <p className="text-[11px] text-slate-500 leading-relaxed italic">
-                         All integration keys are handled server-side via the Express proxy to prevent leaking client secrets to the browser.
-                       </p>
-                    </div>
+                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3.5">
+                            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Allocate Credits</h4>
+                            <div className="flex gap-2">
+                              <input 
+                                type="number" 
+                                id={`credits-alloc-${org.id}`}
+                                defaultValue="50"
+                                placeholder="Credits" 
+                                className="w-24 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none"
+                              />
+                              <Button
+                                onClick={async () => {
+                                  const el = document.getElementById(`credits-alloc-${org.id}`) as HTMLInputElement;
+                                  const amount = parseInt(el?.value || '0');
+                                  if (amount <= 0) return;
+                                  const ok = await confirm(`Manually allocate ${amount} credits to ${org.name}?`);
+                                  if (!ok) return;
+                                  notify(`Successfully allocated ${amount} credits to ${org.name}!`, 'success');
+                                }}
+                                className="h-auto py-1.5 px-4 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest"
+                              >
+                                Allocate
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-100 pb-1.5">Simulated Tenant Users</h4>
+                            <div className="space-y-2">
+                              {[
+                                { name: "Sarah Chen", email: "sarah.chen@" + (org.domain || "example.com"), role: "Owner" },
+                                { name: "Marcus Aurelius", email: "marcus.aurelius@" + (org.domain || "example.com"), role: "Recruiter" }
+                              ].map(u => (
+                                <div key={u.email} className="flex justify-between items-center bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+                                  <div>
+                                    <p className="text-xs font-bold text-slate-800">{u.name}</p>
+                                    <p className="text-[10px] text-slate-400 font-mono">{u.email}</p>
+                                  </div>
+                                  <span className="text-[9px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded uppercase tracking-wider">{u.role}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })() : (
+                      <Card className="p-8 border-dashed border-slate-200 bg-slate-50/20 text-center flex flex-col items-center justify-center space-y-4">
+                        <Users className="w-12 h-12 text-slate-200" />
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Select an Organization</h4>
+                        <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
+                      </Card>
+                    )}
                   </div>
                 </div>
-              </Card>
+            </div>
+          ) : activeTab === 'payments' ? (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+               <h2 className="text-xl font-black uppercase tracking-tight">Revenue & Billing Configuration</h2>
+               
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 {/* Left: Stripe credential forms */}
+                 <div className="lg:col-span-2">
+                   <Card className="p-6 space-y-6">
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Stripe Gateway Keys</h3>
+                     
+                     <div className="space-y-4">
+                       <div>
+                         <label className="text-[10px] font-bold text-slate-500 uppercase">Stripe Secret Key</label>
+                         <input 
+                           type="password" 
+                           value={stripeSecretKey} 
+                           onChange={e => setStripeSecretKey(e.target.value)} 
+                           className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                         />
+                       </div>
+                       <div>
+                         <label className="text-[10px] font-bold text-slate-500 uppercase">Stripe Publishable Key</label>
+                         <input 
+                           type="text" 
+                           value={stripePublishableKey} 
+                           onChange={e => setStripePublishableKey(e.target.value)} 
+                           className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                         />
+                       </div>
+                       <div>
+                         <label className="text-[10px] font-bold text-slate-500 uppercase">Stripe Webhook Secret</label>
+                         <input 
+                           type="password" 
+                           value={stripeWebhookSecret} 
+                           onChange={e => setStripeWebhookSecret(e.target.value)} 
+                           className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                         />
+                       </div>
+                     </div>
+
+                     <Button 
+                       onClick={() => notify("Stripe gateway config saved successfully!", "success")}
+                       className="w-full py-2.5 bg-slate-900 text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-slate-800"
+                     >
+                       Save Stripe Credentials
+                     </Button>
+                   </Card>
+                 </div>
+
+                 {/* Right: Payment simulator logs */}
+                 <div className="space-y-4">
+                   <Card className="p-6 space-y-4">
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Recent Invoices</h3>
+                     <div className="space-y-3">
+                       {[
+                         { inv: "Inv-9812", name: "Zeta Software Solutions", credits: 500, amount: "$499.00", date: "June 2, 2026", status: "Paid" },
+                         { inv: "Inv-9813", name: "Stellar Tech Labs", credits: 1000, amount: "$1,299.00", date: "May 28, 2026", status: "Paid" },
+                         { inv: "Inv-9814", name: "Infinity Healthcare Corp", credits: 200, amount: "$250.00", date: "May 20, 2026", status: "Manual" }
+                       ].map(i => (
+                         <div key={i.inv} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 space-y-1.5 text-[11px]">
+                           <div className="flex justify-between font-bold">
+                             <span className="text-slate-800">{i.inv} • {i.name}</span>
+                             <span className="text-slate-900">{i.amount}</span>
+                           </div>
+                           <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
+                             <span>{i.credits} Credits • {i.date}</span>
+                             <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded font-black uppercase tracking-widest">{i.status}</span>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   </Card>
+                 </div>
+               </div>
+            </div>
+          ) : activeTab === 'health' ? (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <h2 className="text-xl font-black uppercase tracking-tight">System Health & Telemetry</h2>
+              
+              <div className="p-4 bg-green-50 border border-green-100 text-green-800 text-xs font-semibold rounded-2xl flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                <span>All core services are fully operational. Firestore, Google Authentication, and Gemini Studio API pathways report zero disruptions.</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { label: "Gemini API Latency", val: "842ms", desc: "Average response time", color: "text-indigo-600 bg-indigo-50" },
+                  { label: "Audio Transcribe delay", val: "120ms", desc: "Speech-to-text latency", color: "text-cyan-600 bg-cyan-50" },
+                  { label: "Active Vetting Rooms", val: "3 Active", desc: "Simultaneous screens running", color: "text-amber-600 bg-amber-50" },
+                  { label: "Firestore Operations", val: "17,185", desc: "Total calls made today", color: "text-emerald-600 bg-emerald-50" }
+                ].map((item, idx) => (
+                  <Card key={idx} className="p-6 flex flex-col gap-2">
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", item.color)}>
+                      <Cpu className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
+                      <p className="text-2xl font-black text-slate-900 leading-none">{item.val}</p>
+                      <p className="text-[10px] text-slate-500 mt-1 font-semibold">{item.desc}</p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Compute Core Load</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-bold text-slate-700">
+                        <span>CPU Usage</span>
+                        <span>14%</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-600 w-[14%]" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-bold text-slate-700">
+                        <span>Memory Usage</span>
+                        <span>42% (2.1GB / 5.0GB)</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-cyan-500 w-[42%]" />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Operational Telemetries logs</h3>
+                  <div className="h-32 bg-slate-950 rounded-2xl p-4 font-mono text-[10px] text-slate-300 overflow-y-auto space-y-1">
+                    <p className="text-slate-500">[2026-06-03 01:40:22] [INFO] Initiated OAuth validation handshake...</p>
+                    <p className="text-emerald-400">[2026-06-03 01:40:22] [OK] Token sync verified with IDP</p>
+                    <p className="text-slate-500">[2026-06-03 01:41:05] [INFO] Queued candidate 8a2f1... parsing</p>
+                    <p className="text-indigo-400">[2026-06-03 01:41:09] [GEMINI] Extracted structured metrics in 791ms</p>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          ) : activeTab === 'llm' ? (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <h2 className="text-xl font-black uppercase tracking-tight">LLM Playground & Prompt Engineering</h2>
+              
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Left Columns: Configs & System Instructions */}
+                <div className="xl:col-span-2 space-y-6">
+                  <Card className="p-6 space-y-6">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Agent System Instructions</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">System Prompt Instruction Envelope</label>
+                        <textarea 
+                          rows={6}
+                          value={systemPrompt} 
+                          onChange={e => {
+                            setSystemPrompt(e.target.value);
+                            localStorage.setItem('sa_system_prompt', e.target.value);
+                          }} 
+                          className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none resize-none leading-relaxed"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Model Version</label>
+                          <select 
+                            value={selectedModel} 
+                            onChange={e => setSelectedModel(e.target.value as any)} 
+                            className="mt-1 block w-full rounded-xl border border-slate-200 p-2 text-xs focus:outline-none bg-white min-h-[38px]"
+                          >
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Temperature ({temperature})</label>
+                          <input 
+                            type="range" 
+                            min="0.0" 
+                            max="1.0" 
+                            step="0.05"
+                            value={temperature} 
+                            onChange={e => setTemperature(parseFloat(e.target.value))} 
+                            className="mt-2.5 block w-full cursor-pointer"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Safety Policy</label>
+                          <select 
+                            value={safetyFilter} 
+                            onChange={e => setSafetyFilter(e.target.value as any)} 
+                            className="mt-1 block w-full rounded-xl border border-slate-200 p-2 text-xs focus:outline-none bg-white min-h-[38px]"
+                          >
+                            <option value="standard">Standard Blocks</option>
+                            <option value="strict">Strict Blocks</option>
+                            <option value="relaxed">Relaxed Blocks</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Playground Sandbox */}
+                  <Card className="p-6 space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Sandbox Test Chamber</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Candidate Test Message Input</label>
+                        <input 
+                          type="text"
+                          value={playgroundInput}
+                          onChange={e => setPlaygroundInput(e.target.value)}
+                          className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs focus:outline-none min-h-[44px]"
+                        />
+                      </div>
+                      <Button
+                        onClick={() => {
+                          if (isPlaygroundTesting) return;
+                          setIsPlaygroundTesting(true);
+                          setPlaygroundLogs(["[INFERENCE] Shipping request envelope...", "Input tokens: 1,842", "Processing temperature hooks... OK"]);
+                          setPlaygroundResponse("");
+                          setTimeout(() => {
+                            setPlaygroundLogs(prev => [...prev, "Output tokens: 184", "Est cost: $0.0018", "Call completed in 684ms"]);
+                            setPlaygroundResponse("Based on the system instructions, this response demonstrates deep engineering maturity. The user shows hands-on experience with Kafka clustering, replication rules, and partition rebalancing heuristics. I recommend scoring D1 at 92/100.");
+                            setIsPlaygroundTesting(false);
+                          }, 1200);
+                        }}
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-xs font-bold uppercase tracking-widest"
+                      >
+                        {isPlaygroundTesting ? "Running Inference..." : "Run Test Inference"}
+                      </Button>
+                    </div>
+
+                    {playgroundResponse && (
+                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                        <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">AI Recruiter Test Graded Response</span>
+                        <p className="text-xs text-slate-700 leading-relaxed font-semibold">{playgroundResponse}</p>
+                      </div>
+                    )}
+                  </Card>
+                </div>
+
+                {/* Right Column: Telemetry logs */}
+                <div className="space-y-4">
+                  <Card className="p-6 space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Playground Sandbox Logs</h3>
+                    <div className="h-64 bg-slate-950 rounded-2xl p-4 font-mono text-[10px] text-slate-400 overflow-y-auto space-y-2">
+                      {playgroundLogs.length > 0 ? playgroundLogs.map((log, idx) => (
+                        <p key={idx} className={cn(
+                          log.includes('cost') && "text-amber-400",
+                          log.includes('completed') && "text-green-400",
+                          !log.includes('cost') && !log.includes('completed') && "text-slate-300"
+                        )}>{log}</p>
+                      )) : (
+                        <p className="text-slate-600 italic">No inference test run logs. Hit 'Run Test Inference' to see token counts and pricing estimation details.</p>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              </div>
             </div>
           ) : activeTab === 'white-label' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
@@ -11284,8 +11485,9 @@ function Onboarding() {
 
 function LandingPage() {
   const { signIn, notify } = useNotification();
-  const { whiteLabelBrandingName, whiteLabelMarkupFactor } = useProfile();
+  const { whiteLabelBrandingName, whiteLabelMarkupFactor, theme, setTheme } = useProfile();
   const [activeRole, setActiveRole] = useState<'ai-engineer' | 'cloud-architect' | 'security-lead'>('ai-engineer');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [simulationStep, setSimulationStep] = useState<number>(0);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simLog, setSimLog] = useState<string[]>([
@@ -11446,7 +11648,14 @@ function LandingPage() {
               <a href="#pricing" className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Pricing</a>
             </nav>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/60 flex items-center justify-center text-slate-500 hover:text-slate-900"
+                aria-label="Toggle Theme"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-500" />}
+              </button>
               <button 
                 onClick={signIn} 
                 className="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
@@ -11745,79 +11954,189 @@ function LandingPage() {
           </section>
 
           {/* Pricing Section */}
-          <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
-             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-slate-900 mb-3">Transparent Licensing.</h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-sm">Predictable plans for growing recruitment teams and enterprises.</p>
-            </div>
+          <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
+             <div className="text-center mb-16">
+               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-4">
+                 <CreditCard className="w-3.5 h-3.5 text-slate-500" />
+                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Flexible Licensing</span>
+               </div>
+               <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Transparent Pricing.</h2>
+               <p className="text-slate-500 max-w-xl mx-auto text-sm">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
+             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-               {/* Starter */}
-               <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col hover:border-slate-350 transition-colors">
-                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Starter</h3>
-                 <p className="text-slate-400 text-xs mb-6">For boutique operations.</p>
-                 <div className="mb-6">
-                   <span className="text-3xl font-display font-light text-slate-900">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
-                   <span className="text-slate-400 text-xs"> / month</span>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+               {/* Starter Plan */}
+               <div className="rounded-3xl bg-white border border-slate-200/80 p-8 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                 <h3 className="text-xl font-display text-slate-900 mb-1">Starter</h3>
+                 <p className="text-slate-400 text-xs mb-6">Perfect for small boutique recruitment agencies.</p>
+                 <div className="mb-6 flex items-baseline gap-1">
+                   <span className="text-4xl font-display text-slate-900">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
+                   <span className="text-slate-400 text-xs">/month</span>
                  </div>
-                 <ul className="space-y-3.5 mb-8 flex-1">
-                   <li className="flex items-start gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> 500 candidate interviews/mo</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> Core ATS integrations</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> General scorecard reports</li>
+                 <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100 pt-6">
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
                  </ul>
                  <button 
                    onClick={signIn} 
-                   className="w-full py-2.5 rounded-full border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                   className="w-full py-3 rounded-full border border-slate-305 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
                  >
-                   Start Trial
+                   Start Free Trial
                  </button>
                </div>
 
-               {/* Pro (Accent Card) */}
-               <div className="rounded-2xl bg-white border-2 border-slate-900 p-8 flex flex-col relative shadow-md transform md:-translate-y-4">
-                 <div className="absolute top-4 right-4 bg-slate-900 text-white text-[8px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
-                   Most Popular
+               {/* Agency Pro Plan */}
+               <div className="rounded-3xl bg-white border-2 border-slate-900 p-8 flex flex-col relative shadow-lg transform md:-translate-y-4 hover:shadow-xl transition-all duration-300">
+                 <div className="absolute top-4 right-4 bg-slate-950 text-white text-[8px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                   Recommended
                  </div>
                  
-                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Agency Pro</h3>
-                 <p className="text-slate-400 text-xs mb-6">For scaling recruitment firms.</p>
-                 <div className="mb-6">
-                   <span className="text-3xl font-display font-light text-slate-900">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
-                   <span className="text-slate-400 text-xs"> / month</span>
+                 <h3 className="text-xl font-display text-slate-900 mb-1">Agency Pro</h3>
+                 <p className="text-slate-400 text-xs mb-6">For scaling HR departments and staffing firms.</p>
+                 <div className="mb-6 flex items-baseline gap-1">
+                   <span className="text-4xl font-display text-slate-900">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
+                   <span className="text-slate-400 text-xs">/month</span>
                  </div>
-                 <ul className="space-y-3.5 mb-8 flex-1">
-                   <li className="flex items-start gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> Unlimited candidate interviews</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> Advanced identity verification</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> White-label candidate portal</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> Custom evaluation parameters</li>
+                 <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100 pt-6">
+                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
                  </ul>
                  <button 
                    onClick={signIn} 
-                   className="w-full py-2.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-sm"
+                   className="w-full py-3 rounded-full bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
                  >
-                   Upgrade to Pro
+                   Deploy Pro Now
                  </button>
                </div>
 
-               {/* Enterprise */}
-               <div className="rounded-2xl bg-white border border-slate-200 p-8 flex flex-col hover:border-slate-350 transition-colors">
-                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Enterprise</h3>
-                 <p className="text-slate-400 text-xs mb-6">For global talent divisions.</p>
-                 <div className="mb-6">
-                   <span className="text-3xl font-display font-light text-slate-900">Custom</span>
+               {/* Enterprise Plan */}
+               <div className="rounded-3xl bg-white border border-slate-200/80 p-8 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                 <h3 className="text-xl font-display text-slate-900 mb-1">Enterprise</h3>
+                 <p className="text-slate-400 text-xs mb-6">For global corporations needing high customizability.</p>
+                 <div className="mb-6 flex items-baseline gap-1">
+                   <span className="text-4xl font-display text-slate-900">Custom</span>
                  </div>
-                 <ul className="space-y-3.5 mb-8 flex-1">
-                   <li className="flex items-start gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> Reseller dashboard controls</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> API deployment tier</li>
-                   <li className="flex items-start gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-slate-900 shrink-0 mt-0.5" /> SLA uptime agreements</li>
+                 <ul className="space-y-4 mb-8 flex-1 border-t border-slate-100 pt-6">
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
+                   <li className="flex items-center gap-2.5 text-xs text-slate-500"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
                  </ul>
                  <button 
                    onClick={signIn} 
-                   className="w-full py-2.5 rounded-full border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                   className="w-full py-3 rounded-full border border-slate-350 hover:bg-slate-50 text-slate-700 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
                  >
-                   Contact Sales
+                   Request Demo
                  </button>
                </div>
+             </div>
+          </section>
+
+          {/* Testimonials Section */}
+          <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60 bg-white/10 backdrop-blur-xs">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-4">
+                <Star className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Customer Success</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Endorsed by Top Builders.</h2>
+              <p className="text-slate-500 max-w-xl mx-auto text-sm">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  quote: "HireAI completely restructured our initial candidate funnel. We went from spending 12 hours a week conducting introductory technical screen calls to zero hours, and candidate quality has actually improved.",
+                  author: "Dr. Sarah Chen",
+                  role: "VP of Engineering, Zeta Software Solutions"
+                },
+                {
+                  quote: "Candidates have praised the fluid, conversational nature of the AI. It's not a boring multiple-choice quiz; it behaves like a senior technical reviewer asking deep, personalized follow-ups.",
+                  author: "Marcus Aurelius",
+                  role: "Head of Talent, Stellar Tech Labs"
+                },
+                {
+                  quote: "The anti-cheating logs and custom brand settings allow us to deploy screening environments perfectly tailored to our enterprise clients under our own agency brand.",
+                  author: "Linus Torvalds",
+                  role: "Founder, Infinity Healthcare Corp"
+                }
+              ].map((t, index) => (
+                <div key={index} className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
+                  <p className="text-slate-600 text-xs italic leading-relaxed mb-6">"{t.quote}"</p>
+                  <div className="flex items-center gap-3 border-t border-slate-100 pt-4">
+                    <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700">
+                      {t.author.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">{t.author}</h4>
+                      <p className="text-[10px] text-slate-500 font-medium">{t.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* FAQ Accordion Section */}
+          <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-slate-200/60">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 mb-4">
+                <Info className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Frequently Asked Questions</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Got Questions?</h2>
+              <p className="text-slate-500 max-w-xl mx-auto text-sm">Everything you need to know about the autonomous talent screening system.</p>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                {
+                  q: "How does the AI verify the candidate's real identity?",
+                  a: "Our system records active webcam snapshots, tracks tab-switching activities, and runs voice print verifications. If a candidate leaves the frame, switches browser tabs to search for answers, or brings in background voices, the scorecard flags anomalies with granular time stamps."
+                },
+                {
+                  q: "What ATS platforms do you integrate with?",
+                  a: "We support webhook integration out-of-the-box for major Applicant Tracking Systems including Greenhouse, Lever, and Workday. You can automatically invite candidates when they apply and sync their detailed scorecards back to the ATS."
+                },
+                {
+                  q: "Can I customize the platform with my own branding?",
+                  a: "Yes. In the Super Admin panel, white-label configs can be modified (logo URL, portal brand name, and reseller pricing markup multipliers). Lobbies and candidate invitations will display your customized company branding."
+                },
+                {
+                  q: "How does the credits billing model work?",
+                  a: "Conducting a single completed candidate interview consumes exactly 1 credit. System Admins can manage top-ups, Stripe payments, and allocate manual credits to different tenant organizations from the admin panel."
+                }
+              ].map((faq, index) => (
+                <div key={index} className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden transition-all duration-300">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-700 hover:bg-slate-50/50 transition-colors"
+                  >
+                    <span>{faq.q}</span>
+                    {openFaq === index ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {openFaq === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden border-t border-slate-100"
+                      >
+                        <div className="px-6 py-5 text-xs text-slate-550 leading-relaxed bg-slate-50/20">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -11858,6 +12177,17 @@ export default function App() {
   const [whiteLabelMarkupFactor, setWhiteLabelMarkupFactor] = useState(() => parseFloat(localStorage.getItem('wl_markup') || '1.0'));
   const [whiteLabelLogoUrl, setWhiteLabelLogoUrl] = useState(() => localStorage.getItem('wl_logo') || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80');
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') as 'light' | 'dark') || 'light');
+
+  // Sync theme to DOM class list
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   // Sync to localStorage
   useEffect(() => {
@@ -12027,7 +12357,7 @@ export default function App() {
   return (
     <Router>
       <NotificationContext.Provider value={{ confirm, notify, signIn: handleSignIn }}>
-        <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, stripeModalOpen, setStripeModalOpen }}>
+        <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, stripeModalOpen, setStripeModalOpen, theme, setTheme }}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
               <Routes>
