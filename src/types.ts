@@ -76,6 +76,7 @@ export interface Job {
   createdAt: any;
   createdBy: string;
   status: 'active' | 'closed';
+  interviewDurationMinutes?: number;
 }
 
 export type ConfidenceLevel = 'HIGH' | 'MED' | 'LOW';

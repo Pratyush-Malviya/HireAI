@@ -19,10 +19,8 @@ from pathlib import Path
 
 try:
     from gtts import gTTS
-    import soundfile as sf
-    import numpy as np
 except ImportError:
-    print("Run: pip install gTTS soundfile")
+    print("Run: pip install gTTS")
     exit(1)
 
 VOICES_DIR = Path("voices")

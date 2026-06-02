@@ -12,7 +12,7 @@ service cloud.firestore {
     }
     
     function isSuperAdmin() {
-      return isSignedIn() && request.auth.token.email == "malviya.pratyush26@gmail.com";
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
     function getUserData() {

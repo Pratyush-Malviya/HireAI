@@ -370,6 +370,7 @@ const NotificationContext = createContext<{
 const ProfileContext = createContext<{
   profile: UserProfile | null;
   organization: Organization | null;
+  isAdmin: boolean;
   refreshProfile: () => Promise<void>;
 } | null>(null);
 
@@ -575,6 +576,7 @@ function InterviewRoom() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [concluded, setConcluded] = useState(false);
+  const [osintConsent, setOsintConsent] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0);
@@ -615,7 +617,7 @@ function InterviewRoom() {
   
   const [faceStatus, setFaceStatus] = useState<'loading' | 'detected' | 'not_detected' | 'disabled'>('loading');
   const [noiseStatus, setNoiseStatus] = useState<'quiet' | 'noise_detected'>('quiet');
-  const [activeWarning, setActiveWarning] = useState<{ type: 'tab' | 'face' | 'noise'; count: number } | null>(null);
+  const [activeWarning, setActiveWarning] = useState<{ type: 'tab' | 'face' | 'noise' | 'multiple_faces'; count: number } | null>(null);
   
   const [faceapiLoaded, setFaceapiLoaded] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'monitor' | 'transcript'>('monitor');
@@ -626,6 +628,8 @@ function InterviewRoom() {
   const tabWarningsRef = useRef(0);
   const faceWarningsRef = useRef(0);
   const noiseWarningsRef = useRef(0);
+  const multipleFacesWarningsRef = useRef(0);
+  const multipleFacesTimeRef = useRef(0);
   const lastTabWarningRef = useRef(0);
   
   const volumeRef = useRef(0);
@@ -634,6 +638,16 @@ function InterviewRoom() {
   const isListeningRef = useRef(false);
   // Prevents double-submission from both the silence-timeout and onend firing together
   const hasSubmittedRef = useRef(false);
+
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
+  const formatTime = (ms: number | null) => {
+    if (ms === null) return null;
+    const totalSeconds = Math.floor(ms / 1000);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => { volumeRef.current = volume; }, [volume]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
@@ -676,7 +690,7 @@ function InterviewRoom() {
   }, []);
 
   // Warnings and auto-conclusion triggers
-  const triggerWarning = (type: 'tab' | 'face' | 'noise', count: number) => {
+  const triggerWarning = (type: 'tab' | 'face' | 'noise' | 'multiple_faces', count: number) => {
     setActiveWarning({ type, count });
     let warningMsg = "";
     if (type === 'tab') {
@@ -685,6 +699,8 @@ function InterviewRoom() {
       warningMsg = `Warning! Face is not visible. This is warning number ${count} of three. Please look at the camera.`;
     } else if (type === 'noise') {
       warningMsg = `Warning! Ambient noise detected. This is warning number ${count} of three. Please find a quiet space.`;
+    } else if (type === 'multiple_faces') {
+      warningMsg = `Warning! Multiple faces detected. This is warning number ${count} of three. Ensure you are alone.`;
     }
     speak(warningMsg);
     
@@ -705,7 +721,7 @@ function InterviewRoom() {
     }
   };
 
-  const handleViolation = async (type: 'tab' | 'face' | 'noise') => {
+  const handleViolation = async (type: 'tab' | 'face' | 'noise' | 'multiple_faces') => {
     if (concluded) return;
 
     let currentWarnings = 0;
@@ -725,6 +741,9 @@ function InterviewRoom() {
       noiseWarningsRef.current += 1;
       currentWarnings = noiseWarningsRef.current;
       setNoiseWarnings(currentWarnings);
+    } else if (type === 'multiple_faces') {
+      multipleFacesWarningsRef.current += 1;
+      currentWarnings = multipleFacesWarningsRef.current;
     }
 
     if (currentWarnings > 3) {
@@ -810,16 +829,19 @@ function InterviewRoom() {
 
       try {
         let detected = false;
+        let multiFace = false;
         // readyState >= 2 (HAVE_CURRENT_DATA) ensures a real frame is available
         if (!cameraDisabled && videoEl && videoEl.readyState >= 2) {
-          const detection = await faceapi.detectSingleFace(
+          const detections = await faceapi.detectAllFaces(
             videoEl,
             new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.3 })
           );
-          if (detection) detected = true;
+          if (detections && detections.length > 0) detected = true;
+          if (detections && detections.length > 1) multiFace = true;
         } else if (cameraDisabled) {
           // Camera deliberately disabled — don't count against the user
           noFaceTimeRef.current = 0;
+          multipleFacesTimeRef.current = 0;
           setFaceStatus('disabled');
           return;
         }
@@ -836,6 +858,16 @@ function InterviewRoom() {
             handleViolation('face');
           }
         }
+
+        if (multiFace) {
+          multipleFacesTimeRef.current += 1;
+          if (multipleFacesTimeRef.current >= 3) {
+            multipleFacesTimeRef.current = 0;
+            handleViolation('multiple_faces');
+          }
+        } else {
+          multipleFacesTimeRef.current = 0;
+        }
       } catch (err) {
         console.error("Face detection check failed:", err);
       }
@@ -843,6 +875,31 @@ function InterviewRoom() {
 
     return () => clearInterval(interval);
   }, [faceapiLoaded, stream, concluded, messages.length, session?.id]);
+
+  // Interview Duration Timer tracking
+  useEffect(() => {
+    if (!session || concluded || !job?.interviewDurationMinutes) return;
+
+    let startMs = Date.now();
+    if (session.startedAt) {
+       startMs = typeof session.startedAt.toMillis === 'function' ? session.startedAt.toMillis() : session.startedAt;
+    }
+
+    const durationMs = job.interviewDurationMinutes * 60 * 1000;
+    
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startMs;
+      const remaining = Math.max(0, durationMs - elapsed);
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+        autoEndInterview("Interview duration time limit reached");
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [session, concluded, job?.interviewDurationMinutes]);
 
   // Background Noise tracking loop (1 second interval)
   useEffect(() => {
@@ -1331,7 +1388,7 @@ function InterviewRoom() {
         messages: [{ role: 'model', text: intro, timestamp: Date.now() }],
         startedAt: serverTimestamp(),
         completed: false,
-        consentGiven: false
+        consentGiven: true
       };
       
       const docRef = doc(collection(db, 'interviews'));
@@ -1542,6 +1599,7 @@ function InterviewRoom() {
                   {activeWarning.type === 'tab' && "You switched tabs/windows! Stay focused on this screen."}
                   {activeWarning.type === 'face' && "Webcam face presence not detected! Keep your face visible."}
                   {activeWarning.type === 'noise' && "Excessive background noise/talking detected! Quiet room is required."}
+                  {activeWarning.type === 'multiple_faces' && "Multiple faces detected in the webcam view! Ensure you are alone."}
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase bg-red-650 text-white px-2 py-0.5 rounded-full tracking-wider">
@@ -1627,6 +1685,19 @@ function InterviewRoom() {
             {sidebarTab === 'monitor' ? (
               <div className="space-y-5">
                 
+                {/* Session Time Pill */}
+                {timeLeft !== null && (
+                  <div className="bg-slate-955/40 border border-slate-850 rounded-2xl p-4 relative overflow-hidden flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <Clock className="w-4 h-4 text-indigo-400" />
+                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Time Remaining</span>
+                    </div>
+                    <span className={cn("text-xs font-black font-mono px-2 py-1 rounded bg-slate-900 border", timeLeft < 60000 ? "text-red-400 border-red-500/30 animate-pulse" : "text-indigo-400 border-indigo-500/30")}>
+                       {formatTime(timeLeft)}
+                    </span>
+                  </div>
+                )}
+
                 {/* Candidate Overview Pill */}
                 <div className="bg-slate-955/40 border border-slate-850 rounded-2xl p-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-600" />
@@ -1902,14 +1973,63 @@ function InterviewRoom() {
             )}
             
             {messages.length === 0 ? (
-              <div className="relative z-10 text-center max-w-sm mx-auto p-8 animate-in fade-in zoom-in-95 duration-500">
-                <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 mx-auto">
-                   <Play className="w-7 h-7 text-indigo-400" />
-                </div>
-                <h2 className="text-xl font-black text-white tracking-tight mb-3 uppercase">Interactivity Calibrated</h2>
-                <p className="text-slate-400 text-xs font-medium mb-6 leading-relaxed">Ensure webcam presence is visible and background ambient noise is calm before starting.</p>
+              <div className="relative z-10 text-center w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in-95 duration-500 bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl shadow-2xl mt-4 sm:mt-10">
+                <h2 className="text-2xl font-black text-white tracking-tight mb-2 uppercase">Lobby Pre-Check</h2>
+                <p className="text-slate-400 text-xs font-medium mb-8 leading-relaxed max-w-md mx-auto">Ensure your webcam is clear, your microphone is picking up audio, and your background is free of distractions.</p>
                 
-                <Button onClick={startInterview} disabled={loading} className="w-full h-12 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-900/30 font-black tracking-wider uppercase text-xs cursor-pointer transition-transform hover:scale-[1.01] active:scale-[0.98]">
+                {/* Equipment Check Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                  {/* Camera Check */}
+                  <div className="bg-slate-950 rounded-2xl p-2 border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden aspect-video shadow-inner">
+                    {stream?.getVideoTracks()[0]?.enabled !== false ? (
+                      <video ref={bindVideo} autoPlay muted className="w-full h-full object-cover scale-100 rotate-y-180 rounded-xl" />
+                    ) : (
+                      <div className="text-slate-500 flex flex-col items-center">
+                        <Video className="w-6 h-6 mb-2" />
+                        <span className="text-[10px] uppercase font-bold tracking-widest">No Video</span>
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded text-[9px] font-black uppercase text-white tracking-widest backdrop-blur-sm">
+                       <div className={cn("w-1.5 h-1.5 rounded-full", stream ? "bg-green-500 animate-pulse" : "bg-red-500")} /> Camera
+                    </div>
+                  </div>
+                  
+                  {/* Mic Check */}
+                  <div className="bg-slate-950 rounded-2xl p-6 border border-slate-800 flex flex-col items-center justify-center relative shadow-inner">
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded text-[9px] font-black uppercase text-white tracking-widest backdrop-blur-sm">
+                       <div className={cn("w-1.5 h-1.5 rounded-full", stream ? "bg-green-500 animate-pulse" : "bg-red-500")} /> Microphone
+                    </div>
+                    <div className="w-full mt-4 space-y-4">
+                       <div className="flex gap-1 h-10 items-end justify-center">
+                         {[...Array(12)].map((_, i) => (
+                           <motion.div
+                             key={i}
+                             className={cn("w-2 rounded-t-full transition-all duration-75", i < (volume / (100/12)) ? "bg-emerald-500" : "bg-slate-800")}
+                             style={{ height: `${Math.max(15, i < (volume / (100/12)) ? (Math.random() * 60 + 40) : 15)}%` }}
+                           />
+                         ))}
+                       </div>
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Test Mic Output</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 mb-6 text-left bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                  <div className="mt-0.5 shrink-0">
+                    <input 
+                      type="checkbox" 
+                      id="osint-consent"
+                      checked={osintConsent}
+                      onChange={(e) => setOsintConsent(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500/30 focus:ring-offset-slate-950 cursor-pointer"
+                    />
+                  </div>
+                  <label htmlFor="osint-consent" className="text-[11px] text-slate-300 font-medium cursor-pointer leading-relaxed">
+                    I consent to automated background checks, open-source intelligence (OSINT) gathering, and public profile analysis during this screening.
+                  </label>
+                </div>
+                
+                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-white rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-indigo-650 hover:bg-indigo-700 shadow-indigo-900/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-slate-800 text-slate-500 cursor-not-allowed")}>
                   Initialize Screening
                 </Button>
               </div>
@@ -2207,7 +2327,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     setClearing(true);
     try {
       const uid = user.uid;
-      const isSuperAdmin = user.email === 'malviya.pratyush26@gmail.com';
+      const isSuperAdmin = isUserAdmin;
       const batchSize = 450; 
       
       console.log('Deep cleaning database for user:', uid);
@@ -2368,6 +2488,13 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 <button className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                    <Menu className="w-5 h-5" />
                 </button>
+                {/* Mobile Logo */}
+                <Link to="/" className="flex items-center lg:hidden hover:opacity-90 transition-opacity select-none">
+                   <div className="bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm shrink-0 w-8 h-8 mr-2">
+                      <Search className="w-4 h-4 text-white" />
+                   </div>
+                   <span className="font-display font-black text-xl tracking-tighter uppercase text-slate-900">HireNow</span>
+                </Link>
              </div>
              <div className="flex items-center gap-4">
                <Button 
@@ -2421,7 +2548,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
 // --- Pages ---
 
 function Dashboard() {
-  const { profile } = useProfile();
+  const { profile, isAdmin } = useProfile();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -2461,7 +2588,7 @@ function Dashboard() {
     
     // Org-based isolation
     const baseQuery = collection(db, 'jobs');
-    const q = (auth.currentUser.email === 'malviya.pratyush26@gmail.com')
+    const q = isAdmin
       ? query(baseQuery, where('status', '==', 'active'))
       : query(baseQuery, where('status', '==', 'active'), where('organizationId', '==', profile.organizationId));
 
@@ -2576,6 +2703,7 @@ function NewJob() {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [parsingFile, setParsingFile] = useState(false);
+  const [interviewDurationMinutes, setInterviewDurationMinutes] = useState(15);
   const navigate = useNavigate();
   const { notify } = useNotification();
   const { profile } = useProfile();
@@ -2649,7 +2777,8 @@ function NewJob() {
           organizationId: profile?.organizationId,
           createdBy: auth.currentUser.uid,
           createdAt: serverTimestamp(),
-          status: 'active'
+          status: 'active',
+          interviewDurationMinutes: Number(interviewDurationMinutes)
         });
         notify('Job campaign initialized.', 'success');
         navigate(`/jobs/${docRef.id}`);
@@ -2706,6 +2835,19 @@ function NewJob() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={parsingFile}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
+            <input
+              required
+              type="number"
+              min="5"
+              max="120"
+              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-500 transition-all font-bold text-slate-900 placeholder:text-slate-300"
+              value={interviewDurationMinutes}
+              onChange={(e) => setInterviewDurationMinutes(Number(e.target.value))}
             />
           </div>
 
@@ -2996,7 +3138,7 @@ function JobDetail() {
   } | null>(null);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
-  const { profile, organization } = useProfile();
+  const { profile, organization, isAdmin } = useProfile();
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [bulkInviting, setBulkInviting] = useState(false);
 
@@ -3144,7 +3286,7 @@ function JobDetail() {
     const unsubJob = onSnapshot(doc(db, 'jobs', jobId), (snapshot) => {
       if (snapshot.exists()) {
         const data = { id: snapshot.id, ...snapshot.data() } as Job;
-        if (auth.currentUser?.email !== 'malviya.pratyush26@gmail.com' && data.organizationId !== profile?.organizationId) {
+        if (!isAdmin && data.organizationId !== profile?.organizationId) {
           notify('Unauthorized access to this job', 'error');
           navigate('/');
           return;
@@ -3157,7 +3299,7 @@ function JobDetail() {
     });
 
     const baseCandidatesQuery = collection(db, 'candidates');
-    const qCandidates = (auth.currentUser.email === 'malviya.pratyush26@gmail.com')
+    const qCandidates = isAdmin
       ? query(baseCandidatesQuery, where('jobId', '==', jobId))
       : query(baseCandidatesQuery, where('jobId', '==', jobId), where('organizationId', '==', profile?.organizationId));
 
@@ -4862,12 +5004,13 @@ function parseD6Sections(markdown: string): {
 
 function CandidateDetail() {
   const { candidateId } = useParams();
-  const { profile, organization } = useProfile();
+  const { profile, organization, isAdmin } = useProfile();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [job, setJob] = useState<Job | null>(null);
   const [interview, setInterview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [researching, setResearching] = useState(false);
+  const [retryingScreening, setRetryingScreening] = useState(false);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
   const [calendarConnected, setCalendarConnected] = useState(false);
@@ -5106,13 +5249,34 @@ function CandidateDetail() {
     }
   };
 
+  const handleRetryScreening = async () => {
+    if (!candidate || !job) return;
+    setRetryingScreening(true);
+    try {
+      const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText || '', job.requirements);
+      const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
+      
+      await updateDoc(doc(db, 'candidates', candidate.id), {
+        ...screeningResult,
+        status: 'processed',
+        lastRetriedAt: serverTimestamp()
+      });
+      notify('Screening successfully retried.', 'success');
+    } catch (err) {
+      console.error('Failed to retry screening:', err);
+      notify('Failed to retry screening.', 'error');
+    } finally {
+      setRetryingScreening(false);
+    }
+  };
+
   useEffect(() => {
     if (!candidateId || !profile) return;
     const unsub = onSnapshot(doc(db, 'candidates', candidateId), (docSnap) => {
       if (docSnap.exists()) {
         const cand = { id: docSnap.id, ...docSnap.data() } as Candidate;
         
-        if (auth.currentUser?.email !== 'malviya.pratyush26@gmail.com' && cand.organizationId !== profile?.organizationId) {
+        if (!isAdmin && cand.organizationId !== profile?.organizationId) {
           notify('Unauthorized access', 'error');
           navigate('/');
           return;
@@ -5529,6 +5693,29 @@ function CandidateDetail() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* AI Fallback Warning Banner */}
+      {candidate.aiQuotaExceeded && (
+        <Card className="border-2 border-amber-300 bg-amber-50/50 mb-6 overflow-hidden animate-in slide-in-from-top-4 duration-500 shadow-sm">
+          <div className="bg-amber-500 px-6 py-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex items-center gap-3 text-white">
+              <AlertTriangle className="w-6 h-6 shrink-0" />
+              <div>
+                <h3 className="font-black uppercase tracking-widest text-sm">AI Screening Unavailable</h3>
+                <p className="text-amber-100 text-xs mt-0.5 font-medium">Due to capacity limits, this scorecard was generated using a basic fallback model.</p>
+              </div>
+            </div>
+            <Button 
+              onClick={handleRetryScreening}
+              disabled={retryingScreening}
+              className="bg-white text-amber-700 hover:bg-amber-50 font-black uppercase tracking-widest text-xs h-10 px-6 shadow-md transition-all active:scale-95 whitespace-nowrap shrink-0"
+            >
+              {retryingScreening ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              {retryingScreening ? 'Retrying...' : 'Retry Screening'}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Risk Signals & Red Flags Section */}
       {scorecard?.dimensions?.redFlags?.flags?.length > 0 && (
@@ -7463,7 +7650,7 @@ function MetricCard({
 }
 
 function OrgAdminPanel() {
-  const { profile, organization, refreshProfile } = useProfile();
+  const { profile, organization, refreshProfile, isAdmin } = useProfile();
   const { notify } = useNotification();
   const [loading, setLoading] = useState(true);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -7507,7 +7694,7 @@ function OrgAdminPanel() {
   const [workingHoursStart, setWorkingHoursStart] = useState<string>('09:00');
   const [workingHoursEnd, setWorkingHoursEnd] = useState<string>('18:00');
 
-  const isSuperAdmin = auth.currentUser?.email === 'malviya.pratyush26@gmail.com';
+  const isSuperAdmin = isAdmin;
 
   useEffect(() => {
     if (organization) {
@@ -8519,6 +8706,7 @@ function OrgAdminPanel() {
 }
 
 function SuperAdminPanel() {
+  const { isAdmin } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
@@ -8555,7 +8743,7 @@ function SuperAdminPanel() {
   const [bulkOrgNames, setBulkOrgNames] = useState('');
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
-  const isSuperAdmin = auth.currentUser?.email === 'malviya.pratyush26@gmail.com';
+  const isSuperAdmin = isAdmin;
 
   const handleDownloadPDF = () => {
     try {
@@ -9341,7 +9529,7 @@ function SuperAdminPanel() {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
 
-        const isSuperAdmin = email === 'malviya.pratyush26@gmail.com';
+        const isSuperAdmin = isAdmin;
         
         if (!isSuperAdmin) {
           setLoading(false);
@@ -9597,7 +9785,7 @@ function SuperAdminPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex flex-wrap gap-4 border-b border-slate-200">
+          <div className="flex gap-2 sm:gap-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
              <button 
                onClick={() => setTab('overview')}
                className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-indigo-600 text-indigo-600" : "text-slate-400")}
@@ -9649,63 +9837,122 @@ function SuperAdminPanel() {
 
               <h2 className="text-xl font-black uppercase tracking-tight">Recent Activity</h2>
               <Card className="overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[700px]">
-                    <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Org ID</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Score</th>
-                        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</th>
-                        <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
+                {/* Desktop view */}
+                <div className="hidden md:block">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[700px]">
+                      <thead className="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Org ID</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Score</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {recentCandidates.map(c => (
+                          <tr key={c.id} className="hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
+                            <td className="px-6 py-4">
+                              <div className="font-bold text-sm group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{c.fullName}</div>
+                              <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
+                            </td>
+                            <td className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase">
+                              {c.organizationId?.slice(0, 8) || 'LEGACY'}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={cn(
+                                "px-2 py-0.5 rounded text-[10px] font-black",
+                                getScoreColor(c.scorecard.compositeScore)
+                              )}>
+                                {c.scorecard.compositeScore}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-[10px] font-bold text-slate-400">
+                              {formatDateTime(c.createdAt)}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button 
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const ok = await confirm('Nuclear: Remove this candidate from global database?');
+                                  if (!ok) return;
+                                  try {
+                                    await writeBatch(db).delete(doc(db, 'candidates', c.id)).commit();
+                                    setRecentCandidates(prev => prev.filter(x => x.id !== c.id));
+                                    notify('Global record removed.', 'success');
+                                  } catch (err) {
+                                    handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
+                                  }
+                                }}
+                                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Mobile View */}
+                <div className="block md:hidden divide-y divide-slate-100">
                   {recentCandidates.map(c => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-sm group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{c.fullName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
-                      </td>
-                      <td className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase">
-                        {c.organizationId?.slice(0, 8) || 'LEGACY'}
-                      </td>
-                      <td className="px-6 py-4">
+                    <div 
+                      key={c.id} 
+                      onClick={() => navigate(`/candidates/${c.id}`)}
+                      className="p-4 hover:bg-slate-50 transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-slate-100"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-bold text-sm text-slate-900 uppercase tracking-tight">{c.fullName}</div>
+                          <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
+                        </div>
                         <span className={cn(
-                          "px-2 py-0.5 rounded text-[10px] font-black",
+                          "px-2 py-0.5 rounded text-[10px] font-black shadow-sm shrink-0",
                           getScoreColor(c.scorecard.compositeScore)
                         )}>
-                          {c.scorecard.compositeScore}
+                          Score: {c.scorecard.compositeScore}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-[10px] font-bold text-slate-400">
-                        {formatDateTime(c.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const ok = await confirm('Nuclear: Remove this candidate from global database?');
-                            if (!ok) return;
-                            try {
-                              await writeBatch(db).delete(doc(db, 'candidates', c.id)).commit();
-                              setRecentCandidates(prev => prev.filter(x => x.id !== c.id));
-                              notify('Global record removed.', 'success');
-                            } catch (err) {
-                              handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
-                            }
-                          }}
-                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold text-slate-500">
+                        <div>
+                          <span className="text-slate-400 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-slate-700">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 font-bold uppercase tracking-wider">Time:</span> <span className="text-slate-750">{formatDateTime(c.createdAt)}</span>
+                        </div>
+                      </div>
+                      
+                      <button 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const ok = await confirm('Nuclear: Remove this candidate from global database?');
+                          if (!ok) return;
+                          try {
+                            await writeBatch(db).delete(doc(db, 'candidates', c.id)).commit();
+                            setRecentCandidates(prev => prev.filter(x => x.id !== c.id));
+                            notify('Global record removed.', 'success');
+                          } catch (err) {
+                            handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
+                          }
+                        }}
+                        className="absolute right-3 top-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+                  {recentCandidates.length === 0 && (
+                    <div className="text-center py-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      No candidates screened yet
+                    </div>
+                  )}
+                </div>
+              </Card>
         </div>
           ) : activeTab === 'organizations' ? (
             <div className="space-y-6">
@@ -9719,70 +9966,146 @@ function SuperAdminPanel() {
                   </Button>
                </div>
                 <Card className="overflow-hidden">
-                   <div className="overflow-x-auto">
-                     <table className="w-full min-w-[1000px]">
-                     <thead className="bg-slate-50 border-b border-slate-100">
-                       <tr>
-                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
-                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry & Size</th>
-                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact & HQ</th>
-                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                         <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Created</th>
-                         <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Management</th>
-                       </tr>
-                     </thead>
-                     <tbody className="divide-y divide-slate-100">
-                       {organizations.map(org => (
-                         <tr key={org.id}>
-                           <td className="px-6 py-4">
-                             <div className="font-bold text-sm uppercase tracking-tight text-slate-900">{org.name}</div>
-                             <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
-                             {org.domain && <div className="text-[10px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
-                           </td>
-                           <td className="px-6 py-4">
-                             <div className="text-xs font-bold text-slate-700">{org.industry || "Technology"}</div>
-                             <div className="text-[10px] text-slate-500 mt-0.5">{org.companySize || "11-50 employees"}</div>
-                           </td>
-                           <td className="px-6 py-4">
-                             <div className="text-xs font-semibold text-slate-700">{org.location || "Not Provided"}</div>
-                             <div className="text-[10px] text-slate-500 font-mono mt-0.5">{org.phone || "No Phone"}</div>
-                           </td>
-                           <td className="px-6 py-4">
-                             <p className="text-xs text-slate-600 max-w-xs truncate" title={org.description}>
-                               {org.description || "No vision summary provided."}
-                             </p>
-                           </td>
-                           <td className="px-6 py-4">
-                             <span className={cn(
-                               "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest",
-                               org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                             )}>{org.status}</span>
-                           </td>
-                           <td className="px-6 py-4 text-xs text-slate-500">
-                             {formatDate(org.createdAt)}
-                           </td>
-                           <td className="px-6 py-4 text-right">
-                             <div className="flex items-center justify-end gap-2">
-                               <Button 
-                                 variant="outline" 
-                                 className="h-8 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-3 hover:bg-indigo-50"
-                                 onClick={() => {
-                                   const url = `${window.location.origin}/join/${org.id}`;
-                                   navigator.clipboard.writeText(url);
-                                   notify(`Invite link for ${org.name} copied!`, 'success');
-                                 }}
-                               >
-                                 <Copy className="w-3 h-3 mr-1.5" /> Invite Link
-                               </Button>
-                               <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-500">Suspend</Button>
-                             </div>
-                           </td>
-                         </tr>
-                       ))}
-                     </tbody>
-                   </table>
-                 </div>
+                    {/* Desktop View */}
+                    <div className="hidden md:block">
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[1000px]">
+                          <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
+                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry & Size</th>
+                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact & HQ</th>
+                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
+                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                              <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Created</th>
+                              <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Management</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {organizations.map(org => (
+                              <tr key={org.id}>
+                                <td className="px-6 py-4">
+                                  <div className="font-bold text-sm uppercase tracking-tight text-slate-900">{org.name}</div>
+                                  <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
+                                  {org.domain && <div className="text-[10px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-xs font-bold text-slate-700">{org.industry || "Technology"}</div>
+                                  <div className="text-[10px] text-slate-500 mt-0.5">{org.companySize || "11-50 employees"}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-xs font-semibold text-slate-700">{org.location || "Not Provided"}</div>
+                                  <div className="text-[10px] text-slate-500 font-mono mt-0.5">{org.phone || "No Phone"}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <p className="text-xs text-slate-655 max-w-xs truncate" title={org.description}>
+                                    {org.description || "No vision summary provided."}
+                                  </p>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className={cn(
+                                    "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest",
+                                    org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                                  )}>{org.status}</span>
+                                </td>
+                                <td className="px-6 py-4 text-xs text-slate-500">
+                                  {formatDate(org.createdAt)}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button 
+                                      variant="outline" 
+                                      className="h-8 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-3 hover:bg-indigo-50"
+                                      onClick={() => {
+                                        const url = `${window.location.origin}/join/${org.id}`;
+                                        navigator.clipboard.writeText(url);
+                                        notify(`Invite link for ${org.name} copied!`, 'success');
+                                      }}
+                                    >
+                                      <Copy className="w-3 h-3 mr-1.5" /> Invite Link
+                                    </Button>
+                                    <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest text-slate-500">Suspend</Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Mobile View */}
+                    <div className="block md:hidden divide-y divide-slate-100">
+                      {organizations.map(org => (
+                        <div 
+                          key={org.id}
+                          className="p-4 flex flex-col gap-3.5 relative active:bg-slate-50"
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <div>
+                              <div className="font-bold text-sm uppercase tracking-tight text-slate-900">{org.name}</div>
+                              <div className="text-[10px] text-slate-400 font-mono">ID: {org.id}</div>
+                              {org.domain && <div className="text-[10px] text-indigo-500 font-mono mt-0.5">{org.domain}</div>}
+                            </div>
+                            <span className={cn(
+                              "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest self-start",
+                              org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                            )}>{org.status}</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[11px] border-y border-slate-100 py-3 my-1">
+                            <div>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Industry</p>
+                              <p className="font-bold text-slate-700">{org.industry || "Technology"}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Size</p>
+                              <p className="font-bold text-slate-700">{org.companySize || "11-50 employees"}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">HQ Location</p>
+                              <p className="font-bold text-slate-700">{org.location || "Not Provided"}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Contact Phone</p>
+                              <p className="font-mono text-slate-700">{org.phone || "No Phone"}</p>
+                            </div>
+                          </div>
+
+                          {org.description && (
+                            <div className="text-xs text-slate-655">
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Vision Summary</p>
+                              <p className="italic font-medium text-slate-700">"{org.description}"</p>
+                            </div>
+                          )}
+
+                          <div className="flex gap-2 pt-1">
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest text-indigo-600 border-indigo-100 px-3 hover:bg-indigo-50 flex items-center justify-center gap-1.5"
+                              onClick={() => {
+                                const url = `${window.location.origin}/join/${org.id}`;
+                                navigator.clipboard.writeText(url);
+                                notify(`Invite link for ${org.name} copied!`, 'success');
+                              }}
+                            >
+                              <Copy className="w-3.5 h-3.5" /> Invite Link
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center justify-center"
+                            >
+                              Suspend
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {organizations.length === 0 && (
+                        <div className="text-center py-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                          No organizations onboarded yet
+                        </div>
+                      )}
+                    </div>
                 </Card>
             </div>
           ) : activeTab === 'payments' ? (
@@ -10986,8 +11309,9 @@ export default function App() {
         let retries = 3;
         while (retries > 0) {
           try {
-            // Super Admin override
-            if (u.email === 'malviya.pratyush26@gmail.com') {
+            // System Admins collection (Super Admins)
+            const adminDoc = await getDoc(doc(db, 'admins', u.uid));
+            if (adminDoc.exists()) {
               setIsAdmin(true);
             }
             
@@ -11003,11 +11327,7 @@ export default function App() {
               }
             }
             
-            // System Admins collection (Super Admins)
-            const adminDoc = await getDoc(doc(db, 'admins', u.uid));
-            if (adminDoc.exists()) {
-              setIsAdmin(true);
-            }
+            // Check logic removed as it's merged above
             break; // Success
           } catch (err) {
             console.warn(`Profile/Admin check attempt ${4 - retries} failed:`, err);
@@ -11081,7 +11401,7 @@ export default function App() {
   return (
     <Router>
       <NotificationContext.Provider value={{ confirm, notify, signIn: handleSignIn }}>
-        <ProfileContext.Provider value={{ profile, organization, refreshProfile }}>
+        <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile }}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
               <Routes>
