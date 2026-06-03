@@ -32,33 +32,34 @@
 }
 
 .dark {
-  --slate-50: #0c0a09;          /* Dark Canvas */
-  --slate-100: #1c1917;         /* Dark Card Surface */
-  --slate-200: #292524;         /* Dark Border Soft */
-  --slate-300: #4e4e4e;         /* Dark Border Strong */
-  --slate-400: #777169;         /* Dark Muted Soft */
-  --slate-500: #a8a29e;         /* Dark Muted */
-  --slate-600: #d6d3d1;         /* Dark Body Text */
-  --slate-700: #f5f5f5;         /* Dark Primary / Body Strong */
-  --slate-800: #f0efed;         /* Dark Surface Elevated */
-  --slate-900: #ffffff;         /* Dark Surface / Ink */
-  --slate-950: #000000;
+  /* Premium Dark Mode - Deep Space / Slate */
+  --slate-50: #020617;          /* Canvas: Deep Slate 950 */
+  --slate-100: #0f172a;         /* Card Surface: Slate 900 */
+  --slate-200: #1e293b;         /* Border Soft: Slate 800 */
+  --slate-300: #334155;         /* Border Strong: Slate 700 */
+  --slate-400: #64748b;         /* Muted Soft: Slate 500 */
+  --slate-500: #94a3b8;         /* Muted: Slate 400 */
+  --slate-600: #cbd5e1;         /* Body Text: Slate 300 */
+  --slate-700: #f1f5f9;         /* Primary: Slate 100 */
+  --slate-800: #f8fafc;         /* Surface Elevated: Slate 50 */
+  --slate-900: #ffffff;         /* Pure White */
+  --slate-950: #ffffff;
 
-  --indigo-50: #1c1917;
-  --indigo-100: #292524;
-  --indigo-200: #4e4e4e;
-  --indigo-300: #a8a29e;
-  --indigo-400: #d6d3d1;
-  --indigo-500: #f5f5f5;
-  --indigo-600: #ffffff;
-  --indigo-700: #ffffff;
-  --indigo-850: #ffffff;
-  --indigo-900: #ffffff;
+  --indigo-50: #0f172a;
+  --indigo-100: #1e293b;
+  --indigo-200: #334155;
+  --indigo-300: #475569;
+  --indigo-400: #64748b;
+  --indigo-500: #818cf8;        /* Vibrant Indigo for Dark Mode */
+  --indigo-600: #6366f1;
+  --indigo-700: #4f46e5;
+  --indigo-850: #3730a3;
+  --indigo-900: #312e81;
 
-  --white-theme: #1c1917;        /* Replace solid white with card surface */
-  --color-brand: #f5f5f5;
+  --white-theme: #0f172a;        /* Card surface */
+  --color-brand: #f8fafc;
   --color-brand-dark: #ffffff;
-  --color-brand-light: #a8a29e;
+  --color-brand-light: #94a3b8;
 }
 
 @theme {
