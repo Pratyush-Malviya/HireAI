@@ -2919,13 +2919,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </Link>
              </div>
              <div className="flex items-center gap-3">
-               <button
-                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                 className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/60 flex items-center justify-center text-slate-500 hover:text-slate-900"
-                 aria-label="Toggle Theme"
-               >
-                 {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-500" />}
-               </button>
+               
                <Button 
                   variant="outline" 
                   className="hidden xl:flex text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs py-1.5 h-auto font-medium"
@@ -11748,13 +11742,7 @@ function LandingPage() {
             </nav>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all border border-slate-200/60 flex items-center justify-center text-slate-500 hover:text-slate-900"
-                aria-label="Toggle Theme"
-              >
-                {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-500" />}
-              </button>
+              
               <button 
                 onClick={signIn} 
                 className="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
@@ -12323,15 +12311,7 @@ export default function App() {
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') as 'light' | 'dark') || 'light');
 
-  // Sync theme to DOM class list
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
+  
 
   // Sync to localStorage
   useEffect(() => {
