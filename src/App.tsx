@@ -4346,6 +4346,7 @@ function JobDetail() {
   // Editable configuration states for the drawer:
   const [editPassedThresh, setEditPassedThresh] = useState(80);
   const [editLowThresh, setEditLowThresh] = useState(40);
+  const [isJobDescCollapsed, setIsJobDescCollapsed] = useState(true);
   
   const [editD1Name, setEditD1Name] = useState('');
   const [editD1Desc, setEditD1Desc] = useState('');
@@ -5236,6 +5237,112 @@ function JobDetail() {
           </label>
         </div>
       </div>
+
+      {/* Collapsable Job Description / Details */}
+      <Card className="border-slate-100 shadow-sm overflow-hidden rounded-2xl bg-white transition-all duration-300">
+        <button
+          type="button"
+          onClick={() => setIsJobDescCollapsed(!isJobDescCollapsed)}
+          className="w-full flex items-center justify-between p-5 bg-slate-50/50 hover:bg-slate-50 transition-all font-bold text-sm text-slate-800"
+        >
+          <div className="flex items-center gap-2">
+            <Briefcase className="w-4 h-4 text-indigo-650" />
+            <span className="font-black uppercase tracking-wider text-xs">Job Details & Description</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+              {isJobDescCollapsed ? 'Expand to view' : 'Collapse'}
+            </span>
+            <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-300", !isJobDescCollapsed && "rotate-180")} />
+          </div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {!isJobDescCollapsed && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="border-t border-slate-100 overflow-hidden"
+            >
+              <div className="p-6 space-y-6">
+                {/* Requirements Grid */}
+                {job.requirements && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-50/30 p-5 rounded-2xl border border-slate-100">
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Role Type</span>
+                      <span className="text-xs font-bold text-slate-800">{job.requirements.role_type || 'N/A'}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Seniority</span>
+                      <span className="text-xs font-bold text-slate-800">{job.requirements.role_seniority || 'N/A'}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Min Experience</span>
+                      <span className="text-xs font-bold text-slate-800">{job.requirements.min_experience_years !== undefined ? `${job.requirements.min_experience_years} Years` : 'N/A'}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Location</span>
+                      <span className="text-xs font-bold text-slate-800">{job.requirements.location_requirement || 'N/A'}</span>
+                    </div>
+                    {job.requirements.required_education && (
+                      <div className="space-y-1">
+                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Required Education</span>
+                        <span className="text-xs font-bold text-slate-800">{job.requirements.required_education}</span>
+                      </div>
+                    )}
+                    {job.requirements.preferred_industries && job.requirements.preferred_industries.length > 0 && (
+                      <div className="space-y-1 md:col-span-2 lg:col-span-3">
+                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Preferred Industries</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {job.requirements.preferred_industries.map((ind, i) => (
+                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">{ind}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Skills tags */}
+                {job.requirements && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {job.requirements.must_have_skills && job.requirements.must_have_skills.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Must-Have Skills</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {job.requirements.must_have_skills.map((skill, i) => (
+                            <span key={i} className="text-[10px] font-extrabold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg">{skill}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {job.requirements.nice_to_have_skills && job.requirements.nice_to_have_skills.length > 0 && (
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Nice-To-Have Skills</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {job.requirements.nice_to_have_skills.map((skill, i) => (
+                            <span key={i} className="text-[10px] font-extrabold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg">{skill}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Job Description Text */}
+                <div className="space-y-2 border-t border-slate-100 pt-5">
+                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Full Job Description Context</span>
+                  <div className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap font-medium max-h-80 overflow-y-auto bg-slate-50/20 p-4 rounded-xl border border-slate-100/50 custom-scrollbar">
+                    {job.description}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
