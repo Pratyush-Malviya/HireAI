@@ -9,6 +9,7 @@ import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
 import { Job, Candidate, Organization, UserProfile } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
+import { LandingPage } from './components/LandingPage';
 import { generateInterviewResponse, summarizeInterview } from './services/interviewService';
 import { extractTextFromFile } from './services/fileService';
 import jsPDF from 'jspdf';
@@ -13870,7 +13871,7 @@ export default function App() {
             ) : (
               <Routes>
                 <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
-                <Route path="*" element={<LandingPage />} />
+                <Route path="*" element={<LandingPage onGetStarted={handleSignIn} />} />
               </Routes>
             )}
           <StripeCheckoutModal isOpen={stripeModalOpen} onClose={() => setStripeModalOpen(false)} onPaymentSuccess={handlePaymentSuccess} />
