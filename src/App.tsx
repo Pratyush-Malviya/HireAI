@@ -4333,6 +4333,16 @@ function JobDetail() {
 
   const [showInviteModal, setShowInviteModal] = useState(false);
 
+  // States for pre-uploaded resumes screening
+  const [isSelectResumeModalOpen, setIsSelectResumeModalOpen] = useState(false);
+  const [allOrgCandidates, setAllOrgCandidates] = useState<Candidate[]>([]);
+  const [loadingOrgCandidates, setLoadingOrgCandidates] = useState(false);
+  const [selectedPreUploadedResumes, setSelectedPreUploadedResumes] = useState<string[]>([]);
+  const [preUploadedSearchQuery, setPreUploadedSearchQuery] = useState('');
+  const [screeningPreUploadedInProgress, setScreeningPreUploadedInProgress] = useState(false);
+  const [screeningPreUploadedProgress, setScreeningPreUploadedProgress] = useState(0);
+  const [screeningPreUploadedLogs, setScreeningPreUploadedLogs] = useState<string[]>([]);
+
   // Editable configuration states for the drawer:
   const [editPassedThresh, setEditPassedThresh] = useState(80);
   const [editLowThresh, setEditLowThresh] = useState(40);
@@ -4377,14 +4387,28 @@ function JobDetail() {
     setEditD3Desc(custom?.education?.description ?? 'University degree status, major/subject alignment, and tier ranking of credentials.');
     setEditD3Weight(custom?.education?.weight ?? 15);
 
-    setEditD4Name(custom?.achievements?.name ?? 'Quantifiably Backed Outcomes');
-    setEditD4Desc(custom?.achievements?.description ?? 'Metric improvements (KPIs in %, USD, scale), leadership actions, and award recognitions.');
-    setEditD4Weight(custom?.achievements?.weight ?? 15);
-
     setEditD5Name(custom?.culturalRoleFit?.name ?? 'Culture Match & Commitment');
     setEditD5Desc(custom?.culturalRoleFit?.description ?? 'Job-hopping rates, career trajectory consistency, and values coherence.');
     setEditD5Weight(custom?.culturalRoleFit?.weight ?? 10);
   }, [job]);
+
+  useEffect(() => {
+    if (!isSelectResumeModalOpen || !profile?.organizationId) return;
+    setLoadingOrgCandidates(true);
+    const q = query(
+      collection(db, 'candidates'),
+      where('organizationId', '==', profile.organizationId)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Candidate[];
+      setAllOrgCandidates(data);
+      setLoadingOrgCandidates(false);
+    }, (err) => {
+      console.error(err);
+      setLoadingOrgCandidates(false);
+    });
+    return unsub;
+  }, [isSelectResumeModalOpen, profile?.organizationId]);
 
   const handleSaveSettings = async () => {
     if (!job || !jobId) return;
@@ -4452,6 +4476,100 @@ function JobDetail() {
       notify('Error running bulk re-evaluation.', 'error');
     } finally {
       setReevaluatingAll(false);
+    }
+  };
+
+  const executePreUploadedScreening = async () => {
+    if (!job) return;
+    const targets = filteredAndUnscreenedResumes.filter(r => {
+      const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
+      return selectedPreUploadedResumes.includes(key);
+    });
+
+    if (targets.length === 0) {
+      notify('No candidates selected for screening.', 'error');
+      return;
+    }
+
+    const requiredCredits = targets.length;
+    const currentCredits = profile?.credits !== undefined ? profile.credits : 50;
+    if (currentCredits < requiredCredits) {
+      notify(`Insufficient credits. Required: ${requiredCredits}, Available: ${currentCredits}.`, 'error');
+      setStripeModalOpen(true);
+      return;
+    }
+
+    const ok = await confirm(`Are you sure you want to screen ${targets.length} candidate(s) under the job "${job.title}"? This will deduct ${requiredCredits} credit(s).`);
+    if (!ok) return;
+
+    setScreeningPreUploadedInProgress(true);
+    setScreeningPreUploadedLogs([`Initializing screening pipeline for ${targets.length} resumes...`]);
+    setScreeningPreUploadedProgress(0);
+
+    let completedCount = 0;
+    let successCount = 0;
+    let skippedCount = 0;
+
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        const candidate = targets[i];
+        
+        setScreeningPreUploadedLogs(prev => [...prev, `[${i + 1}/${targets.length}] Processing candidate: ${candidate.fullName}...`]);
+
+        if (!candidate.resumeText) {
+          setScreeningPreUploadedLogs(prev => [...prev, `❌ Error: No resume content found for ${candidate.fullName}. Skipping.`]);
+          skippedCount++;
+          completedCount++;
+          setScreeningPreUploadedProgress(Math.round((completedCount / targets.length) * 100));
+          continue;
+        }
+
+        try {
+          const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText, job.requirements || '');
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
+
+          await addDoc(collection(db, 'candidates'), {
+            ...screeningResult,
+            profileTags: generateProfileTags(screeningResult),
+            jobId: jobId,
+            organizationId: profile!.organizationId,
+            createdBy: auth.currentUser!.uid,
+            resumeHash: candidate.resumeHash || '',
+            resumeText: candidate.resumeText,
+            createdAt: serverTimestamp(),
+            status: 'processed'
+          });
+
+          await updateDoc(doc(db, 'users', auth.currentUser!.uid), {
+            credits: currentCredits - (successCount + 1)
+          });
+          refreshProfile();
+
+          successCount++;
+          completedCount++;
+          setScreeningPreUploadedLogs(prev => [...prev, `✅ Screened ${candidate.fullName} successfully! Match: ${screeningResult.scorecard?.compositeScore}%`]);
+          setScreeningPreUploadedProgress(Math.round((completedCount / targets.length) * 100));
+        } catch (err: any) {
+          console.error(err);
+          setScreeningPreUploadedLogs(prev => [...prev, `❌ Failed to screen ${candidate.fullName}: ${err.message || 'Unknown error'}`]);
+          skippedCount++;
+          completedCount++;
+          setScreeningPreUploadedProgress(Math.round((completedCount / targets.length) * 100));
+        }
+
+        if (i < targets.length - 1) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+
+      notify(`Screening completed. Success: ${successCount}, Skipped/Failed: ${skippedCount}`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      notify('Screening batch process interrupted.', 'error');
+    } finally {
+      setScreeningPreUploadedInProgress(false);
+      setIsSelectResumeModalOpen(false);
+      setSelectedPreUploadedResumes([]);
     }
   };
 
@@ -4988,6 +5106,62 @@ function JobDetail() {
     return [...placeholders, ...filteredRealCandidates];
   }, [filteredRealCandidates, uploadProgress, job]);
 
+  const uniquePreUploadedResumes = useMemo(() => {
+    const groups: { [key: string]: Candidate[] } = {};
+    allOrgCandidates.forEach(c => {
+      const key = c.resumeHash || `${(c.fullName || '').toLowerCase()}_${(c.email || '').toLowerCase()}`;
+      if (!key) return;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(c);
+    });
+
+    return Object.keys(groups).map(key => {
+      const list = groups[key];
+      const sorted = [...list].sort((a, b) => {
+        const scoreA = a.scorecard?.compositeScore ?? 0;
+        const scoreB = b.scorecard?.compositeScore ?? 0;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        const dateA = a.createdAt?.seconds ?? 0;
+        const dateB = b.createdAt?.seconds ?? 0;
+        return dateB - dateA;
+      });
+      
+      const bestCandidate = sorted[0];
+      const jobIds = Array.from(new Set(list.map(c => c.jobId).filter(Boolean)));
+      
+      return {
+        ...bestCandidate,
+        allJobIds: jobIds,
+        screeningsCount: list.length,
+        bestScore: Math.max(...list.map(c => c.scorecard?.compositeScore ?? 0)),
+        versions: list
+      };
+    });
+  }, [allOrgCandidates]);
+
+  const filteredPreUploadedResumes = useMemo(() => {
+    return uniquePreUploadedResumes.filter(r => {
+      const matchesSearch = 
+        (r.fullName || '').toLowerCase().includes(preUploadedSearchQuery.toLowerCase()) ||
+        (r.email || '').toLowerCase().includes(preUploadedSearchQuery.toLowerCase()) ||
+        (r.currentRole || '').toLowerCase().includes(preUploadedSearchQuery.toLowerCase()) ||
+        (r.currentCompany || '').toLowerCase().includes(preUploadedSearchQuery.toLowerCase());
+      return matchesSearch;
+    });
+  }, [uniquePreUploadedResumes, preUploadedSearchQuery]);
+
+  const filteredAndUnscreenedResumes = useMemo(() => {
+    return filteredPreUploadedResumes.map(r => {
+      const alreadyScreened = r.versions?.some((v: any) => v.jobId === jobId);
+      return {
+        ...r,
+        alreadyScreened
+      };
+    });
+  }, [filteredPreUploadedResumes, jobId]);
+
   const uniqueRoles = Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All');
 
   const passedThresh = job?.requirements?.thresholds?.passed ?? 80;
@@ -5042,6 +5216,15 @@ function JobDetail() {
           >
             <Sliders className="w-4 h-4" />
             Evaluation Settings
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => setIsSelectResumeModalOpen(true)}
+            className="px-5 h-12 rounded-xl text-sm font-bold border-slate-200 hover:bg-slate-50 transition-all text-slate-700 flex items-center gap-1.5"
+          >
+            <Database className="w-4 h-4 text-indigo-650" />
+            Screen Pre-uploaded Resumes
           </Button>
 
           <label className="cursor-pointer">
@@ -6203,6 +6386,155 @@ function JobDetail() {
               >
                 Close
               </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Screen Pre-uploaded Resumes Modal */}
+      <Modal
+        isOpen={isSelectResumeModalOpen}
+        onClose={() => {
+          if (!screeningPreUploadedInProgress) setIsSelectResumeModalOpen(false);
+        }}
+        title={screeningPreUploadedInProgress ? "Executing Resume Screening" : "Screen Pre-uploaded Resumes"}
+      >
+        {screeningPreUploadedInProgress ? (
+          <div className="p-6 space-y-6 text-center">
+            <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+              <svg className="absolute inset-0 w-full h-full -rotate-90">
+                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
+                <circle 
+                  cx="40" cy="40" r="36" 
+                  stroke="currentColor" strokeWidth="4" 
+                  strokeDasharray={226.2} 
+                  strokeDashoffset={226.2 - (screeningPreUploadedProgress / 100) * 226.2} 
+                  strokeLinecap="round" 
+                  fill="transparent" 
+                  className="text-indigo-650"
+                />
+              </svg>
+              <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex flex-col items-center justify-center shadow-inner">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-650" />
+              </div>
+            </div>
+            
+            <div className="space-y-1">
+              <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Analyzing Candidate Files</h4>
+              <p className="text-xs text-slate-500">Executing LLM scoring engine against target job profile.</p>
+            </div>
+
+            <div className="bg-slate-950 rounded-xl p-4 font-mono text-[9px] text-slate-400 h-40 overflow-y-auto border border-slate-900 space-y-1 text-left">
+              {screeningPreUploadedLogs.map((log, i) => (
+                <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
+                  <span className="text-cyan-400">➜</span> {log}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="p-6 space-y-6 text-left">
+            <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+              Select one or more candidates from your organization's historical talent pool to screen against this job role.
+            </p>
+
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <input
+                type="text"
+                className="w-full text-xs font-bold pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-650 text-slate-800"
+                placeholder="Search by name, role, or company..."
+                value={preUploadedSearchQuery}
+                onChange={(e) => setPreUploadedSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <div className="border border-slate-150 rounded-xl max-h-[350px] overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
+              {loadingOrgCandidates ? (
+                <div className="p-10 text-center flex flex-col items-center justify-center space-y-2">
+                  <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">Loading Resumes...</p>
+                </div>
+              ) : filteredAndUnscreenedResumes.length === 0 ? (
+                <div className="p-10 text-center text-slate-400 text-xs">No resumes found.</div>
+              ) : (
+                filteredAndUnscreenedResumes.map(candidate => {
+                  const candKey = candidate.resumeHash || `${(candidate.fullName || '').toLowerCase()}_${(candidate.email || '').toLowerCase()}`;
+                  const isSelected = selectedPreUploadedResumes.includes(candKey);
+                  return (
+                    <div 
+                      key={candidate.id}
+                      onClick={() => {
+                        if (candidate.alreadyScreened) return;
+                        if (isSelected) {
+                          setSelectedPreUploadedResumes(prev => prev.filter(k => k !== candKey));
+                        } else {
+                          setSelectedPreUploadedResumes(prev => [...prev, candKey]);
+                        }
+                      }}
+                      className={cn(
+                        "p-3 flex items-center justify-between gap-4 transition-colors cursor-pointer",
+                        candidate.alreadyScreened ? "bg-slate-50/60 opacity-60 cursor-not-allowed" : "hover:bg-slate-50/50"
+                      )}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          disabled={candidate.alreadyScreened}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPreUploadedResumes(prev => [...prev, candKey]);
+                            } else {
+                              setSelectedPreUploadedResumes(prev => prev.filter(k => k !== candKey));
+                            }
+                          }}
+                          className="w-4 h-4 rounded text-indigo-650 focus:ring-indigo-500 border-slate-300 cursor-pointer disabled:cursor-not-allowed"
+                        />
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-slate-800 truncate">{candidate.fullName}</h4>
+                          <p className="text-[10px] text-slate-400 font-semibold truncate">{candidate.email}</p>
+                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight truncate mt-0.5">
+                            {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {candidate.alreadyScreened ? (
+                          <span className="text-[8px] font-black bg-slate-200 text-slate-500 border border-slate-300 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                        ) : (
+                          <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-150">
+                            Best Fit: {candidate.bestScore}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <span className="text-[10px] text-indigo-650 font-bold uppercase tracking-wider">
+                Selected: {selectedPreUploadedResumes.length} ({selectedPreUploadedResumes.length} credit(s))
+              </span>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  className="text-xs uppercase tracking-wider h-9 px-4 rounded-xl"
+                  onClick={() => setIsSelectResumeModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+                  onClick={executePreUploadedScreening}
+                  disabled={selectedPreUploadedResumes.length === 0}
+                >
+                  <Play className="w-3.5 h-3.5" /> Execute Screening
+                </Button>
+              </div>
             </div>
           </div>
         )}
