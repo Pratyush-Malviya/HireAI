@@ -153,6 +153,84 @@ async function hashString(str: string) {
     .join('');
 }
 
+function generateProfileTags(screeningResult: any): string[] {
+  const tags = new Set<string>();
+  const role = (screeningResult?.currentRole || '').toLowerCase();
+  const skills = (screeningResult?.scorecard?.skillsAnalysis?.confirmed || []).map((s: string) => s.toLowerCase());
+  const allText = [role, ...skills].join(' ');
+
+  // --- Broad Domain Tags ---
+  const domainRules: [string[], string][] = [
+    [['sales', ' bd ', 'business development', 'account exec', 'revenue'], 'Sales'],
+    [['engineer', 'developer', 'swe', 'sde', 'programmer', 'coder', 'software'], 'Engineering'],
+    [['design', ' ux', ' ui', 'graphic'], 'Design'],
+    [['market', 'growth', 'seo', 'sem', 'brand'], 'Marketing'],
+    [['product manager', 'product lead', ' pm ', 'product own'], 'Product'],
+    [['data', 'analyst', ' ml ', 'machine learn', 'artificial intel', ' ai ', 'deep learn'], 'Data & AI'],
+    [[' hr ', 'human resource', 'people', 'recruiter', 'talent acq'], 'HR'],
+    [['finance', 'accounting', 'cfo', 'financial', 'controller'], 'Finance'],
+    [['operations', ' ops', 'logistics', 'supply chain'], 'Operations'],
+    [['manager', 'director', ' vp ', 'cto', 'ceo', 'coo', 'lead', 'head of', 'chief'], 'Leadership'],
+    [['support', 'success', 'customer experience', ' cx '], 'Customer Success'],
+    [['legal', 'compliance', 'counsel', 'attorney', 'lawyer'], 'Legal'],
+    [['devops', 'sre', 'infra', 'cloud', 'platform eng', 'site reliab'], 'DevOps & Infra'],
+    [['qa', 'test', 'quality assur', 'sdet', 'automation test'], 'QA'],
+    [['content', 'writer', 'editor', 'copywriter', 'technical writ'], 'Content'],
+  ];
+  for (const [keywords, tag] of domainRules) {
+    if (keywords.some(kw => allText.includes(kw))) tags.add(tag);
+  }
+
+  // --- Sub-Category Tags ---
+  const subRules: [string[], string][] = [
+    // Engineering sub-categories
+    [['react', 'angular', 'vue', 'next.js', 'nuxt', 'tailwind', 'css', 'html', 'frontend', 'front-end', 'front end', 'ui developer', 'web developer'], 'Frontend'],
+    [['node', 'express', 'django', 'flask', 'spring', 'rest api', 'microservice', 'backend', 'back-end', 'back end', 'fastapi', 'graphql', 'grpc', 'server-side'], 'Backend'],
+    [['full-stack', 'fullstack', 'full stack'], 'Full-Stack'],
+    [['react native', 'flutter', 'swift', 'kotlin', 'ios', 'android', 'mobile dev', 'xamarin'], 'Mobile'],
+    [['embedded', 'firmware', 'rtos', 'iot', 'microcontroller', 'fpga', 'vhdl'], 'Embedded'],
+    // Data & AI sub-categories
+    [['machine learn', 'deep learn', 'tensorflow', 'pytorch', 'nlp', 'computer vision', 'neural', 'llm', 'genai', 'generative ai'], 'Machine Learning'],
+    [['etl', 'data pipeline', 'spark', 'airflow', 'data warehouse', 'dbt', 'data engineer', 'kafka', 'databricks'], 'Data Engineering'],
+    [['tableau', 'power bi', 'looker', 'sql analyst', 'reporting', 'business intel', 'data analy'], 'Data Analytics'],
+    // DevOps & Infra sub-categories
+    [['aws', 'gcp', 'azure', 'cloud arch', 'cloud engineer'], 'Cloud'],
+    [['sre', 'site reliab', 'incident', 'monitoring', 'on-call', 'observability'], 'SRE'],
+    [['kubernetes', 'docker', 'terraform', 'ci/cd', 'infrastructure', 'helm', 'ansible'], 'Platform'],
+    // Design sub-categories
+    [['ux', 'user research', 'usability', 'information arch', 'ux design'], 'UX Design'],
+    [['ui design', 'visual design', 'figma', 'sketch', 'prototyp'], 'UI Design'],
+    [['product design', 'end-to-end design', 'design system'], 'Product Design'],
+    // Sales sub-categories
+    [['account executive', ' ae ', 'closing', 'quota', 'enterprise sales'], 'Account Executive'],
+    [['sdr', 'bdr', 'outbound', 'prospecting', 'pipeline gen', 'cold call'], 'SDR/BDR'],
+    [['sales manager', 'sales director', 'vp sales', 'cro', 'sales lead'], 'Sales Leadership'],
+    // Marketing sub-categories
+    [['growth market', 'acquisition', 'funnel', 'conversion', 'growth hack'], 'Growth'],
+    [['content strat', 'blog', 'seo content', 'editorial', 'content market'], 'Content Marketing'],
+    [['ppc', 'paid media', 'google ads', 'facebook ads', 'sem', 'performance market'], 'Performance'],
+    // HR sub-categories
+    [['recruiter', 'talent acq', 'sourcing', 'recruiting'], 'Recruiting'],
+    [['people ops', 'hrbp', 'employee experience', 'l&d', 'learning and dev'], 'People Ops'],
+    // Finance sub-categories
+    [['accountant', 'cpa', 'bookkeep', 'auditing', 'audit'], 'Accounting'],
+    [['financial plan', 'fp&a', 'forecasting', 'budgeting'], 'FP&A'],
+  ];
+  for (const [keywords, tag] of subRules) {
+    if (keywords.some(kw => allText.includes(kw))) tags.add(tag);
+  }
+
+  // Infer Full-Stack if both Frontend and Backend signals exist
+  if (tags.has('Frontend') && tags.has('Backend') && !tags.has('Full-Stack')) {
+    tags.add('Full-Stack');
+  }
+
+  // Fallback: If no tags generated, add 'General' 
+  if (tags.size === 0) tags.add('General');
+
+  return Array.from(tags);
+}
+
 async function getCachedScreening(resumeText: string, jobRequirements: any): Promise<any | null> {
   try {
     const combinedString = `${resumeText}||${JSON.stringify(jobRequirements)}`;
@@ -2854,6 +2932,10 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 <Briefcase className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Post Job</span>}
              </Link>
+             <Link to="/resume-bank" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                <Database className="w-5 h-5 shrink-0" /> 
+                {!isSidebarCollapsed && <span className="truncate">Resume Bank</span>}
+             </Link>
              <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Settings className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">HR Admin</span>}
@@ -2942,6 +3024,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 <div className="px-6 py-4 space-y-2 flex flex-col">
                     <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Dashboard</Link>
                     <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Post Job</Link>
+                    <Link to="/resume-bank" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Resume Bank</Link>
                     <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">HR Admin</Link>
                     {isUserAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors">System Admin</Link>
@@ -3117,6 +3200,689 @@ function Dashboard() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ResumeBank() {
+  const { profile, refreshProfile, setStripeModalOpen } = useProfile();
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedResumes, setSelectedResumes] = useState<string[]>([]);
+  const [isReScreenModalOpen, setIsReScreenModalOpen] = useState(false);
+  const [reScreeningCandidate, setReScreeningCandidate] = useState<any | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState('');
+  const [screeningInProgress, setScreeningInProgress] = useState(false);
+  const [screeningLogs, setScreeningLogs] = useState<string[]>([]);
+  const [screeningProgress, setScreeningProgress] = useState(0);
+  const { confirm, notify } = useNotification();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!auth.currentUser || !profile?.organizationId) return;
+
+    const jobsQuery = query(
+      collection(db, 'jobs'),
+      where('organizationId', '==', profile.organizationId),
+      where('status', '==', 'active')
+    );
+    const unsubJobs = onSnapshot(jobsQuery, (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Job[];
+      setJobs(data);
+    });
+
+    const candidatesQuery = query(
+      collection(db, 'candidates'),
+      where('organizationId', '==', profile.organizationId)
+    );
+    
+    const unsubCandidates = onSnapshot(candidatesQuery, async (snap) => {
+      const candData = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Candidate[];
+      
+      const candsToBackfill = candData.filter(c => c.resumeText && (!c.profileTags || c.profileTags.length === 0));
+      if (candsToBackfill.length > 0) {
+        console.log(`[ResumeBank] Retroactively backfilling tags for ${candsToBackfill.length} candidates...`);
+        const batch = writeBatch(db);
+        let count = 0;
+        for (const c of candsToBackfill.slice(0, 20)) {
+          const derivedTags = generateProfileTags(c);
+          batch.update(doc(db, 'candidates', c.id), { profileTags: derivedTags });
+          count++;
+        }
+        if (count > 0) {
+          try {
+            await batch.commit();
+            console.log(`[ResumeBank] Backfilled tags for ${count} candidates.`);
+          } catch (e) {
+            console.error('[ResumeBank] Failed backfilling tags:', e);
+          }
+        }
+      }
+
+      setCandidates(candData);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubJobs();
+      unsubCandidates();
+    };
+  }, [profile]);
+
+  const uniqueResumes = useMemo(() => {
+    const groups: { [key: string]: Candidate[] } = {};
+    candidates.forEach(c => {
+      const key = c.resumeHash || `${(c.fullName || '').toLowerCase()}_${(c.email || '').toLowerCase()}`;
+      if (!key) return;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(c);
+    });
+
+    return Object.keys(groups).map(key => {
+      const list = groups[key];
+      const sorted = [...list].sort((a, b) => {
+        const scoreA = a.scorecard?.compositeScore ?? 0;
+        const scoreB = b.scorecard?.compositeScore ?? 0;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        const dateA = a.createdAt?.seconds ?? 0;
+        const dateB = b.createdAt?.seconds ?? 0;
+        return dateB - dateA;
+      });
+      
+      const bestCandidate = sorted[0];
+      const jobIds = Array.from(new Set(list.map(c => c.jobId).filter(Boolean)));
+      const allCandidateTags = Array.from(new Set(list.flatMap(c => c.profileTags || [])));
+
+      return {
+        ...bestCandidate,
+        allJobIds: jobIds,
+        profileTags: allCandidateTags.length > 0 ? allCandidateTags : (bestCandidate.profileTags || []),
+        screeningsCount: list.length,
+        bestScore: Math.max(...list.map(c => c.scorecard?.compositeScore ?? 0)),
+        versions: list
+      };
+    });
+  }, [candidates]);
+
+  const allUniqueTags = useMemo(() => {
+    const tags = new Set<string>();
+    uniqueResumes.forEach(r => {
+      r.profileTags?.forEach(t => tags.add(t));
+    });
+    return Array.from(tags).sort();
+  }, [uniqueResumes]);
+
+  const filteredResumes = useMemo(() => {
+    return uniqueResumes
+      .filter(r => {
+        const matchesSearch = 
+          (r.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (r.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (r.currentRole || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (r.currentCompany || '').toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesTags = 
+          selectedTags.length === 0 || 
+          (r.profileTags || []).some(tag => selectedTags.includes(tag));
+
+        return matchesSearch && matchesTags;
+      })
+      .sort((a, b) => {
+        const dateA = a.createdAt?.seconds ?? 0;
+        const dateB = b.createdAt?.seconds ?? 0;
+        return dateB - dateA;
+      });
+  }, [uniqueResumes, searchQuery, selectedTags]);
+
+  const handleBulkReScreen = () => {
+    if (selectedResumes.length === 0) {
+      notify('Select at least one resume to re-screen.', 'info');
+      return;
+    }
+    setReScreeningCandidate(null);
+    setSelectedJobId('');
+    setIsReScreenModalOpen(true);
+  };
+
+  const handleSingleReScreen = (cand: any) => {
+    setReScreeningCandidate(cand);
+    setSelectedJobId('');
+    setIsReScreenModalOpen(true);
+  };
+
+  const executeReScreening = async () => {
+    if (!selectedJobId) {
+      notify('Please select a target job.', 'error');
+      return;
+    }
+
+    const targetJob = jobs.find(j => j.id === selectedJobId);
+    if (!targetJob) {
+      notify('Target job not found.', 'error');
+      return;
+    }
+
+    const targets = reScreeningCandidate ? [reScreeningCandidate] : filteredResumes.filter(r => {
+      const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
+      return selectedResumes.includes(key);
+    });
+    
+    if (targets.length === 0) {
+      notify('No valid candidates found for re-screening.', 'error');
+      return;
+    }
+
+    const requiredCredits = targets.length;
+    const currentCredits = profile?.credits !== undefined ? profile.credits : 50;
+    if (currentCredits < requiredCredits) {
+      notify(`Insufficient credits. Required: ${requiredCredits}, Available: ${currentCredits}.`, 'error');
+      setStripeModalOpen(true);
+      return;
+    }
+
+    const ok = await confirm(`Are you sure you want to screen ${targets.length} candidate(s) under the job "${targetJob.title}"? This will deduct ${requiredCredits} credit(s).`);
+    if (!ok) return;
+
+    setScreeningInProgress(true);
+    setScreeningLogs([`Initializing screening pipeline for ${targets.length} resumes...`]);
+    setScreeningProgress(0);
+
+    let completedCount = 0;
+    let skippedCount = 0;
+    let successCount = 0;
+
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        const candidate = targets[i];
+        
+        setScreeningLogs(prev => [...prev, `[${i + 1}/${targets.length}] Processing candidate: ${candidate.fullName}...`]);
+
+        const isAlreadyScreened = candidate.versions?.some((v: any) => v.jobId === selectedJobId);
+        if (isAlreadyScreened) {
+          setScreeningLogs(prev => [...prev, `⚠️ ${candidate.fullName} has already been screened for this job. Skipping.`]);
+          skippedCount++;
+          completedCount++;
+          setScreeningProgress(Math.round((completedCount / targets.length) * 100));
+          continue;
+        }
+
+        if (!candidate.resumeText) {
+          setScreeningLogs(prev => [...prev, `❌ Error: No resume content found for ${candidate.fullName}. Skipping.`]);
+          skippedCount++;
+          completedCount++;
+          setScreeningProgress(Math.round((completedCount / targets.length) * 100));
+          continue;
+        }
+
+        try {
+          const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText, targetJob.requirements || '');
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, targetJob.requirements);
+
+          await addDoc(collection(db, 'candidates'), {
+            ...screeningResult,
+            profileTags: generateProfileTags(screeningResult),
+            jobId: selectedJobId,
+            organizationId: profile!.organizationId,
+            createdBy: auth.currentUser!.uid,
+            resumeHash: candidate.resumeHash || '',
+            resumeText: candidate.resumeText,
+            createdAt: serverTimestamp(),
+            status: 'processed'
+          });
+
+          await updateDoc(doc(db, 'users', auth.currentUser!.uid), {
+            credits: currentCredits - (successCount + 1)
+          });
+          refreshProfile();
+
+          successCount++;
+          completedCount++;
+          setScreeningLogs(prev => [...prev, `✅ Screened ${candidate.fullName} successfully! Match: ${screeningResult.scorecard?.compositeScore}%`]);
+          setScreeningProgress(Math.round((completedCount / targets.length) * 100));
+        } catch (err: any) {
+          console.error(err);
+          setScreeningLogs(prev => [...prev, `❌ Failed to screen ${candidate.fullName}: ${err.message || 'Unknown error'}`]);
+          skippedCount++;
+          completedCount++;
+          setScreeningProgress(Math.round((completedCount / targets.length) * 100));
+        }
+
+        if (i < targets.length - 1) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+
+      notify(`Screening completed. Success: ${successCount}, Skipped/Failed: ${skippedCount}`, 'success');
+    } catch (err: any) {
+      console.error(err);
+      notify('Screening batch process interrupted.', 'error');
+    } finally {
+      setScreeningInProgress(false);
+      setIsReScreenModalOpen(false);
+      setSelectedResumes([]);
+      setSelectedJobId('');
+    }
+  };
+
+  const getJobTitle = (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    return job ? job.title : 'Deleted Campaign';
+  };
+
+  const stats = useMemo(() => {
+    const totalUnique = uniqueResumes.length;
+    const totalScreenings = candidates.length;
+    const scores = uniqueResumes.map(r => r.bestScore).filter(s => typeof s === 'number' && !isNaN(s));
+    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    
+    const tagCounts: { [key: string]: number } = {};
+    uniqueResumes.flatMap(r => r.profileTags || []).forEach(t => {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
+    });
+    const topTag = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a])[0] || 'None';
+
+    return { totalUnique, totalScreenings, avgScore, topTag };
+  }, [uniqueResumes, candidates]);
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500 text-left">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Resume Bank</h1>
+          <p className="text-slate-500 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl"
+            onClick={() => setSelectedResumes([])}
+            disabled={selectedResumes.length === 0}
+          >
+            Clear Selection
+          </Button>
+          <Button
+            variant="primary"
+            className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl"
+            onClick={handleBulkReScreen}
+            disabled={selectedResumes.length === 0}
+          >
+            <Zap className="w-3.5 h-3.5" /> Re-screen Selected ({selectedResumes.length})
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6 bg-white border border-slate-100 shadow-sm flex items-center gap-4 rounded-2xl">
+          <div className="p-3 bg-indigo-50 text-indigo-650 rounded-2xl">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Total Candidates</span>
+            <span className="text-2xl font-black">{stats.totalUnique}</span>
+          </div>
+        </Card>
+        <Card className="p-6 bg-white border border-slate-100 shadow-sm flex items-center gap-4 rounded-2xl">
+          <div className="p-3 bg-cyan-50 text-cyan-600 rounded-2xl">
+            <Database className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Screenings Run</span>
+            <span className="text-2xl font-black">{stats.totalScreenings}</span>
+          </div>
+        </Card>
+        <Card className="p-6 bg-white border border-slate-100 shadow-sm flex items-center gap-4 rounded-2xl">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <Award className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Avg. Best Fit</span>
+            <span className="text-2xl font-black">{stats.avgScore}%</span>
+          </div>
+        </Card>
+        <Card className="p-6 bg-white border border-slate-100 shadow-sm flex items-center gap-4 rounded-2xl">
+          <div className="p-3 bg-violet-50 text-violet-650 rounded-2xl">
+            <Brain className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Top Domain Track</span>
+            <span className="text-xs font-black truncate max-w-[150px] block mt-1 uppercase tracking-tight text-violet-750 bg-violet-50/50 px-2 py-0.5 rounded-lg border border-violet-100/50">{stats.topTag}</span>
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-12 gap-8 items-start">
+        <aside className="col-span-12 lg:col-span-3 space-y-6">
+          <Card className="p-6 bg-white border border-slate-100 shadow-sm rounded-2xl">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-6">Filter Resumes</h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Search</label>
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                  <input
+                    type="text"
+                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-650 text-slate-800"
+                    placeholder="Name, role, company..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {allUniqueTags.length > 0 && (
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Filter by Tags</label>
+                  <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+                    {allUniqueTags.map(tag => {
+                      const isSelected = selectedTags.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedTags(prev => prev.filter(t => t !== tag));
+                            } else {
+                              setSelectedTags(prev => [...prev, tag]);
+                            }
+                          }}
+                          className={cn(
+                            "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            isSelected
+                              ? "bg-indigo-600 border-indigo-700 text-white shadow-sm"
+                              : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-350"
+                          )}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        </aside>
+
+        <div className="col-span-12 lg:col-span-9">
+          <Card className="overflow-hidden bg-white border border-slate-100 shadow-sm rounded-2xl">
+            {loading ? (
+              <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
+                <Loader2 className="w-10 h-10 text-indigo-650 animate-spin" />
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Resume Bank...</p>
+              </div>
+            ) : filteredResumes.length === 0 ? (
+              <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
+                <Database className="w-12 h-12 text-slate-300 animate-pulse" />
+                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">No Resumes Found</h3>
+                <p className="text-slate-400 text-xs">Adjust your search parameters to find profiles.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left min-w-[850px] table-fixed">
+                  <thead className="bg-slate-50 border-b border-slate-100">
+                    <tr>
+                      <th className="w-12 px-6 py-4">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded text-indigo-650 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                          checked={filteredResumes.length > 0 && filteredResumes.every(r => {
+                            const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
+                            return selectedResumes.includes(key);
+                          })}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              const keys = filteredResumes.map(r => r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`).filter(Boolean);
+                              setSelectedResumes(keys);
+                            } else {
+                              setSelectedResumes([]);
+                            }
+                          }}
+                        />
+                      </th>
+                      <th className="w-1/4 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
+                      <th className="w-1/3 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tags & Career Track</th>
+                      <th className="w-1/5 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Original Campaign</th>
+                      <th className="w-24 px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Screenings</th>
+                      <th className="w-32 px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredResumes.map(candidate => {
+                      const candKey = candidate.resumeHash || `${(candidate.fullName || '').toLowerCase()}_${(candidate.email || '').toLowerCase()}`;
+                      const isSelected = selectedResumes.includes(candKey);
+                      
+                      return (
+                        <tr
+                          key={candidate.id}
+                          className={cn(
+                            "transition-colors hover:bg-slate-50/50 cursor-pointer",
+                            isSelected && "bg-indigo-50/20"
+                          )}
+                          onClick={() => {
+                            if (candidate.id) navigate(`/candidates/${candidate.id}`);
+                          }}
+                        >
+                          <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 rounded text-indigo-650 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedResumes(prev => [...prev, candKey]);
+                                } else {
+                                  setSelectedResumes(prev => prev.filter(k => k !== candKey));
+                                }
+                              }}
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center font-black text-slate-400 text-xs shrink-0">
+                                {candidate.fullName?.charAt(0) || '?'}
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-extrabold text-slate-900 truncate">{candidate.fullName}</h4>
+                                <p className="text-[10px] text-slate-400 font-bold truncate">{candidate.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="space-y-1.5">
+                              <p className="text-[10px] text-slate-500 font-black uppercase tracking-wide truncate">
+                                {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
+                              </p>
+                              <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
+                                {candidate.profileTags?.map((tag: string, i: number) => (
+                                  <span key={i} className="px-1.5 py-0.5 bg-violet-50 text-violet-600 rounded-md border border-violet-100/50 text-[8px] font-bold tracking-tight">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-[10px] text-slate-500 font-extrabold truncate">
+                              {getJobTitle(candidate.jobId)}
+                            </p>
+                            <p className="text-[8px] text-slate-400 mt-0.5 uppercase tracking-widest font-black">
+                              {formatDate(candidate.createdAt)}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="inline-flex flex-col items-center">
+                              <span className="text-[10px] font-black text-slate-800 bg-slate-100 border border-slate-200/50 px-2 py-0.5 rounded-full leading-none mb-1">
+                                {candidate.screeningsCount}x
+                              </span>
+                              <span className={cn(
+                                "text-[9px] font-black leading-none uppercase",
+                                candidate.bestScore >= 80 ? "text-green-600" :
+                                candidate.bestScore >= 60 ? "text-amber-600" : "text-red-600"
+                              )}>
+                                Best: {candidate.bestScore}%
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-650 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-100/60 flex items-center gap-1.5 ml-auto"
+                              onClick={() => handleSingleReScreen(candidate)}
+                            >
+                              <Zap className="w-3 h-3 text-indigo-500 fill-indigo-500/20" /> Re-Screen
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={isReScreenModalOpen}
+        onClose={() => {
+          if (!screeningInProgress) setIsReScreenModalOpen(false);
+        }}
+        title={screeningInProgress ? "Executing Forensic Screening" : "Select Target Pipeline"}
+      >
+        {screeningInProgress ? (
+          <div className="p-6 space-y-6 text-center">
+            <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+              <svg className="absolute inset-0 w-full h-full -rotate-90">
+                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
+                <circle 
+                  cx="40" cy="40" r="36" 
+                  stroke="currentColor" strokeWidth="4" 
+                  strokeDasharray={226.2} 
+                  strokeDashoffset={226.2 - (screeningProgress / 100) * 226.2} 
+                  strokeLinecap="round" 
+                  fill="transparent" 
+                  className="text-indigo-650"
+                />
+              </svg>
+              <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex flex-col items-center justify-center shadow-inner">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-650" />
+              </div>
+            </div>
+            
+            <div className="space-y-1">
+              <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Analyzing Candidate Files</h4>
+              <p className="text-xs text-slate-500">Executing LLM scoring engine against target job profile.</p>
+            </div>
+
+            <div className="bg-slate-950 rounded-xl p-4 font-mono text-[9px] text-slate-400 h-40 overflow-y-auto border border-slate-900 space-y-1 text-left">
+              {screeningLogs.map((log, i) => (
+                <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
+                  <span className="text-cyan-400">➜</span> {log}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="p-6 space-y-6 text-left">
+            <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl space-y-1 text-left">
+              <h5 className="text-[10px] font-black uppercase text-slate-450 tracking-wider">Candidate Scope</h5>
+              <p className="text-xs font-bold text-slate-800">
+                {reScreeningCandidate ? `Re-screening candidate: ${reScreeningCandidate.fullName}` : `Bulk screening: ${selectedResumes.length} selected resumes`}
+              </p>
+              <p className="text-[10px] text-indigo-650 font-semibold mt-1">
+                Cost: {reScreeningCandidate ? '1 credit' : `${selectedResumes.length} credits`}
+              </p>
+            </div>
+
+            <div className="space-y-2 text-left">
+              <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Target Job Position</label>
+              {jobs.length === 0 ? (
+                <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 text-center">
+                  <p className="text-xs text-slate-500 font-medium">No active jobs. Please post a job first.</p>
+                  <Button
+                    variant="outline"
+                    className="mt-3 text-[10px] uppercase font-bold tracking-wider"
+                    onClick={() => {
+                      setIsReScreenModalOpen(false);
+                      navigate('/jobs/new');
+                    }}
+                  >
+                    Post New Job
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                  {jobs.map(job => {
+                    const alreadyScreened = reScreeningCandidate?.versions?.some((v: any) => v.jobId === job.id);
+                    return (
+                      <button
+                        key={job.id}
+                        type="button"
+                        disabled={alreadyScreened}
+                        onClick={() => setSelectedJobId(job.id)}
+                        className={cn(
+                          "w-full text-left p-3.5 border rounded-xl flex items-center justify-between transition-all group",
+                          selectedJobId === job.id
+                            ? "border-indigo-600 bg-indigo-50/20 shadow-sm"
+                            : alreadyScreened
+                              ? "border-slate-200 bg-slate-50/60 opacity-60 cursor-not-allowed"
+                              : "border-slate-200 hover:border-indigo-250 bg-white hover:bg-slate-50/20"
+                        )}
+                      >
+                        <div className="min-w-0">
+                          <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-indigo-650" : "text-slate-800")}>
+                            {job.title}
+                          </h4>
+                          <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{job.department || 'General'}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {alreadyScreened && (
+                            <span className="text-[8px] font-black bg-slate-100 text-slate-400 border border-slate-200 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                          )}
+                          {!alreadyScreened && (
+                            <div className={cn(
+                              "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
+                              selectedJobId === job.id ? "border-indigo-600 bg-indigo-600" : "border-slate-200 group-hover:border-indigo-300"
+                            )}>
+                              {selectedJobId === job.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <Button
+                variant="outline"
+                className="text-xs uppercase tracking-wider h-9 px-4 rounded-xl"
+                onClick={() => setIsReScreenModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl"
+                onClick={executeReScreening}
+                disabled={!selectedJobId}
+              >
+                <Play className="w-3.5 h-3.5" /> Execute Screening
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
@@ -3549,6 +4315,7 @@ function JobDetail() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [roleFilter, setRoleFilter] = useState('All');
   const [sortBy, setSortBy] = useState('Score');
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<{ 
     total: number; 
     current: number; 
@@ -3679,6 +4446,7 @@ function JobDetail() {
           
           await updateDoc(doc(db, 'candidates', candidate.id), {
             ...screeningResult,
+            profileTags: generateProfileTags(screeningResult),
             status: 'processed',
             lastRetriedAt: serverTimestamp()
           });
@@ -3840,6 +4608,7 @@ function JobDetail() {
             
             await addDoc(collection(db, 'candidates'), {
               ...screeningResult,
+              profileTags: generateProfileTags(screeningResult),
               jobId: jId,
               organizationId: profile!.organizationId,
               createdBy: auth.currentUser!.uid,
@@ -3976,6 +4745,7 @@ function JobDetail() {
       
       await updateDoc(doc(db, 'candidates', candidate.id), {
         ...screeningResult,
+        profileTags: generateProfileTags(screeningResult),
         status: 'processed',
         lastRetriedAt: serverTimestamp()
       });
@@ -4157,6 +4927,16 @@ function JobDetail() {
     }
   };
 
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    candidates.forEach(c => {
+      if (c.profileTags) {
+        c.profileTags.forEach(t => tags.add(t));
+      }
+    });
+    return Array.from(tags).sort();
+  }, [candidates]);
+
   const filteredRealCandidates = useMemo(() => {
     return candidates
       .filter(c => {
@@ -4176,7 +4956,8 @@ function JobDetail() {
         }
 
         const matchesRole = roleFilter === 'All' || c.currentRole === roleFilter;
-        return matchesSearch && matchesStatus && matchesRole;
+        const matchesTags = tagFilter.length === 0 || (c.profileTags || []).some(t => tagFilter.includes(t));
+        return matchesSearch && matchesStatus && matchesRole && matchesTags;
       })
       .sort((a, b) => {
         if (sortBy === 'Score') return b.scorecard.compositeScore - a.scorecard.compositeScore;
@@ -4185,7 +4966,7 @@ function JobDetail() {
         const timeB = b.createdAt?.seconds || Date.now() / 1000;
         return timeB - timeA;
       });
-  }, [candidates, debouncedSearch, statusFilter, roleFilter, sortBy]);
+  }, [candidates, debouncedSearch, statusFilter, roleFilter, sortBy, tagFilter]);
 
   const filteredCandidates = useMemo(() => {
     if (!uploadProgress || uploadProgress.current >= uploadProgress.total) {
@@ -4359,6 +5140,36 @@ function JobDetail() {
                     ))}
                   </div>
                 </div>
+                {allTags.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Tags</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+                      {allTags.map(tag => {
+                        const isChecked = tagFilter.includes(tag);
+                        return (
+                          <label key={`tag-filter-${tag}`} className="flex items-center gap-3 cursor-pointer group">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+                              checked={isChecked} 
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setTagFilter(prev => [...prev, tag]);
+                                } else {
+                                  setTagFilter(prev => prev.filter(t => t !== tag));
+                                }
+                              }} 
+                            />
+                            <span className={cn(
+                              "text-xs font-bold transition-colors truncate",
+                              isChecked ? "text-indigo-600 font-black" : "text-slate-500 group-hover:text-slate-900"
+                            )}>{tag}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </details>
           </div>
@@ -4717,6 +5528,15 @@ function JobDetail() {
                             </div>
                           )}
                         </div>
+                        {candidate.profileTags && candidate.profileTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {candidate.profileTags.map((tag, i) => (
+                              <span key={i} className="px-1.5 py-0.5 bg-violet-50 text-violet-600 rounded-md border border-violet-100/50 text-[8px] font-black uppercase tracking-widest leading-none">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-8 h-14 overflow-hidden content-start">
@@ -4915,6 +5735,15 @@ function JobDetail() {
                                     )}
                                   </div>
                                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{candidate.currentRole}</p>
+                                  {candidate.profileTags && candidate.profileTags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {candidate.profileTags.map((tag, i) => (
+                                        <span key={i} className="px-1.5 py-0.5 bg-violet-50 text-violet-600 rounded-md border border-violet-100/50 text-[8px] font-bold tracking-tight">
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
                              </div>
                           </td>
@@ -12501,6 +13330,7 @@ export default function App() {
                     <Route path="/jobs/:jobId" element={<JobDetail />} />
                     <Route path="/candidates/:candidateId" element={<CandidateDetail />} />
                     <Route path="/org-admin" element={<OrgAdminPanel />} />
+                    <Route path="/resume-bank" element={<ResumeBank />} />
                     <Route path="/admin" element={<SuperAdminPanel />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </>

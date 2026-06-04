@@ -151,6 +151,7 @@ export interface Candidate {
   createdBy: string;
   parsedData: any;
   resumeText?: string;
+  profileTags?: string[];
   createdAt: any;
   status: 'processed' | 'shortlisted' | 'rejected';
   interviewStatus?: 'none' | 'invited' | 'in_progress' | 'completed' | 'failed';
