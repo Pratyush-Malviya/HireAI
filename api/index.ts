@@ -1380,6 +1380,49 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const d5_name = custom.culturalRoleFit?.name || "culturalRoleFit (D5)";
     const d5_desc = custom.culturalRoleFit?.description || "Tenure patterns (job-hopping), growth trajectory consistency.";
 
+    // Stage 1: Adversarial Auditor
+    const auditorResponse = await generateContentWithRetry({
+      model: "gemini-3.5-flash",
+      contents: `You are an Adversarial Talent Auditor. Your task is to audit the candidate's resume for any red flags, gaps, anomalies, or stability concerns.
+      Compare the candidate's claimed history with the job requirements and check for:
+      - Tenure instability, job-hopping (average tenure under 1.5 years per job).
+      - Employment gaps exceeding 12 months.
+      - Suspicious, inflated, or unbacked metrics.
+      - Any credential or experience inconsistencies.
+      
+      JOB REQUIREMENTS:
+      ${JSON.stringify(jobRequirements, null, 2)}
+      
+      CANDIDATE RESUME:
+      ${resumeText}
+      
+      Output a concise, critical audit report highlighting all detected anomalies and red flags.`,
+      config: { temperature: 0.1 }
+    });
+    const auditorReport = auditorResponse.text || "No major anomalies flagged.";
+
+    // Stage 2: Technical/Ecosystem Screener
+    const technicalResponse = await generateContentWithRetry({
+      model: "gemini-3.5-flash",
+      contents: `You are a Technical and Stack Screener. Your task is to perform an objective evaluation of the candidate's technical skills, tool stack, and experience depth against the job requirements.
+      Assess:
+      - Overlap with must-have and nice-to-have skills.
+      - Proximity of their titles and roles to the target role.
+      - Seniority tier and tenure alignment.
+      - Tech projects complexity and scope.
+      
+      JOB REQUIREMENTS:
+      ${JSON.stringify(jobRequirements, null, 2)}
+      
+      CANDIDATE RESUME:
+      ${resumeText}
+      
+      Output a concise technical capability report listing confirmed, absent, and inferred skills, along with seniority alignment.`,
+      config: { temperature: 0.1 }
+    });
+    const technicalReport = technicalResponse.text || "No technical assessment available.";
+
+    // Stage 3: Synthesizer (Executive Talent Solutions Architect)
     const scoringProtocol = `SCORING PROTOCOL (D6+ v2.0):
       Analyze and score the candidate on 5 core dimensions (Each 0-100), mapping your analysis to these json keys: 'skillsMatch', 'experienceFit', 'education', 'achievements', 'culturalRoleFit'.
       To ensure absolute rigidity, accuracy, and consistency superior to manual human evaluations, you MUST strictly grade each dimension according to the following objective rubric:
@@ -1423,34 +1466,35 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 
     const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
-      contents: `You are a Principal Talent Solutions Architect and Adversarial Talent Auditor. 
-      Your mission: Perform a forensic, high-fidelity screening of the candidate resume against specific Job Requirements and custom screening criteria.
+      contents: `You are a Principal Talent Solutions Architect. Your mission is to perform a forensic, high-fidelity compilation of the candidate's screening report by synthesizing detailed evaluations from an Adversarial Auditor and a Technical Screener.
       
       ${scoringProtocol}
   
+      INPUTS:
+      - Adversarial Auditor's Assessment:
+      ${auditorReport}
+      
+      - Technical & Stack Screener's Assessment:
+      ${technicalReport}
+  
       SIGNAL REQUIREMENTS:
-      - Extract the candidate's personal contact details: 'fullName', 'email' (parse carefully from the header or contact section of the resume), 'phone', 'location', 'currentRole', 'currentCompany', 'totalExperience', and a brief 'oneLineSummary'.
-      - Identify specific "Penalties" (e.g., gaps > 12mo, job-hopping < 1yr avg tenure, resume < 300 words).
-      - Identify specific "Bonuses" (e.g., exact match on 5+ keywords, referral, previous hire from tier-1 firms).
+      - Extract candidate contact details: 'fullName', 'email', 'phone', 'location', 'currentRole', 'currentCompany', 'totalExperience', and 'oneLineSummary'.
+      - Identify specific "Penalties" (stability gaps, tenure issues, etc.).
+      - Identify specific "Bonuses" (firm tiering, keywords match density, etc.).
       - Detect "Red Flags" with severity levels.
   
-      MANDATE: 
-      - Be a strict filter. 
-      - Calculate a base compositeScore using these dimensions.
-      - Provide deep rationales and citations for every claim.
-      
-      MANDATE FOR RECOMMENDATION SUMMARY (under scorecard.recommendation.summary):
+      MANDATE FOR RECOMMENDATION SUMMARY (scorecard.recommendation.summary):
       - This must be an extremely detailed, rich, multi-paragraph Markdown-formatted executive deconstruction (at least 300 words).
-      - Utilize markdown structures (### and #### and bullet lists) to present it professionally on the landing dashboard.
+      - Use markdown headers and lists.
       - It MUST contain the following sections:
          1. ### **D6 Executive Summary & Match Narrative**
-            A high-density synthesis of their fit, core capabilities, and general match strength.
+            A high-density synthesis of fit and capability.
          2. ### **Dimensional Performance Ledger**
-            An analytical breakdown explaining the scores achieved in skillsMatch (D1), experienceFit (D2), education (D3), achievements (D4), and culturalRoleFit (D5). Make sure to refer to the custom names specified: ${d1_name}, ${d2_name}, ${d3_name}, ${d4_name}, ${d5_name}.
+            A breakdown of D1 (${d1_name}), D2 (${d2_name}), D3 (${d3_name}), D4 (${d4_name}), and D5 (${d5_name}).
          3. ### **D6 Auditing, Penalties & Anomalies**
-            An adversarial review explaining any gaps, stability patterns, short resumes, or other detected anomalies.
+            An adversarial review of gaps, stability, or other detected anomalies.
          4. ### **Hiring Recommendation & Interview Strategy**
-            Prescriptive advice with exact questions tailored to probe their specific experience and skill gaps during upcoming live panels.
+            Prescriptive interview questions tailored to probe findings.
       
       JOB REQUIREMENTS:
       ${JSON.stringify(jobRequirements, null, 2)}
@@ -1555,27 +1599,115 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("AI Key missing");
     }
-    const prompt = `You are an elite Professional Intelligence Agent specializing in executive-level background verification and deep-signal talent research.
+
+    // Stage 1: Query Planner & Rewriter
+    const plannerPrompt = `You are a professional Query Rewriting and Search Optimization agent.
+    Given candidate name, role, company, and background details, expand and rewrite this context into exactly 3 optimized search queries targeting public professional profiles (LinkedIn, GitHub, StackOverflow), tech blogs (Medium, Dev.to), patents, open-source work, or news.
+    
+    CANDIDATE: ${candidateName}
+    CURRENT ROLE: ${role} at ${company}
+    DETAILS: ${details}
+    
+    Output exactly 3 plain text queries, one per line. Do not include numbering, formatting, or introduction.`;
+
+    const plannerResponse = await generateContentWithRetry({
+      model: "gemini-3.5-flash",
+      contents: plannerPrompt,
+      config: { temperature: 0.1 }
+    });
+
+    const searchQueriesText = plannerResponse.text || `${candidateName} ${company} ${role}`;
+    const searchQueries = searchQueriesText.split("\n").map(q => q.trim()).filter(q => q.length > 0).slice(0, 3);
+    if (searchQueries.length === 0) {
+      searchQueries.push(`${candidateName} ${company} ${role}`);
+    }
+
+    // Stage 2: OSINT Collector with Google Search Grounding
+    const collectorPrompt = `You are an OSINT Intelligence Agent specializing in professional background scans.
+    Your mission is to perform active search verification for the candidate: ${candidateName} who claims to be a ${role} at ${company}.
+    
+    Perform search scans sequentially using each of the following queries:
+    ${searchQueries.map((q, idx) => `${idx + 1}. "${q}"`).join("\n")}
+    
+    For each query, compile a dossier of:
+    - Found profile URLs (LinkedIn, GitHub, StackOverflow, Kaggle, Medium, personal sites)
+    - Project contributions, open-source work, public accomplishments
+    - Employment history validation signs
+    - Location and title alignment
+    
+    Write a detailed, source-cited factual report of your findings.`;
+
+    let collectorResponse;
+    try {
+      collectorResponse = await generateContentWithRetry({
+        model: "gemini-3.5-flash",
+        contents: collectorPrompt,
+        config: {
+          tools: [{ googleSearch: {} }],
+          temperature: 0.2
+        }
+      });
+    } catch (groundingError) {
+      console.warn("OSINT Collector with Grounding failed. Retrying without Search Grounding tool:", groundingError);
+      collectorResponse = await generateContentWithRetry({
+        model: "gemini-3.5-flash",
+        contents: collectorPrompt,
+        config: { temperature: 0.2 }
+      });
+    }
+
+    const osintDossier = collectorResponse.text || "No public data found.";
+
+    // Stage 3: Adversarial Verification Auditor
+    const auditorPrompt = `You are an Adversarial Verification Auditor.
+    Review the OSINT Dossier against the candidate's claimed background.
+    
+    CLAIMED BACKGROUND:
+    Name: ${candidateName}
+    Role: ${role}
+    Company: ${company}
+    Known Details: ${details}
+    
+    OSINT DOSSIER:
+    ${osintDossier}
+    
+    Calculate and output:
+    1. Identity Confidence Score (0-100):
+       - Exact email/phone match -> +40
+       - LinkedIn + company match -> +25
+       - GitHub + project match -> +20
+       - Location match -> +10
+       - Skill overlap -> +5
+    
+    2. Verification Audit & Risk Signals:
+       - Assess risk score (0-100) detailing if they have inflated credentials, short tenures, or contradictory timelines.
+       - Highlight any timeline discrepancies or stable employment gaps.
+       
+    Output a verification report detailing your logical audits.`;
+
+    const auditResponse = await generateContentWithRetry({
+      model: "gemini-3.5-flash",
+      contents: auditorPrompt,
+      config: { temperature: 0.1 }
+    });
+
+    const verificationAudit = auditResponse.text || "Verification audit completed.";
+
+    // Stage 4: Synthesizer (Executive Reporter)
+    const prompt = `You are an elite Synthesis Reporter. Your task is to compile the final candidate background intelligence report by synthesizing the OSINT dossier and the verification audit against the claimed candidate details.
     
     MISSION: Conduct a comprehensive, multi-source professional audit of the candidate: ${candidateName}.
     CURRENT TARGET: ${role} at ${company}.
     KNOWN CONTEXT: ${details}
     
-    RESOURCES TO SEARCH & SCAN:
-    1. Professional Platforms: LinkedIn, GitHub, StackOverflow, Kaggle, Behance, Dribbble, Medium, Dev.to, Google Scholar, ResearchGate, Personal portfolio websites, Crunchbase, Product Hunt, open-source ecosystems, conference talks, and startup contributions.
-    2. Social Validation Sources: Twitter/X, Reddit, YouTube, Hacker News.
-    DO NOT USE: Facebook, Instagram, private communities, leaked databases, or non-public information.
+    OSINT COLLECTOR DOSSIER:
+    ${osintDossier}
+    
+    VERIFICATION AUDIT REPORT:
+    ${verificationAudit}
     
     IDENTITY RESOLUTION PROTOCOL:
     Verify candidate against full name, list of companies, education, email, and phone index if any.
-    Scoring Identity Confidence:
-    - Exact email match -> +40
-    - LinkedIn + company match -> +25
-    - GitHub + project match -> +20
-    - Location match -> +10
-    - Skill overlap -> +5
-    Minimum identity confidence score required: 85.
-    
     If identity confidence is < 85%:
     - Mark status as "LOW_CONFIDENCE" or "MEDIUM_CONFIDENCE" and mark data as "Unverified". Ask recruiter for manual review. Do not show sensitive insights.
     If identity confidence is >= 90%: Mark status as "VERIFIED".
@@ -1629,28 +1761,14 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       ]
     }`;
 
-    let response;
-    try {
-      response = await generateContentWithRetry({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }],
-          temperature: 0,
-          responseMimeType: "application/json"
-        },
-      });
-    } catch (groundingError: any) {
-      console.warn("Research Candidate with Grounding failed or rate-limited. Retrying without Google Search grounding tool to bypass limits:", groundingError);
-      response = await generateContentWithRetry({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          temperature: 0,
-          responseMimeType: "application/json"
-        },
-      });
-    }
+    const response = await generateContentWithRetry({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        temperature: 0,
+        responseMimeType: "application/json"
+      },
+    });
 
     const text = response.text || "";
     let jsonResult: any = {};
@@ -1699,7 +1817,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       ]
     };
 
-    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    const chunks = collectorResponse.candidates?.[0]?.groundingMetadata?.groundingChunks;
     const sources = chunks ? chunks
       .filter((c: any) => c.web)
       .map((c: any) => ({
