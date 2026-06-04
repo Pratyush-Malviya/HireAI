@@ -3001,15 +3001,6 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </Link>
              </div>
              <div className="flex items-center gap-3">
-               
-               <Button 
-                  variant="outline" 
-                  className="hidden xl:flex text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs py-1.5 h-auto font-medium"
-                  onClick={handleGlobalClear}
-                  disabled={clearing}
-                >
-                  <Trash2 className="w-3.5 h-3.5 mr-2" /> {clearing ? 'Clearing...' : 'Clear Platform'}
-                </Button>
              </div>
           </header>
           
@@ -3841,7 +3832,7 @@ function ResumeBank() {
                           <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-indigo-650" : "text-slate-800")}>
                             {job.title}
                           </h4>
-                          <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{job.department || 'General'}</p>
+                          <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {alreadyScreened && (
@@ -10066,6 +10057,7 @@ function SuperAdminPanel() {
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkOrgNames, setBulkOrgNames] = useState('');
   const navigate = useNavigate();
+  const [clearing, setClearing] = useState(false);
   const { confirm, notify } = useNotification();
   const isSuperAdmin = isAdmin;
 
@@ -10709,6 +10701,96 @@ function SuperAdminPanel() {
     );
   }
 
+  const handleGlobalClear = async () => {
+    if (!auth.currentUser) return;
+    const ok = await confirm('DANGER: This will permanently delete ALL jobs and candidates created by you. Do you want to proceed?');
+    if (!ok) return;
+    
+    setClearing(true);
+    try {
+      const uid = auth.currentUser.uid;
+      const batchSize = 450; 
+      
+      console.log('Deep cleaning database for user:', uid);
+      
+      let qJobs = query(collection(db, 'jobs'), where('createdBy', '==', uid));
+      if (isAdmin) {
+        const platformOk = await confirm('Super Admin detected: Do you want to clear the ENTIRE platform database instead of just your data?');
+        if (platformOk) {
+          qJobs = query(collection(db, 'jobs'));
+        }
+      }
+
+      const jobsSnap = await getDocs(qJobs);
+      
+      let batch = writeBatch(db);
+      let count = 0;
+      let totalDeleted = 0;
+
+      for (const jobDoc of jobsSnap.docs) {
+        const candidatesSnap = await getDocs(query(
+          collection(db, 'candidates'), 
+          where('jobId', '==', jobDoc.id)
+        ));
+        
+        for (const candDoc of candidatesSnap.docs) {
+          batch.delete(candDoc.ref);
+          count++;
+          totalDeleted++;
+          if (count >= batchSize) {
+            await batch.commit();
+            batch = writeBatch(db);
+            count = 0;
+          }
+        }
+
+        batch.delete(jobDoc.ref);
+        count++;
+        totalDeleted++;
+        if (count >= batchSize) {
+          await batch.commit();
+          batch = writeBatch(db);
+          count = 0;
+        }
+      }
+
+      const orphSnap = await getDocs(query(
+        collection(db, 'candidates'),
+        where('createdBy', '==', uid)
+      ));
+      
+      for (const orphDoc of orphSnap.docs) {
+        batch.delete(orphDoc.ref);
+        count++;
+        totalDeleted++;
+        if (count >= batchSize) {
+          await batch.commit();
+          batch = writeBatch(db);
+          count = 0;
+        }
+      }
+
+      if (count > 0) {
+        try {
+          await batch.commit();
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, 'batch commit (deep cleaning)');
+        }
+      }
+
+      localStorage.removeItem(`lastBatch_all`);
+      console.log(`Clean up finished. Total records removed: ${totalDeleted}`);
+      notify(`Database cleared. ${totalDeleted} records removed.`, 'success');
+      navigate('/');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      console.error('Global Clear Error:', err);
+      notify('Failed to clear database: ' + (err instanceof Error ? err.message : 'Unknown error'), 'error');
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const clearEverything = async () => {
     const ok = await confirm('☢️ NUCLEAR OPTION: This will delete ALL jobs and ALL candidates across the entire platform. Are you absolutely sure?');
     if (!ok) return;
@@ -11081,9 +11163,19 @@ function SuperAdminPanel() {
           </h1>
           <p className="text-slate-500 text-sm">Platform-wide governance and organization management.</p>
         </div>
-        <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[10px] h-auto p-2" onClick={clearEverything}>
-          <Trash2 className="w-3 h-3 mr-2" /> <span className="hidden sm:inline">Nuclear Reset</span>
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          <Button 
+             variant="outline" 
+             className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-[10px] font-black uppercase tracking-widest py-2 h-auto"
+             onClick={handleGlobalClear}
+             disabled={clearing}
+          >
+             <Trash2 className="w-3.5 h-3.5 mr-2" /> {clearing ? 'Clearing...' : 'Clear Platform'}
+          </Button>
+          <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[10px] h-auto p-2" onClick={clearEverything}>
+            <Trash2 className="w-3 h-3 mr-2" /> <span className="hidden sm:inline">Nuclear Reset</span>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
