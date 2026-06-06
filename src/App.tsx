@@ -346,11 +346,11 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, { ha
               <AlertTriangle className="w-10 h-10 text-red-500" />
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-black text-white uppercase tracking-tight">System Fault Detected</h1>
-              <p className="text-slate-200 text-sm font-medium">An unexpected error occurred. This might be due to a connectivity issue or a data mismatch.</p>
+              <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">System Fault Detected</h1>
+              <p className="text-slate-600 text-sm font-medium">An unexpected error occurred. This might be due to a connectivity issue or a data mismatch.</p>
             </div>
             {this.state.error && (
-              <div className="p-4 glass-premium rounded-xl border border-white/10 text-left">
+              <div className="p-4 glass-premium rounded-xl border border-slate-200 text-left">
                 <p className="text-[10px] font-mono text-red-400 break-all">{this.state.error.message}</p>
               </div>
             )}
@@ -364,7 +364,7 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, { ha
                   window.location.reload();
                 }
               }}
-              className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-xl transition-all"
+              className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-slate-900 font-black uppercase tracking-widest text-xs rounded-xl shadow-xl transition-all"
             >
               Hard Reset & Re-sync
             </button>
@@ -377,7 +377,7 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, { ha
                   window.location.reload();
                 }
               }}
-              className="w-full h-12 bg-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all border border-white/10"
+              className="w-full h-12 bg-slate-100 hover:bg-slate-100 text-slate-900 font-black uppercase tracking-widest text-xs rounded-xl transition-all border border-slate-200"
             >
               Attempt Reconnect
             </button>
@@ -420,7 +420,7 @@ function PlaceholderScoreCircle({ isProcessing }: { isProcessing: boolean }) {
   return (
     <div className="relative w-16 h-16 flex items-center justify-center">
       <svg className="absolute inset-0 w-full h-full -rotate-90">
-        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-100" />
+        <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-800" />
         <circle 
           cx="32" cy="32" r="28" 
           stroke="currentColor" strokeWidth="3" 
@@ -483,12 +483,12 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden border border-white/10"
+        className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden border border-slate-200"
       >
-        <div className="p-8 border-b border-white/10 flex items-center justify-between transparent/50">
-          <h3 className="font-display font-bold text-xl text-white tracking-tight">{title}</h3>
-          <button onClick={onClose} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-white/10 group">
-            <Plus className="w-5 h-5 rotate-45 text-slate-200 group-hover:text-slate-200" />
+        <div className="p-8 border-b border-slate-200 flex items-center justify-between transparent/50">
+          <h3 className="font-display font-bold text-xl text-slate-900 tracking-tight">{title}</h3>
+          <button onClick={onClose} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-200 group">
+            <Plus className="w-5 h-5 rotate-45 text-slate-600 group-hover:text-slate-600" />
           </button>
         </div>
         <div className="p-8">
@@ -501,11 +501,11 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
 
 function Button({ className, variant = 'primary', size = 'md', as: Component = 'button', ...props }: any) {
   const variants = {
-    primary: 'glass-premium text-white hover:bg-white/10 shadow-sm',
-    secondary: 'bg-brand-dark text-white hover:bg-brand-dark shadow-sm',
-    outline: 'border border-white/10 hover:border-white/20 hover:transparent text-slate-300 font-medium',
-    ghost: 'hover:bg-white/5 text-slate-300 font-medium',
-    brand: 'bg-brand-dark text-white hover:bg-brand-dark font-medium tracking-tight',
+    primary: 'glass-premium text-slate-900 hover:bg-slate-100 shadow-sm',
+    secondary: 'bg-brand-dark text-slate-900 hover:bg-brand-dark shadow-sm',
+    outline: 'border border-slate-200 hover:border-slate-300 hover:transparent text-slate-500 font-medium',
+    ghost: 'hover:bg-slate-50 text-slate-500 font-medium',
+    brand: 'bg-brand-dark text-slate-900 hover:bg-brand-dark font-medium tracking-tight',
   };
   const sizes = {
     sm: 'px-3 py-1.5 text-xs rounded-md',
@@ -639,7 +639,7 @@ function AudioWaveform({ analyserRef, isListening }: { analyserRef: React.RefObj
     <div className="flex flex-col items-center justify-center gap-1.5 mb-4 shrink-0">
       <span className={cn(
         "text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300",
-        isListening ? "text-brand-light animate-pulse" : "text-slate-200"
+        isListening ? "text-brand-light animate-pulse" : "text-slate-600"
       )}>
         {isListening ? "● LISTENING (SPEAK NOW)" : "MIC IDLE"}
       </span>
@@ -1655,20 +1655,20 @@ function InterviewRoom() {
   if (unauthorized) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center transparent p-6">
-        <div className="max-w-md w-full glass-premium/40 backdrop-blur-xl border border-white/10/80 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
+        <div className="max-w-md w-full glass-premium/40 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-8 text-center space-y-6 shadow-2xl">
           <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto border border-red-500/20">
             <AlertTriangle className="w-8 h-8 text-red-500" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-black text-slate-100 uppercase tracking-wide">Access Denied</h3>
-            <p className="text-xs text-slate-200 leading-relaxed font-medium">
+            <h3 className="text-lg font-black text-slate-800 uppercase tracking-wide">Access Denied</h3>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               You are not authorized to access this interview lobby. Please ensure you are logged in with the correct email address associated with your invitation.
             </p>
           </div>
           <div className="pt-2 flex flex-col gap-3">
             <button
               onClick={() => navigate('/')}
-              className="h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg transition-all cursor-pointer"
+              className="h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg transition-all cursor-pointer"
             >
               Go to Dashboard
             </button>
@@ -1677,7 +1677,7 @@ function InterviewRoom() {
                 await signOut(auth);
                 window.location.reload();
               }}
-              className="h-11 bg-white/10 hover:bg-slate-750 text-slate-300 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all cursor-pointer"
+              className="h-11 bg-slate-100 hover:bg-slate-750 text-slate-500 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all cursor-pointer"
             >
               Sign Out / Switch Account
             </button>
@@ -1687,10 +1687,10 @@ function InterviewRoom() {
     );
   }
 
-  if (!candidate) return <div className="p-12 text-center text-slate-200">Loading Interview Room...</div>;
+  if (!candidate) return <div className="p-12 text-center text-slate-600">Loading Interview Room...</div>;
 
   return (
-    <div className="w-full min-h-screen flex flex-col gap-6 transparent text-slate-100 relative overflow-hidden p-4 sm:p-6 md:p-8 rounded-none">
+    <div className="w-full min-h-screen flex flex-col gap-6 transparent text-slate-800 relative overflow-hidden p-4 sm:p-6 md:p-8 rounded-none">
       
       {/* Proctoring Alert Notification Overlay */}
       <AnimatePresence>
@@ -1716,7 +1716,7 @@ function InterviewRoom() {
                   {activeWarning.type === 'multiple_faces' && "Multiple faces detected in the webcam view! Ensure you are alone."}
                 </p>
                 <div className="mt-3 flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase bg-red-650 text-white px-2 py-0.5 rounded-full tracking-wider">
+                  <span className="text-[10px] font-black uppercase bg-red-650 text-slate-900 px-2 py-0.5 rounded-full tracking-wider">
                     Warning {activeWarning.count} / 3
                   </span>
                   <span className="text-[10px] text-red-400 font-medium">
@@ -1741,7 +1741,7 @@ function InterviewRoom() {
           </div>
           <div className="space-y-2 flex-1">
              <h4 className="text-sm font-black text-amber-200 uppercase tracking-wide">Webcam, Microphone or Voice Recognition Blocked</h4>
-             <p className="text-xs text-slate-300 leading-relaxed font-medium">
+             <p className="text-xs text-slate-500 leading-relaxed font-medium">
                We detected potential browser constraints (<strong>{mediaError || speechError}</strong>) limiting live mic/camera capture.
              </p>
              <div className="pt-1.5 flex flex-wrap gap-2">
@@ -1749,7 +1749,7 @@ function InterviewRoom() {
                  href={window.location.href} 
                  target="_blank" 
                  rel="noopener noreferrer" 
-                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
                >
                  <ExternalLink className="w-3.5 h-3.5" /> Open in a New Tab
                </a>
@@ -1759,7 +1759,7 @@ function InterviewRoom() {
                    setIsKeyboardMode(prev => !prev);
                    notify("Keyboard input mode toggled.", "info");
                  }}
-                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-white/10 hover:bg-slate-750 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-100 hover:bg-slate-750 text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
                >
                  <Keyboard className="w-3.5 h-3.5" /> {isKeyboardMode ? "Switch to Voice" : "Switch to Keyboard"}
                </button>
@@ -1772,14 +1772,14 @@ function InterviewRoom() {
       <div className="w-full flex flex-col lg:flex-row gap-6 h-[calc(100vh-160px)] lg:h-[calc(100vh-140px)] flex-1 overflow-hidden">
         
         {/* Sleek Tabbed Sidebar (Replaces cluttered multi-card sidebar) */}
-        <div className="w-full lg:w-80 flex flex-col glass-premium/60 border border-white/10/80 rounded-3xl overflow-hidden shrink-0 shadow-2xl relative">
+        <div className="w-full lg:w-80 flex flex-col glass-premium/60 border border-slate-200/80 rounded-3xl overflow-hidden shrink-0 shadow-2xl relative">
           
           {/* Header Tabs Navigation */}
-          <div className="flex border-b border-white/10/80 transparent/40 p-1.5 rounded-t-3xl shrink-0">
+          <div className="flex border-b border-slate-200/80 transparent/40 p-1.5 rounded-t-3xl shrink-0">
             <button
               onClick={() => setSidebarTab('monitor')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
-                sidebarTab === 'monitor' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-white"
+                sidebarTab === 'monitor' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-600 hover:text-slate-900"
               )}
             >
               <Shield className="w-3.5 h-3.5" /> Monitor
@@ -1787,7 +1787,7 @@ function InterviewRoom() {
             <button
               onClick={() => setSidebarTab('transcript')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
-                sidebarTab === 'transcript' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-white"
+                sidebarTab === 'transcript' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-600 hover:text-slate-900"
               )}
             >
               <FileText className="w-3.5 h-3.5" /> Transcript
@@ -1804,7 +1804,7 @@ function InterviewRoom() {
                   <div className="bg-slate-955/40 border border-slate-850 rounded-2xl p-4 relative overflow-hidden flex items-center justify-between">
                     <div className="flex items-center gap-2">
                        <Clock className="w-4 h-4 text-brand-light" />
-                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Time Remaining</span>
+                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Time Remaining</span>
                     </div>
                     <span className={cn("text-xs font-black font-mono px-2 py-1 rounded glass-premium border", timeLeft < 60000 ? "text-red-400 border-red-500/30 animate-pulse" : "text-brand-light border-brand/30")}>
                        {formatTime(timeLeft)}
@@ -1816,7 +1816,7 @@ function InterviewRoom() {
                 <div className="bg-slate-955/40 border border-slate-850 rounded-2xl p-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-dark" />
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full glass-premium flex items-center justify-center border border-white/10 shrink-0 overflow-hidden">
+                    <div className="w-10 h-10 rounded-full glass-premium flex items-center justify-center border border-slate-200 shrink-0 overflow-hidden">
                       {stream?.getVideoTracks()[0]?.enabled !== false ? (
                          <video 
                            ref={bindVideo} 
@@ -1825,11 +1825,11 @@ function InterviewRoom() {
                            className="w-full h-full object-cover scale-150 rotate-y-180" 
                          />
                       ) : (
-                        <Users className="w-5 h-5 text-slate-200" />
+                        <Users className="w-5 h-5 text-slate-600" />
                       )}
                     </div>
                     <div>
-                      <h3 className="text-xs font-black text-slate-100 tracking-tight leading-none mb-1">{candidate.fullName}</h3>
+                      <h3 className="text-xs font-black text-slate-800 tracking-tight leading-none mb-1">{candidate.fullName}</h3>
                       <p className="text-[8px] font-black text-brand-light uppercase tracking-wider leading-none mb-1">{job?.title}</p>
                       <span className="text-[8px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" /> Connection secure
@@ -1840,16 +1840,16 @@ function InterviewRoom() {
 
                 {/* Proctoring Integrity Dashboard */}
                 <div className="space-y-3.5">
-                  <div className="flex items-center gap-1.5 border-b border-white/10 pb-2">
+                  <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2">
                     <Sliders className="w-4 h-4 text-brand" />
-                    <h4 className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Integrity Dashboard</h4>
+                    <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Integrity Dashboard</h4>
                   </div>
 
                   {/* Tab Tracking Pill */}
                   <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
-                      <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Tab Focus</span>
-                      <span className="text-[9px] text-slate-200 font-medium">Warnings: {tabWarnings} / 3</span>
+                      <span className="block text-[10px] font-black text-slate-900 uppercase tracking-wider mb-0.5">Tab Focus</span>
+                      <span className="text-[9px] text-slate-600 font-medium">Warnings: {tabWarnings} / 3</span>
                     </div>
                     <div className="flex gap-1.5">
                       {[1, 2, 3].map(i => (
@@ -1858,7 +1858,7 @@ function InterviewRoom() {
                           className={cn("w-3.5 h-3.5 rounded-full border transition-all duration-300", 
                             tabWarnings >= i 
                               ? "bg-red-500 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
-                              : "glass-premium border-white/10"
+                              : "glass-premium border-slate-200"
                           )} 
                         />
                       ))}
@@ -1868,7 +1868,7 @@ function InterviewRoom() {
                   {/* Face Presence Pill */}
                   <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
-                      <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Face Tracking</span>
+                      <span className="block text-[10px] font-black text-slate-900 uppercase tracking-wider mb-0.5">Face Tracking</span>
                       <span className={cn("text-[9px] font-black uppercase tracking-wider", 
                         faceStatus === 'detected' ? "text-green-400" : faceStatus === 'not_detected' ? "text-red-400 animate-pulse" : "text-brand-light"
                       )}>
@@ -1882,7 +1882,7 @@ function InterviewRoom() {
                           className={cn("w-3.5 h-3.5 rounded-full border transition-all duration-300", 
                             faceWarnings >= i 
                               ? "bg-red-500 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
-                              : "glass-premium border-white/10"
+                              : "glass-premium border-slate-200"
                           )} 
                         />
                       ))}
@@ -1892,7 +1892,7 @@ function InterviewRoom() {
                   {/* Room Sound Meter Pill */}
                   <div className="bg-slate-955/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
-                      <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Room Noise</span>
+                      <span className="block text-[10px] font-black text-slate-900 uppercase tracking-wider mb-0.5">Room Noise</span>
                       <span className={cn("text-[9px] font-black uppercase tracking-wider", 
                         noiseStatus === 'noise_detected' ? "text-amber-400" : "text-green-400"
                       )}>
@@ -1906,7 +1906,7 @@ function InterviewRoom() {
                           className={cn("w-3.5 h-3.5 rounded-full border transition-all duration-300", 
                             noiseWarnings >= i 
                               ? "bg-red-500 border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)]" 
-                              : "glass-premium border-white/10"
+                              : "glass-premium border-slate-200"
                           )} 
                         />
                       ))}
@@ -1916,9 +1916,9 @@ function InterviewRoom() {
 
                 {/* Voice Dialect Configuration */}
                 <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-1.5 border-b border-white/10 pb-2">
+                  <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2">
                     <Volume2 className="w-4 h-4 text-brand" />
-                    <h4 className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Interviewer Voice</h4>
+                    <h4 className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Interviewer Voice</h4>
                   </div>
                   <div className="relative">
                     <select
@@ -1927,15 +1927,15 @@ function InterviewRoom() {
                         const target = botVoiceOptions.find(opt => opt.id === e.target.value);
                         if (target) changeVoice(target);
                       }}
-                      className="w-full transparent border border-slate-850 rounded-xl px-3 py-2.5 font-bold text-white text-xs focus:ring-1 focus:ring-brand outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
+                      className="w-full transparent border border-slate-850 rounded-xl px-3 py-2.5 font-bold text-slate-900 text-xs focus:ring-1 focus:ring-brand outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
                     >
                       {botVoiceOptions.map((opt) => (
-                        <option key={opt.id} value={opt.id} className="transparent text-slate-300 font-bold">
+                        <option key={opt.id} value={opt.id} className="transparent text-slate-500 font-bold">
                           {opt.flag} {opt.label}
                         </option>
                       ))}
                     </select>
-                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-200">
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-600">
                       <ChevronDown className="w-3.5 h-3.5" />
                     </div>
                   </div>
@@ -1952,11 +1952,11 @@ function InterviewRoom() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
-                          m.role === 'model' ? "bg-brand/20 text-brand-light border border-brand/30" : "bg-white/10 text-slate-200"
+                          m.role === 'model' ? "bg-brand/20 text-brand-light border border-brand/30" : "bg-slate-100 text-slate-600"
                         )}>
                           {m.role === 'model' ? 'AI' : 'You'}
                         </span>
-                        <span className="text-[8px] font-medium text-slate-200">{formatDateTime(new Date(m.timestamp))}</span>
+                        <span className="text-[8px] font-medium text-slate-600">{formatDateTime(new Date(m.timestamp))}</span>
                       </div>
                       <p className="text-xs text-slate-303 leading-relaxed pl-1">
                         {m.text}
@@ -1978,7 +1978,7 @@ function InterviewRoom() {
                   {messages.length === 0 && !input && (
                     <div className="h-full flex flex-col items-center justify-center opacity-25 py-24">
                       <RotateCcw className="w-8 h-8 mb-2 animate-pulse text-brand-light" />
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-200">Feed Calibrated</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600">Feed Calibrated</p>
                     </div>
                   )}
                   <div ref={scrollRef} />
@@ -1989,22 +1989,22 @@ function InterviewRoom() {
         </div>
 
         {/* Main Cinematic Video Panel */}
-        <div className="flex-1 glass-premium/60 border border-white/10 rounded-3xl overflow-hidden flex flex-col relative shadow-2xl">
+        <div className="flex-1 glass-premium/60 border border-slate-200 rounded-3xl overflow-hidden flex flex-col relative shadow-2xl">
           
           {/* Dashboard Header Overlay */}
           <div className="absolute top-0 left-0 w-full p-5 flex items-center justify-between z-20 pointer-events-none">
             <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 shadow-2xl pointer-events-auto">
               <div className="w-2 h-2 rounded-full bg-red-655 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
-              <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Room</span>
-              <div className="h-3 w-px bg-white/10" />
-              <span className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">ID: {candidateId.substring(0, 8)}</span>
+              <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Live Room</span>
+              <div className="h-3 w-px bg-slate-100" />
+              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">ID: {candidateId.substring(0, 8)}</span>
             </div>
             
             {!concluded && (
               <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-3.5 shadow-2xl pointer-events-auto">
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-black text-slate-200 uppercase tracking-widest leading-none mb-1">Room Signal</span>
-                  <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
+                  <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">Room Signal</span>
+                  <div className="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
                      <motion.div 
                         className={cn("h-full transition-all duration-75", volume > 80 ? "bg-red-500" : "bg-brand")}
                         animate={{ width: `${Math.min(volume * 1.5, 100)}%` }}
@@ -2058,7 +2058,7 @@ function InterviewRoom() {
                             <motion.div className="w-1.5 h-1.5 glass-premium rounded-full" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.25 }} />
                             <motion.div className="w-1.5 h-1.5 glass-premium rounded-full" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.5 }} />
                           </div>
-                          <span className="text-[9px] font-black text-white uppercase tracking-[0.25em]">Reasoning</span>
+                          <span className="text-[9px] font-black text-slate-900 uppercase tracking-[0.25em]">Reasoning</span>
                         </motion.div>
                       ) : isSpeaking ? (
                         <motion.div 
@@ -2078,7 +2078,7 @@ function InterviewRoom() {
                                />
                              ))}
                           </div>
-                          <span className="text-[9px] font-black text-white uppercase tracking-[0.25em]">Synthesizing</span>
+                          <span className="text-[9px] font-black text-slate-900 uppercase tracking-[0.25em]">Synthesizing</span>
                         </motion.div>
                       ) : null}
                    </AnimatePresence>
@@ -2087,30 +2087,30 @@ function InterviewRoom() {
             )}
             
             {messages.length === 0 ? (
-              <div className="relative z-10 text-center w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in-95 duration-500 glass-premium/40 backdrop-blur-xl border border-white/10/80 rounded-3xl shadow-2xl mt-4 sm:mt-10">
-                <h2 className="text-2xl font-black text-white tracking-tight mb-2 uppercase">Lobby Pre-Check</h2>
-                <p className="text-slate-200 text-xs font-medium mb-8 leading-relaxed max-w-md mx-auto">Ensure your webcam is clear, your microphone is picking up audio, and your background is free of distractions.</p>
+              <div className="relative z-10 text-center w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in-95 duration-500 glass-premium/40 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl mt-4 sm:mt-10">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2 uppercase">Lobby Pre-Check</h2>
+                <p className="text-slate-600 text-xs font-medium mb-8 leading-relaxed max-w-md mx-auto">Ensure your webcam is clear, your microphone is picking up audio, and your background is free of distractions.</p>
                 
                 {/* Equipment Check Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                   {/* Camera Check */}
-                  <div className="transparent rounded-2xl p-2 border border-white/10 flex flex-col items-center justify-center relative overflow-hidden aspect-video shadow-inner">
+                  <div className="transparent rounded-2xl p-2 border border-slate-200 flex flex-col items-center justify-center relative overflow-hidden aspect-video shadow-inner">
                     {stream?.getVideoTracks()[0]?.enabled !== false ? (
                       <video ref={bindVideo} autoPlay muted className="w-full h-full object-cover scale-100 rotate-y-180 rounded-xl" />
                     ) : (
-                      <div className="text-slate-200 flex flex-col items-center">
+                      <div className="text-slate-600 flex flex-col items-center">
                         <Video className="w-6 h-6 mb-2" />
                         <span className="text-[10px] uppercase font-bold tracking-widest">No Video</span>
                       </div>
                     )}
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 glass-premium/80 px-2 py-1 rounded text-[9px] font-black uppercase text-white tracking-widest backdrop-blur-sm">
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 glass-premium/80 px-2 py-1 rounded text-[9px] font-black uppercase text-slate-900 tracking-widest backdrop-blur-sm">
                        <div className={cn("w-1.5 h-1.5 rounded-full", stream ? "bg-green-500 animate-pulse" : "bg-red-500")} /> Camera
                     </div>
                   </div>
                   
                   {/* Mic Check */}
-                  <div className="transparent rounded-2xl p-6 border border-white/10 flex flex-col items-center justify-center relative shadow-inner">
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 glass-premium/80 px-2 py-1 rounded text-[9px] font-black uppercase text-white tracking-widest backdrop-blur-sm">
+                  <div className="transparent rounded-2xl p-6 border border-slate-200 flex flex-col items-center justify-center relative shadow-inner">
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 glass-premium/80 px-2 py-1 rounded text-[9px] font-black uppercase text-slate-900 tracking-widest backdrop-blur-sm">
                        <div className={cn("w-1.5 h-1.5 rounded-full", stream ? "bg-green-500 animate-pulse" : "bg-red-500")} /> Microphone
                     </div>
                     <div className="w-full mt-4 space-y-4">
@@ -2118,32 +2118,32 @@ function InterviewRoom() {
                          {[...Array(12)].map((_, i) => (
                            <motion.div
                              key={i}
-                             className={cn("w-2 rounded-t-full transition-all duration-75", i < (volume / (100/12)) ? "bg-emerald-500" : "bg-white/10")}
+                             className={cn("w-2 rounded-t-full transition-all duration-75", i < (volume / (100/12)) ? "bg-emerald-500" : "bg-slate-100")}
                              style={{ height: `${Math.max(15, i < (volume / (100/12)) ? (Math.random() * 60 + 40) : 15)}%` }}
                            />
                          ))}
                        </div>
-                       <p className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">Test Mic Output</p>
+                       <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Test Mic Output</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 mb-6 text-left glass-premium/50 p-3 rounded-xl border border-white/10">
+                <div className="flex items-start gap-3 mb-6 text-left glass-premium/50 p-3 rounded-xl border border-slate-200">
                   <div className="mt-0.5 shrink-0">
                     <input 
                       type="checkbox" 
                       id="osint-consent"
                       checked={osintConsent}
                       onChange={(e) => setOsintConsent(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 glass-premium text-brand-light focus:ring-brand/30 focus:ring-offset-[#0d1117] cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-200 glass-premium text-brand-light focus:ring-brand/30 focus:ring-offset-[#0d1117] cursor-pointer"
                     />
                   </div>
-                  <label htmlFor="osint-consent" className="text-[11px] text-slate-300 font-medium cursor-pointer leading-relaxed">
+                  <label htmlFor="osint-consent" className="text-[11px] text-slate-500 font-medium cursor-pointer leading-relaxed">
                     I consent to automated background checks, open-source intelligence (OSINT) gathering, and public profile analysis during this screening.
                   </label>
                 </div>
                 
-                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-white rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] shadow-brand-dark/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-white/10 text-slate-200 cursor-not-allowed")}>
+                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-slate-900 rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] shadow-brand-dark/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-slate-100 text-slate-600 cursor-not-allowed")}>
                   Initialize Screening
                 </Button>
               </div>
@@ -2157,7 +2157,7 @@ function InterviewRoom() {
                     faceStatus === 'detected' ? "border-emerald-500/25 shadow-emerald-950/10" :
                     faceStatus === 'not_detected' ? "border-red-500/50 shadow-red-950/20 animate-pulse" :
                     faceStatus === 'loading' ? "border-brand/20 shadow-brand-dark/5 animate-pulse" :
-                    "border-white/10"
+                    "border-slate-200"
                   )}>
                     {/* Security scan scan-line */}
                     <motion.div 
@@ -2185,8 +2185,8 @@ function InterviewRoom() {
                     
                     {stream?.getVideoTracks()[0]?.enabled === false && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 glass-premium">
-                         <CameraOff className="w-12 h-12 text-slate-300 animate-pulse" />
-                         <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Webcam Inactive</p>
+                         <CameraOff className="w-12 h-12 text-slate-500 animate-pulse" />
+                         <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Webcam Inactive</p>
                       </div>
                     )}
                   </div>
@@ -2196,7 +2196,7 @@ function InterviewRoom() {
                     <AnimatePresence mode="wait">
                       {concluded ? (
                         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-green-600/90 backdrop-blur-md px-5 py-2.5 rounded-xl border border-green-500/50 shadow-xl">
-                           <h4 className="text-white text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                           <h4 className="text-slate-900 text-xs font-black uppercase tracking-widest flex items-center gap-2">
                               <CheckCircle2 className="w-4 h-4" /> Session Finalized
                            </h4>
                         </motion.div>
@@ -2209,14 +2209,14 @@ function InterviewRoom() {
                           className="w-full text-center"
                         >
                           {messages[messages.length - 1]?.role === 'model' ? (
-                            <div className="glass-premium/90 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-white/10 shadow-2xl inline-block max-w-lg text-left">
-                              <div className="text-white text-xs font-semibold leading-relaxed tracking-wide">
+                            <div className="glass-premium/90 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-slate-200 shadow-2xl inline-block max-w-lg text-left">
+                              <div className="text-slate-900 text-xs font-semibold leading-relaxed tracking-wide">
                                  <Markdown>{messages[messages.length - 1]?.text}</Markdown>
                               </div>
                             </div>
                           ) : (
                             <div className="bg-brand/90 backdrop-blur-md px-5 py-2.5 rounded-xl border border-brand/40 shadow-xl inline-block max-w-md text-center">
-                              <p className="text-white text-xs font-semibold italic">"{messages[messages.length - 1]?.text}"</p>
+                              <p className="text-slate-900 text-xs font-semibold italic">"{messages[messages.length - 1]?.text}"</p>
                             </div>
                           )}
                         </motion.div>
@@ -2231,11 +2231,11 @@ function InterviewRoom() {
                           animate={{ opacity: 1, y: 0 }}
                           className="bg-brand-dark/90 backdrop-blur-xl px-6 py-3.5 rounded-2xl border border-brand/30 shadow-2xl max-w-md w-full text-center"
                         >
-                           <p className="text-white/80 text-[9px] font-black uppercase tracking-widest mb-1.5 flex items-center justify-center gap-1.5">
+                           <p className="text-slate-900/80 text-[9px] font-black uppercase tracking-widest mb-1.5 flex items-center justify-center gap-1.5">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Transcription
                            </p>
-                           <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
-                           <p className="text-white/60 text-[8px] font-semibold tracking-wider uppercase mt-2">Pause speaking to automatically submit response</p>
+                           <p className="text-slate-900 text-xs font-bold italic leading-relaxed">"{input}"</p>
+                           <p className="text-slate-900/60 text-[8px] font-semibold tracking-wider uppercase mt-2">Pause speaking to automatically submit response</p>
                         </motion.div>
                       ) : (
                         !isListening && (
@@ -2244,10 +2244,10 @@ function InterviewRoom() {
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-brand/95 backdrop-blur-xl px-5 py-3 rounded-2xl border border-brand-light/40 shadow-2xl max-w-md w-full text-center"
                           >
-                             <p className="text-white text-[9px] font-black uppercase tracking-widest mb-1.5 opacity-80">Speech Preview</p>
-                             <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
+                             <p className="text-slate-900 text-[9px] font-black uppercase tracking-widest mb-1.5 opacity-80">Speech Preview</p>
+                             <p className="text-slate-900 text-xs font-bold italic leading-relaxed">"{input}"</p>
                              <div className="mt-2.5 flex items-center justify-center">
-                                <Button onClick={() => handleSend()} size="sm" className="h-7 glass-premium text-brand hover:bg-white/5 text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
+                                <Button onClick={() => handleSend()} size="sm" className="h-7 glass-premium text-brand hover:bg-slate-50 text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
                                   <Send className="w-3 h-3 mr-1.5" /> Confirm & Send
                                 </Button>
                              </div>
@@ -2263,7 +2263,7 @@ function InterviewRoom() {
 
           {/* Cinematic controls deck bar */}
           {!concluded && messages.length > 0 && (
-            <div className="p-6 bg-slate-955/65 backdrop-blur-xl border-t border-white/10/80 relative z-30 shrink-0">
+            <div className="p-6 bg-slate-955/65 backdrop-blur-xl border-t border-slate-200/80 relative z-30 shrink-0">
               <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
                   <div className="flex items-center gap-4">
                     
@@ -2272,8 +2272,8 @@ function InterviewRoom() {
                       variant="outline"
                       onClick={toggleMute}
                       className={cn(
-                        "w-11 h-11 rounded-full p-0 border-white/10 transition-all cursor-pointer",
-                        isMuted ? "bg-red-500/20 text-red-500 border-red-500/50" : "glass-premium hover:bg-slate-850 text-white"
+                        "w-11 h-11 rounded-full p-0 border-slate-200 transition-all cursor-pointer",
+                        isMuted ? "bg-red-500/20 text-red-500 border-red-500/50" : "glass-premium hover:bg-slate-850 text-slate-900"
                       )}
                     >
                       {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -2283,7 +2283,7 @@ function InterviewRoom() {
                     <Button
                       variant="outline"
                       onClick={toggleCamera}
-                      className="w-11 h-11 rounded-full p-0 border-white/10 glass-premium hover:bg-slate-850 text-white cursor-pointer"
+                      className="w-11 h-11 rounded-full p-0 border-slate-200 glass-premium hover:bg-slate-850 text-slate-900 cursor-pointer"
                     >
                       {stream?.getVideoTracks()[0]?.enabled === false ? <CameraOff className="w-4 h-4 text-red-500" /> : <Camera className="w-4 h-4" />}
                     </Button>
@@ -2296,8 +2296,8 @@ function InterviewRoom() {
                         notify(!isKeyboardMode ? "Keyboard typing mode activated." : "Voice mode activated.", "info");
                       }}
                       className={cn(
-                        "w-11 h-11 rounded-full p-0 border-white/10 transition-all cursor-pointer",
-                        isKeyboardMode ? "bg-brand/20 text-brand-light border-brand/50" : "glass-premium hover:bg-slate-850 text-white"
+                        "w-11 h-11 rounded-full p-0 border-slate-200 transition-all cursor-pointer",
+                        isKeyboardMode ? "bg-brand/20 text-brand-light border-brand/50" : "glass-premium hover:bg-slate-850 text-slate-900"
                       )}
                       title={isKeyboardMode ? "Switch to Voice mode" : "Switch to Keyboard mode"}
                     >
@@ -2319,11 +2319,11 @@ function InterviewRoom() {
                         disabled={loading || isSpeaking || isMuted}
                         className={cn(
                           "w-13 h-13 rounded-full shadow-2xl transition-all relative z-10 flex items-center justify-center p-0 cursor-pointer",
-                          isListening ? "bg-red-650 hover:bg-red-700 text-white" : "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white",
+                          isListening ? "bg-red-650 hover:bg-red-700 text-slate-900" : "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-slate-900",
                           isMuted && "opacity-40 grayscale cursor-not-allowed"
                         )}
                       >
-                        {isListening ? <Loader2 className="w-4.5 h-4.5 animate-spin text-white" /> : <MessageSquare className="w-4.5 h-4.5 text-white" />}
+                        {isListening ? <Loader2 className="w-4.5 h-4.5 animate-spin text-slate-900" /> : <MessageSquare className="w-4.5 h-4.5 text-slate-900" />}
                       </Button>
                     </div>
 
@@ -2332,7 +2332,7 @@ function InterviewRoom() {
                       variant="outline"
                       onClick={manualEndInterview}
                       disabled={loading}
-                      className="w-11 h-11 rounded-full p-0 border-red-500/30 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all shadow-md cursor-pointer"
+                      className="w-11 h-11 rounded-full p-0 border-red-500/30 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-slate-900 transition-all shadow-md cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -2384,19 +2384,19 @@ function InterviewRoom() {
                               }
                             }}
                             placeholder={isThinking ? "Please wait for AI response..." : "Type your answer here..."}
-                            className="flex-1 transparent border border-slate-855 text-white rounded-xl px-4 h-11 text-xs focus:outline-none focus:border-brand font-semibold transition-all"
+                            className="flex-1 transparent border border-slate-855 text-slate-900 rounded-xl px-4 h-11 text-xs focus:outline-none focus:border-brand font-semibold transition-all"
                           />
                           <Button 
                             onClick={() => handleSend()} 
                             disabled={loading || isThinking || !input.trim()}
-                            className="bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] h-11 px-5 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer text-white"
+                            className="bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] h-11 px-5 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer text-slate-900"
                           >
                             <Send className="w-3.5 h-3.5" />
                           </Button>
                         </motion.div>
                       ) : (
                         <div className="text-center py-1 transparent/40 rounded-full border border-[#161b22]/60 max-w-[200px] mx-auto">
-                          <span className="text-[8px] font-black text-slate-200 uppercase tracking-[0.2em]">
+                          <span className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">
                              {isSpeaking ? "Receiving Data" : isListening ? "Listening" : "Idle mic status"}
                           </span>
                         </div>
@@ -2413,7 +2413,7 @@ function InterviewRoom() {
                   <ShieldCheck className="w-5 h-5 animate-pulse" />
                   <p className="text-xs font-black uppercase tracking-widest">End-to-End Proctoring Log Saved</p>
                </div>
-               <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-12 px-8 glass-premium hover:bg-white/10 text-slate-955 font-black uppercase tracking-widest rounded-xl text-xs shadow-2xl transition-transform hover:scale-102 active:scale-98 cursor-pointer">
+               <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-12 px-8 glass-premium hover:bg-slate-100 text-slate-955 font-black uppercase tracking-widest rounded-xl text-xs shadow-2xl transition-transform hover:scale-102 active:scale-98 cursor-pointer">
                   Review Session Evaluation
                </Button>
             </div>
@@ -2484,16 +2484,16 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 transparent/50 backdrop-blur-xs animate-in fade-in duration-300">
-      <div className="glass-premium rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/10 flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-white/10 flex items-center justify-between transparent/50">
+      <div className="glass-premium rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+        <div className="p-6 border-b border-slate-200 flex items-center justify-between transparent/50">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center shrink-0 shadow-sm">
-              <CreditCard className="w-4 h-4 text-white" />
+              <CreditCard className="w-4 h-4 text-slate-900" />
             </div>
-            <h3 className="font-display font-light text-xl text-white tracking-tight">Stripe Secure Checkout</h3>
+            <h3 className="font-display font-light text-xl text-slate-900 tracking-tight">Stripe Secure Checkout</h3>
           </div>
           <button onClick={onClose} disabled={isProcessing} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-250">
-            <Plus className="w-5 h-5 rotate-45 text-slate-200" />
+            <Plus className="w-5 h-5 rotate-45 text-slate-600" />
           </button>
         </div>
 
@@ -2502,7 +2502,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
             <form onSubmit={handlePay} className="space-y-6">
               {/* Plan selector */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-200">Choose Package / Plan</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Choose Package / Plan</label>
                 <div className="grid grid-cols-1 gap-3">
                   {(Object.keys(plans) as Array<keyof typeof plans>).map(planKey => (
                     <button
@@ -2511,72 +2511,72 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       onClick={() => setSelectedPlan(planKey)}
                       className={cn(
                         "p-4 rounded-2xl border text-left flex justify-between items-center transition-all min-h-[44px]",
-                        selectedPlan === planKey ? "border-[#161b22] transparent ring-1 ring-[#161b22]" : "border-white/10 hover:transparent"
+                        selectedPlan === planKey ? "border-[#161b22] transparent ring-1 ring-[#161b22]" : "border-slate-200 hover:transparent"
                       )}
                     >
                       <div>
-                        <p className="text-sm font-semibold text-white">{plans[planKey].name}</p>
-                        <p className="text-[10px] text-slate-200">Credit addition or upgrade</p>
+                        <p className="text-sm font-semibold text-slate-900">{plans[planKey].name}</p>
+                        <p className="text-[10px] text-slate-600">Credit addition or upgrade</p>
                       </div>
-                      <span className="text-sm font-bold text-white">{plans[planKey].price}</span>
+                      <span className="text-sm font-bold text-slate-900">{plans[planKey].price}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Secure details */}
-              <div className="space-y-4 pt-4 border-t border-white/10">
+              <div className="space-y-4 pt-4 border-t border-slate-200">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <ShieldCheck className="w-4 h-4 text-slate-200" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-200">Secure Payment Details</span>
+                  <ShieldCheck className="w-4 h-4 text-slate-600" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Secure Payment Details</span>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-200 uppercase">Cardholder Name</label>
+                    <label className="text-[10px] font-bold text-slate-600 uppercase">Cardholder Name</label>
                     <input
                       required
                       type="text"
                       value={cardName}
                       onChange={e => setCardName(e.target.value)}
                       placeholder="Jane Doe"
-                      className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-200 uppercase">Card Number</label>
+                    <label className="text-[10px] font-bold text-slate-600 uppercase">Card Number</label>
                     <input
                       required
                       type="text"
                       value={cardNumber}
                       onChange={e => setCardNumber(e.target.value.replace(/\D/g, '').substring(0, 16))}
                       placeholder="4242 4242 4242 4242"
-                      className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-200 uppercase">Expiration</label>
+                      <label className="text-[10px] font-bold text-slate-600 uppercase">Expiration</label>
                       <input
                         required
                         type="text"
                         value={cardExpiry}
                         onChange={e => setCardExpiry(e.target.value.substring(0, 5))}
                         placeholder="MM/YY"
-                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-200 uppercase">CVC</label>
+                      <label className="text-[10px] font-bold text-slate-600 uppercase">CVC</label>
                       <input
                         required
                         type="text"
                         value={cardCvc}
                         onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').substring(0, 4))}
                         placeholder="123"
-                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -2587,13 +2587,13 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-full border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-widest min-h-[44px]"
+                  className="flex-1 py-3 rounded-full border border-slate-200 text-slate-500 text-xs font-bold uppercase tracking-widest min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-full glass-premium text-white hover:bg-white/10 text-xs font-bold uppercase tracking-widest shadow-sm min-h-[44px]"
+                  className="flex-1 py-3 rounded-full glass-premium text-brand hover:bg-slate-100 text-xs font-bold uppercase tracking-widest shadow-sm min-h-[44px]"
                 >
                   Authorize Payment
                 </button>
@@ -2603,16 +2603,16 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
 
           {step === 'processing' && (
             <div className="flex flex-col items-center justify-center py-10 space-y-6">
-              <Loader2 className="w-12 h-12 text-slate-300 animate-spin" />
+              <Loader2 className="w-12 h-12 text-slate-500 animate-spin" />
               <div className="space-y-1 text-center">
-                <p className="text-sm font-semibold text-white">Authorizing Card Transaction</p>
-                <p className="text-xs text-slate-200">Secured via Stripe Gateway Protocols</p>
+                <p className="text-sm font-semibold text-slate-900">Authorizing Card Transaction</p>
+                <p className="text-xs text-slate-600">Secured via Stripe Gateway Protocols</p>
               </div>
 
               {/* Console log display */}
-              <div className="w-full transparent rounded-2xl p-4 font-mono text-[9px] text-slate-200 h-40 overflow-y-auto border border-[#161b22] text-left space-y-1">
+              <div className="w-full transparent rounded-2xl p-4 font-mono text-[9px] text-slate-600 h-40 overflow-y-auto border border-[#161b22] text-left space-y-1">
                 {processingLog.map((log, i) => (
-                  <div key={i} className={cn(log.includes('successfully') ? "text-emerald-400" : "text-slate-300")}>
+                  <div key={i} className={cn(log.includes('successfully') ? "text-emerald-400" : "text-slate-500")}>
                     <span className="text-cyan-400">➜</span> {log}
                   </div>
                 ))}
@@ -2626,14 +2626,14 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-display font-light text-white">Payment Completed!</h3>
-                <p className="text-slate-200 text-sm max-w-sm">
+                <h3 className="text-2xl font-display font-light text-slate-900">Payment Completed!</h3>
+                <p className="text-slate-600 text-sm max-w-sm">
                   Your payment was verified. {plans[selectedPlan as keyof typeof plans].name} has been provisioned to your workspace.
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="px-8 py-3 glass-premium text-white hover:bg-white/10 text-xs font-bold uppercase tracking-widest rounded-full min-h-[44px]"
+                className="px-8 py-3 glass-premium text-brand hover:bg-slate-100 text-xs font-bold uppercase tracking-widest rounded-full min-h-[44px]"
               >
                 Return to Dashboard
               </button>
@@ -2689,8 +2689,8 @@ function PublicSharedScorecard() {
   if (loading) {
     return (
       <div className="min-h-screen transparent flex items-center justify-center flex-col gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
-        <span className="text-xs uppercase font-bold text-slate-200">Loading Shared Scorecard...</span>
+        <Loader2 className="w-8 h-8 animate-spin text-slate-500" />
+        <span className="text-xs uppercase font-bold text-slate-600">Loading Shared Scorecard...</span>
       </div>
     );
   }
@@ -2699,23 +2699,23 @@ function PublicSharedScorecard() {
     return (
       <div className="min-h-screen transparent flex items-center justify-center flex-col gap-4">
         <AlertCircle className="w-12 h-12 text-red-500" />
-        <h2 className="text-xl font-display font-light text-white">Scorecard Not Found</h2>
-        <p className="text-slate-200 text-sm">The requested talent evaluation profile does not exist or link expired.</p>
+        <h2 className="text-xl font-display font-light text-slate-900">Scorecard Not Found</h2>
+        <p className="text-slate-600 text-sm">The requested talent evaluation profile does not exist or link expired.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen transparent font-sans text-slate-300 p-6 md:p-12 relative">
+    <div className="min-h-screen transparent font-sans text-slate-500 p-6 md:p-12 relative">
       <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         
         {/* Header Branding */}
-        <div className="flex justify-between items-center border-b border-white/10 pb-6">
+        <div className="flex justify-between items-center border-b border-slate-200 pb-6">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg transparent flex items-center justify-center shadow-sm">
-              <Search className="w-4 h-4 text-white" />
+              <Search className="w-4 h-4 text-slate-900" />
             </div>
-            <span className="font-display font-light text-lg tracking-tight text-white">HireAI Shared Talent Review</span>
+            <span className="font-display font-light text-lg tracking-tight text-slate-900">HireAI Shared Talent Review</span>
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-200/50 px-3 py-1 rounded-full">
             Verified Evaluation
@@ -2723,35 +2723,35 @@ function PublicSharedScorecard() {
         </div>
 
         {/* Candidate Profile Details */}
-        <div className="glass-premium rounded-3xl border border-white/10/80 p-8 shadow-sm space-y-6">
+        <div className="glass-premium rounded-3xl border border-slate-200/80 p-8 shadow-sm space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div>
-              <h1 className="text-3xl font-display font-light text-white mb-1">{candidate.fullName}</h1>
-              <p className="text-slate-200 text-sm font-medium">{candidate.currentRole} Candidate</p>
-              {job && <p className="text-xs text-slate-200 mt-1">Applying for: {job.title}</p>}
+              <h1 className="text-3xl font-display font-light text-slate-900 mb-1">{candidate.fullName}</h1>
+              <p className="text-slate-600 text-sm font-medium">{candidate.currentRole} Candidate</p>
+              {job && <p className="text-xs text-slate-600 mt-1">Applying for: {job.title}</p>}
             </div>
             
-            <div className="flex items-center gap-4 transparent px-6 py-4 rounded-2xl border border-white/10/60">
+            <div className="flex items-center gap-4 transparent px-6 py-4 rounded-2xl border border-slate-200/60">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-200">Match Rating</p>
-                <p className="text-2xl font-display text-white mt-0.5">{candidate.scorecard?.compositeScore}%</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-600">Match Rating</p>
+                <p className="text-2xl font-display text-slate-900 mt-0.5">{candidate.scorecard?.compositeScore}%</p>
               </div>
-              <div className="w-2 h-10 rounded-full bg-white/10 overflow-hidden">
+              <div className="w-2 h-10 rounded-full bg-slate-100 overflow-hidden">
                 <div className="h-full glass-premium" style={{ height: `${candidate.scorecard?.compositeScore}%` }} />
               </div>
             </div>
           </div>
 
           {/* D6 Scorecard */}
-          <div className="pt-6 border-t border-white/10">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 mb-4">D6 Assessment Scorecard</h3>
+          <div className="pt-6 border-t border-slate-200">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 mb-4">D6 Assessment Scorecard</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {Object.entries(candidate.scorecard?.dimensions || {}).map(([key, value]: any) => {
                 if (key === 'redFlags' || key === 'signalDensity') return null;
                 return (
-                  <div key={key} className="transparent/50 border border-white/10/40 p-4 rounded-2xl text-center">
-                    <p className="text-[10px] font-bold text-slate-200 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
-                    <p className="text-lg font-display text-white font-medium mt-1">{value?.score}%</p>
+                  <div key={key} className="transparent/50 border border-slate-200/40 p-4 rounded-2xl text-center">
+                    <p className="text-[10px] font-bold text-slate-600 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
+                    <p className="text-lg font-display text-slate-900 font-medium mt-1">{value?.score}%</p>
                   </div>
                 );
               })}
@@ -2760,23 +2760,23 @@ function PublicSharedScorecard() {
 
           {/* Summary */}
           {candidate.scorecard?.recommendation?.summary && (
-            <div className="pt-6 border-t border-white/10 space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Executive Summary</h3>
-              <p className="text-sm leading-relaxed text-slate-200 transparent/40 p-4 rounded-2xl border border-white/10/30">{candidate.scorecard.recommendation.summary}</p>
+            <div className="pt-6 border-t border-slate-200 space-y-2">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600">Executive Summary</h3>
+              <p className="text-sm leading-relaxed text-slate-600 transparent/40 p-4 rounded-2xl border border-slate-200/30">{candidate.scorecard.recommendation.summary}</p>
             </div>
           )}
 
           {/* Interview logs */}
           {interview && (
-            <div className="pt-6 border-t border-white/10 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Conversation Transcripts</h3>
-              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-white/10/50 rounded-2xl p-4 transparent/30">
+            <div className="pt-6 border-t border-slate-200 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600">Conversation Transcripts</h3>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-slate-200/50 rounded-2xl p-4 transparent/30">
                 {interview.messages?.map((msg: any, i: number) => (
                   <div key={i} className="text-xs leading-relaxed">
-                    <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-white")}>
+                    <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-slate-900")}>
                       {msg.role === 'assistant' ? 'AI Screener' : 'Candidate'}
                     </p>
-                    <p className="text-slate-200 mt-0.5">{msg.content}</p>
+                    <p className="text-slate-600 mt-0.5">{msg.content}</p>
                   </div>
                 ))}
               </div>
@@ -2901,7 +2901,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     const isImmersive = location.pathname.includes('/interview/') || location.pathname.includes('/join/');
     if (isImmersive) {
       return (
-        <div className="flex h-screen w-screen transparent font-sans text-slate-100 overflow-hidden">
+        <div className="flex h-screen w-screen transparent font-sans text-slate-800 overflow-hidden">
           <main className="flex-1 overflow-y-auto transparent w-full h-full">
             {children}
           </main>
@@ -2910,34 +2910,34 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     }
 
     return (
-      <div className="flex h-screen transparent font-sans text-white selection:bg-brand/10 overflow-hidden">
+      <div className="flex h-screen transparent font-sans text-slate-900 selection:bg-brand/10 overflow-hidden">
                 {/* Sidebar */}
-        <aside className={cn("glass-premium text-white flex-col hidden lg:flex shrink-0 border-r border-white/10 transition-all duration-300", isSidebarCollapsed ? "w-20" : "w-64")}>
-          <div className={cn("h-16 flex items-center border-b border-white/10 shrink-0", isSidebarCollapsed ? "px-0 justify-center" : "px-6 justify-between")}>
+        <aside className={cn("glass-premium text-slate-900 flex-col hidden lg:flex shrink-0 border-r border-slate-200 transition-all duration-300", isSidebarCollapsed ? "w-20" : "w-64")}>
+          <div className={cn("h-16 flex items-center border-b border-slate-200 shrink-0", isSidebarCollapsed ? "px-0 justify-center" : "px-6 justify-between")}>
              <div className="flex items-center">
                <div className={cn("bg-brand-dark rounded-lg flex items-center justify-center shadow-sm shrink-0", isSidebarCollapsed ? "w-10 h-10" : "w-8 h-8 mr-3")}>
-                  <Search className="w-4 h-4 text-white" />
+                  <Search className="w-4 h-4 text-slate-900" />
                </div>
                {!isSidebarCollapsed && <span className="font-display font-light text-xl tracking-tight uppercase">{whiteLabelBrandingName || "HireAI"}</span>}
              </div>
-             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-white/10 rounded-lg text-slate-200 hover:text-white transition-colors">
+             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">
                <Menu className="w-4 h-4" />
              </button>
           </div>
           <nav className="flex-1 px-3 py-6 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
-             <Link to="/" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <LayoutGrid className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Dashboard</span>}
              </Link>
-             <Link to="/jobs/new" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/jobs/new" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Briefcase className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Post Job</span>}
              </Link>
-             <Link to="/resume-bank" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/resume-bank" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Database className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Resume Bank</span>}
              </Link>
-             <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Settings className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">HR Admin</span>}
              </Link>
@@ -2948,15 +2948,15 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </Link>
              )}
           </nav>
-          <div className={cn("p-4 border-t border-white/10 flex flex-col shrink-0 gap-4", isSidebarCollapsed ? "items-center" : "")}>
+          <div className={cn("p-4 border-t border-slate-200 flex flex-col shrink-0 gap-4", isSidebarCollapsed ? "items-center" : "")}>
             {/* Workspace Credits Meter */}
             {!isSidebarCollapsed && (
-              <div className="px-3 py-2 bg-white/10/40 border border-white/10/30 rounded-xl space-y-1.5 mx-2 text-[10px]">
-                <div className="flex justify-between font-semibold text-slate-300">
+              <div className="px-3 py-2 bg-slate-100/40 border border-slate-200/30 rounded-xl space-y-1.5 mx-2 text-[10px]">
+                <div className="flex justify-between font-semibold text-slate-500">
                   <span>Balance</span>
-                  <span className="text-white">{(profile?.credits !== undefined ? profile.credits : 50)} Left</span>
+                  <span className="text-slate-900">{(profile?.credits !== undefined ? profile.credits : 50)} Left</span>
                 </div>
-                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-cyan-400" 
                     style={{ width: `${Math.min(100, (((profile?.credits !== undefined ? profile.credits : 50)) / 50) * 100)}%` }} 
@@ -2964,7 +2964,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </div>
                 <button 
                   onClick={() => setStripeModalOpen(true)}
-                  className="w-full py-1 glass-premium hover:transparent text-white rounded text-[8px] font-bold uppercase tracking-wider transition-colors border border-slate-750"
+                  className="w-full py-1 glass-premium hover:transparent text-slate-900 rounded text-[8px] font-bold uppercase tracking-wider transition-colors border border-slate-750"
                 >
                   Buy Credits
                 </button>
@@ -2972,15 +2972,15 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
             )}
 
             <div className={cn("flex items-center gap-3", isSidebarCollapsed ? "justify-center" : "px-2")}>
-              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-sm font-bold shrink-0">{user.email.charAt(0).toUpperCase()}</div>
+              <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-sm font-bold shrink-0">{user.email.charAt(0).toUpperCase()}</div>
               {!isSidebarCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-white truncate">{user.email}</p>
-                  <p className="text-[10px] text-slate-200 truncate">Authenticated</p>
+                  <p className="text-xs font-medium text-slate-900 truncate">{user.email}</p>
+                  <p className="text-[10px] text-slate-600 truncate">Authenticated</p>
                 </div>
               )}
             </div>
-            <Button variant="ghost" className={cn("text-slate-200 hover:text-white hover:bg-white/10 text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
+            <Button variant="ghost" className={cn("text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
               <LogOut className={cn("shrink-0", isSidebarCollapsed ? "w-5 h-5" : "w-4 h-4 mr-2")} /> 
               {!isSidebarCollapsed && "Logout"}
             </Button>
@@ -2988,17 +2988,17 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
         </aside>
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="h-16 glass-premium border-b border-white/10 flex items-center justify-between px-4 sm:px-6 shrink-0">
+          <header className="h-16 glass-premium border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0">
              <div className="flex items-center gap-4">
-                <button className="lg:hidden p-2 text-slate-200 hover:bg-white/5 rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <button className="lg:hidden p-2 text-slate-600 hover:bg-slate-50 rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                    <Menu className="w-5 h-5" />
                 </button>
                 {/* Mobile Logo */}
                 <Link to="/" className="flex items-center lg:hidden hover:opacity-90 transition-opacity select-none">
                    <div className="bg-brand-dark rounded-lg flex items-center justify-center shadow-sm shrink-0 w-8 h-8 mr-2">
-                      <Search className="w-4 h-4 text-white" />
+                      <Search className="w-4 h-4 text-slate-900" />
                    </div>
-                   <span className="font-display font-light text-xl tracking-tight uppercase text-white">{whiteLabelBrandingName || "HireAI"}</span>
+                   <span className="font-display font-light text-xl tracking-tight uppercase text-slate-900">{whiteLabelBrandingName || "HireAI"}</span>
                 </Link>
              </div>
              <div className="flex items-center gap-3">
@@ -3011,18 +3011,18 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="lg:hidden border-b glass-premium border-white/10 shrink-0"
+                className="lg:hidden border-b glass-premium border-slate-200 shrink-0"
               >
                 <div className="px-6 py-4 space-y-2 flex flex-col">
-                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Dashboard</Link>
-                    <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Post Job</Link>
-                    <Link to="/resume-bank" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">Resume Bank</Link>
-                    <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">HR Admin</Link>
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Dashboard</Link>
+                    <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Post Job</Link>
+                    <Link to="/resume-bank" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">Resume Bank</Link>
+                    <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">HR Admin</Link>
                     {isUserAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-brand-light hover:text-brand-light transition-colors">System Admin</Link>
                     )}
-                    <div className="pt-4 border-t border-white/10">
-                      <Button variant="ghost" className="w-full justify-start text-slate-200 hover:text-white hover:bg-white/10 text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
+                    <div className="pt-4 border-t border-slate-200">
+                      <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
                         <LogOut className="w-4 h-4 mr-2" /> Logout
                       </Button>
                     </div>
@@ -3107,10 +3107,10 @@ function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-200">
         <div>
           <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Active Pipelines</h1>
-          <p className="text-slate-200 max-w-2xl text-xs sm:text-lg leading-relaxed font-black uppercase tracking-widest opacity-60">
+          <p className="text-slate-600 max-w-2xl text-xs sm:text-lg leading-relaxed font-black uppercase tracking-widest opacity-60">
             Autonomous Talent Orchestration
           </p>
         </div>
@@ -3124,16 +3124,16 @@ function Dashboard() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-64 glass-premium border border-white/10 rounded-[2rem] animate-pulse" />
+            <div key={i} className="h-64 glass-premium border border-slate-200 rounded-[2rem] animate-pulse" />
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <Card className="p-12 sm:p-20 text-center glass-premium border-dashed border-2 border-white/10 rounded-[3rem]">
+        <Card className="p-12 sm:p-20 text-center glass-premium border-dashed border-2 border-slate-200 rounded-[3rem]">
           <div className="w-20 h-20 bg-brand/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
             <Briefcase className="w-10 h-10 text-brand-light" />
           </div>
           <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Workspace Empty</h3>
-          <p className="text-slate-200 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
+          <p className="text-slate-600 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
           <Button onClick={() => navigate('/jobs/new')} size="lg" className="rounded-2xl h-14 font-black uppercase tracking-widest text-xs">Post Your First Job</Button>
         </Card>
       ) : (
@@ -3148,12 +3148,12 @@ function Dashboard() {
               className="cursor-pointer"
               onClick={() => navigate(`/jobs/${job.id}`)}
             >
-              <Card className="p-8 h-full hover:border-brand transition-all group shadow-xl hover:shadow-brand/10 rounded-[2.5rem] border-white/10 flex flex-col justify-between relative overflow-hidden glass-premium/80 backdrop-blur-sm">
+              <Card className="p-8 h-full hover:border-brand transition-all group shadow-xl hover:shadow-brand/10 rounded-[2.5rem] border-slate-200 flex flex-col justify-between relative overflow-hidden glass-premium/80 backdrop-blur-sm">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rotate-45 translate-x-16 -translate-y-16 group-hover:bg-brand/10 transition-colors" />
                 
                 <div>
                    <div className="flex justify-between items-start mb-8">
-                     <div className="w-14 h-14 transparent rounded-2xl flex items-center justify-center text-white font-black group-hover:scale-110 transition-transform shadow-xl">
+                     <div className="w-14 h-14 transparent rounded-2xl flex items-center justify-center text-slate-900 font-black group-hover:scale-110 transition-transform shadow-xl">
                        {job.title.charAt(0).toUpperCase()}
                      </div>
                      <span className="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 shadow-sm shadow-emerald-100">
@@ -3163,13 +3163,13 @@ function Dashboard() {
                    <div className="flex justify-between items-start">
                      <div className="flex-1 min-w-0">
                        <h3 className="text-2xl font-black mb-3 group-hover:text-brand-light transition-colors line-clamp-2 tracking-tighter leading-tight uppercase">{job.title}</h3>
-                       <p className="text-[10px] text-slate-200 mb-8 flex items-center gap-1.5 font-black uppercase tracking-widest">
+                       <p className="text-[10px] text-slate-600 mb-8 flex items-center gap-1.5 font-black uppercase tracking-widest">
                          <Clock className="w-3 h-3" /> Initialized {formatDate(job.createdAt)}
                        </p>
                      </div>
                      <button 
                        onClick={(e) => deleteJob(e, job.id)} 
-                       className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all ml-2"
+                       className="p-3 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all ml-2"
                      >
                        <Trash2 className="w-5 h-5" />
                      </button>
@@ -3177,13 +3177,13 @@ function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-4 pt-6 mt-auto border-t border-slate-50">
-                  <div className="flex items-center gap-2 text-slate-200 font-black uppercase tracking-[0.2em] text-[10px]">
+                  <div className="flex items-center gap-2 text-slate-600 font-black uppercase tracking-[0.2em] text-[10px]">
                     <div className="flex -space-x-2">
-                       {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-white/5 border-2 border-white" />)}
+                       {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-slate-50 border-2 border-white" />)}
                     </div>
                     <span>Talent Pipeline</span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand-light ml-auto group-hover:translate-x-1 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand-light ml-auto group-hover:translate-x-1 group-hover:bg-brand-dark group-hover:text-slate-900 transition-all">
                      <ChevronRight className="w-5 h-5" />
                   </div>
                 </div>
@@ -3483,10 +3483,10 @@ function ResumeBank() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 text-left">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200">
         <div>
           <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Resume Bank</h1>
-          <p className="text-slate-200 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
+          <p className="text-slate-600 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button
@@ -3509,39 +3509,39 @@ function ResumeBank() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
+        <Card className="p-6 glass-premium border border-slate-200 shadow-sm flex items-center gap-4 rounded-2xl">
           <div className="p-3 bg-brand/10 text-brand rounded-2xl">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Total Candidates</span>
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Total Candidates</span>
             <span className="text-2xl font-black">{stats.totalUnique}</span>
           </div>
         </Card>
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
+        <Card className="p-6 glass-premium border border-slate-200 shadow-sm flex items-center gap-4 rounded-2xl">
           <div className="p-3 bg-cyan-50 text-cyan-600 rounded-2xl">
             <Database className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Screenings Run</span>
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Screenings Run</span>
             <span className="text-2xl font-black">{stats.totalScreenings}</span>
           </div>
         </Card>
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
+        <Card className="p-6 glass-premium border border-slate-200 shadow-sm flex items-center gap-4 rounded-2xl">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Avg. Best Fit</span>
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Avg. Best Fit</span>
             <span className="text-2xl font-black">{stats.avgScore}%</span>
           </div>
         </Card>
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
+        <Card className="p-6 glass-premium border border-slate-200 shadow-sm flex items-center gap-4 rounded-2xl">
           <div className="p-3 bg-violet-50 text-violet-650 rounded-2xl">
             <Brain className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Top Domain Track</span>
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Top Domain Track</span>
             <span className="text-xs font-black truncate max-w-[150px] block mt-1 uppercase tracking-tight text-violet-750 bg-violet-50/50 px-2 py-0.5 rounded-lg border border-violet-100/50">{stats.topTag}</span>
           </div>
         </Card>
@@ -3549,17 +3549,17 @@ function ResumeBank() {
 
       <div className="grid grid-cols-12 gap-8 items-start">
         <aside className="col-span-12 lg:col-span-3 space-y-6">
-          <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-2xl">
-            <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6">Filter Resumes</h3>
+          <Card className="p-6 glass-premium border border-slate-200 shadow-sm rounded-2xl">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-6">Filter Resumes</h3>
             
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Search</label>
+                <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Search</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-200 absolute left-3 top-3.5" />
+                  <Search className="w-4 h-4 text-slate-600 absolute left-3 top-3.5" />
                   <input
                     type="text"
-                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-500"
                     placeholder="Name, role, company..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -3569,7 +3569,7 @@ function ResumeBank() {
 
               {allUniqueTags.length > 0 && (
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Filter by Tags</label>
+                  <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Filter by Tags</label>
                   <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                     {allUniqueTags.map(tag => {
                       const isSelected = selectedTags.includes(tag);
@@ -3586,8 +3586,8 @@ function ResumeBank() {
                           className={cn(
                             "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
                             isSelected
-                              ? "bg-brand-dark border-brand-dark text-white shadow-sm"
-                              : "transparent border-white/10 text-slate-200 hover:bg-white/5 hover:border-slate-350"
+                              ? "bg-brand-dark border-brand-dark text-slate-900 shadow-sm"
+                              : "transparent border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-350"
                           )}
                         >
                           {tag}
@@ -3602,27 +3602,27 @@ function ResumeBank() {
         </aside>
 
         <div className="col-span-12 lg:col-span-9">
-          <Card className="overflow-hidden glass-premium border border-white/10 shadow-sm rounded-2xl">
+          <Card className="overflow-hidden glass-premium border border-slate-200 shadow-sm rounded-2xl">
             {loading ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-10 h-10 text-brand animate-spin" />
-                <p className="text-slate-200 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Resume Bank...</p>
+                <p className="text-slate-600 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Resume Bank...</p>
               </div>
             ) : filteredResumes.length === 0 ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
-                <Database className="w-12 h-12 text-slate-300 animate-pulse" />
-                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">No Resumes Found</h3>
-                <p className="text-slate-200 text-xs">Adjust your search parameters to find profiles.</p>
+                <Database className="w-12 h-12 text-slate-500 animate-pulse" />
+                <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">No Resumes Found</h3>
+                <p className="text-slate-600 text-xs">Adjust your search parameters to find profiles.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left min-w-[850px] table-fixed">
-                  <thead className="transparent border-b border-white/10">
+                  <thead className="transparent border-b border-slate-200">
                     <tr>
                       <th className="w-12 px-6 py-4">
                         <input
                           type="checkbox"
-                          className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer"
+                          className="w-4 h-4 rounded text-brand focus:ring-brand border-slate-300 cursor-pointer"
                           checked={filteredResumes.length > 0 && filteredResumes.every(r => {
                             const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
                             return selectedResumes.includes(key);
@@ -3637,11 +3637,11 @@ function ResumeBank() {
                           }}
                         />
                       </th>
-                      <th className="w-1/4 px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Candidate</th>
-                      <th className="w-1/3 px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Tags & Career Track</th>
-                      <th className="w-1/5 px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Original Campaign</th>
-                      <th className="w-24 px-6 py-4 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">Screenings</th>
-                      <th className="w-32 px-6 py-4 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Actions</th>
+                      <th className="w-1/4 px-6 py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">Candidate</th>
+                      <th className="w-1/3 px-6 py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">Tags & Career Track</th>
+                      <th className="w-1/5 px-6 py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">Original Campaign</th>
+                      <th className="w-24 px-6 py-4 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest">Screenings</th>
+                      <th className="w-32 px-6 py-4 text-right text-[10px] font-black text-slate-600 uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -3663,7 +3663,7 @@ function ResumeBank() {
                           <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
-                              className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer"
+                              className="w-4 h-4 rounded text-brand focus:ring-brand border-slate-300 cursor-pointer"
                               checked={isSelected}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -3676,18 +3676,18 @@ function ResumeBank() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-black text-slate-200 text-xs shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center font-black text-slate-600 text-xs shrink-0">
                                 {candidate.fullName?.charAt(0) || '?'}
                               </div>
                               <div className="min-w-0">
-                                <h4 className="text-xs font-extrabold text-white truncate">{candidate.fullName}</h4>
-                                <p className="text-[10px] text-slate-200 font-bold truncate">{candidate.email}</p>
+                                <h4 className="text-xs font-extrabold text-slate-900 truncate">{candidate.fullName}</h4>
+                                <p className="text-[10px] text-slate-600 font-bold truncate">{candidate.email}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="space-y-1.5">
-                              <p className="text-[10px] text-slate-200 font-black uppercase tracking-wide truncate">
+                              <p className="text-[10px] text-slate-600 font-black uppercase tracking-wide truncate">
                                 {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
                               </p>
                               <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
@@ -3700,16 +3700,16 @@ function ResumeBank() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="text-[10px] text-slate-200 font-extrabold truncate">
+                            <p className="text-[10px] text-slate-600 font-extrabold truncate">
                               {getJobTitle(candidate.jobId)}
                             </p>
-                            <p className="text-[8px] text-slate-200 mt-0.5 uppercase tracking-widest font-black">
+                            <p className="text-[8px] text-slate-600 mt-0.5 uppercase tracking-widest font-black">
                               {formatDate(candidate.createdAt)}
                             </p>
                           </td>
                           <td className="px-6 py-4 text-center">
                             <div className="inline-flex flex-col items-center">
-                              <span className="text-[10px] font-black text-slate-300 bg-white/5 border border-white/10/50 px-2 py-0.5 rounded-full leading-none mb-1">
+                              <span className="text-[10px] font-black text-slate-500 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded-full leading-none mb-1">
                                 {candidate.screeningsCount}x
                               </span>
                               <span className={cn(
@@ -3725,7 +3725,7 @@ function ResumeBank() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand hover:bg-brand/10 border border-white/10 hover:border-brand/10 flex items-center gap-1.5 ml-auto"
+                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:text-brand hover:bg-brand/10 border border-slate-200 hover:border-brand/10 flex items-center gap-1.5 ml-auto"
                               onClick={() => handleSingleReScreen(candidate)}
                             >
                               <Zap className="w-3 h-3 text-brand fill-brand/20" /> Re-Screen
@@ -3753,7 +3753,7 @@ function ResumeBank() {
           <div className="p-6 space-y-6 text-center">
             <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full -rotate-90">
-                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
+                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-800" />
                 <circle 
                   cx="40" cy="40" r="36" 
                   stroke="currentColor" strokeWidth="4" 
@@ -3770,11 +3770,11 @@ function ResumeBank() {
             </div>
             
             <div className="space-y-1">
-              <h4 className="text-sm font-black text-slate-300 uppercase tracking-widest">Analyzing Candidate Files</h4>
-              <p className="text-xs text-slate-200">Executing LLM scoring engine against target job profile.</p>
+              <h4 className="text-sm font-black text-slate-500 uppercase tracking-widest">Analyzing Candidate Files</h4>
+              <p className="text-xs text-slate-600">Executing LLM scoring engine against target job profile.</p>
             </div>
 
-            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-200 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-600 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
               {screeningLogs.map((log, i) => (
                 <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
                   <span className="text-cyan-400">➜</span> {log}
@@ -3786,7 +3786,7 @@ function ResumeBank() {
           <div className="p-6 space-y-6 text-left">
             <div className="transparent border border-slate-150 p-4 rounded-xl space-y-1 text-left">
               <h5 className="text-[10px] font-black uppercase text-slate-450 tracking-wider">Candidate Scope</h5>
-              <p className="text-xs font-bold text-slate-300">
+              <p className="text-xs font-bold text-slate-500">
                 {reScreeningCandidate ? `Re-screening candidate: ${reScreeningCandidate.fullName}` : `Bulk screening: ${selectedResumes.length} selected resumes`}
               </p>
               <p className="text-[10px] text-brand font-semibold mt-1">
@@ -3795,10 +3795,10 @@ function ResumeBank() {
             </div>
 
             <div className="space-y-2 text-left">
-              <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Target Job Position</label>
+              <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Target Job Position</label>
               {jobs.length === 0 ? (
-                <div className="p-4 border border-white/10 rounded-xl transparent text-center">
-                  <p className="text-xs text-slate-200 font-medium">No active jobs. Please post a job first.</p>
+                <div className="p-4 border border-slate-200 rounded-xl transparent text-center">
+                  <p className="text-xs text-slate-600 font-medium">No active jobs. Please post a job first.</p>
                   <Button
                     variant="outline"
                     className="mt-3 text-[10px] uppercase font-bold tracking-wider"
@@ -3825,24 +3825,24 @@ function ResumeBank() {
                           selectedJobId === job.id
                             ? "border-brand-dark bg-brand/10 shadow-sm"
                             : alreadyScreened
-                              ? "border-white/10 transparent/60 opacity-60 cursor-not-allowed"
-                              : "border-white/10 hover:border-brand-light glass-premium hover:transparent/20"
+                              ? "border-slate-200 transparent/60 opacity-60 cursor-not-allowed"
+                              : "border-slate-200 hover:border-brand-light glass-premium hover:transparent/20"
                         )}
                       >
                         <div className="min-w-0">
-                          <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-brand" : "text-slate-300")}>
+                          <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-brand" : "text-slate-500")}>
                             {job.title}
                           </h4>
-                          <p className="text-[9px] text-slate-200 font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
+                          <p className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {alreadyScreened && (
-                            <span className="text-[8px] font-black bg-white/5 text-slate-200 border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                            <span className="text-[8px] font-black bg-slate-50 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                           )}
                           {!alreadyScreened && (
                             <div className={cn(
                               "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                              selectedJobId === job.id ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
+                              selectedJobId === job.id ? "border-brand-dark bg-brand-dark" : "border-slate-200 group-hover:border-brand-light"
                             )}>
                               {selectedJobId === job.id && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
                             </div>
@@ -3855,7 +3855,7 @@ function ResumeBank() {
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
               <Button
                 variant="outline"
                 className="text-xs uppercase tracking-wider h-9 px-4 rounded-xl"
@@ -3982,18 +3982,18 @@ function NewJob() {
         </Button>
         <div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Initialize Campaign</h1>
-          <p className="text-slate-200 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and customize screening dimensions for precise candidate fit evaluation.</p>
+          <p className="text-slate-600 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and customize screening dimensions for precise candidate fit evaluation.</p>
         </div>
       </div>
 
-      <Card className="p-6 sm:p-10 border-white/10 shadow-2xl shadow-brand/10 rounded-[2.5rem] glass-premium/80 backdrop-blur-xl">
+      <Card className="p-6 sm:p-10 border-slate-200 shadow-2xl shadow-brand/10 rounded-[2.5rem] glass-premium/80 backdrop-blur-xl">
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em] px-1">Campaign Title</label>
+            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-1">Campaign Title</label>
             <input
               required
               type="text"
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-slate-300"
+              className="w-full px-6 py-4 transparent border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-slate-900 placeholder:text-slate-500"
               placeholder="e.g. Senior Staff Engineer (Cloud Infrastructure)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -4001,7 +4001,7 @@ function NewJob() {
           </div>
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1 mb-2">
-              <label className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em]">Requirement Context</label>
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Requirement Context</label>
               <label className="text-[10px] font-black text-brand-light hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest">
                 <Plus className="w-3.5 h-3.5" />
                 <span>Upload PDF/DOCX</span>
@@ -4011,7 +4011,7 @@ function NewJob() {
             <textarea
               required
               rows={12}
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all text-sm leading-relaxed font-medium min-h-[250px] custom-scrollbar"
+              className="w-full px-6 py-4 transparent border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-brand transition-all text-sm leading-relaxed font-medium min-h-[250px] custom-scrollbar"
               placeholder={parsingFile ? "Decrypting document layers..." : "Paste the full mission brief / job description here..."}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -4020,44 +4020,44 @@ function NewJob() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
+            <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
             <input
               required
               type="number"
               min="5"
               max="120"
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-slate-300"
+              className="w-full px-6 py-4 transparent border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-slate-900 placeholder:text-slate-500"
               value={interviewDurationMinutes}
               onChange={(e) => setInterviewDurationMinutes(Number(e.target.value))}
             />
           </div>
 
           {/* Advanced Configurations Expansion */}
-          <div className="border-t border-white/10 pt-6">
+          <div className="border-t border-slate-200 pt-6">
             <button
               type="button"
               id="toggle-config-btn"
               onClick={() => setShowConfig(!showConfig)}
-              className="flex items-center justify-between w-full p-4 transparent hover:bg-white/5/85 rounded-2xl transition-all border border-white/10 font-bold text-xs uppercase tracking-wider text-slate-300 shadow-sm"
+              className="flex items-center justify-between w-full p-4 transparent hover:bg-slate-50/85 rounded-2xl transition-all border border-slate-200 font-bold text-xs uppercase tracking-wider text-slate-500 shadow-sm"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-brand" />
                 <span>Scoring Matrix & Passing Thresholds Configuration ({showConfig ? 'Hide' : 'Customize'})</span>
               </div>
-              <ChevronDown className={cn("w-4 h-4 text-slate-200 transition-transform", showConfig && "rotate-180")} />
+              <ChevronDown className={cn("w-4 h-4 text-slate-600 transition-transform", showConfig && "rotate-180")} />
             </button>
 
             {showConfig && (
-              <div className="mt-6 space-y-8 p-6 transparent/50 rounded-3xl border border-white/10/50 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="mt-6 space-y-8 p-6 transparent/50 rounded-3xl border border-slate-200/50 animate-in fade-in slide-in-from-top-2 duration-300">
                 {/* Threshold Section */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider flex items-center gap-2">
                     <Target className="w-4 h-4 text-brand" /> Screening Thresholds
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
+                    <div className="space-y-2 p-4 glass-premium rounded-2xl border border-slate-200 shadow-sm">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Passed Match</label>
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Passed Match</label>
                         <span className="text-sm font-black text-green-600 bg-green-50 px-2.5 py-0.5 rounded-lg border border-green-100">{passedThreshold}%</span>
                       </div>
                       <input
@@ -4069,12 +4069,12 @@ function NewJob() {
                         value={passedThreshold}
                         onChange={(e) => setPassedThreshold(Number(e.target.value))}
                       />
-                      <p className="text-[9px] text-slate-200 font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
+                      <p className="text-[9px] text-slate-600 font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
                     </div>
 
-                    <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
+                    <div className="space-y-2 p-4 glass-premium rounded-2xl border border-slate-200 shadow-sm">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Low Match (Failed)</label>
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Low Match (Failed)</label>
                         <span className="text-sm font-black text-red-600 bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-100">{lowThreshold}%</span>
                       </div>
                       <input
@@ -4086,15 +4086,15 @@ function NewJob() {
                         value={lowThreshold}
                         onChange={(e) => setLowThreshold(Number(e.target.value))}
                       />
-                      <p className="text-[9px] text-slate-200 font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
+                      <p className="text-[9px] text-slate-600 font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Custom Dimensions Section */}
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                    <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
+                  <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                    <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider flex items-center gap-2">
                       <Briefcase className="w-4 h-4 text-brand" /> Screening Criteria Parameters
                     </h3>
                     <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-brand-light">
@@ -4103,32 +4103,32 @@ function NewJob() {
                   </div>
 
                   {/* Dimension 1: skillsMatch */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="p-4 glass-premium border border-slate-200 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d1Name}
                           onChange={(e) => setD1Name(e.target.value)}
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d1Weight}
                           onChange={(e) => setD1Weight(Math.max(0, Number(e.target.value)))}
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                         value={d1Desc}
                         onChange={(e) => setD1Desc(e.target.value)}
                       />
@@ -4136,32 +4136,32 @@ function NewJob() {
                   </div>
 
                   {/* Dimension 2: experienceFit */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="p-4 glass-premium border border-slate-200 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d2Name}
                           onChange={(e) => setD2Name(e.target.value)}
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d2Weight}
                           onChange={(e) => setD2Weight(Math.max(0, Number(e.target.value)))}
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                         value={d2Desc}
                         onChange={(e) => setD2Desc(e.target.value)}
                       />
@@ -4169,32 +4169,32 @@ function NewJob() {
                   </div>
 
                   {/* Dimension 3: education */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="p-4 glass-premium border border-slate-200 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d3Name}
                           onChange={(e) => setD3Name(e.target.value)}
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d3Weight}
                           onChange={(e) => setD3Weight(Math.max(0, Number(e.target.value)))}
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                         value={d3Desc}
                         onChange={(e) => setD3Desc(e.target.value)}
                       />
@@ -4202,32 +4202,32 @@ function NewJob() {
                   </div>
 
                   {/* Dimension 4: achievements */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="p-4 glass-premium border border-slate-200 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d4Name}
                           onChange={(e) => setD4Name(e.target.value)}
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d4Weight}
                           onChange={(e) => setD4Weight(Math.max(0, Number(e.target.value)))}
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                         value={d4Desc}
                         onChange={(e) => setD4Desc(e.target.value)}
                       />
@@ -4235,32 +4235,32 @@ function NewJob() {
                   </div>
 
                   {/* Dimension 5: culturalRoleFit */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="p-4 glass-premium border border-slate-200 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d5Name}
                           onChange={(e) => setD5Name(e.target.value)}
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                           value={d5Weight}
                           onChange={(e) => setD5Weight(Math.max(0, Number(e.target.value)))}
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                         value={d5Desc}
                         onChange={(e) => setD5Desc(e.target.value)}
                       />
@@ -5202,7 +5202,7 @@ function JobDetail() {
                    <RotateCcw className="w-3 h-3" /> Autonomous
                 </span>
               </div>
-              <p className="text-slate-200 text-sm max-w-lg leading-relaxed">
+              <p className="text-slate-600 text-sm max-w-lg leading-relaxed">
                 End-to-end AI screening — website voice interviews, instant fit scoring, and autonomous reporting.
               </p>
             </div>
@@ -5223,7 +5223,7 @@ function JobDetail() {
           <Button
             variant="outline"
             onClick={() => setIsSelectResumeModalOpen(true)}
-            className="px-5 h-12 rounded-xl text-sm font-bold border-white/10 hover:transparent transition-all text-slate-300 flex items-center gap-1.5"
+            className="px-5 h-12 rounded-xl text-sm font-bold border-slate-200 hover:transparent transition-all text-slate-500 flex items-center gap-1.5"
           >
             <Database className="w-4 h-4 text-brand" />
             Screen Pre-uploaded Resumes
@@ -5240,21 +5240,21 @@ function JobDetail() {
       </div>
 
       {/* Collapsable Job Description / Details */}
-      <Card className="border-white/10 shadow-sm overflow-hidden rounded-2xl glass-premium transition-all duration-300">
+      <Card className="border-slate-200 shadow-sm overflow-hidden rounded-2xl glass-premium transition-all duration-300">
         <button
           type="button"
           onClick={() => setIsJobDescCollapsed(!isJobDescCollapsed)}
-          className="w-full flex items-center justify-between p-5 transparent/50 hover:transparent transition-all font-bold text-sm text-slate-300"
+          className="w-full flex items-center justify-between p-5 transparent/50 hover:transparent transition-all font-bold text-sm text-slate-500"
         >
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-brand" />
             <span className="font-black uppercase tracking-wider text-xs">Job Details & Description</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-200 font-semibold uppercase tracking-wider">
+            <span className="text-[10px] text-slate-600 font-semibold uppercase tracking-wider">
               {isJobDescCollapsed ? 'Expand to view' : 'Collapse'}
             </span>
-            <ChevronDown className={cn("w-4 h-4 text-slate-200 transition-transform duration-300", !isJobDescCollapsed && "rotate-180")} />
+            <ChevronDown className={cn("w-4 h-4 text-slate-600 transition-transform duration-300", !isJobDescCollapsed && "rotate-180")} />
           </div>
         </button>
 
@@ -5265,40 +5265,40 @@ function JobDetail() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="border-t border-white/10 overflow-hidden"
+              className="border-t border-slate-200 overflow-hidden"
             >
               <div className="p-6 space-y-6">
                 {/* Requirements Grid */}
                 {job.requirements && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transparent/30 p-5 rounded-2xl border border-white/10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transparent/30 p-5 rounded-2xl border border-slate-200">
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Role Type</span>
-                      <span className="text-xs font-bold text-slate-300">{job.requirements.role_type || 'N/A'}</span>
+                      <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Role Type</span>
+                      <span className="text-xs font-bold text-slate-500">{job.requirements.role_type || 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Seniority</span>
-                      <span className="text-xs font-bold text-slate-300">{job.requirements.role_seniority || 'N/A'}</span>
+                      <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Seniority</span>
+                      <span className="text-xs font-bold text-slate-500">{job.requirements.role_seniority || 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Min Experience</span>
-                      <span className="text-xs font-bold text-slate-300">{job.requirements.min_experience_years !== undefined ? `${job.requirements.min_experience_years} Years` : 'N/A'}</span>
+                      <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Min Experience</span>
+                      <span className="text-xs font-bold text-slate-500">{job.requirements.min_experience_years !== undefined ? `${job.requirements.min_experience_years} Years` : 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Location</span>
-                      <span className="text-xs font-bold text-slate-300">{job.requirements.location_requirement || 'N/A'}</span>
+                      <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Location</span>
+                      <span className="text-xs font-bold text-slate-500">{job.requirements.location_requirement || 'N/A'}</span>
                     </div>
                     {job.requirements.required_education && (
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Required Education</span>
-                        <span className="text-xs font-bold text-slate-300">{job.requirements.required_education}</span>
+                        <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Required Education</span>
+                        <span className="text-xs font-bold text-slate-500">{job.requirements.required_education}</span>
                       </div>
                     )}
                     {job.requirements.preferred_industries && job.requirements.preferred_industries.length > 0 && (
                       <div className="space-y-1 md:col-span-2 lg:col-span-3">
-                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Preferred Industries</span>
+                        <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Preferred Industries</span>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {job.requirements.preferred_industries.map((ind, i) => (
-                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-white/5 text-slate-200 rounded-md">{ind}</span>
+                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-slate-50 text-slate-600 rounded-md">{ind}</span>
                           ))}
                         </div>
                       </div>
@@ -5311,7 +5311,7 @@ function JobDetail() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {job.requirements.must_have_skills && job.requirements.must_have_skills.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Must-Have Skills</span>
+                        <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Must-Have Skills</span>
                         <div className="flex flex-wrap gap-1.5">
                           {job.requirements.must_have_skills.map((skill, i) => (
                             <span key={i} className="text-[10px] font-extrabold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg">{skill}</span>
@@ -5321,7 +5321,7 @@ function JobDetail() {
                     )}
                     {job.requirements.nice_to_have_skills && job.requirements.nice_to_have_skills.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Nice-To-Have Skills</span>
+                        <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Nice-To-Have Skills</span>
                         <div className="flex flex-wrap gap-1.5">
                           {job.requirements.nice_to_have_skills.map((skill, i) => (
                             <span key={i} className="text-[10px] font-extrabold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg">{skill}</span>
@@ -5333,9 +5333,9 @@ function JobDetail() {
                 )}
 
                 {/* Job Description Text */}
-                <div className="space-y-2 border-t border-white/10 pt-5">
-                  <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Full Job Description Context</span>
-                  <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-medium max-h-80 overflow-y-auto transparent/20 p-4 rounded-xl border border-white/10/50 custom-scrollbar">
+                <div className="space-y-2 border-t border-slate-200 pt-5">
+                  <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Full Job Description Context</span>
+                  <div className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap font-medium max-h-80 overflow-y-auto transparent/20 p-4 rounded-xl border border-slate-200/50 custom-scrollbar">
                     {job.description}
                   </div>
                 </div>
@@ -5353,10 +5353,10 @@ function JobDetail() {
           { label: `Passed Match (${passedThresh}+)`, count: stats.passed, percent: Math.round((stats.passed / (stats.total || 1)) * 100), color: 'text-green-500' },
           { label: `Low Match (<${lowThresh})`, count: stats.failed, percent: Math.round((stats.failed / (stats.total || 1)) * 100), color: 'text-red-500' },
         ].map(s => (
-          <Card key={s.label} className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between border-white/10 shadow-sm hover:shadow-md transition-shadow">
+          <Card key={s.label} className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="text-center sm:text-left mb-2 sm:mb-0">
               <p className="text-2xl md:text-3xl font-black mb-1">{s.count}</p>
-              <p className="text-[9px] md:text-[10px] font-black text-slate-200 uppercase tracking-widest">{s.label}</p>
+              <p className="text-[9px] md:text-[10px] font-black text-slate-600 uppercase tracking-widest">{s.label}</p>
             </div>
             <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
               <svg className="w-12 h-12 md:w-14 md:h-14 -rotate-90">
@@ -5378,45 +5378,45 @@ function JobDetail() {
           <div className="sticky top-24 space-y-10">
             <details className="lg:block group open:mb-8 lg:open:mb-0" open>
               <summary className="list-none cursor-pointer lg:cursor-default flex items-center justify-between lg:mb-4">
-                <h3 className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em]">Active Filters</h3>
-                <Filter className="w-4 h-4 text-slate-200 lg:hidden group-open:rotate-180 transition-transform" />
+                <h3 className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Active Filters</h3>
+                <Filter className="w-4 h-4 text-slate-600 lg:hidden group-open:rotate-180 transition-transform" />
               </summary>
               <div className="space-y-8 mt-4 lg:mt-0">
                 <div>
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Status</h4>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Status</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', 'Processing Resume', 'Ready to Invite', 'Invite Sent', 'Scheduled', 'Evaluating', 'Passed', 'Failed'].map(status => (
                       <label key={`status-filter-${status}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                          statusFilter === status ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
+                          statusFilter === status ? "border-brand-dark bg-brand-dark" : "border-slate-200 group-hover:border-brand-light"
                         )}>
                           {statusFilter === status && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
                         </div>
                         <input type="radio" className="hidden" name="status" value={status} checked={statusFilter === status} onChange={() => setStatusFilter(status)} />
                         <span className={cn(
                           "text-xs font-bold transition-colors truncate",
-                          statusFilter === status ? "text-brand-light" : "text-slate-200 group-hover:text-white"
+                          statusFilter === status ? "text-brand-light" : "text-slate-600 group-hover:text-slate-900"
                         )}>{status}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Role</h4>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Role</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', ...Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All')].slice(0, 5).map(role => (
                       <label key={`role-filter-${role}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                          roleFilter === role ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
+                          roleFilter === role ? "border-brand-dark bg-brand-dark" : "border-slate-200 group-hover:border-brand-light"
                         )}>
                           {roleFilter === role && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
                         </div>
                         <input type="radio" className="hidden" name="role" value={role} checked={roleFilter === role} onChange={() => setRoleFilter(role)} />
                         <span className={cn(
                           "text-xs font-bold transition-colors truncate",
-                          roleFilter === role ? "text-brand-light" : "text-slate-200 group-hover:text-white"
+                          roleFilter === role ? "text-brand-light" : "text-slate-600 group-hover:text-slate-900"
                         )}>{role}</span>
                       </label>
                     ))}
@@ -5424,7 +5424,7 @@ function JobDetail() {
                 </div>
                 {allTags.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Tags</h4>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4">Tags</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                       {allTags.map(tag => {
                         const isChecked = tagFilter.includes(tag);
@@ -5432,7 +5432,7 @@ function JobDetail() {
                           <label key={`tag-filter-${tag}`} className="flex items-center gap-3 cursor-pointer group">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20 cursor-pointer"
+                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-slate-300 cursor-pointer"
                               checked={isChecked} 
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -5444,7 +5444,7 @@ function JobDetail() {
                             />
                             <span className={cn(
                               "text-xs font-bold transition-colors truncate",
-                              isChecked ? "text-brand-light font-black" : "text-slate-200 group-hover:text-white"
+                              isChecked ? "text-brand-light font-black" : "text-slate-600 group-hover:text-slate-900"
                             )}>{tag}</span>
                           </label>
                         );
@@ -5460,22 +5460,22 @@ function JobDetail() {
         {/* Main Content */}
         <div className="col-span-12 lg:col-span-9 space-y-8">
           {uploadProgress && (
-            <div className="glass-premium border border-white/10 rounded-2xl p-6 shadow-sm space-y-4 animate-in fade-in-50 slide-in-from-top-4 duration-300">
+            <div className="glass-premium border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 animate-in fade-in-50 slide-in-from-top-4 duration-300">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                    <Cpu className="w-4 h-4 text-slate-300 animate-pulse" />
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
+                    <Cpu className="w-4 h-4 text-slate-500 animate-pulse" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-xs font-bold tracking-widest uppercase text-slate-850 leading-none">
                         {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Ingestion Pipeline'}
                       </p>
-                      <span className="text-[10px] font-mono font-bold bg-white/5 px-1.5 py-0.5 rounded text-slate-300 border border-white/10/50">
+                      <span className="text-[10px] font-mono font-bold bg-slate-50 px-1.5 py-0.5 rounded text-slate-500 border border-slate-200/50">
                         {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-200 mt-1.5 truncate">
+                    <p className="text-[10px] text-slate-600 mt-1.5 truncate">
                       {uploadProgress.current === uploadProgress.total ? 'Processing complete' : `Target: ${uploadProgress.currentFileName || 'Initializing...'}`}
                     </p>
                   </div>
@@ -5483,14 +5483,14 @@ function JobDetail() {
 
                 {/* Progress and indicators */}
                 <div className="flex items-center gap-4 w-full md:w-auto md:justify-end">
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-200 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-300" /> {uploadProgress.success}
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-600 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-500" /> {uploadProgress.success}
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-200 shrink-0">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-600 shrink-0">
                     <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> {uploadProgress.skipped}
                   </div>
 
-                  <div className="hidden sm:block w-32 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10 shrink-0">
+                  <div className="hidden sm:block w-32 h-1.5 bg-slate-50 rounded-full overflow-hidden border border-slate-200 shrink-0">
                     <div 
                       className="h-full glass-premium transition-all duration-300"
                       style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
@@ -5508,7 +5508,7 @@ function JobDetail() {
                     </Button>
                   ) : (
                     uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && (
-                      <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-white/5 px-2 py-1 rounded border border-white/10">
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-slate-50 px-2 py-1 rounded border border-slate-200">
                         <Clock className="w-3.5 h-3.5 animate-spin" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
                       </span>
                     )
@@ -5518,9 +5518,9 @@ function JobDetail() {
 
               {/* Dynamic Console Telemetry Logs */}
               {uploadProgress.logs && uploadProgress.logs.length > 0 && (
-                <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-200 h-32 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+                <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-600 h-32 overflow-y-auto border border-[#161b22] space-y-1 text-left">
                   {uploadProgress.logs.map((log, i) => (
-                    <div key={i} className={cn(log.includes('[Pass]') ? "text-emerald-400" : "text-slate-300")}>
+                    <div key={i} className={cn(log.includes('[Pass]') ? "text-emerald-400" : "text-slate-500")}>
                       <span className="text-cyan-400">➜</span> {log}
                     </div>
                   ))}
@@ -5533,7 +5533,7 @@ function JobDetail() {
             <div className="flex items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black">Candidates ({filteredCandidates.length})</h2>
-                <p className="text-slate-200 text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
+                <p className="text-slate-600 text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
               </div>
               {candidates.length > 0 && (
                 <Button 
@@ -5553,7 +5553,7 @@ function JobDetail() {
                 <Button 
                   variant="brand" 
                   size="sm" 
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] h-9 px-4 flex items-center gap-1.5 shadow-md shadow-emerald-100"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-slate-900 font-black uppercase tracking-widest text-[10px] h-9 px-4 flex items-center gap-1.5 shadow-md shadow-emerald-100"
                   onClick={handleBulkInvite}
                   disabled={bulkInviting}
                 >
@@ -5582,9 +5582,9 @@ function JobDetail() {
                   Research Pipeline
                 </Button>
               )}
-              <div className="flex flex-wrap items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
-                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
-                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sort</span>
+              <div className="flex flex-wrap items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 px-2 border-r border-slate-200 h-7">
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Sort</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
                     value={sortBy} 
@@ -5595,8 +5595,8 @@ function JobDetail() {
                     <option>Recent</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
-                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</span>
+                <div className="flex items-center gap-2 px-2 border-r border-slate-200 h-7">
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Status</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
                     value={statusFilter} 
@@ -5609,7 +5609,7 @@ function JobDetail() {
                   </select>
                 </div>
                 <div className="flex items-center gap-2 px-2 h-7">
-                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Role</span>
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Role</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[80px] sm:max-w-[120px] truncate" 
                     value={roleFilter} 
@@ -5623,25 +5623,25 @@ function JobDetail() {
                 </div>
               </div>
               <div className="relative group flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-200 group-focus-within:text-brand transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-brand transition-colors" />
                 <input 
                   type="text" 
                   placeholder="Search candidates..." 
-                  className="pl-10 pr-4 py-2 transparent border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all w-full"
+                  className="pl-10 pr-4 py-2 transparent border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 h-9 shrink-0">
+              <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200 h-9 shrink-0">
                 <button 
                   onClick={() => setViewMode('list')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-200")}
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-light" : "text-slate-600 hover:text-slate-600")}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setViewMode('grid')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-200")}
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-brand-light" : "text-slate-600 hover:text-slate-600")}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -5650,12 +5650,12 @@ function JobDetail() {
           </div>
 
           {filteredCandidates.length === 0 ? (
-            <div className="p-20 text-center border-2 border-dashed border-white/10 rounded-2xl glass-premium/50">
-              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                <Users className="w-8 h-8 text-slate-200" />
+            <div className="p-20 text-center border-2 border-dashed border-slate-200 rounded-2xl glass-premium/50">
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-200">
+                <Users className="w-8 h-8 text-slate-600" />
               </div>
-              <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">No Matching Candidates</h3>
-              <p className="text-slate-200 text-xs">Adjust your search or filters to find specific applicants.</p>
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">No Matching Candidates</h3>
+              <p className="text-slate-600 text-xs">Adjust your search or filters to find specific applicants.</p>
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6">
@@ -5684,14 +5684,14 @@ function JobDetail() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-black text-slate-300 truncate text-base tracking-tight animate-pulse">
+                              <h3 className="font-black text-slate-500 truncate text-base tracking-tight animate-pulse">
                                 {candidate.fullName}
                               </h3>
                               <span className="text-[8px] font-black bg-brand bg-brand/10 text-brand-light px-2 py-0.5 rounded-full uppercase tracking-widest border border-brand/20 flex items-center gap-1 shrink-0 animate-pulse">
                                 <Sparkles className="w-2.5 h-2.5 animate-pulse" /> Forensic Screening
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-200 font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 ">
+                            <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 ">
                               {candidate.currentRole} 
                               <span className="w-1 h-1 rounded-full bg-[#c9d1d9]" />
                               Active Session
@@ -5700,10 +5700,10 @@ function JobDetail() {
                         </div>
                         
                         <div className="flex gap-2 mb-8 h-10 overflow-hidden items-center">
-                          <div className="h-6 w-20 bg-white/5 rounded-lg animate-pulse" />
-                          <div className="h-6 w-28 bg-white/5 rounded-lg animate-pulse" />
-                          <div className="h-6 w-16 bg-white/5 rounded-lg animate-pulse" />
-                          <div className="h-6 w-24 bg-slate-150 bg-white/5 rounded-lg animate-pulse" />
+                          <div className="h-6 w-20 bg-slate-50 rounded-lg animate-pulse" />
+                          <div className="h-6 w-28 bg-slate-50 rounded-lg animate-pulse" />
+                          <div className="h-6 w-16 bg-slate-50 rounded-lg animate-pulse" />
+                          <div className="h-6 w-24 bg-slate-150 bg-slate-50 rounded-lg animate-pulse" />
                         </div>
                         
                         <div className="flex items-center justify-between pt-5 border-t border-slate-50">
@@ -5711,7 +5711,7 @@ function JobDetail() {
                             <div className="w-2 h-2 rounded-full bg-brand animate-ping" />
                             Analyzing Resume Stack
                           </div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-200 animate-pulse">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-600 animate-pulse">
                             Generating Scorecard...
                           </div>
                         </div>
@@ -5733,7 +5733,7 @@ function JobDetail() {
                         "p-6 relative group border-2 transition-all cursor-pointer glass-premium overflow-hidden",
                         isBestMatch 
                           ? "border-amber-400 shadow-[0_20px_50px_rgba(245,158,11,0.15)] ring-4 ring-amber-400/5" 
-                          : "border-white/10 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/10"
+                          : "border-slate-200 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/10"
                       )} 
                       onClick={() => navigate(`/candidates/${candidate.id}`)}
                     >
@@ -5741,20 +5741,20 @@ function JobDetail() {
                         <>
                           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-200 to-amber-400 animate-pulse" />
                           <div className="absolute -right-12 -top-12 w-24 h-24 bg-amber-400 rotate-45 flex items-end justify-center pb-2 px-6">
-                            <Star className="w-5 h-5 text-white fill-current mb-2" />
+                            <Star className="w-5 h-5 text-slate-900 fill-current mb-2" />
                           </div>
                         </>
                       )}
                       
                       <div className="absolute top-4 right-4 flex flex-col items-center">
                         {isBestMatch && (
-                           <div className="mb-2 bg-amber-500 text-white px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1">
+                           <div className="mb-2 bg-amber-500 text-slate-900 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-lg flex items-center gap-1">
                               Best Fit <Sparkles className="w-2.5 h-2.5" />
                            </div>
                         )}
                         <div className="relative w-16 h-16 flex items-center justify-center">
                         <svg className="absolute inset-0 w-full h-full -rotate-90">
-                          <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-100" />
+                          <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-slate-800" />
                           <circle 
                             cx="32" cy="32" r="28" 
                             stroke="currentColor" strokeWidth="3" 
@@ -5781,8 +5781,8 @@ function JobDetail() {
                       <div className={cn(
                         "w-14 h-14 rounded-2xl border flex items-center justify-center font-black text-xl shrink-0 transition-colors",
                         isBestMatch 
-                          ? "bg-brand-dark text-white border-brand-dark shadow-lg" 
-                          : "transparent border-white/10 text-slate-200 group-hover:bg-brand/10 group-hover:text-brand"
+                          ? "bg-brand-dark text-slate-900 border-brand-dark shadow-lg" 
+                          : "transparent border-slate-200 text-slate-600 group-hover:bg-brand/10 group-hover:text-brand"
                       )}>
                         {candidate.fullName.charAt(0)}
                       </div>
@@ -5790,18 +5790,18 @@ function JobDetail() {
                         <div className="flex items-center gap-2">
                            <h3 className={cn(
                              "font-black truncate text-base tracking-tight transition-colors",
-                             isBestMatch ? "text-brand-light" : "text-white group-hover:text-brand-light"
+                             isBestMatch ? "text-brand-light" : "text-slate-900 group-hover:text-brand-light"
                            )}>
                              {candidate.fullName}
                            </h3>
                            {isBestMatch && (
-                             <span className="text-[8px] font-black bg-brand-dark text-white px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Best Match</span>
+                             <span className="text-[8px] font-black bg-brand-dark text-slate-900 px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Best Match</span>
                            )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] text-slate-200 font-black uppercase tracking-widest flex items-center gap-1.5 ">
+                          <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest flex items-center gap-1.5 ">
                             {candidate.currentRole} 
-                            <span className="w-1 h-1 rounded-full bg-white/10" />
+                            <span className="w-1 h-1 rounded-full bg-slate-100" />
                             {formatDate(candidate.createdAt)}
                           </p>
                           {candidate.research && (
@@ -5823,12 +5823,12 @@ function JobDetail() {
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-8 h-14 overflow-hidden content-start">
                        {candidate.scorecard.skillsAnalysis?.confirmed?.slice(0, 6).map((skill, ridx) => (
-                         <span key={ridx} className="px-2 py-1 transparent text-slate-200 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                         <span key={ridx} className="px-2 py-1 transparent text-slate-600 rounded-lg border border-slate-200 text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                            {skill}
                          </span>
                        ))}
                        {candidate.scorecard.skillsAnalysis?.confirmed?.length > 6 && (
-                         <span className="px-2 py-1 bg-white/5 text-slate-200 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest">
+                         <span className="px-2 py-1 bg-slate-50 text-slate-600 rounded-lg border border-slate-200 text-[10px] font-black uppercase tracking-widest">
                            +{candidate.scorecard.skillsAnalysis.confirmed.length - 6}
                          </span>
                        )}
@@ -5850,7 +5850,7 @@ function JobDetail() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand-light hover:bg-brand/10 border border-transparent hover:border-brand/10"
+                          className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:text-brand-light hover:bg-brand/10 border border-transparent hover:border-brand/10"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRetryScreening(candidate);
@@ -5860,13 +5860,13 @@ function JobDetail() {
                           {retryingScreening === candidate.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3 mr-1" />}
                           Re-Screen
                         </Button>
-                        <Button variant="ghost" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest border border-white/10 rounded-xl hover:bg-brand/10 hover:text-brand-light" onClick={(e) => {
+                        <Button variant="ghost" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest border border-slate-200 rounded-xl hover:bg-brand/10 hover:text-brand-light" onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/candidates/${candidate.id}`);
                         }}>
                           Full Report
                         </Button>
-                        <button onClick={(e) => deleteCandidate(e, candidate.id)} className="p-2 text-slate-300 hover:text-red-500 transition-all hover:bg-red-50 rounded-lg ml-1">
+                        <button onClick={(e) => deleteCandidate(e, candidate.id)} className="p-2 text-slate-500 hover:text-red-500 transition-all hover:bg-red-50 rounded-lg ml-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -5880,12 +5880,12 @@ function JobDetail() {
             <Card className="overflow-hidden">
                <div className="overflow-x-auto">
                  <table className="w-full text-left min-w-[800px]">
-                  <thead className="transparent border-b border-white/10">
+                  <thead className="transparent border-b border-slate-200">
                     <tr>
                       <th className="w-12 px-6 py-4">
                         <input 
                           type="checkbox"
-                          className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20 cursor-pointer"
+                          className="w-4 h-4 rounded text-brand-light focus:ring-brand border-slate-300 cursor-pointer"
                           checked={filteredCandidates.length > 0 && filteredCandidates.every(c => selectedCandidates.includes(c.id))}
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -5898,10 +5898,10 @@ function JobDetail() {
                           }}
                         />
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Candidate</th>
-                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">Score</th>
-                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-4 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Actions</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">Candidate</th>
+                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest">Score</th>
+                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest">Status</th>
+                      <th className="px-6 py-4 text-right text-[10px] font-black text-slate-600 uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -5920,7 +5920,7 @@ function JobDetail() {
                               <input 
                                 type="checkbox"
                                 disabled
-                                className="w-4 h-4 rounded text-slate-300 border-white/10 cursor-not-allowed opacity-40 animate-pulse"
+                                className="w-4 h-4 rounded text-slate-500 border-slate-200 cursor-not-allowed opacity-40 animate-pulse"
                               />
                             </td>
                             <td className="px-6 py-4">
@@ -5930,14 +5930,14 @@ function JobDetail() {
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <p className="text-sm font-black text-slate-300 truncate animate-pulse">
+                                    <p className="text-sm font-black text-slate-500 truncate animate-pulse">
                                       {candidate.fullName}
                                     </p>
                                     <span className="text-[7px] font-black text-brand bg-brand/10 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-brand/10 flex items-center gap-1">
                                       <Sparkles className="w-2.5 h-2.5 mr-0.5 animate-pulse" /> Screening
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">Active session</p>
+                                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">Active session</p>
                                 </div>
                               </div>
                             </td>
@@ -5948,7 +5948,7 @@ function JobDetail() {
                                     Analyzing...
                                   </span>
                                 </div>
-                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/10/50">
+                                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-200/50">
                                   <div className="h-full bg-brand animate-pulse w-[45%]" />
                                 </div>
                               </div>
@@ -5959,7 +5959,7 @@ function JobDetail() {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <span className="text-[10px] font-bold text-slate-200">Forensic Indexing...</span>
+                              <span className="text-[10px] font-bold text-slate-600">Forensic Indexing...</span>
                             </td>
                           </tr>
                         );
@@ -5977,7 +5977,7 @@ function JobDetail() {
                           <td className="px-6 py-4 w-12" onClick={(e) => e.stopPropagation()}>
                             <input 
                               type="checkbox"
-                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20 cursor-pointer"
+                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-slate-300 cursor-pointer"
                               checked={isSelected}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -5995,7 +5995,7 @@ function JobDetail() {
                              <div className="flex items-center gap-3">
                                 <div className={cn(
                                   "w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs",
-                                  isBestMatch ? "bg-brand-dark text-white" : "bg-white/5 text-slate-200"
+                                  isBestMatch ? "bg-brand-dark text-slate-900" : "bg-slate-50 text-slate-600"
                                 )}>
                                   {candidate.fullName.charAt(0)}
                                 </div>
@@ -6003,7 +6003,7 @@ function JobDetail() {
                                   <div className="flex items-center gap-2">
                                     <p className={cn(
                                       "text-sm font-bold transition-colors",
-                                      isBestMatch ? "text-brand-light" : "text-white group-hover:text-brand-light"
+                                      isBestMatch ? "text-brand-light" : "text-slate-900 group-hover:text-brand-light"
                                     )}>
                                       {candidate.fullName}
                                     </p>
@@ -6016,7 +6016,7 @@ function JobDetail() {
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">{candidate.currentRole}</p>
+                                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">{candidate.currentRole}</p>
                                   {candidate.profileTags && candidate.profileTags.length > 0 && (
                                     <div className="flex flex-wrap gap-1 mt-1">
                                       {candidate.profileTags.map((tag, i) => (
@@ -6043,7 +6043,7 @@ function JobDetail() {
                                     <span className="text-[8px] font-black text-brand-light uppercase tracking-widest">TOP</span>
                                   )}
                                 </div>
-                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/10/50">
+                                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-200/50">
                                   <motion.div 
                                     initial={{ width: 0 }}
                                     animate={{ width: `${candidate.scorecard.compositeScore}%` }}
@@ -6059,7 +6059,7 @@ function JobDetail() {
                           <td className="px-6 py-4 text-center">
                              <span className={cn(
                                 "text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest",
-                                candidate.status === 'processed' ? "bg-green-50 text-green-600" : "bg-white/5 text-slate-200"
+                                candidate.status === 'processed' ? "bg-green-50 text-green-600" : "bg-slate-50 text-slate-600"
                              )}>
                                {candidate.status}
                              </span>
@@ -6069,7 +6069,7 @@ function JobDetail() {
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
-                                  className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand-light"
+                                  className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-600 hover:text-brand-light"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRetryScreening(candidate);
@@ -6100,7 +6100,7 @@ function JobDetail() {
                                  )}
                                </Button>
                                <Button variant="ghost" className="h-8 text-[10px] font-black" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${candidate.id}`); }}>View Details</Button>
-                               <button onClick={(e) => deleteCandidate(e, candidate.id)} className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                               <button onClick={(e) => deleteCandidate(e, candidate.id)} className="p-2 text-slate-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                                  <Trash2 className="w-4 h-4" />
                                </button>
                              </div>
@@ -6123,19 +6123,19 @@ function JobDetail() {
         title="Scoring Configuration & Threshold Rules"
       >
         <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-          <p className="text-xs font-semibold text-slate-200 leading-relaxed">
+          <p className="text-xs font-semibold text-slate-600 leading-relaxed">
             Specify customized candidate screening dimensions, weights, and match-classification thresholds. Updates are real-time and saved directly to the database.
           </p>
 
           {/* Thresholds */}
-          <div className="space-y-4 border-b border-white/10 pb-5">
-            <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
+          <div className="space-y-4 border-b border-slate-200 pb-5">
+            <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider flex items-center gap-2">
               <Target className="w-4 h-4 text-brand" /> Screening Thresholds
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 p-3 transparent rounded-xl border border-white/10">
+              <div className="space-y-2 p-3 transparent rounded-xl border border-slate-200">
                 <div className="flex justify-between items-center">
-                  <label className="text-[9px] font-black text-slate-200 uppercase tracking-widest">Passed Match</label>
+                  <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Passed Match</label>
                   <span className="text-xs font-black text-green-600 glass-premium px-2 py-0.5 rounded border border-green-100">{editPassedThresh}%</span>
                 </div>
                 <input
@@ -6148,9 +6148,9 @@ function JobDetail() {
                 />
               </div>
 
-              <div className="space-y-2 p-3 transparent rounded-xl border border-white/10">
+              <div className="space-y-2 p-3 transparent rounded-xl border border-slate-200">
                 <div className="flex justify-between items-center">
-                  <label className="text-[9px] font-black text-slate-200 uppercase tracking-widest">Low Match (Fail)</label>
+                  <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Low Match (Fail)</label>
                   <span className="text-xs font-black text-red-600 glass-premium px-2 py-0.5 rounded border border-red-100">{editLowThresh}%</span>
                 </div>
                 <input
@@ -6168,7 +6168,7 @@ function JobDetail() {
           {/* Custom Criteria Weights & Names */}
           <div className="space-y-5">
             <div className="flex justify-between items-center pb-2">
-              <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
+              <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-brand" /> Screening Criteria Parameters
               </h3>
               <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-brand-light">
@@ -6177,22 +6177,22 @@ function JobDetail() {
             </div>
 
             {/* Metric 1 */}
-            <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 1 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Metric 1 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD1Name}
                     onChange={(e) => setEditD1Name(e.target.value)}
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD1Weight}
                     onChange={(e) => setEditD1Weight(Math.max(0, Number(editD1Weight)))}
                   />
@@ -6200,29 +6200,29 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                 value={editD1Desc}
                 onChange={(e) => setEditD1Desc(e.target.value)}
               />
             </div>
 
             {/* Metric 2 */}
-            <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 2 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Metric 2 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD2Name}
                     onChange={(e) => setEditD2Name(e.target.value)}
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD2Weight}
                     onChange={(e) => setEditD2Weight(Math.max(0, Number(editD2Weight)))}
                   />
@@ -6230,29 +6230,29 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                 value={editD2Desc}
                 onChange={(e) => setEditD2Desc(e.target.value)}
               />
             </div>
 
             {/* Metric 3 */}
-            <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 3 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Metric 3 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD3Name}
                     onChange={(e) => setEditD3Name(e.target.value)}
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 text-slate-500"
                     value={editD3Weight}
                     onChange={(e) => setEditD3Weight(Math.max(0, Number(editD3Weight)))}
                   />
@@ -6260,29 +6260,29 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                 value={editD3Desc}
                 onChange={(e) => setEditD3Desc(e.target.value)}
               />
             </div>
 
             {/* Metric 4 */}
-            <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 4 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Metric 4 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD4Name}
                     onChange={(e) => setEditD4Name(e.target.value)}
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 text-slate-500"
                     value={editD4Weight}
                     onChange={(e) => setEditD4Weight(Math.max(0, Number(editD4Weight)))}
                   />
@@ -6290,29 +6290,29 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                 value={editD4Desc}
                 onChange={(e) => setEditD4Desc(e.target.value)}
               />
             </div>
 
             {/* Metric 5 */}
-            <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 5 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Metric 5 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500"
                     value={editD5Name}
                     onChange={(e) => setEditD5Name(e.target.value)}
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-600 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 text-slate-500"
                     value={editD5Weight}
                     onChange={(e) => setEditD5Weight(Math.max(0, Number(editD5Weight)))}
                   />
@@ -6320,7 +6320,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-slate-200 rounded-lg focus:outline-none focus:border-brand text-slate-500 leading-relaxed"
                 value={editD5Desc}
                 onChange={(e) => setEditD5Desc(e.target.value)}
               />
@@ -6328,11 +6328,11 @@ function JobDetail() {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-3">
+        <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row gap-3">
           <Button
             type="button"
             variant="outline"
-            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-300 border-white/10"
+            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-500 border-slate-200"
             onClick={() => setShowSettingsDrawer(false)}
           >
             Cancel
@@ -6354,7 +6354,7 @@ function JobDetail() {
           <Button
             type="button"
             variant="primary"
-            className="flex-1 h-12 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white"
+            className="flex-1 h-12 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-slate-900"
             onClick={handleSaveSettings}
           >
             Save Parameters Only
@@ -6373,9 +6373,9 @@ function JobDetail() {
       >
         {activeInviteCandidate && (
           <div className="space-y-6">
-            <div className="p-4 transparent border border-white/10 rounded-2xl text-left space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-2xl text-left space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase text-slate-200 tracking-wider">Candidate Profile</span>
+                <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">Candidate Profile</span>
                 {inviteEmailInput ? (
                   <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Email Extracted
@@ -6387,30 +6387,30 @@ function JobDetail() {
                 )}
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-extrabold text-slate-300">{activeInviteCandidate.fullName}</h4>
-                <p className="text-xs text-slate-200 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+                <h4 className="text-sm font-extrabold text-slate-500">{activeInviteCandidate.fullName}</h4>
+                <p className="text-xs text-slate-600 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
               </div>
             </div>
 
             <div className="space-y-5">
               {/* Option 1: Send via Email */}
-              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-brand/10 text-brand-light rounded-xl mt-0.5">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 1: Send Email Invite</h5>
-                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                    <h5 className="text-xs font-black text-slate-500 uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <p className="text-[11px] text-slate-600 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recipient Email Address</label>
+                    <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-500 transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
@@ -6426,7 +6426,7 @@ function JobDetail() {
                 <Button
                   variant="primary"
                   type="button"
-                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
+                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-slate-900 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
                   disabled={!inviteEmailInput.trim() || invitingCandidateId === activeInviteCandidate.id}
                   onClick={() => {
                     if (activeInviteCandidate) {
@@ -6449,25 +6449,25 @@ function JobDetail() {
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="hidden p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
+              <div className="hidden p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
-                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
+                    <h5 className="text-xs font-black text-slate-500 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
+                    <p className="text-[11px] text-slate-600 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-slate-200/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -6482,11 +6482,11 @@ function JobDetail() {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-white/10 flex justify-end">
+            <div className="pt-4 border-t border-slate-200 flex justify-end">
               <Button
                 variant="outline"
                 type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-white/10 rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-600 border-slate-200 rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
@@ -6511,7 +6511,7 @@ function JobDetail() {
           <div className="p-6 space-y-6 text-center">
             <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full -rotate-90">
-                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
+                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-800" />
                 <circle 
                   cx="40" cy="40" r="36" 
                   stroke="currentColor" strokeWidth="4" 
@@ -6528,11 +6528,11 @@ function JobDetail() {
             </div>
             
             <div className="space-y-1">
-              <h4 className="text-sm font-black text-slate-300 uppercase tracking-widest">Analyzing Candidate Files</h4>
-              <p className="text-xs text-slate-200">Executing LLM scoring engine against target job profile.</p>
+              <h4 className="text-sm font-black text-slate-500 uppercase tracking-widest">Analyzing Candidate Files</h4>
+              <p className="text-xs text-slate-600">Executing LLM scoring engine against target job profile.</p>
             </div>
 
-            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-200 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-600 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
               {screeningPreUploadedLogs.map((log, i) => (
                 <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
                   <span className="text-cyan-400">➜</span> {log}
@@ -6542,15 +6542,15 @@ function JobDetail() {
           </div>
         ) : (
           <div className="p-6 space-y-6 text-left">
-            <p className="text-xs font-semibold text-slate-200 leading-relaxed">
+            <p className="text-xs font-semibold text-slate-600 leading-relaxed">
               Select one or more candidates from your organization's historical talent pool to screen against this job role.
             </p>
 
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-200 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-slate-600 absolute left-3 top-3" />
               <input
                 type="text"
-                className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
+                className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-500"
                 placeholder="Search by name, role, or company..."
                 value={preUploadedSearchQuery}
                 onChange={(e) => setPreUploadedSearchQuery(e.target.value)}
@@ -6561,10 +6561,10 @@ function JobDetail() {
               {loadingOrgCandidates ? (
                 <div className="p-10 text-center flex flex-col items-center justify-center space-y-2">
                   <Loader2 className="w-6 h-6 text-brand-light animate-spin" />
-                  <p className="text-xs text-slate-200 font-bold uppercase tracking-widest animate-pulse">Loading Resumes...</p>
+                  <p className="text-xs text-slate-600 font-bold uppercase tracking-widest animate-pulse">Loading Resumes...</p>
                 </div>
               ) : filteredAndUnscreenedResumes.length === 0 ? (
-                <div className="p-10 text-center text-slate-200 text-xs">No resumes found.</div>
+                <div className="p-10 text-center text-slate-600 text-xs">No resumes found.</div>
               ) : (
                 filteredAndUnscreenedResumes.map(candidate => {
                   const candKey = candidate.resumeHash || `${(candidate.fullName || '').toLowerCase()}_${(candidate.email || '').toLowerCase()}`;
@@ -6597,19 +6597,19 @@ function JobDetail() {
                               setSelectedPreUploadedResumes(prev => prev.filter(k => k !== candKey));
                             }
                           }}
-                          className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer disabled:cursor-not-allowed"
+                          className="w-4 h-4 rounded text-brand focus:ring-brand border-slate-300 cursor-pointer disabled:cursor-not-allowed"
                         />
                         <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-slate-300 truncate">{candidate.fullName}</h4>
-                          <p className="text-[10px] text-slate-200 font-semibold truncate">{candidate.email}</p>
-                          <p className="text-[9px] text-slate-200 font-bold uppercase tracking-tight truncate mt-0.5">
+                          <h4 className="text-xs font-bold text-slate-500 truncate">{candidate.fullName}</h4>
+                          <p className="text-[10px] text-slate-600 font-semibold truncate">{candidate.email}</p>
+                          <p className="text-[9px] text-slate-600 font-bold uppercase tracking-tight truncate mt-0.5">
                             {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {candidate.alreadyScreened ? (
-                          <span className="text-[8px] font-black bg-white/10 text-slate-200 border border-white/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                          <span className="text-[8px] font-black bg-slate-100 text-slate-600 border border-slate-300 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                         ) : (
                           <span className="text-[9px] font-black text-brand-light bg-brand/10 px-2 py-0.5 rounded-lg border border-brand/20">
                             Best Fit: {candidate.bestScore}%
@@ -6622,7 +6622,7 @@ function JobDetail() {
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200">
               <span className="text-[10px] text-brand font-bold uppercase tracking-wider">
                 Selected: {selectedPreUploadedResumes.length} ({selectedPreUploadedResumes.length} credit(s))
               </span>
@@ -7192,7 +7192,7 @@ function CandidateDetail() {
     return unsub;
   }, [candidateId, profile]);
 
-  if (loading) return <div className="h-screen flex items-center justify-center font-medium text-slate-200">Loading screening report...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center font-medium text-slate-600">Loading screening report...</div>;
   if (!candidate) return <div className="p-20 text-center">Candidate report not found</div>;
 
   const { scorecard } = candidate;
@@ -7421,7 +7421,7 @@ function CandidateDetail() {
             <Button variant="ghost" className="-ml-2 px-2" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
               <ChevronRight className="w-4 h-4 rotate-180" /> <span className="hidden sm:inline">Pipeline</span>
             </Button>
-            <div className="w-px h-6 bg-white/10" />
+            <div className="w-px h-6 bg-slate-100" />
             <Button 
               variant="ghost" 
               className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[8px] sm:text-[10px]" 
@@ -7450,7 +7450,7 @@ function CandidateDetail() {
               </>
             )}
            </Button>
-           <Button variant="outline" className="text-slate-200 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
+           <Button variant="outline" className="text-slate-600 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
              <Database className="w-3.5 h-3.5 mr-1 sm:mr-2" /> PDF
            </Button>
            <Button
@@ -7530,24 +7530,24 @@ function CandidateDetail() {
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 glass-premium/60 backdrop-blur-md"
           >
             <Card className="hidden w-full max-w-2xl overflow-hidden shadow-2xl border-brand/20">
-              <div className="bg-brand-dark p-6 flex justify-between items-center text-white">
+              <div className="bg-brand-dark p-6 flex justify-between items-center text-slate-900">
                 <div className="flex items-center gap-3">
                   <div className="p-2 glass-premium/20 rounded-lg">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="font-black uppercase tracking-widest text-sm">Schedule Professional Interview</h3>
-                    <p className="text-white/60 text-[10px] font-bold">Candidate: {candidate.fullName}</p>
+                    <p className="text-slate-900/60 text-[10px] font-bold">Candidate: {candidate.fullName}</p>
                   </div>
                 </div>
-                <Button variant="ghost" className="text-white/80 hover:text-white" onClick={() => setShowScheduler(false)}>
+                <Button variant="ghost" className="text-slate-900/80 hover:text-slate-900" onClick={() => setShowScheduler(false)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
               
               <div className="p-8 space-y-6">
                 <div>
-                  <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Available Slots (Grounding Analysis)</h4>
+                  <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Available Slots (Grounding Analysis)</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-auto pr-2 custom-scrollbar">
                     {availableSlots.length > 0 ? availableSlots.map((slot, i) => (
                       <button
@@ -7556,18 +7556,18 @@ function CandidateDetail() {
                         className={cn(
                           "p-4 rounded-xl border text-left transition-all",
                           selectedSlot?.start === slot.start 
-                            ? "bg-brand-dark border-brand-dark text-white shadow-lg" 
-                            : "transparent border-white/10 text-slate-200 hover:border-brand-light"
+                            ? "bg-brand-dark border-brand-dark text-slate-900 shadow-lg" 
+                            : "transparent border-slate-200 text-slate-600 hover:border-brand-light"
                         )}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <Clock className={cn("w-3.5 h-3.5", selectedSlot?.start === slot.start ? "text-white/80" : "text-brand")} />
+                          <Clock className={cn("w-3.5 h-3.5", selectedSlot?.start === slot.start ? "text-slate-900/80" : "text-brand")} />
                           <span className="text-xs font-bold uppercase tracking-tight">{slot.label.split(' @ ')[1]}</span>
                         </div>
                         <div className="text-[10px] font-black opacity-80">{slot.label.split(' @ ')[0]}</div>
                       </button>
                     )) : (
-                      <p className="text-sm text-slate-200 italic py-8 text-center col-span-2">No available slots found in the next 14 days. Please check your calendar settings.</p>
+                      <p className="text-sm text-slate-600 italic py-8 text-center col-span-2">No available slots found in the next 14 days. Please check your calendar settings.</p>
                     )}
                   </div>
                 </div>
@@ -7588,8 +7588,8 @@ function CandidateDetail() {
                   </div>
                 )}
                 
-                <p className="text-[10px] text-slate-200 text-center italic">
-                  Scheduling an interview will automatically create a Google Meet link and send a calendar invitation to <span className="font-bold text-slate-200">{candidate.email}</span>.
+                <p className="text-[10px] text-slate-600 text-center italic">
+                  Scheduling an interview will automatically create a Google Meet link and send a calendar invitation to <span className="font-bold text-slate-600">{candidate.email}</span>.
                 </p>
               </div>
             </Card>
@@ -7601,7 +7601,7 @@ function CandidateDetail() {
       {candidate.aiQuotaExceeded && (
         <Card className="border-2 border-amber-300 bg-amber-50/50 mb-6 overflow-hidden animate-in slide-in-from-top-4 duration-500 shadow-sm">
           <div className="bg-amber-500 px-6 py-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex items-center gap-3 text-white">
+            <div className="flex items-center gap-3 text-slate-900">
               <AlertTriangle className="w-6 h-6 shrink-0" />
               <div>
                 <h3 className="font-black uppercase tracking-widest text-sm">AI Screening Unavailable</h3>
@@ -7624,11 +7624,11 @@ function CandidateDetail() {
       {scorecard?.dimensions?.redFlags?.flags?.length > 0 && (
         <Card className="border-2 border-red-100 bg-red-50/30 overflow-hidden animate-in slide-in-from-top-4 duration-500">
            <div className="bg-red-600 px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-white">
+              <div className="flex items-center gap-3 text-slate-900">
                  <AlertTriangle className="w-5 h-5" />
                  <h3 className="font-black uppercase tracking-widest text-sm">Critical Risk Signals Detected</h3>
               </div>
-              <span className="text-[10px] font-black glass-premium/20 px-2 py-1 rounded uppercase tracking-widest text-white">
+              <span className="text-[10px] font-black glass-premium/20 px-2 py-1 rounded uppercase tracking-widest text-slate-900">
                 D6 Integrity Check
               </span>
            </div>
@@ -7648,8 +7648,8 @@ function CandidateDetail() {
                       </span>
                       <span className="text-[10px] font-black text-red-500">-{flag.penalty} pts</span>
                    </div>
-                   <h4 className="font-black text-white text-sm mb-1 uppercase tracking-tight">{flag.label}</h4>
-                   <p className="text-xs text-slate-200 leading-relaxed italic">{flag.rationale}</p>
+                   <h4 className="font-black text-slate-900 text-sm mb-1 uppercase tracking-tight">{flag.label}</h4>
+                   <p className="text-xs text-slate-600 leading-relaxed italic">{flag.rationale}</p>
                 </div>
               ))}
            </div>
@@ -7670,15 +7670,15 @@ function CandidateDetail() {
         scorecard?.recommendation?.status === 'potential' ? "from-amber-500 via-orange-500 to-yellow-500" : "from-slate-600 via-[#30363d] to-slate-500"
       )}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.06),transparent)] pointer-events-none" />
-        <div className="glass-premium text-white m-[1px] rounded-[11px] p-8 flex flex-col md:flex-row items-center gap-8 relative z-10">
+        <div className="glass-premium text-slate-900 m-[1px] rounded-[11px] p-8 flex flex-col md:flex-row items-center gap-8 relative z-10">
           <div className={cn(
              "w-32 h-32 rounded-3xl flex flex-col items-center justify-center shrink-0 border-4 shadow-lg shadow-black/40 backdrop-blur-md",
               scorecard?.recommendation?.status === 'perfect' ? "bg-green-500/10 border-green-500/40 text-green-400" :
               scorecard?.recommendation?.status === 'strong' ? "bg-brand/10 border-brand/40 text-brand-light" :
-              scorecard?.recommendation?.status === 'potential' ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-slate-500/10 border-slate-500/40 text-slate-200"
+              scorecard?.recommendation?.status === 'potential' ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-slate-500/10 border-slate-500/40 text-slate-600"
           )}>
             <span className="text-5xl font-black tracking-tighter">{scorecard?.compositeScore || 0}</span>
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-200 mt-1">Match Index</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mt-1">Match Index</span>
           </div>
           <div className="flex-1 text-center md:text-left space-y-3">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
@@ -7690,18 +7690,18 @@ function CandidateDetail() {
               )}>
                 {scorecard?.recommendation?.fitHeader || 'Screening Report'}
               </span>
-              <span className="text-[10px] font-bold bg-white/10 text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/10/50">
+              <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full uppercase tracking-widest border border-slate-200/50">
                 {candidate.location}
               </span>
-              <span className="text-[10px] font-bold bg-white/10 text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/10/50">
+              <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full uppercase tracking-widest border border-slate-200/50">
                 {candidate.totalExperience} Years Experience
               </span>
             </div>
-            <h1 className="text-4xl font-black text-white tracking-tight">{candidate.fullName}</h1>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">{candidate.fullName}</h1>
             <p className="text-[11px] text-brand-light font-extrabold uppercase tracking-widest">
               Applied for: {job?.title || 'Unknown Position'}
             </p>
-            <div className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl mt-4 font-semibold italic">
+            <div className="text-slate-500 text-sm sm:text-base leading-relaxed max-w-4xl mt-4 font-semibold italic">
               <Markdown>{truncateSummary(candidate.oneLineSummary || "Forensic screening and scoring analysis completed.", 450)}</Markdown>
             </div>
           </div>
@@ -7709,7 +7709,7 @@ function CandidateDetail() {
       </Card>
 
       {/* State-of-the-art Sub-Tab Navigation Bar */}
-      <div id="candidate-detail-tabs" className="flex flex-wrap items-center gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 shadow-sm relative z-20">
+      <div id="candidate-detail-tabs" className="flex flex-wrap items-center gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm relative z-20">
         <Button
           variant="ghost"
           onClick={() => setActiveDetailTab('core')}
@@ -7717,7 +7717,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'core' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-200 hover:text-slate-300 hover:transparent"
+              : "text-slate-600 hover:text-slate-500 hover:transparent"
           )}
         >
           <FileText className="w-4 h-4" />
@@ -7730,7 +7730,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'offer' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-200 hover:text-slate-300 hover:transparent"
+              : "text-slate-600 hover:text-slate-500 hover:transparent"
           )}
         >
           <Award className="w-4 h-4" />
@@ -7743,7 +7743,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'campaign' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-200 hover:text-slate-300 hover:transparent"
+              : "text-slate-600 hover:text-slate-500 hover:transparent"
           )}
         >
           <Send className="w-4 h-4" />
@@ -7756,7 +7756,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'proctoring' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-200 hover:text-slate-300 hover:transparent"
+              : "text-slate-600 hover:text-slate-500 hover:transparent"
           )}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -7771,10 +7771,10 @@ function CandidateDetail() {
         <div className="glass-premium px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-brand rounded-lg">
-              <Search className="w-5 h-5 text-white" />
+              <Search className="w-5 h-5 text-slate-900" />
             </div>
             <div>
-              <h3 className="text-white font-black uppercase tracking-widest text-sm">Professional Footprint Analysis</h3>
+              <h3 className="text-slate-900 font-black uppercase tracking-widest text-sm">Professional Footprint Analysis</h3>
               <p className="text-brand-light text-[10px] font-bold">Powered by Gemini OSINT Grounding</p>
             </div>
           </div>
@@ -7785,7 +7785,7 @@ function CandidateDetail() {
             </div>
           )}
           {!researching && candidate.research && (
-             <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest bg-white/10 px-2 py-1 rounded">
+             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">
                Last validated {formatDateTime(candidate.research.lastResearchedAt)}
              </span>
           )}
@@ -7796,13 +7796,13 @@ function CandidateDetail() {
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 border-4 border-brand border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-lg font-black text-slate-300">Synthesizing Digital Presence...</p>
+              <p className="text-lg font-black text-slate-500">Synthesizing Digital Presence...</p>
               <div className="max-w-md mx-auto space-y-2">
-                <div className="h-2 bg-white/5 rounded-full w-full animate-pulse" />
-                <div className="h-2 bg-white/5 rounded-full w-5/6 animate-pulse mx-auto" />
-                <div className="h-2 bg-white/5 rounded-full w-4/6 animate-pulse mx-auto" />
+                <div className="h-2 bg-slate-50 rounded-full w-full animate-pulse" />
+                <div className="h-2 bg-slate-50 rounded-full w-5/6 animate-pulse mx-auto" />
+                <div className="h-2 bg-slate-50 rounded-full w-4/6 animate-pulse mx-auto" />
               </div>
-              <p className="text-xs text-slate-200 mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
+              <p className="text-xs text-slate-600 mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
             </div>
           ) : candidate.research ? (
             (() => {
@@ -7837,11 +7837,11 @@ function CandidateDetail() {
                   {/* Row 1: Section 7 - Confidence Meter Panel & Section 1: Verified Profiles */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* CONFIDENCE METER (Section 7) */}
-                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-rose-50/50 border-rose-200 shadow-rose-100/30' : 'transparent border-white/10/60 shadow-slate-100/30 shadow-md'}`}>
+                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-rose-50/50 border-rose-200 shadow-rose-100/30' : 'transparent border-slate-200/60 shadow-slate-100/30 shadow-md'}`}>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-rose-500' : 'text-emerald-500'}`} />
-                          <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">7. Confidence Meter</h4>
+                          <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">7. Confidence Meter</h4>
                         </div>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
                           status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
@@ -7864,13 +7864,13 @@ function CandidateDetail() {
                               strokeDashoffset={175 - (175 * confidence) / 100}
                               strokeLinecap="round" fill="transparent" />
                           </svg>
-                          <span className="absolute text-sm font-black text-slate-300">{confidence}%</span>
+                          <span className="absolute text-sm font-black text-slate-500">{confidence}%</span>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-300">
+                          <p className="text-xs font-bold text-slate-500">
                             {isUnverified ? 'Unverified Audit Profile' : 'Verified Identity Level'}
                           </p>
-                          <p className="text-[11px] text-slate-200 mt-1">
+                          <p className="text-[11px] text-slate-600 mt-1">
                             {isUnverified 
                               ? 'Profile falls below the 85% confidence threshold. Sensitive insights are hidden.' 
                               : `Excellent identity resolution from verified professional social registries.`
@@ -7881,10 +7881,10 @@ function CandidateDetail() {
                     </div>
 
                     {/* VERIFIED PROFILES (Section 1) */}
-                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-white/10/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
+                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-slate-200/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
                       <div className="flex items-center gap-2 mb-4">
                         <Users className="w-5 h-5 text-brand" />
-                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">1. Verified Profiles</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">1. Verified Profiles</h4>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -7899,21 +7899,21 @@ function CandidateDetail() {
                               className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                                 isVer 
                                   ? 'bg-emerald-50/40 border-emerald-100 hover:border-emerald-300' 
-                                  : 'bg-white/5/50 border-white/10/40 hover:border-white/20'
+                                  : 'bg-slate-50/50 border-slate-200/40 hover:border-slate-300'
                               } ${!p.url || p.url === '#' ? 'pointer-events-none cursor-default' : ''}`}
                             >
                               <div className="flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full ${isVer ? 'bg-emerald-500' : 'bg-[#8b949e]'}`} />
-                                <span className="text-xs font-black text-slate-300">{p.name}</span>
+                                <span className="text-xs font-black text-slate-500">{p.name}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-slate-200'}`}>
+                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-slate-600'}`}>
                                   {isVer ? 'Verified' : 'Unverified'}
                                 </span>
                                 {isVer ? (
                                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                                 ) : (
-                                  <AlertCircle className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                                  <AlertCircle className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                                 )}
                               </div>
                             </a>
@@ -7945,38 +7945,38 @@ function CandidateDetail() {
                       {/* Row 2: DeepResearch Summary (Section 2) & Career Narrative (Section 3) */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* DEEP RESEARCH SUMMARY (Section 2) */}
-                        <div id="deep-research-summary-card" className="md:col-span-2 p-6 glass-premium border border-white/10 rounded-2xl shadow-sm space-y-4">
-                          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+                        <div id="deep-research-summary-card" className="md:col-span-2 p-6 glass-premium border border-slate-200 rounded-2xl shadow-sm space-y-4">
+                          <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
                             <Sparkles className="w-5 h-5 text-brand" />
-                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">2. DeepResearch Summary</h4>
+                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">2. DeepResearch Summary</h4>
                           </div>
-                          <div className="text-slate-300 text-sm leading-relaxed prose prose-indigo max-w-none max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                          <div className="text-slate-500 text-sm leading-relaxed prose prose-indigo max-w-none max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                             <Markdown>{summaryText}</Markdown>
                           </div>
                         </div>
 
                         {/* CAREER TIMELINE VALIDATION (Section 3) */}
-                        <div id="career-timeline-card" className="p-6 glass-premium border border-white/10 rounded-2xl shadow-sm flex flex-col justify-between space-y-4">
+                        <div id="career-timeline-card" className="p-6 glass-premium border border-slate-200 rounded-2xl shadow-sm flex flex-col justify-between space-y-4">
                           <div>
-                            <div className="flex items-center gap-2 pb-2 border-b border-white/10 mb-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-slate-200 mb-4">
                               <Briefcase className="w-5 h-5 text-brand" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">3. Career Timeline</h4>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">3. Career Timeline</h4>
                             </div>
                             
                             <div className="space-y-4">
                               <div>
-                                <div className="flex justify-between text-xs font-bold text-slate-300 mb-1.5">
+                                <div className="flex justify-between text-xs font-bold text-slate-500 mb-1.5">
                                   <span>Career Stability Rating</span>
                                   <span className="font-extrabold">{stabilityScore}%</span>
                                 </div>
-                                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
                                   <div className="h-full bg-brand rounded-full transition-all" style={{ width: `${stabilityScore}%` }} />
                                 </div>
                               </div>
                               
-                              <div className="p-3 transparent rounded-xl border border-white/10 space-y-2">
-                                <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Growth Trajectory</span>
-                                <p className="text-xs text-slate-200 leading-relaxed font-semibold">{growthTrajectory}</p>
+                              <div className="p-3 transparent rounded-xl border border-slate-200 space-y-2">
+                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block">Growth Trajectory</span>
+                                <p className="text-xs text-slate-600 leading-relaxed font-semibold">{growthTrajectory}</p>
                               </div>
                             </div>
                           </div>
@@ -7994,11 +7994,11 @@ function CandidateDetail() {
                       {/* Row 3: Technical Intelligence (Section 4) & Leadership / Comm (Section 5) */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* TECHNICAL INTELLIGENCE (Section 4) */}
-                        <div id="technical-intelligence-card" className="p-6 glass-premium border border-white/10 rounded-2xl shadow-sm space-y-5">
-                          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                        <div id="technical-intelligence-card" className="p-6 glass-premium border border-slate-200 rounded-2xl shadow-sm space-y-5">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                             <div className="flex items-center gap-2">
                               <Cpu className="w-5 h-5 text-brand" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">4. Technical Intelligence</h4>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">4. Technical Intelligence</h4>
                             </div>
                             <span className="text-[10px] font-black uppercase bg-brand/10 text-brand-light px-2 py-0.5 rounded tracking-wider">
                               Assessed: {seniority}
@@ -8006,30 +8006,30 @@ function CandidateDetail() {
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="p-4 transparent rounded-xl border border-white/10 space-y-2 text-center">
-                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Engineering Depth</span>
+                            <div className="p-4 transparent rounded-xl border border-slate-200 space-y-2 text-center">
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Engineering Depth</span>
                               <div className="text-3xl font-black text-brand-light">{engDepth}%</div>
-                              <p className="text-[10px] text-slate-200 font-medium leading-relaxed">Based on codebase validation and engineering design overlap.</p>
+                              <p className="text-[10px] text-slate-600 font-medium leading-relaxed">Based on codebase validation and engineering design overlap.</p>
                             </div>
-                            <div className="p-4 transparent rounded-xl border border-white/10 space-y-2 text-center">
-                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Problem Solving</span>
+                            <div className="p-4 transparent rounded-xl border border-slate-200 space-y-2 text-center">
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Problem Solving</span>
                               <div className="text-3xl font-black text-brand-light">{problemSolving}%</div>
-                              <p className="text-[10px] text-slate-200 font-medium leading-relaxed font-sans">Derived from community contributions, stack trace, and complexity metrics.</p>
+                              <p className="text-[10px] text-slate-600 font-medium leading-relaxed font-sans">Derived from community contributions, stack trace, and complexity metrics.</p>
                             </div>
                           </div>
 
-                          <div className="p-3.5 transparent rounded-xl border border-white/10 space-y-1">
-                            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1 font-sans">Technical Insights Narrative</span>
-                            <p className="text-xs text-slate-200 leading-relaxed font-sans">{res.technical_depth || 'Technical alignment verified across primary languages and architectures.'}</p>
+                          <div className="p-3.5 transparent rounded-xl border border-slate-200 space-y-1">
+                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1 font-sans">Technical Insights Narrative</span>
+                            <p className="text-xs text-slate-600 leading-relaxed font-sans">{res.technical_depth || 'Technical alignment verified across primary languages and architectures.'}</p>
                           </div>
                         </div>
 
                         {/* LEADERSHIP & COMMUNICATION (Section 5) */}
-                        <div id="leadership-communication-card" className="p-6 glass-premium border border-white/10 rounded-2xl shadow-sm space-y-5">
-                          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                        <div id="leadership-communication-card" className="p-6 glass-premium border border-slate-200 rounded-2xl shadow-sm space-y-5">
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                             <div className="flex items-center gap-2">
                               <Brain className="w-5 h-5 text-brand" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">5. Leadership & Communication</h4>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">5. Leadership & Communication</h4>
                             </div>
           
                               <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded tracking-wider">
@@ -8042,14 +8042,14 @@ function CandidateDetail() {
                           
 
                           <div className="space-y-4 font-sans">
-                            <div className="p-3.5 transparent rounded-xl border border-white/10 space-y-1">
-                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1">Communication Quality Check</span>
-                              <p className="text-xs text-slate-200 leading-relaxed font-semibold">{communicationQuality}</p>
+                            <div className="p-3.5 transparent rounded-xl border border-slate-200 space-y-1">
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Communication Quality Check</span>
+                              <p className="text-xs text-slate-600 leading-relaxed font-semibold">{communicationQuality}</p>
                             </div>
 
-                            <div className="p-3.5 transparent rounded-xl border border-white/10 space-y-1">
-                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1">Leadership Potential</span>
-                              <p className="text-xs text-slate-200 leading-relaxed">{res.leadership_potential || 'Capable of leading technical scopes and guiding complex features proactively.'}</p>
+                            <div className="p-3.5 transparent rounded-xl border border-slate-200 space-y-1">
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1">Leadership Potential</span>
+                              <p className="text-xs text-slate-600 leading-relaxed">{res.leadership_potential || 'Capable of leading technical scopes and guiding complex features proactively.'}</p>
                             </div>
                           </div>
                         </div>
@@ -8060,7 +8060,7 @@ function CandidateDetail() {
 <div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
                           <div className="flex items-center gap-2">
                             <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-rose-500' : 'text-emerald-500'}`} />
-                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">6. Risk Signals</h4>
+                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">6. Risk Signals</h4>
                           </div>
                           <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
                             riskScore > 40 ? 'bg-rose-100 text-rose-800' :
@@ -8076,10 +8076,10 @@ function CandidateDetail() {
                             {riskScore > 20 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-slate-300">
+                            <p className="text-xs font-bold text-slate-500">
                               {riskScore > 20 ? 'Potential inconsistencies detected:' : 'No potential inconsistencies detected.'}
                             </p>
-                            <p className="text-xs text-slate-200 mt-1 leading-relaxed">
+                            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                               {riskSignals}
                             </p>
                           </div>
@@ -8091,10 +8091,10 @@ function CandidateDetail() {
                   {/* Row 5: Evidence Sources (Section 8) & Refresh Analysis Container */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
                     {/* EVIDENCE SOURCES (Section 8) */}
-                    <div id="evidence-sources-card" className="lg:col-span-2 p-6 transparent border border-white/10/60 rounded-2xl">
+                    <div id="evidence-sources-card" className="lg:col-span-2 p-6 transparent border border-slate-200/60 rounded-2xl">
                       <div className="flex items-center gap-2 mb-4">
                         <BookOpen className="w-5 h-5 text-brand" />
-                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">8. Evidence Sources / Reference Grounding Links</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500">8. Evidence Sources / Reference Grounding Links</h4>
                       </div>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -8104,37 +8104,37 @@ function CandidateDetail() {
                             href={source.uri && source.uri !== '#' ? source.uri : undefined}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`block p-3 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-white/5/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
+                            className={`block p-3 glass-premium border border-slate-200 rounded-xl hover:border-brand/20 hover:bg-slate-50/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-[11px] font-bold text-slate-200 line-clamp-1 group-hover:text-brand-light italic">
+                              <span className="text-[11px] font-bold text-slate-600 line-clamp-1 group-hover:text-brand-light italic">
                                 {source.title || source.uri}
                               </span>
-                              {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-brand-light shrink-0" />}
+                              {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-brand-light shrink-0" />}
                             </div>
                           </a>
                         ))}
                         {sources.length === 0 && (
-                          <p className="text-xs text-slate-200 italic">No public references compiled.</p>
+                          <p className="text-xs text-slate-600 italic">No public references compiled.</p>
                         )}
                       </div>
                     </div>
 
                     {/* REFRESH ACTION AND AUDIT SUMMARY PANEL */}
-                    <div className="p-6 transparent border border-white/10/60 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div className="p-6 transparent border border-slate-200/60 rounded-2xl flex flex-col justify-between space-y-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-slate-300">
+                        <div className="flex items-center gap-2 text-slate-500">
                           <CheckCircle2 className="text-brand-light w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-wider">Audit Integrity (v5.0)</span>
                         </div>
-                        <p className="text-[10px] text-slate-200 leading-relaxed italic font-sans">
+                        <p className="text-[10px] text-slate-600 leading-relaxed italic font-sans">
                           Multi-source background synthesis. Built in real-time under zero-trust guidelines. Verify physical certs before hire.
                         </p>
                       </div>
                       
                       <Button 
                         variant="outline" 
-                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-brand-light border-brand/20 glass-premium hover:bg-white/5 hover:border-brand-light hover:text-brand-light transition-all"
+                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-brand-light border-brand/20 glass-premium hover:bg-slate-50 hover:border-brand-light hover:text-brand-light transition-all"
                         onClick={handleDeepResearch}
                       >
                         <RotateCcw className="w-3.5 h-3.5 mr-2" /> Refresh Grounding Audit
@@ -8151,11 +8151,11 @@ function CandidateDetail() {
 
           ) : (
             <div className="py-12 flex flex-col items-center text-center">
-              <div className="w-20 h-20 transparent rounded-full flex items-center justify-center mb-6 border border-white/10">
-                <Globe className="w-10 h-10 text-slate-300" />
+              <div className="w-20 h-20 transparent rounded-full flex items-center justify-center mb-6 border border-slate-200">
+                <Globe className="w-10 h-10 text-slate-500" />
               </div>
-              <h4 className="text-xl font-black text-white mb-2">Footprint Analysis Missing</h4>
-              <p className="text-sm text-slate-200 max-w-md mx-auto mb-8">
+              <h4 className="text-xl font-black text-slate-900 mb-2">Footprint Analysis Missing</h4>
+              <p className="text-sm text-slate-600 max-w-md mx-auto mb-8">
                 Perform a deep web research to uncover the candidate's professional presence across LinkedIn, GitHub, industry registries, and public portfolios.
               </p>
               <Button 
@@ -8178,12 +8178,12 @@ function CandidateDetail() {
 
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="border-b border-white/10 pb-2">
-              <h2 className="text-xl font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
+            <div className="border-b border-slate-200 pb-2">
+              <h2 className="text-xl font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brand" />
                 D6+ Forensic Analysis Reports
               </h2>
-              <p className="text-xs text-slate-200 font-semibold tracking-wide">Deconstructed adversarial talent reports across major scoring dimensions</p>
+              <p className="text-xs text-slate-600 font-semibold tracking-wide">Deconstructed adversarial talent reports across major scoring dimensions</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -8195,11 +8195,11 @@ function CandidateDetail() {
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-white text-sm uppercase tracking-wider">D6 Executive Summary & Match Narrative</h3>
-                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">CORE FIT & SYNTHESIS</p>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">D6 Executive Summary & Match Narrative</h3>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">CORE FIT & SYNTHESIS</p>
                     </div>
                   </div>
-                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-indigo max-w-none flex-1">
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-indigo max-w-none flex-1">
                     <Markdown>{d6Sections.executiveSummary}</Markdown>
                   </div>
                 </Card>
@@ -8213,11 +8213,11 @@ function CandidateDetail() {
                       <BarChart3 className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-white text-sm uppercase tracking-wider">Dimensional Performance Ledger</h3>
-                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">D1-D5 BREAKDOWN DECONSTRUCTION</p>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">Dimensional Performance Ledger</h3>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">D1-D5 BREAKDOWN DECONSTRUCTION</p>
                     </div>
                   </div>
-                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-blue max-w-none flex-1">
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-blue max-w-none flex-1">
                     <Markdown>{d6Sections.performanceLedger}</Markdown>
                   </div>
                 </Card>
@@ -8231,11 +8231,11 @@ function CandidateDetail() {
                       <Shield className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-white text-sm uppercase tracking-wider">D6 Auditing, Penalties & Anomalies</h3>
-                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">ADVERSARIAL STABILITY & GAP EVALUATION</p>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">D6 Auditing, Penalties & Anomalies</h3>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">ADVERSARIAL STABILITY & GAP EVALUATION</p>
                     </div>
                   </div>
-                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-amber max-w-none flex-1">
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-amber max-w-none flex-1">
                     <Markdown>{d6Sections.auditingAnomalies}</Markdown>
                   </div>
                 </Card>
@@ -8249,11 +8249,11 @@ function CandidateDetail() {
                       <Lightbulb className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-white text-sm uppercase tracking-wider">Hiring Recommendation & Interview Strategy</h3>
-                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">PRESCRIPTIVE PANEL EVALUATION QUESTIONS</p>
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider">Hiring Recommendation & Interview Strategy</h3>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">PRESCRIPTIVE PANEL EVALUATION QUESTIONS</p>
                     </div>
                   </div>
-                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-emerald max-w-none flex-1">
+                  <div className="text-slate-600 text-xs sm:text-sm leading-relaxed prose prose-emerald max-w-none flex-1">
                     <Markdown>{d6Sections.interviewStrategy}</Markdown>
                   </div>
                 </Card>
@@ -8267,50 +8267,50 @@ function CandidateDetail() {
         {/* Profile Details */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="p-6">
-             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Quick Stats</h3>
+             <h3 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Quick Stats</h3>
              <div className="space-y-4">
                <div>
-                 <p className="text-sm font-bold text-white">{candidate.currentRole}</p>
-                 <p className="text-xs text-slate-200">@{candidate.currentCompany}</p>
+                 <p className="text-sm font-bold text-slate-900">{candidate.currentRole}</p>
+                 <p className="text-xs text-slate-600">@{candidate.currentCompany}</p>
                </div>
                <div className="flex justify-between items-center py-3 border-y border-slate-50">
-                 <span className="text-sm text-slate-200">Exp. Years</span>
+                 <span className="text-sm text-slate-600">Exp. Years</span>
                  <span className="font-bold text-brand-light">{candidate.totalExperience}Y</span>
                </div>
                <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                 <span className="text-sm text-slate-200">Location</span>
+                 <span className="text-sm text-slate-600">Location</span>
                  <span className="font-bold">{candidate.location}</span>
                </div>
                <div className="flex justify-between items-center pt-1">
-                 <span className="text-sm text-slate-200">Screened On</span>
-                 <span className="text-sm font-bold text-slate-300">{formatDateTime(candidate.createdAt)}</span>
+                 <span className="text-sm text-slate-600">Screened On</span>
+                 <span className="text-sm font-bold text-slate-500">{formatDateTime(candidate.createdAt)}</span>
                </div>
              </div>
           </Card>
 
           <Card className="p-6 transparent">
-             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Red Flags (D6)</h3>
+             <h3 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Red Flags (D6)</h3>
              <div className="space-y-4">
                {scorecard?.dimensions?.redFlags?.flags?.length > 0 ? scorecard.dimensions.redFlags.flags.map((flag, idx) => (
-                 <div key={idx} className="glass-premium p-4 rounded-xl border border-white/10 flex flex-col gap-2 shadow-sm">
+                 <div key={idx} className="glass-premium p-4 rounded-xl border border-slate-200 flex flex-col gap-2 shadow-sm">
                    <div className="flex items-center gap-2">
                      <div className={cn(
                        "w-2 h-2 rounded-full shrink-0",
                        flag.severity === 'high' ? "bg-red-500" : flag.severity === 'medium' ? "bg-amber-500" : "bg-[#8b949e]"
                      )} />
-                     <p className="text-sm font-black text-slate-300">{flag.label}</p>
+                     <p className="text-sm font-black text-slate-500">{flag.label}</p>
                      <span className="ml-auto text-[10px] text-red-500 font-black uppercase tracking-tighter">-{flag.penalty} pts</span>
                    </div>
-                   <p className="text-xs text-slate-200 leading-relaxed italic border-l-2 border-white/10 pl-3 py-1">
+                   <p className="text-xs text-slate-600 leading-relaxed italic border-l-2 border-slate-200 pl-3 py-1">
                      {flag.rationale}
                    </p>
                  </div>
                )) : (
-                 <div className="p-4 text-center border-2 border-dashed border-white/10 rounded-xl">
-                   <p className="text-xs text-slate-200">No risk signals detected.</p>
+                 <div className="p-4 text-center border-2 border-dashed border-slate-200 rounded-xl">
+                   <p className="text-xs text-slate-600">No risk signals detected.</p>
                  </div>
                )}
-               <div className="pt-2 flex justify-between items-center text-xs font-black uppercase border-t border-white/10 mt-2">
+               <div className="pt-2 flex justify-between items-center text-xs font-black uppercase border-t border-slate-200 mt-2">
                  <span>Total Penalty</span>
                  <span className="text-red-600">-{scorecard?.dimensions?.redFlags?.totalPenalty || 0} Points</span>
                </div>
@@ -8318,7 +8318,7 @@ function CandidateDetail() {
           </Card>
 
            <Card className="p-6">
-              <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Confirmed Skill Tags</h3>
+              <h3 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Confirmed Skill Tags</h3>
               <div className="flex flex-wrap gap-1.5">
                 {scorecard?.skillsAnalysis?.confirmed?.map((s, idx) => (
                   <span key={idx} className="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-black rounded uppercase tracking-tighter border border-green-100 italic">
@@ -8335,8 +8335,8 @@ function CandidateDetail() {
                    <Zap className="w-4 h-4 text-brand-light" />
                  </div>
                  <div>
-                   <h4 className="font-extrabold text-slate-300 text-sm">Composio Integrations</h4>
-                   <p className="text-[10px] text-slate-200 font-semibold uppercase">Gmail & Google Calendar</p>
+                   <h4 className="font-extrabold text-slate-500 text-sm">Composio Integrations</h4>
+                   <p className="text-[10px] text-slate-600 font-semibold uppercase">Gmail & Google Calendar</p>
                  </div>
               </div>
               
@@ -8354,18 +8354,18 @@ function CandidateDetail() {
                       Disconnect
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-200 leading-relaxed">
+                  <p className="text-[10px] text-slate-600 leading-relaxed">
                     Your Gmail and Google Calendar are connected via Composio. Invites and schedule events will route through Composio.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-slate-200 leading-normal">
+                  <p className="text-xs text-slate-600 leading-normal">
                     Link your Google Workspace in one click to enable automatic interview invitations via Gmail and Google Calendar scheduling.
                   </p>
                   <Button
                     variant="primary"
-                    className="w-full h-10 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-md"
+                    className="w-full h-10 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-[10px] uppercase font-black tracking-widest text-slate-900 rounded-xl flex items-center justify-center gap-2 shadow-md"
                     onClick={handleConnectComposio}
                     disabled={composioLoading}
                   >
@@ -8383,18 +8383,18 @@ function CandidateDetail() {
            {/* AI Meeting Recorder Bot Card */}
            <Card className="p-6 glass-premium border border-slate-150 rounded-2xl shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 rounded-full glass-premium flex items-center justify-center text-white text-xs shadow-inner">
-                   <Video className="w-4 h-4 text-white" />
+                 <div className="w-8 h-8 rounded-full glass-premium flex items-center justify-center text-slate-900 text-xs shadow-inner">
+                   <Video className="w-4 h-4 text-slate-900" />
                  </div>
                  <div>
-                   <h4 className="font-extrabold text-slate-300 text-sm">AI Meeting Recorder Bot</h4>
-                   <p className="text-[10px] text-slate-200 font-semibold uppercase">External Meeting Capture</p>
+                   <h4 className="font-extrabold text-slate-500 text-sm">AI Meeting Recorder Bot</h4>
+                   <p className="text-[10px] text-slate-600 font-semibold uppercase">External Meeting Capture</p>
                  </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 transparent border border-slate-150 rounded-xl">
-                  <span className="text-[10px] font-black uppercase text-slate-200 tracking-wider">Bot Status</span>
+                  <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">Bot Status</span>
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "w-2 h-2 rounded-full",
@@ -8402,7 +8402,7 @@ function CandidateDetail() {
                       botStatus === 'recording' ? "bg-red-500 animate-pulse" :
                       botStatus === 'joining' ? "bg-amber-500 animate-pulse" : "bg-[#8b949e]"
                     )} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
                       {botStatus === 'completed' ? 'Recording Ready' :
                        botStatus === 'recording' ? 'Live Recording' :
                        botStatus === 'joining' ? 'Lobby / Joining' : 'Idle / Ready'}
@@ -8411,10 +8411,10 @@ function CandidateDetail() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
+                  <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-white/10 rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-slate-200 rounded-xl text-slate-500 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     placeholder="Paste meeting link here"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
@@ -8422,10 +8422,10 @@ function CandidateDetail() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Bot Display Name</label>
+                  <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Bot Display Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-white/10 rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-slate-200 rounded-xl text-slate-500 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     value={botName}
                     onChange={(e) => setBotName(e.target.value)}
                   />
@@ -8435,9 +8435,9 @@ function CandidateDetail() {
                   <Button
                     variant="primary"
                     className={cn(
-                      "w-full h-11 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg",
+                      "w-full h-11 text-[10px] uppercase font-black tracking-widest text-slate-900 rounded-xl flex items-center justify-center gap-2 shadow-lg",
                       botStatus === 'joining' || botStatus === 'recording'
-                        ? "bg-white/10 hover:bg-white/10 shadow-slate-100"
+                        ? "bg-slate-100 hover:bg-slate-100 shadow-slate-100"
                         : "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] shadow-brand/10"
                     )}
                     onClick={handleLaunchMeetingBot}
@@ -8454,9 +8454,9 @@ function CandidateDetail() {
                 )}
 
                 {recordingUrl && (
-                  <div className="space-y-2 pt-3 border-t border-white/10 animate-in fade-in duration-500">
-                    <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recorded Meeting Stream</span>
-                    <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-lg transparent aspect-video">
+                  <div className="space-y-2 pt-3 border-t border-slate-200 animate-in fade-in duration-500">
+                    <span className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Recorded Meeting Stream</span>
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-lg transparent aspect-video">
                       <video
                         src={recordingUrl}
                         controls
@@ -8477,8 +8477,8 @@ function CandidateDetail() {
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-black">D6 Scoring Engine</h2>
                 <div className="group relative">
-                  <Info className="w-4 h-4 text-slate-200 cursor-help" />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 glass-premium text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none">
+                  <Info className="w-4 h-4 text-slate-600 cursor-help" />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 glass-premium text-slate-900 text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-slate-200 pointer-events-none">
                     <p className="leading-relaxed">
                       <span className="font-black text-brand-light block mb-1 uppercase tracking-widest">D6+ Scoring Architecture</span>
                       Proprietary v2.0 weighted scoring system. Evaluates 5 core dimensions using adaptive role weights, chronological audit penalties, and signal density analysis.
@@ -8488,7 +8488,7 @@ function CandidateDetail() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-200">Integrity Score:</span>
+                <span className="text-xs font-bold text-slate-600">Integrity Score:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
                   (candidate.scorecard.integrityScore || 100) >= 90 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
@@ -8497,17 +8497,17 @@ function CandidateDetail() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-200">Signal Density:</span>
+                <span className="text-xs font-bold text-slate-600">Signal Density:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
-                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-light" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-white/5 text-slate-300" : "bg-red-100 text-red-700"
+                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-light" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-slate-50 text-slate-500" : "bg-red-100 text-red-700"
                 )}>
                   {candidate.scorecard.dimensions?.signalDensity?.score || '--'}/100
                 </span>
                 {candidate.scorecard.dimensions?.signalDensity?.rationale && (
                   <div className="group relative">
-                    <Info className="w-3 h-3 text-slate-200 cursor-help" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 glass-premium text-white text-[8px] font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none">
+                    <Info className="w-3 h-3 text-slate-600 cursor-help" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 glass-premium text-slate-900 text-[8px] font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-slate-200 pointer-events-none">
                       {candidate.scorecard.dimensions.signalDensity.rationale}
                     </div>
                   </div>
@@ -8588,12 +8588,12 @@ function CandidateDetail() {
                   amber: { bg: 'bg-amber-50/10', text: 'text-amber-400', bgActive: 'bg-amber-50', textActive: 'text-amber-600', border: 'border-amber-100' },
                   rose: { bg: 'bg-rose-50/10', text: 'text-rose-400', bgActive: 'bg-rose-50', textActive: 'text-rose-600', border: 'border-rose-100' },
                 };
-                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-200', bgActive: 'bg-white/5', textActive: 'text-slate-300', border: 'border-slate-150' };
+                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-600', bgActive: 'bg-slate-50', textActive: 'text-slate-500', border: 'border-slate-150' };
 
                 return (
                   <Card key={dimInfo.id} className={cn(
                     "p-0 overflow-visible border-2 transition-all group/dim",
-                    dim ? (dim.score >= 80 ? "border-green-150 hover:border-green-300" : dim.score >= 50 ? "border-amber-150 hover:border-amber-300" : "border-red-150 hover:border-red-300") : "border-white/10 opacity-70"
+                    dim ? (dim.score >= 80 ? "border-green-150 hover:border-green-300" : dim.score >= 50 ? "border-amber-150 hover:border-amber-300" : "border-red-150 hover:border-red-300") : "border-slate-200 opacity-70"
                   )}>
                     <div className="flex flex-col md:flex-row">
                       {/* Score Indicator Sidebar */}
@@ -8604,7 +8604,7 @@ function CandidateDetail() {
                         <div className="relative">
                           <div className={cn(
                             "w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 shadow-sm relative z-10",
-                            dim ? (dim.score >= 80 ? "glass-premium border-green-200 text-green-600" : dim.score >= 50 ? "glass-premium border-amber-200 text-amber-600" : "glass-premium border-red-200 text-red-600") : "glass-premium border-white/10 text-slate-300"
+                            dim ? (dim.score >= 80 ? "glass-premium border-green-200 text-green-600" : dim.score >= 50 ? "glass-premium border-amber-200 text-amber-600" : "glass-premium border-red-200 text-red-600") : "glass-premium border-slate-200 text-slate-500"
                           )}>
                             <span className="text-2xl font-black">{dim ? dim.score : '--'}</span>
                             <span className="text-[8px] font-black uppercase tracking-tighter opacity-60">Score</span>
@@ -8614,15 +8614,15 @@ function CandidateDetail() {
                                "absolute -top-2 -right-2 w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center z-20",
                                dim.confidence === 'HIGH' ? "bg-green-500" : dim.confidence === 'MED' ? "bg-amber-500" : "bg-red-500"
                              )}>
-                               <ShieldCheck className="w-3 h-3 text-white" />
+                               <ShieldCheck className="w-3 h-3 text-slate-900" />
                              </div>
                           )}
                         </div>
                         <div className="flex flex-col items-center md:items-center">
-                           <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">{dimInfo.id}</span>
+                           <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{dimInfo.id}</span>
                            <div className={cn(
                              "w-1 h-8 rounded-full my-2 hidden md:block",
-                             dim ? (dim.score >= 80 ? "bg-green-200" : dim.score >= 50 ? "bg-amber-200" : "bg-red-200") : "bg-white/5"
+                             dim ? (dim.score >= 80 ? "bg-green-200" : dim.score >= 50 ? "bg-amber-200" : "bg-red-200") : "bg-slate-50"
                            )} />
                         </div>
                       </div>
@@ -8631,15 +8631,15 @@ function CandidateDetail() {
                       <div className="flex-1 p-6 space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
-                            <div className={cn("p-2 rounded-lg", dim ? `${colors.bgActive} ${colors.textActive}` : "transparent text-slate-300")}>
+                            <div className={cn("p-2 rounded-lg", dim ? `${colors.bgActive} ${colors.textActive}` : "transparent text-slate-500")}>
                               <Icon className="w-5 h-5" />
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <h3 className="font-black text-white uppercase tracking-tight">{dimInfo.label}</h3>
+                                <h3 className="font-black text-slate-900 uppercase tracking-tight">{dimInfo.label}</h3>
                                 <div className="group/info relative">
-                                  <Info className="w-3.5 h-3.5 text-slate-300 hover:text-brand-light transition-colors cursor-help" />
-                                  <div className="absolute bottom-full left-0 mb-2 w-64 p-3 glass-premium text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none">
+                                  <Info className="w-3.5 h-3.5 text-slate-500 hover:text-brand-light transition-colors cursor-help" />
+                                  <div className="absolute bottom-full left-0 mb-2 w-64 p-3 glass-premium text-slate-900 text-[10px] font-medium rounded-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50 shadow-xl border border-slate-200 pointer-events-none">
                                     <p className="leading-relaxed">
                                       <span className="font-black text-brand-light block mb-1 uppercase tracking-widest">{dimInfo.label} PROTOCOL</span>
                                       {dimInfo.calculationDetail}
@@ -8649,10 +8649,10 @@ function CandidateDetail() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <p className="text-[10px] text-slate-200 font-medium italic">{dimInfo.description}</p>
+                                <p className="text-[10px] text-slate-600 font-medium italic">{dimInfo.description}</p>
                                 <span className={cn(
                                   "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border",
-                                  dimInfo.weight === 'High' ? "bg-brand/10 text-brand-light border-brand/10" : "transparent text-slate-200 border-white/10"
+                                  dimInfo.weight === 'High' ? "bg-brand/10 text-brand-light border-brand/10" : "transparent text-slate-600 border-slate-200"
                                 )}>
                                   {dimInfo.weight} Weight
                                 </span>
@@ -8681,40 +8681,40 @@ function CandidateDetail() {
                           <div className="space-y-4">
                             <details className="group/rationale">
                               <summary className="list-none cursor-pointer">
-                                <div className="transparent rounded-xl p-4 border border-white/10 relative overflow-hidden group-hover/dim:glass-premium transition-colors duration-300 flex justify-between items-start">
+                                <div className="transparent rounded-xl p-4 border border-slate-200 relative overflow-hidden group-hover/dim:glass-premium transition-colors duration-300 flex justify-between items-start">
                                   <div className={cn(
                                     "absolute left-0 top-0 w-1 h-full",
                                     dim.score >= 80 ? "bg-green-500" : dim.score >= 50 ? "bg-amber-500" : "bg-red-500"
                                   )} />
                                   <div className="flex-1">
-                                    <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-2">AI Scoring Rationale</span>
-                                    <p className="text-sm text-slate-200 leading-relaxed font-medium line-clamp-2 group-open/rationale:line-clamp-none">
+                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-2">AI Scoring Rationale</span>
+                                    <p className="text-sm text-slate-600 leading-relaxed font-medium line-clamp-2 group-open/rationale:line-clamp-none">
                                       {dim.rationale}
                                     </p>
                                   </div>
-                                  <ChevronDown className="w-4 h-4 text-slate-300 group-open/rationale:rotate-180 transition-transform mt-6" />
+                                  <ChevronDown className="w-4 h-4 text-slate-500 group-open/rationale:rotate-180 transition-transform mt-6" />
                                 </div>
                               </summary>
                             </details>
 
                             {dim.citations && dim.citations.length > 0 && (
                               <div className="space-y-2">
-                                <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block pl-1">Signal Citations</span>
+                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block pl-1">Signal Citations</span>
                                 <div className="flex flex-wrap gap-2">
                                   {dim.citations.map((cite: any, cidx: number) => (
                                     <div 
                                       key={cidx} 
-                                      className="glass-premium border border-white/10 rounded-full px-3 py-1.5 flex items-center gap-2 hover:border-brand/20 hover:bg-brand/10 transition-all cursor-default group/cite"
+                                      className="glass-premium border border-slate-200 rounded-full px-3 py-1.5 flex items-center gap-2 hover:border-brand/20 hover:bg-brand/10 transition-all cursor-default group/cite"
                                       title={cite.source}
                                     >
-                                      <div className="w-4 h-4 rounded-full glass-premium flex items-center justify-center text-[7px] font-black text-white shrink-0">
+                                      <div className="w-4 h-4 rounded-full glass-premium flex items-center justify-center text-[7px] font-black text-slate-900 shrink-0">
                                         {cidx + 1}
                                       </div>
-                                      <span className="text-[10px] font-bold text-slate-200 group-hover/cite:text-brand-light max-w-[120px] truncate">
+                                      <span className="text-[10px] font-bold text-slate-600 group-hover/cite:text-brand-light max-w-[120px] truncate">
                                         {cite.claim}
                                       </span>
-                                      <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                                      <Search className="w-2.5 h-2.5 text-slate-300" />
+                                      <div className="w-1.5 h-1.5 rounded-full bg-slate-100" />
+                                      <Search className="w-2.5 h-2.5 text-slate-500" />
                                     </div>
                                   ))}
                                 </div>
@@ -8722,8 +8722,8 @@ function CandidateDetail() {
                             )}
                           </div>
                         ) : (
-                          <div className="py-4 text-center border-2 border-dashed border-white/10 rounded-2xl transparent/30">
-                            <p className="text-xs text-slate-200 italic">No analysis data available for this dimension.</p>
+                          <div className="py-4 text-center border-2 border-dashed border-slate-200 rounded-2xl transparent/30">
+                            <p className="text-xs text-slate-600 italic">No analysis data available for this dimension.</p>
                           </div>
                         )}
                       </div>
@@ -8734,26 +8734,26 @@ function CandidateDetail() {
             </div>
           </Card>
 
-          <Card className="p-6 transparent border-2 border-dashed border-white/10">
+          <Card className="p-6 transparent border-2 border-dashed border-slate-200">
              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-black text-slate-200 text-xs shadow-inner">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-black text-slate-600 text-xs shadow-inner">
                   PII
                 </div>
-                <h4 className="font-bold text-slate-300">PII Isolation & Compliance</h4>
+                <h4 className="font-bold text-slate-500">PII Isolation & Compliance</h4>
              </div>
-             <p className="text-xs text-slate-200 leading-relaxed">
+             <p className="text-xs text-slate-600 leading-relaxed">
                As per our Section 06 policies, Personally Identifiable Information is strictly isolated. Read access is restricted to the hiring manager. No demographic signals are used in scoring.
              </p>
           </Card>
 
-          <Card className="p-8 border-dashed border-2 border-white/10">
+          <Card className="p-8 border-dashed border-2 border-slate-200">
              <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 glass-premium rounded-lg">
-                   <Users className="w-5 h-5 text-white" />
+                   <Users className="w-5 h-5 text-slate-900" />
                 </div>
                 <div>
-                   <h3 className="font-black text-lg text-white">Proctoring & Integrity (Section 3.4)</h3>
-                   <p className="text-xs text-slate-200">Multi-layer security monitoring logs</p>
+                   <h3 className="font-black text-lg text-slate-900">Proctoring & Integrity (Section 3.4)</h3>
+                   <p className="text-xs text-slate-600">Multi-layer security monitoring logs</p>
                 </div>
              </div>
              <div className="space-y-3">
@@ -8776,7 +8776,7 @@ function CandidateDetail() {
              </div>
           </Card>
 
-          <Card className="p-8 glass-premium text-white overflow-hidden relative">
+          <Card className="p-8 glass-premium text-slate-900 overflow-hidden relative">
              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 rounded-full -mr-16 -mt-16 blur-3xl" />
              <div className="flex items-center gap-3 mb-6 relative">
                 <div className="p-2 bg-brand rounded-lg">
@@ -8786,7 +8786,7 @@ function CandidateDetail() {
                 </div>
                 <div>
                    <h3 className="font-black text-lg">Interview Flow Sequence (3.5)</h3>
-                   <p className="text-xs text-slate-200">Adaptive voice interaction state</p>
+                   <p className="text-xs text-slate-600">Adaptive voice interaction state</p>
                 </div>
              </div>
              <div className="space-y-4 relative">
@@ -8803,7 +8803,7 @@ function CandidateDetail() {
                   )}>
                     <div className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border",
-                      s.active ? "bg-brand border-brand-light" : "bg-white/10 border-white/10"
+                      s.active ? "bg-brand border-brand-light" : "bg-slate-100 border-slate-200"
                     )}>
                       {s.step}
                     </div>
@@ -8830,14 +8830,14 @@ function CandidateDetail() {
                 <Sliders className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-white text-base uppercase tracking-wider">Offer Letter Builder</h3>
-                <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">Configure Official Offer Parameters</p>
+                <h3 className="font-black text-slate-900 text-base uppercase tracking-wider">Offer Letter Builder</h3>
+                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">Configure Official Offer Parameters</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-2">Base Salary (Annual Amount)</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-2">Base Salary (Annual Amount)</label>
                 <div className="flex gap-4 items-center">
                   <input 
                     type="range" 
@@ -8852,18 +8852,18 @@ function CandidateDetail() {
                     type="number"
                     value={offerSalary}
                     onChange={(e) => setOfferSalary(Number(e.target.value))}
-                    className="w-36 p-2 rounded-xl border border-white/10 text-xs font-black text-slate-850"
+                    className="w-36 p-2 rounded-xl border border-slate-200 text-xs font-black text-slate-850"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Currency Selector</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1.5">Currency Selector</label>
                   <select 
                     value={offerCurrency} 
                     onChange={(e) => setOfferCurrency(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-white/10 text-xs font-bold text-slate-300 glass-premium"
+                    className="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-500 glass-premium"
                   >
                     <option value="INR">INR (₹) - Indian Rupee</option>
                     <option value="USD">USD ($) - US Dollar</option>
@@ -8874,35 +8874,35 @@ function CandidateDetail() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Expected Start Date</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1.5">Expected Start Date</label>
                   <input 
                     type="date" 
                     value={offerStartDate} 
                     onChange={(e) => setOfferStartDate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-white/10 text-xs font-bold text-slate-705 glass-premium"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-705 glass-premium"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Perks & Core Benefits Ledger</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1.5">Perks & Core Benefits Ledger</label>
                 <textarea 
                   rows={3}
                   value={offerBenefits} 
                   onChange={(e) => setOfferBenefits(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-white/10 text-xs text-slate-200 leading-relaxed font-sans focus:border-brand focus:outline-none"
+                  className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed font-sans focus:border-brand focus:outline-none"
                   placeholder="Provide details on health insurance, stock units, equity, or work setups..."
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Employment Level</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1.5">Employment Level</label>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                   {['Standard Full-time', 'Consultant Contract', 'Internship Trial'].map((type) => (
                     <button 
                       key={type}
                       type="button"
-                      className="p-2.5 rounded-xl border border-white/10 text-center text-[10px] font-extrabold uppercase tracking-wider text-slate-650 hover:transparent"
+                      className="p-2.5 rounded-xl border border-slate-200 text-center text-[10px] font-extrabold uppercase tracking-wider text-slate-650 hover:transparent"
                     >
                       {type}
                     </button>
@@ -8945,7 +8945,7 @@ function CandidateDetail() {
                   setOfferState('draft');
                   notify('Offer contract draft cleared.', 'info');
                 }}
-                className="sm:w-32 border-slate-250 text-slate-200 text-xs font-black uppercase tracking-wider h-11"
+                className="sm:w-32 border-slate-250 text-slate-600 text-xs font-black uppercase tracking-wider h-11"
               >
                 Reset Draft
               </Button>
@@ -8955,7 +8955,7 @@ function CandidateDetail() {
           {/* Interactive Document Preview */}
           <div className="space-y-4">
             {/* Status Visual Tracking Progress Bar */}
-            <Card className="p-4 glass-premium border-none text-white overflow-hidden relative">
+            <Card className="p-4 glass-premium border-none text-slate-900 overflow-hidden relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-brand/10 rounded-full -mr-12 -mt-12 blur-3xl" />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                 <div>
@@ -8966,16 +8966,16 @@ function CandidateDetail() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-white/10/80 p-1 rounded-xl border border-white/10/50">
+                <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/50">
                   {['draft', 'sent', 'viewed', 'accepted'].map((st, idx) => (
                     <div key={st} className="flex items-center">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider",
-                        offerState === st ? "bg-brand-dark text-white shadow" : "text-slate-200"
+                        offerState === st ? "bg-brand-dark text-slate-900 shadow" : "text-slate-600"
                       )}>
                         {st}
                       </span>
-                      {idx < 3 && <div className="w-2 h-px bg-white/10" />}
+                      {idx < 3 && <div className="w-2 h-px bg-slate-100" />}
                     </div>
                   ))}
                 </div>
@@ -8983,30 +8983,30 @@ function CandidateDetail() {
             </Card>
 
             {/* Document sheet */}
-            <Card className="glass-premium border border-white/10 shadow-2xl rounded-2xl overflow-hidden min-h-[550px] relative flex flex-col justify-between">
+            <Card className="glass-premium border border-slate-200 shadow-2xl rounded-2xl overflow-hidden min-h-[550px] relative flex flex-col justify-between">
               {/* Top Letterhead banner */}
-              <div className="glass-premium text-white px-8 py-8 border-b-4 border-brand-dark flex justify-between items-center">
+              <div className="glass-premium text-slate-900 px-8 py-8 border-b-4 border-brand-dark flex justify-between items-center">
                 <div>
                   <h2 className="text-xl font-black uppercase tracking-widest text-brand-light leading-none mb-1">
                     {organization?.name || 'HIRENOW'}
                   </h2>
-                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-widest">Official Talent Agreement Letter</p>
+                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Official Talent Agreement Letter</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[9px] text-slate-200 font-mono">ID: OFF_{candidateId?.slice(0,6)}</p>
-                  <p className="text-[9px] text-slate-200 font-mono">DATE: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  <p className="text-[9px] text-slate-600 font-mono">ID: OFF_{candidateId?.slice(0,6)}</p>
+                  <p className="text-[9px] text-slate-600 font-mono">DATE: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                 </div>
               </div>
 
               {/* Main Page Sheet Content */}
               <div className="p-8 sm:p-12 space-y-6 flex-1 text-slate-750 text-xs sm:text-sm leading-relaxed font-sans max-h-[550px] overflow-y-auto custom-scrollbar">
                 <div className="space-y-1">
-                  <p className="font-extrabold text-white text-left">Dear {candidate.fullName},</p>
-                  <p className="text-left">Applied Email: <span className="font-mono text-slate-200 font-semibold">{candidate.email}</span></p>
+                  <p className="font-extrabold text-slate-900 text-left">Dear {candidate.fullName},</p>
+                  <p className="text-left">Applied Email: <span className="font-mono text-slate-600 font-semibold">{candidate.email}</span></p>
                 </div>
 
                 <p className="text-left">
-                  Following the meticulous evaluation of your credentials and your high-signal technical voice interview, we are absolutely delighted to extend our official offer of employment at <strong className="text-white font-extrabold">{organization?.name || 'our organization'}</strong>.
+                  Following the meticulous evaluation of your credentials and your high-signal technical voice interview, we are absolutely delighted to extend our official offer of employment at <strong className="text-slate-900 font-extrabold">{organization?.name || 'our organization'}</strong>.
                 </p>
 
                 {/* Offer key ledger parameters */}
@@ -9028,35 +9028,35 @@ function CandidateDetail() {
                   </div>
                   <div>
                     <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block mb-0.5">Joining Commencement Date</span>
-                    <p className="font-black text-slate-300 text-xs">{offerStartDate}</p>
+                    <p className="font-black text-slate-500 text-xs">{offerStartDate}</p>
                   </div>
                   <div>
                     <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block mb-0.5">Compliance Isolation</span>
-                    <p className="font-black text-slate-300 text-xs">Section 06 ISO Certified</p>
+                    <p className="font-black text-slate-500 text-xs">Section 06 ISO Certified</p>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <h4 className="font-black text-white uppercase text-xs tracking-wider">Compensations & Benefits Ledger</h4>
-                  <p className="text-xs text-slate-200 leading-relaxed italic pr-2">
+                  <h4 className="font-black text-slate-900 uppercase text-xs tracking-wider">Compensations & Benefits Ledger</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed italic pr-2">
                     {offerBenefits}
                   </p>
                 </div>
 
-                <p className="text-[11px] text-slate-200 italic text-left">
+                <p className="text-[11px] text-slate-600 italic text-left">
                   To confirm your acceptance, kindly click the simulated e-signature simulation block below. Signing this document constitutes your legal binding of employment.
                 </p>
 
                 {/* Simulated Handwritten Candidate Sign Block */}
-                <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="text-left">
-                    <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest block mb-2">Authorized Signatory</span>
-                    <p className="font-semibold text-slate-300">HR Director</p>
-                    <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">{organization?.name || 'HIRENOW'}</p>
+                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest block mb-2">Authorized Signatory</span>
+                    <p className="font-semibold text-slate-500">HR Director</p>
+                    <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">{organization?.name || 'HIRENOW'}</p>
                   </div>
 
                   <div className="border-2 border-dashed border-brand/20 rounded-2xl p-4 transparent min-w-[200px] text-center relative group">
-                    <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest block mb-1">Candidate Signatory Signature</span>
+                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest block mb-1">Candidate Signatory Signature</span>
                     
                     {offerState === 'accepted' ? (
                       <div className="py-2">
@@ -9090,7 +9090,7 @@ function CandidateDetail() {
                             }, 1200);
                           }}
                           disabled={isSigning || offerState === 'draft'}
-                          className="bg-brand-dark hover:glass-premium border-none text-[10px] font-black uppercase tracking-widest px-4 py-2 h-auto text-white"
+                          className="bg-brand-dark hover:glass-premium border-none text-[10px] font-black uppercase tracking-widest px-4 py-2 h-auto text-slate-900"
                         >
                           {isSigning ? 'Signing...' : offerState === 'draft' ? 'Awaiting Release' : 'Simulate E-Sign Acceptance'}
                         </Button>
@@ -9101,14 +9101,14 @@ function CandidateDetail() {
               </div>
 
               {/* PDF Print and Standalone footer */}
-              <div className="transparent py-3 px-8 border-t border-white/10 flex justify-between items-center text-[10px] text-slate-200 font-medium">
+              <div className="transparent py-3 px-8 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-medium">
                 <p>© 2026 {organization?.name || 'HireAI'} • Confidentially Guarded</p>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => {
                       window.print();
                     }}
-                    className="flex items-center gap-1 hover:text-slate-200 font-semibold"
+                    className="flex items-center gap-1 hover:text-slate-600 font-semibold"
                   >
                     <Printer className="w-3.5 h-3.5" /> Print Draft
                   </button>
@@ -9129,14 +9129,14 @@ function CandidateDetail() {
                 <Send className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-white text-base uppercase tracking-wider">Automated Campaigns Workspace</h3>
-                <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">Configure Multi-Channel Outbound Triggers</p>
+                <h3 className="font-black text-slate-900 text-base uppercase tracking-wider">Automated Campaigns Workspace</h3>
+                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tight">Configure Multi-Channel Outbound Triggers</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-2">Message Template Picker</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-2">Message Template Picker</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { id: 'invite', label: 'Invite to AI Voice Assessment', icon: Mic },
@@ -9153,7 +9153,7 @@ function CandidateDetail() {
                           "p-3 rounded-xl border flex items-center gap-2 text-left text-xs font-bold transition-all flex-1 min-w-[200px]",
                           campaignTemplate === temp.id 
                             ? "bg-emerald-50 border-emerald-300 text-emerald-700 shadow-sm" 
-                            : "glass-premium border-white/10 text-slate-550 hover:transparent"
+                            : "glass-premium border-slate-200 text-slate-550 hover:transparent"
                         )}
                       >
                         <TIcon className="w-4 h-4 text-emerald-500" />
@@ -9165,8 +9165,8 @@ function CandidateDetail() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">WhatsApp / SMS Dynamic Template Text</label>
-                <div className="transparent rounded-xl p-4 border border-white/10 font-mono text-xs text-slate-200 leading-relaxed text-left relative pl-10">
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1.5">WhatsApp / SMS Dynamic Template Text</label>
+                <div className="transparent rounded-xl p-4 border border-slate-200 font-mono text-xs text-slate-600 leading-relaxed text-left relative pl-10">
                   <div className="absolute top-4 left-4 bg-emerald-100 p-1 rounded-full text-emerald-650">
                     <Send className="w-3 h-3" />
                   </div>
@@ -9191,8 +9191,8 @@ function CandidateDetail() {
               <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
                 <div className="text-left">
                   <h4 className="text-[10px] font-black text-emerald-950 uppercase tracking-widest block mb-0.5">Campaign Outbound Targets</h4>
-                  <p className="text-xs text-slate-200 leading-normal font-sans">
-                    Email address: <span className="font-semibold text-white">{candidate.email}</span> • Mobile: <span className="font-semibold text-white">Registered</span>
+                  <p className="text-xs text-slate-600 leading-normal font-sans">
+                    Email address: <span className="font-semibold text-slate-900">{candidate.email}</span> • Mobile: <span className="font-semibold text-slate-900">Registered</span>
                   </p>
                 </div>
               </div>
@@ -9240,7 +9240,7 @@ function CandidateDetail() {
             {/* WhatsApp Mock Mobile Frame */}
             <div className="border-[12px] border-[#0d1117] rounded-[40px] bg-slate-905 w-full max-w-[340px] mx-auto overflow-hidden shadow-2xl relative min-h-[460px] flex flex-col justify-between">
               {/* Top notch bar */}
-              <div className="transparent text-white py-1 px-8 text-[9px] font-bold font-mono tracking-widest flex justify-between items-center shrink-0">
+              <div className="transparent text-slate-900 py-1 px-8 text-[9px] font-bold font-mono tracking-widest flex justify-between items-center shrink-0">
                 <span>9:41</span>
                 <span className="w-16 h-4 transparent rounded-b-xl absolute top-0 left-1/2 -translate-x-1/2" />
                 <div className="flex gap-1.5 items-center">
@@ -9250,7 +9250,7 @@ function CandidateDetail() {
               </div>
 
               {/* Chat header contact */}
-              <div className="bg-white/10 text-white px-5 py-3 flex items-center gap-3 shrink-0">
+              <div className="bg-slate-100 text-slate-900 px-5 py-3 flex items-center gap-3 shrink-0">
                 <div className="w-7 h-7 bg-brand rounded-full text-[10px] font-black text-center flex items-center justify-center border-2 border-white shadow">
                   HF
                 </div>
@@ -9284,7 +9284,7 @@ function CandidateDetail() {
                   
                   {/* Whatsapp tick timing footer */}
                   <div className="flex justify-end gap-1 items-center mt-2 pb-0.5 pointer-events-none">
-                    <span className="text-[8px] text-slate-200">9:41 AM</span>
+                    <span className="text-[8px] text-slate-600">9:41 AM</span>
                     <div className="flex items-center text-blue-500 scale-90">
                       <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                     </div>
@@ -9293,7 +9293,7 @@ function CandidateDetail() {
               </div>
 
               {/* Chat input footer mocker */}
-              <div className="transparent p-2 text-white/50 text-[10px] items-center flex justify-between shrink-0">
+              <div className="transparent p-2 text-slate-900/50 text-[10px] items-center flex justify-between shrink-0">
                 <span>Message</span>
                 <Send className="w-3.5 h-3.5" />
               </div>
@@ -9301,10 +9301,10 @@ function CandidateDetail() {
 
             {/* Campaign Metrics Ledger Ledger */}
             <Card className="p-6">
-              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Outbound Delivery Campaign Log</h4>
+              <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Outbound Delivery Campaign Log</h4>
               <div className="space-y-3">
                 {outboundLogs.map((log) => (
-                  <div key={log.id} className="p-3 transparent rounded-xl border border-white/10 flex items-center justify-between text-xs gap-4 font-sans text-left">
+                  <div key={log.id} className="p-3 transparent rounded-xl border border-slate-200 flex items-center justify-between text-xs gap-4 font-sans text-left">
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         "p-2 rounded-lg shrink-0",
@@ -9313,19 +9313,19 @@ function CandidateDetail() {
                         <MessageSquare className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-extrabold text-white">{log.template}</p>
-                        <p className="text-[10px] text-slate-200 truncate max-w-[200px]">{log.recipient}</p>
+                        <p className="font-extrabold text-slate-900">{log.template}</p>
+                        <p className="text-[10px] text-slate-600 truncate max-w-[200px]">{log.recipient}</p>
                       </div>
                     </div>
 
                     <div className="text-right">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest",
-                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-white/5 text-slate-200"
+                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-slate-50 text-slate-600"
                       )}>
                         {log.status}
                       </span>
-                      <p className="text-[9px] text-slate-200 mt-1">{log.timestamp}</p>
+                      <p className="text-[9px] text-slate-600 mt-1">{log.timestamp}</p>
                     </div>
                   </div>
                 ))}
@@ -9365,7 +9365,7 @@ function CandidateDetail() {
                       <p className="text-xs font-black text-brand-light uppercase tracking-widest animate-pulse">
                         {cameraAnomalyMock ? 'SECURITY VIOLATION TRIGGERED' : 'BIOMETRIC ANOMALY SYSTEM ACTIVE'}
                       </p>
-                      <p className="text-sm font-extrabold text-white">
+                      <p className="text-sm font-extrabold text-slate-900">
                         {cameraAnomalyMock ? 'Multiple Faces Observed inside Feed!' : 'Verified: Single Candidate Presence'}
                       </p>
                       {gazeDeviationMock && <p className="text-[10px] text-red-400 uppercase tracking-widest font-black animate-pulse">GAZE DEVIATION DETECTED: Looking offscreen</p>}
@@ -9373,16 +9373,16 @@ function CandidateDetail() {
                   </div>
                 ) : (
                   <div className="text-center space-y-2 py-10 font-sans">
-                    <Camera className="w-12 h-12 text-slate-200 mx-auto" />
-                    <p className="text-xs font-black text-slate-200 uppercase tracking-widest">PROCTORING MONITORING FEED STANDBY</p>
-                    <p className="text-[10px] text-slate-200 p-2 max-w-sm mx-auto leading-relaxed">Simulate live visual checks & eye trace mapping used during voice sessions.</p>
+                    <Camera className="w-12 h-12 text-slate-600 mx-auto" />
+                    <p className="text-xs font-black text-slate-600 uppercase tracking-widest">PROCTORING MONITORING FEED STANDBY</p>
+                    <p className="text-[10px] text-slate-600 p-2 max-w-sm mx-auto leading-relaxed">Simulate live visual checks & eye trace mapping used during voice sessions.</p>
                   </div>
                 )}
               </div>
 
               {/* Absolute watermark trackers */}
               <div className="p-6 flex justify-between items-start relative z-20">
-                <span className="text-[10px] font-black glass-premium/80 text-brand-light px-3 py-1.5 rounded-xl uppercase tracking-widest backdrop-blur border border-white/10/50">
+                <span className="text-[10px] font-black glass-premium/80 text-brand-light px-3 py-1.5 rounded-xl uppercase tracking-widest backdrop-blur border border-slate-200/50">
                   CAMERA CHECKPOINT FEED • 1080P
                 </span>
                 <span className={cn(
@@ -9394,7 +9394,7 @@ function CandidateDetail() {
               </div>
 
               {/* Camera layout controls footer */}
-              <div className="p-6 glass-premium border-t border-white/10 flex justify-between items-center relative z-20 shrink-0">
+              <div className="p-6 glass-premium border-t border-slate-200 flex justify-between items-center relative z-20 shrink-0">
                 <Button 
                   onClick={() => {
                     setActiveCameraTest(prev => !prev);
@@ -9408,14 +9408,14 @@ function CandidateDetail() {
                 </Button>
 
                 <div className="flex gap-2">
-                  <span className="text-[10px] text-slate-200 uppercase tracking-widest font-mono">INTEGRITY MATRIX ACTIVE</span>
+                  <span className="text-[10px] text-slate-600 uppercase tracking-widest font-mono">INTEGRITY MATRIX ACTIVE</span>
                 </div>
               </div>
             </Card>
 
             {/* Simulated candidate actions launcher */}
             <Card className="p-6">
-              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Simulate Candidate Adversarial Cheating Patterns</h4>
+              <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Simulate Candidate Adversarial Cheating Patterns</h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Button 
                   onClick={() => {
@@ -9457,7 +9457,7 @@ function CandidateDetail() {
           {/* Proctoring telemetry stats */}
           <div className="space-y-6">
             <Card className="p-6 space-y-4">
-              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest pb-2 border-b border-white/10">Integrity Telemetry Index</h4>
+              <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest pb-2 border-b border-slate-200">Integrity Telemetry Index</h4>
               
               <div className="flex gap-3 items-center py-2 text-left">
                 <div className={cn(
@@ -9467,8 +9467,8 @@ function CandidateDetail() {
                   {Math.max(0, 100 - (tabSwitchCountMock * 25) - (cameraAnomalyMock ? 50 : 0) - (gazeDeviationMock ? 15 : 0))}%
                 </div>
                 <div>
-                  <span className="text-[9px] font-black bg-white/5 text-slate-200 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
-                  <p className="text-xs font-bold text-slate-300">
+                  <span className="text-[9px] font-black bg-slate-50 text-slate-600 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
+                  <p className="text-xs font-bold text-slate-500">
                     {(tabSwitchCountMock > 2 || cameraAnomalyMock) ? 'Severe Security Penalty Alert' : (tabSwitchCountMock > 0 || gazeDeviationMock) ? 'Anomalous Integrity' : 'Elite Verified Safe Profile'}
                   </p>
                 </div>
@@ -9476,22 +9476,22 @@ function CandidateDetail() {
 
               <div className="space-y-3 pt-2 text-left">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-200 font-medium">Off-screen Outbreaks</span>
-                  <span className="font-extrabold text-slate-300">{gazeDeviationMock ? '1 active' : '0 detected'}</span>
+                  <span className="text-slate-600 font-medium">Off-screen Outbreaks</span>
+                  <span className="font-extrabold text-slate-500">{gazeDeviationMock ? '1 active' : '0 detected'}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-200 font-medium">Tab Switch Deviations</span>
-                  <span className="font-extrabold text-slate-300">{tabSwitchCountMock} triggers</span>
+                  <span className="text-slate-600 font-medium">Tab Switch Deviations</span>
+                  <span className="font-extrabold text-slate-500">{tabSwitchCountMock} triggers</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-200 font-medium">Secondary Audio Signal</span>
-                  <span className="font-extrabold text-slate-300">0.0dB Stable</span>
+                  <span className="text-slate-600 font-medium">Secondary Audio Signal</span>
+                  <span className="font-extrabold text-slate-500">0.0dB Stable</span>
                 </div>
               </div>
             </Card>
 
             <Card className="p-6">
-              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Adversarial Violation Ledger</h4>
+              <h4 className="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">Adversarial Violation Ledger</h4>
               <div className="space-y-3">
                 {tabSwitchCountMock > 0 && (
                   <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs flex justify-between items-center font-sans text-left">
@@ -9512,8 +9512,8 @@ function CandidateDetail() {
                   </div>
                 )}
                 {!cameraAnomalyMock && !gazeDeviationMock && tabSwitchCountMock === 0 && (
-                  <div className="py-6 text-center border-2 border-dashed border-white/10 rounded-2xl transparent/50">
-                    <p className="text-xs text-slate-200 italic">No violation blocks detected.</p>
+                  <div className="py-6 text-center border-2 border-dashed border-slate-200 rounded-2xl transparent/50">
+                    <p className="text-xs text-slate-600 italic">No violation blocks detected.</p>
                   </div>
                 )}
               </div>
@@ -9533,9 +9533,9 @@ function CandidateDetail() {
       >
         {activeInviteCandidate && (
           <div className="space-y-6">
-            <div className="p-4 transparent border border-white/10 rounded-2xl text-left space-y-3">
+            <div className="p-4 transparent border border-slate-200 rounded-2xl text-left space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase text-slate-200 tracking-wider">Candidate Profile</span>
+                <span className="text-[10px] font-black uppercase text-slate-600 tracking-wider">Candidate Profile</span>
                 {inviteEmailInput ? (
                   <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Email Extracted
@@ -9547,30 +9547,30 @@ function CandidateDetail() {
                 )}
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-extrabold text-slate-300">{activeInviteCandidate.fullName}</h4>
-                <p className="text-xs text-slate-200 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+                <h4 className="text-sm font-extrabold text-slate-500">{activeInviteCandidate.fullName}</h4>
+                <p className="text-xs text-slate-600 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
               </div>
             </div>
 
             <div className="space-y-5">
               {/* Option 1: Send via Email */}
-              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-brand/10 text-brand-light rounded-xl mt-0.5">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 1: Send Email Invite</h5>
-                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                    <h5 className="text-xs font-black text-slate-500 uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <p className="text-[11px] text-slate-600 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recipient Email Address</label>
+                    <label className="text-[9px] font-black uppercase text-slate-600 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-500 transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
@@ -9586,7 +9586,7 @@ function CandidateDetail() {
                 <Button
                   variant="primary"
                   type="button"
-                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
+                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-slate-900 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
                   disabled={!inviteEmailInput.trim() || sendingInvite}
                   onClick={() => {
                     if (activeInviteCandidate) {
@@ -9609,25 +9609,25 @@ function CandidateDetail() {
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-slate-200/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
-                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
+                    <h5 className="text-xs font-black text-slate-500 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
+                    <p className="text-[11px] text-slate-600 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-slate-200/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-slate-200 text-slate-600 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -9642,11 +9642,11 @@ function CandidateDetail() {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-white/10 flex justify-end">
+            <div className="pt-4 border-t border-slate-200 flex justify-end">
               <Button
                 variant="outline"
                 type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-white/10 rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-600 border-slate-200 rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
@@ -9678,17 +9678,17 @@ function MetricCard({
   iconBg: string; 
 }) {
   return (
-    <Card className="p-6 glass-premium/80 backdrop-blur-sm border border-white/10 hover:border-brand/20 transition-all shadow-sm">
+    <Card className="p-6 glass-premium/80 backdrop-blur-sm border border-slate-200 hover:border-brand/20 transition-all shadow-sm">
       <div className="flex justify-between items-start mb-4">
         <div className="min-w-0">
-          <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest mb-1 leading-snug">{label}</p>
-          <p className="text-4xl font-black text-white tracking-tight leading-none truncate">{val}</p>
+          <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1 leading-snug">{label}</p>
+          <p className="text-4xl font-black text-slate-900 tracking-tight leading-none truncate">{val}</p>
         </div>
         <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", iconBg, iconColor)}>
           <Icon className="w-5 h-5 font-bold" />
         </div>
       </div>
-      <p className="text-xs text-slate-200 leading-relaxed font-medium mt-auto">{desc}</p>
+      <p className="text-xs text-slate-600 leading-relaxed font-medium mt-auto">{desc}</p>
     </Card>
   );
 }
@@ -10042,7 +10042,7 @@ function OrgAdminPanel() {
       <div className="h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-brand-light" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-200">Loading Metrics Panel...</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Loading Metrics Panel...</p>
         </div>
       </div>
     );
@@ -10056,17 +10056,17 @@ function OrgAdminPanel() {
         title="Filters"
       >
         <div className="space-y-6">
-          <p className="text-slate-200 text-xs">
+          <p className="text-slate-600 text-xs">
             Adjust the date range, working hours, and organization for HR Agent metrics.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Date range</label>
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Date range</label>
               <select
                 value={dateRange}
                 onChange={e => setDateRange(e.target.value)}
-                className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
+                className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-brand outline-none transition-all text-sm"
               >
                 <option value="7">7 Days</option>
                 <option value="30">30 Days</option>
@@ -10076,12 +10076,12 @@ function OrgAdminPanel() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization</label>
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Organization</label>
               {isSuperAdmin ? (
                 <select
                   value={selectedOrgId}
                   onChange={e => setSelectedOrgId(e.target.value)}
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
+                  className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-brand outline-none transition-all text-sm"
                 >
                   <option value="all">All Organizations</option>
                   {organizations.map(org => (
@@ -10089,20 +10089,20 @@ function OrgAdminPanel() {
                   ))}
                 </select>
               ) : (
-                <div className="w-full bg-white/5/50 border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-slate-200 select-none text-sm">
+                <div className="w-full bg-slate-50/50 border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-600 select-none text-sm">
                   {organization?.name || 'My Organization'}
                 </div>
               )}
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-1.5 overflow-visible">
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-1.5 overflow-visible">
                 Working hours 
                 <div className="group relative">
-                  <span className="cursor-help text-slate-300 hover:text-brand transition-colors">
+                  <span className="cursor-help text-slate-500 hover:text-brand transition-colors">
                     <Info className="w-3.5 h-3.5" />
                   </span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 glass-premium text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none normal-case tracking-normal">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 glass-premium text-slate-900 text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-slate-200 pointer-events-none normal-case tracking-normal">
                     <span className="font-black text-brand-light block mb-1 uppercase tracking-widest">Working Hours Range</span>
                     Defines the standard operational hour interval used to segment analytics for timezone/outside-hours interview metrics.
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#161b22]" />
@@ -10115,16 +10115,16 @@ function OrgAdminPanel() {
                     type="time" 
                     value={workingHoursStart}
                     onChange={e => setWorkingHoursStart(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-brand outline-none transition-all text-sm"
                   />
                 </div>
-                <span className="text-xs font-bold text-slate-200 uppercase tracking-widest font-mono">to</span>
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-widest font-mono">to</span>
                 <div className="relative flex-1">
                   <input
                     type="time" 
                     value={workingHoursEnd}
                     onChange={e => setWorkingHoursEnd(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-brand outline-none transition-all text-sm"
                   />
                 </div>
               </div>
@@ -10148,11 +10148,11 @@ function OrgAdminPanel() {
         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-brand/10 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 relative">
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-200 text-[10px] font-black uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-slate-600 text-[10px] font-black uppercase tracking-widest">
               <span className="text-brand-light">◀</span>
               <span>{activeOrgName} Admin Panel</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight">
               Manage everything about {activeOrgName}.ai
             </h1>
           </div>
@@ -10160,14 +10160,14 @@ function OrgAdminPanel() {
       </div>
 
       {/* Sub-Tab Navigation Bar */}
-      <div className="flex gap-4 border-b border-white/10 pb-2">
+      <div className="flex gap-4 border-b border-slate-200 pb-2">
         <button 
           onClick={() => setActivePanelTab('analytics')}
           className={cn(
             "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
             activePanelTab === 'analytics' 
               ? "border-b-2 border-brand-dark text-brand-light font-black pb-[11px]" 
-              : "border-transparent text-slate-200 hover:text-slate-200"
+              : "border-transparent text-slate-600 hover:text-slate-600"
           )}
         >
           <BarChart3 className="w-4 h-4" />
@@ -10179,7 +10179,7 @@ function OrgAdminPanel() {
             "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
             activePanelTab === 'workspace' 
               ? "border-b-2 border-brand-dark text-brand-light font-black pb-[11px]" 
-              : "border-transparent text-slate-200 hover:text-slate-200"
+              : "border-transparent text-slate-600 hover:text-slate-600"
           )}
         >
           <Settings className="w-4 h-4" />
@@ -10190,21 +10190,21 @@ function OrgAdminPanel() {
       {activePanelTab === 'analytics' ? (
         <>
           {/* Sub Header for Metrics Panel */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/10 pb-6">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase leading-none mb-1">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none mb-1">
             HR Agent Metrics Dashboard
           </h2>
-          <p className="text-slate-200 text-xs sm:text-sm">
+          <p className="text-slate-600 text-xs sm:text-sm">
             Monitor interview activity, resume screening throughput, and working-hours efficiency from a single admin view.
           </p>
         </div>
         <Button
           variant="outline"
           onClick={() => setFiltersOpen(true)}
-          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-white/10 text-slate-300 hover:transparent shrink-0 shadow-sm rounded-xl"
+          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-slate-200 text-slate-500 hover:transparent shrink-0 shadow-sm rounded-xl"
         >
-          <Filter className="w-4 h-4 text-slate-200" />
+          <Filter className="w-4 h-4 text-slate-600" />
           Filters
         </Button>
       </div>
@@ -10257,10 +10257,10 @@ function OrgAdminPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
         {/* Daily Trend */}
         <div className="lg:col-span-2">
-          <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-3xl h-full flex flex-col justify-between">
+          <Card className="p-6 glass-premium border border-slate-200 shadow-sm rounded-3xl h-full flex flex-col justify-between">
             <div className="mb-6">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight">Activity Trend</h3>
-              <p className="text-xs text-slate-200">
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Activity Trend</h3>
+              <p className="text-xs text-slate-600">
                 Daily trend for interviews conducted and resumes screened in the selected range.
               </p>
             </div>
@@ -10297,11 +10297,11 @@ function OrgAdminPanel() {
                 </ResponsiveContainer>
               ) : (
                 <div className="text-center py-12 flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-2xl transparent flex items-center justify-center text-slate-300 mb-3">
+                  <div className="w-16 h-16 rounded-2xl transparent flex items-center justify-center text-slate-500 mb-3">
                     <FileText className="w-8 h-8" />
                   </div>
-                  <p className="text-xs font-bold text-slate-200 uppercase tracking-widest mb-1">No Activity Data</p>
-                  <p className="text-[10px] text-slate-200 italic">No candidates/interviews available in the selected range.</p>
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-1">No Activity Data</p>
+                  <p className="text-[10px] text-slate-600 italic">No candidates/interviews available in the selected range.</p>
                 </div>
               )}
             </div>
@@ -10310,10 +10310,10 @@ function OrgAdminPanel() {
 
         {/* Working Hours Split */}
         <div className="lg:col-span-1">
-          <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-3xl h-full flex flex-col justify-between">
+          <Card className="p-6 glass-premium border border-slate-200 shadow-sm rounded-3xl h-full flex flex-col justify-between">
             <div className="mb-6">
-              <h3 className="text-lg font-black text-white uppercase tracking-tight">Working Hours Distribution</h3>
-              <p className="text-xs text-slate-200">
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Working Hours Distribution</h3>
+              <p className="text-xs text-slate-600">
                 Percentage split between interviews held during and outside working hours.
               </p>
             </div>
@@ -10348,27 +10348,27 @@ function OrgAdminPanel() {
                     <div className="flex items-center justify-between p-2.5 bg-green-50/50 rounded-xl border border-green-100/40">
                       <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded-full bg-[#10b981]" />
-                        <span className="text-xs font-black uppercase text-slate-200 tracking-tight">Working Hours</span>
+                        <span className="text-xs font-black uppercase text-slate-600 tracking-tight">Working Hours</span>
                       </div>
-                      <span className="text-xs font-black text-green-700">{workingHoursPercent.toFixed(1)}% <span className="text-slate-200 font-medium font-mono text-[10px]">({workingHoursCount})</span></span>
+                      <span className="text-xs font-black text-green-700">{workingHoursPercent.toFixed(1)}% <span className="text-slate-600 font-medium font-mono text-[10px]">({workingHoursCount})</span></span>
                     </div>
 
                     <div className="flex items-center justify-between p-2.5 bg-orange-50/50 rounded-xl border border-orange-100/40">
                       <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded-full bg-[#f97316]" />
-                        <span className="text-xs font-black uppercase text-slate-200 tracking-tight">Outside Working Hours</span>
+                        <span className="text-xs font-black uppercase text-slate-600 tracking-tight">Outside Working Hours</span>
                       </div>
-                      <span className="text-xs font-black text-orange-700">{outsideHoursPercent.toFixed(1)}% <span className="text-slate-200 font-medium font-mono text-[10px]">({outsideHoursCount})</span></span>
+                      <span className="text-xs font-black text-orange-700">{outsideHoursPercent.toFixed(1)}% <span className="text-slate-600 font-medium font-mono text-[10px]">({outsideHoursCount})</span></span>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-12 flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 rounded-2xl transparent flex items-center justify-center text-slate-300 mb-3">
+                  <div className="w-16 h-16 rounded-2xl transparent flex items-center justify-center text-slate-500 mb-3">
                     <Clock className="w-8 h-8" />
                   </div>
-                  <p className="text-xs font-bold text-slate-200 uppercase tracking-widest mb-1">No Completed Interviews</p>
-                  <p className="text-[10px] text-slate-200 italic font-medium">Completed interviews are required to view working hours split.</p>
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-1">No Completed Interviews</p>
+                  <p className="text-[10px] text-slate-600 italic font-medium">Completed interviews are required to view working hours split.</p>
                 </div>
               )}
             </div>
@@ -10391,20 +10391,20 @@ function OrgAdminPanel() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* Company Details */}
-            <Card className="p-8 space-y-6 glass-premium border border-white/10 shadow-sm rounded-3xl">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+            <Card className="p-8 space-y-6 glass-premium border border-slate-200 shadow-sm rounded-3xl">
+              <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
                 <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center">
                   <Globe className="w-5 h-5 text-brand-light" />
                 </div>
                 <div>
-                  <h3 className="font-black text-white uppercase text-sm tracking-wide">Company Identity</h3>
-                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-widest">Workspace Profile Details</p>
+                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide">Company Identity</h3>
+                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Workspace Profile Details</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization Name</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Organization Name</label>
                   <input
                     type="text"
                     required
@@ -10412,29 +10412,29 @@ function OrgAdminPanel() {
                     value={orgName}
                     onChange={e => setOrgName(e.target.value)}
                     placeholder="e.g. Acme Corp"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Web Domain</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Web Domain</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={orgDomain}
                     onChange={e => setOrgDomain(e.target.value)}
                     placeholder="e.g. acme.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Industry</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Industry</label>
                   <select
                     disabled={isReadOnly}
                     value={orgIndustry}
                     onChange={e => setOrgIndustry(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   >
                     {['Technology', 'Finance', 'Healthcare', 'Education', 'Retail', 'Non-Profit', 'Consumer Services', 'Other'].map(ind => (
                       <option key={ind} value={ind}>{ind}</option>
@@ -10443,12 +10443,12 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Company Size</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Company Size</label>
                   <select
                     disabled={isReadOnly}
                     value={orgCompanySize}
                     onChange={e => setOrgCompanySize(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   >
                     {['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'].map(sz => (
                       <option key={sz} value={sz}>{sz} employees</option>
@@ -10457,74 +10457,74 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">HQ Location</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">HQ Location</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={orgLocation}
                     onChange={e => setOrgLocation(e.target.value)}
                     placeholder="e.g. San Francisco, CA"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Contact Phone</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Contact Phone</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={orgPhone}
                     onChange={e => setOrgPhone(e.target.value)}
                     placeholder="e.g. +1 (555) 123-4567"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Description / Vision Statement</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Description / Vision Statement</label>
                   <textarea
                     disabled={isReadOnly}
                     rows={4}
                     value={orgDescription}
                     onChange={e => setOrgDescription(e.target.value)}
                     placeholder="Explain your organization's mission, culture and vision of screening..."
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs resize-none disabled:opacity-60 font-medium"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs resize-none disabled:opacity-60 font-medium"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="col-span-1 sm:col-span-3">
-                  <h4 className="font-bold text-slate-300 text-sm">Official Working Hours</h4>
-                  <p className="text-[10px] font-bold text-slate-200 uppercase tracking-widest mt-0.5">Used to track after-hours interviews</p>
+                  <h4 className="font-bold text-slate-500 text-sm">Official Working Hours</h4>
+                  <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Used to track after-hours interviews</p>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Start Time</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Start Time</label>
                   <input
                     type="time"
                     disabled={isReadOnly}
                     value={orgWorkingHoursStart}
                     onChange={e => setOrgWorkingHoursStart(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">End Time</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">End Time</label>
                   <input
                     type="time"
                     disabled={isReadOnly}
                     value={orgWorkingHoursEnd}
                     onChange={e => setOrgWorkingHoursEnd(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Timezone</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Timezone</label>
                   <select
                     disabled={isReadOnly}
                     value={orgWorkingHoursTimezone}
                     onChange={e => setOrgWorkingHoursTimezone(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   >
                     {['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Kolkata', 'Asia/Tokyo', 'Australia/Sydney'].map(tz => (
                       <option key={tz} value={tz}>{tz}</option>
@@ -10533,10 +10533,10 @@ function OrgAdminPanel() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10">
+              <div className="pt-4 border-t border-slate-200">
                 <div className="mb-4">
-                  <h4 className="font-bold text-slate-300 text-sm">Bot Speaking Pace</h4>
-                  <p className="text-[10px] font-bold text-slate-200 uppercase tracking-widest mt-0.5">Control how fast the AI interviewer speaks</p>
+                  <h4 className="font-bold text-slate-500 text-sm">Bot Speaking Pace</h4>
+                  <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">Control how fast the AI interviewer speaks</p>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                   {[
@@ -10549,7 +10549,7 @@ function OrgAdminPanel() {
                       type="button"
                       disabled={isReadOnly}
                       onClick={() => setBotSpeakingPace(pace.value)}
-                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-white/10 text-slate-200 hover:border-white/10'}`}
+                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-slate-200 text-slate-600 hover:border-slate-200'}`}
                     >
                       {pace.label}
                     </button>
@@ -10559,116 +10559,116 @@ function OrgAdminPanel() {
             </Card>
 
             {/* Mail Server Controls (SMTP) */}
-            <Card className="p-8 space-y-6 glass-premium border border-white/10 shadow-sm rounded-3xl">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+            <Card className="p-8 space-y-6 glass-premium border border-slate-200 shadow-sm rounded-3xl">
+              <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
                 <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center">
                   <Database className="w-5 h-5 text-brand-light" />
                 </div>
                 <div>
-                  <h3 className="font-black text-white uppercase text-sm tracking-wide">Candidate Invitation Mail Server</h3>
-                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-widest font-mono">Custom SMTP Settings</p>
+                  <h3 className="font-black text-slate-900 uppercase text-sm tracking-wide">Candidate Invitation Mail Server</h3>
+                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest font-mono">Custom SMTP Settings</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">SMTP Outgoing Host</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">SMTP Outgoing Host</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={smtpHost}
                     onChange={e => setSmtpHost(e.target.value)}
                     placeholder="smtp.example.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Port</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Port</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={smtpPort}
                     onChange={e => setSmtpPort(e.target.value)}
                     placeholder="465 / 587"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="sm:col-span-3">
-                  <label className="flex items-center gap-3.5 p-3.5 transparent rounded-2xl border border-white/10 hover:border-white/10 cursor-pointer transition-all select-none disabled:opacity-60 w-full mb-0">
+                  <label className="flex items-center gap-3.5 p-3.5 transparent rounded-2xl border border-slate-200 hover:border-slate-200 cursor-pointer transition-all select-none disabled:opacity-60 w-full mb-0">
                     <input
                       type="checkbox"
                       disabled={isReadOnly}
                       checked={smtpSecure}
                       onChange={e => setSmtpSecure(e.target.checked)}
-                      className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20"
+                      className="w-4 h-4 rounded text-brand-light focus:ring-brand border-slate-300"
                     />
                     <div>
-                      <p className="text-xs font-black text-slate-300 uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
-                      <p className="text-[10px] text-slate-200 font-medium">Configure secure SSL/TLS. Set checked for port 465, false/unchecked for port 587 (STARTTLS).</p>
+                      <p className="text-xs font-black text-slate-500 uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
+                      <p className="text-[10px] text-slate-600 font-medium">Configure secure SSL/TLS. Set checked for port 465, false/unchecked for port 587 (STARTTLS).</p>
                     </div>
                   </label>
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">SMTP Account Username</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">SMTP Account Username</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={smtpUser}
                     onChange={e => setSmtpUser(e.target.value)}
                     placeholder="user@example.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">SMTP Password</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">SMTP Password</label>
                   <input
                     type="password"
                     disabled={isReadOnly}
                     value={smtpPass}
                     onChange={e => setSmtpPass(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sender Display Name (From)</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Sender Display Name (From)</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
                     value={smtpFromName}
                     onChange={e => setSmtpFromName(e.target.value)}
                     placeholder="e.g. Acme Corp Careers"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sender Email (From)</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Sender Email (From)</label>
                   <input
                     type="email"
                     disabled={isReadOnly}
                     value={smtpFromEmail}
                     onChange={e => setSmtpFromEmail(e.target.value)}
                     placeholder="e.g. no-reply@example.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-900 focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
               </div>
 
               {/* Test Connection Form Inline block */}
-              <div className="p-4 transparent rounded-2xl border border-white/10 space-y-3.5">
+              <div className="p-4 transparent rounded-2xl border border-slate-200 space-y-3.5">
                 <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block leading-none">Connection Verification Test</span>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="email"
                     id="testSmtpEmailRecipient"
                     placeholder="Test recipient email (e.g. yours)"
-                    className="flex-1 glass-premium border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:border-brand outline-none transition-all text-xs"
+                    className="flex-1 glass-premium border border-slate-200 rounded-xl px-4 py-2 font-semibold text-slate-900 focus:border-brand outline-none transition-all text-xs"
                   />
                   <Button
                     type="button"
@@ -10723,7 +10723,7 @@ function OrgAdminPanel() {
           </div>
 
           {/* Action Controls */}
-          <div className="flex items-center justify-end gap-4 border-t border-white/10 pt-6">
+          <div className="flex items-center justify-end gap-4 border-t border-slate-200 pt-6">
             <Button
               type="button"
               variant="outline"
@@ -10737,7 +10737,7 @@ function OrgAdminPanel() {
               type="submit"
               variant="brand"
               disabled={savingSettings || isReadOnly}
-              className="px-8 h-11 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] disabled:opacity-50 text-white font-bold"
+              className="px-8 h-11 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] disabled:opacity-50 text-slate-900 font-bold"
             >
               {savingSettings ? 'Saving Changes...' : 'Save Workspace Settings'}
             </Button>
@@ -11440,9 +11440,9 @@ function SuperAdminPanel() {
   if (!isSuperAdmin) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center p-12 text-center">
-        <ShieldCheck className="w-16 h-16 text-white mb-6" />
-        <h2 className="text-2xl font-black text-white uppercase">Access Restricted</h2>
-        <p className="text-slate-200 mt-2">Only platform super-administrators can access this registry.</p>
+        <ShieldCheck className="w-16 h-16 text-slate-900 mb-6" />
+        <h2 className="text-2xl font-black text-slate-900 uppercase">Access Restricted</h2>
+        <p className="text-slate-600 mt-2">Only platform super-administrators can access this registry.</p>
         <Button variant="outline" className="mt-8" onClick={() => navigate('/')}>Return to Workspace</Button>
       </div>
     );
@@ -11731,7 +11731,7 @@ function SuperAdminPanel() {
     <div className="h-[60vh] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-brand-light" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-200">Loading Platform Data...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Loading Platform Data...</p>
       </div>
     </div>
   );
@@ -11743,16 +11743,16 @@ function SuperAdminPanel() {
         onClose={() => setOnboardModalOpen(false)} 
         title={bulkMode ? "Bulk Onboard Organizations" : "Onboard New Organization"}
       >
-        <div className="mb-6 flex p-1 bg-white/5 rounded-lg">
+        <div className="mb-6 flex p-1 bg-slate-50 rounded-lg">
            <button 
              onClick={() => setBulkMode(false)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-300")}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-600 hover:text-slate-500")}
            >
              Single Entry
            </button>
            <button 
              onClick={() => setBulkMode(true)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-300")}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-600 hover:text-slate-500")}
            >
              Bulk Upload
            </button>
@@ -11761,24 +11761,24 @@ function SuperAdminPanel() {
         {!bulkMode ? (
           <form onSubmit={handleCreateOrg} className="space-y-4">
              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Company Name</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Company Name</label>
                 <input 
                   autoFocus
                   required
                   value={newOrgName}
                   onChange={e => setNewOrgName(e.target.value)}
                   placeholder="e.g. Acme Corporation"
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                  className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all placeholder:text-slate-500"
                 />
              </div>
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div className="space-y-1">
-                 <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Industry</label>
+                 <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Industry</label>
                  <select
                    value={newOrgIndustry}
                    onChange={e => setNewOrgIndustry(e.target.value)}
-                   className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all glass-premium"
+                   className="w-full transparent border-2 border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all glass-premium"
                  >
                    <option value="Technology">Technology</option>
                    <option value="Finance">Finance</option>
@@ -11791,11 +11791,11 @@ function SuperAdminPanel() {
                </div>
 
                <div className="space-y-1">
-                 <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Company Size</label>
+                 <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Company Size</label>
                  <select
                    value={newOrgCompanySize}
                    onChange={e => setNewOrgCompanySize(e.target.value)}
-                   className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all glass-premium"
+                   className="w-full transparent border-2 border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all glass-premium"
                  >
                    <option value="1-10">1-10 employees</option>
                    <option value="11-50">11-50 employees</option>
@@ -11809,43 +11809,43 @@ function SuperAdminPanel() {
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">HQ Location</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">HQ Location</label>
                   <input 
                     value={newOrgLocation}
                     onChange={e => setNewOrgLocation(e.target.value)}
                     placeholder="e.g. San Francisco"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all placeholder:text-slate-500"
                   />
                </div>
                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Contact Phone</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Contact Phone</label>
                   <input 
                     value={newOrgPhone}
                     onChange={e => setNewOrgPhone(e.target.value)}
                     placeholder="e.g. +1 (555) 123-4567"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                    className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all placeholder:text-slate-500"
                   />
                </div>
              </div>
 
              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Email Domain (Optional)</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Email Domain (Optional)</label>
                 <input 
                   value={newOrgDomain}
                   onChange={e => setNewOrgDomain(e.target.value)}
                   placeholder="e.g. acme.com"
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300 font-mono"
+                  className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all placeholder:text-slate-500 font-mono"
                 />
              </div>
 
              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Description / Vision</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Description / Vision</label>
                 <textarea 
                   value={newOrgDescription}
                   onChange={e => setNewOrgDescription(e.target.value)}
                   placeholder="Briefly state organization vision or core domain focus..."
                   rows={2}
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300 resize-none font-sans"
+                  className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:border-brand outline-none transition-all placeholder:text-slate-500 resize-none font-sans"
                 />
              </div>
 
@@ -11870,7 +11870,7 @@ function SuperAdminPanel() {
         ) : (
           <form onSubmit={handleBulkOnboard} className="space-y-6">
              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization Names</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Organization Names</label>
                 <textarea 
                   autoFocus
                   required
@@ -11878,9 +11878,9 @@ function SuperAdminPanel() {
                   value={bulkOrgNames}
                   onChange={e => setBulkOrgNames(e.target.value)}
                   placeholder="Acme Corp&#10;Globex Ltd&#10;Soylent Inc"
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                  className="w-full transparent border-2 border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-brand outline-none transition-all placeholder:text-slate-500"
                 />
-                <p className="text-[10px] text-slate-200 font-medium italic">Enter one company name per line.</p>
+                <p className="text-[10px] text-slate-600 font-medium italic">Enter one company name per line.</p>
              </div>
              <div className="flex gap-3 pt-4">
                 <Button 
@@ -11908,7 +11908,7 @@ function SuperAdminPanel() {
             <ShieldCheck className="w-8 h-8 text-brand shrink-0" />
             <span className="truncate">Super Admin Registry</span>
           </h1>
-          <p className="text-slate-200 text-sm">Platform-wide governance and organization management.</p>
+          <p className="text-slate-600 text-sm">Platform-wide governance and organization management.</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Button 
@@ -11938,7 +11938,7 @@ function SuperAdminPanel() {
                 <s.icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-200 tracking-widest leading-none mb-1">{s.label}</p>
+                <p className="text-[10px] font-black uppercase text-slate-600 tracking-widest leading-none mb-1">{s.label}</p>
                 <p className="text-3xl font-black leading-none">{s.val}</p>
               </div>
             </div>
@@ -11948,46 +11948,46 @@ function SuperAdminPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex gap-2 sm:gap-4 border-b border-white/10 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
+          <div className="flex gap-2 sm:gap-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
              <button 
                onClick={() => setTab('overview')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                Overview
              </button>
              <button 
                onClick={() => setTab('organizations')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                Organizations
              </button>
              <button 
                onClick={() => setTab('payments')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                Payments
              </button>
              <button 
                onClick={() => setTab('health')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                System Health
              </button>
              <button 
                onClick={() => setTab('llm')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                LLM Playground
              </button>
              <button 
                onClick={() => setTab('white-label')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                White-Label
              </button>
              <button 
                onClick={() => setTab('manual')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-600")}
              >
                User Manual
              </button>
@@ -11996,23 +11996,23 @@ function SuperAdminPanel() {
           {activeTab === 'overview' ? (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <Card className="p-6 bg-brand-dark text-white">
+                 <Card className="p-6 bg-brand-dark text-slate-900">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Global Screening Volume</p>
                     <p className="text-3xl font-black">{recentCandidates.length}+</p>
                  </Card>
                  <Card className="p-6">
-                    <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Database Health</p>
+                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Database Health</p>
                     <p className="text-3xl font-black">99.9%</p>
                  </Card>
                  <Card className="p-6">
-                    <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Platform Status</p>
+                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Platform Status</p>
                     <p className="text-3xl font-black text-green-500">Online</p>
                  </Card>
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-200">Weekly Screening Volume</h3>
+                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-600">Weekly Screening Volume</h3>
                    <ResponsiveContainer width="100%" height={180}>
                      <BarChart data={[
                        { day: "Mon", screenings: 42 },
@@ -12032,7 +12032,7 @@ function SuperAdminPanel() {
                    </ResponsiveContainer>
                  </Card>
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-200">Pass Rate Distribution</h3>
+                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-600">Pass Rate Distribution</h3>
                    <ResponsiveContainer width="100%" height={180}>
                      <PieChart>
                        <Pie data={[
@@ -12060,13 +12060,13 @@ function SuperAdminPanel() {
                 <div className="hidden md:block">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[700px]">
-                      <thead className="transparent border-b border-white/10">
+                      <thead className="transparent border-b border-slate-200">
                         <tr>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Candidate</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Org ID</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Score</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Time</th>
-                          <th className="px-6 py-4 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Actions</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Candidate</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Org ID</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Score</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Time</th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black text-slate-600 uppercase tracking-widest">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -12074,9 +12074,9 @@ function SuperAdminPanel() {
                           <tr key={c.id} className="hover:transparent transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
                             <td className="px-6 py-4">
                               <div className="font-bold text-sm group-hover:text-brand-light transition-colors uppercase tracking-tight">{c.fullName}</div>
-                              <div className="text-[10px] text-slate-200 font-mono italic">{c.email}</div>
+                              <div className="text-[10px] text-slate-600 font-mono italic">{c.email}</div>
                             </td>
-                            <td className="px-6 py-4 text-[10px] font-black text-slate-200 uppercase">
+                            <td className="px-6 py-4 text-[10px] font-black text-slate-600 uppercase">
                               {c.organizationId?.slice(0, 8) || 'LEGACY'}
                             </td>
                             <td className="px-6 py-4">
@@ -12087,7 +12087,7 @@ function SuperAdminPanel() {
                                 {c.scorecard.compositeScore}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-[10px] font-bold text-slate-200">
+                            <td className="px-6 py-4 text-[10px] font-bold text-slate-600">
                               {formatDateTime(c.createdAt)}
                             </td>
                             <td className="px-6 py-4 text-right">
@@ -12104,7 +12104,7 @@ function SuperAdminPanel() {
                                     handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
                                   }
                                 }}
-                                className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -12122,12 +12122,12 @@ function SuperAdminPanel() {
                     <div 
                       key={c.id} 
                       onClick={() => navigate(`/candidates/${c.id}`)}
-                      className="p-4 hover:transparent transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-white/5"
+                      className="p-4 hover:transparent transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-slate-50"
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="font-bold text-sm text-white uppercase tracking-tight">{c.fullName}</div>
-                          <div className="text-[10px] text-slate-200 font-mono italic">{c.email}</div>
+                          <div className="font-bold text-sm text-slate-900 uppercase tracking-tight">{c.fullName}</div>
+                          <div className="text-[10px] text-slate-600 font-mono italic">{c.email}</div>
                         </div>
                         <span className={cn(
                           "px-2 py-0.5 rounded text-[10px] font-black shadow-sm shrink-0",
@@ -12137,12 +12137,12 @@ function SuperAdminPanel() {
                         </span>
                       </div>
                       
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold text-slate-200">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold text-slate-600">
                         <div>
-                          <span className="text-slate-200 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-slate-300">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
+                          <span className="text-slate-600 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-slate-500">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
                         </div>
                         <div>
-                          <span className="text-slate-200 font-bold uppercase tracking-wider">Time:</span> <span className="text-slate-750">{formatDateTime(c.createdAt)}</span>
+                          <span className="text-slate-600 font-bold uppercase tracking-wider">Time:</span> <span className="text-slate-750">{formatDateTime(c.createdAt)}</span>
                         </div>
                       </div>
                       
@@ -12159,14 +12159,14 @@ function SuperAdminPanel() {
                             handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
                           }
                         }}
-                        className="absolute right-3 top-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                        className="absolute right-3 top-4 p-2 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                   {recentCandidates.length === 0 && (
-                    <div className="text-center py-8 text-xs font-bold text-slate-200 uppercase tracking-widest">
+                    <div className="text-center py-8 text-xs font-bold text-slate-600 uppercase tracking-widest">
                       No candidates screened yet
                     </div>
                   )}
@@ -12179,7 +12179,7 @@ function SuperAdminPanel() {
                   <h2 className="text-xl font-black uppercase tracking-tight">Organization Registry</h2>
                   <Button 
                     onClick={() => setOnboardModalOpen(true)}
-                    className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white"
+                    className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-slate-900"
                   >
                     <Plus className="w-3.5 h-3.5 mr-1.5" /> Onboard Organization
                   </Button>
@@ -12191,12 +12191,12 @@ function SuperAdminPanel() {
                     <Card className="p-6">
                       <div className="overflow-x-auto">
                         <table className="w-full min-w-[600px]">
-                          <thead className="transparent border-b border-white/10">
+                          <thead className="transparent border-b border-slate-200">
                             <tr>
-                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization</th>
-                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Industry & Size</th>
-                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</th>
-                              <th className="px-4 py-3 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Action</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Organization</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Industry & Size</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-600 uppercase tracking-widest">Status</th>
+                              <th className="px-4 py-3 text-right text-[10px] font-black text-slate-600 uppercase tracking-widest">Action</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
@@ -12210,13 +12210,13 @@ function SuperAdminPanel() {
                                 )}
                               >
                                 <td className="px-4 py-3">
-                                  <div className="font-bold text-xs uppercase tracking-tight text-white">{org.name}</div>
-                                  <div className="text-[9px] text-slate-200 font-mono">ID: {org.id.slice(0, 10)}...</div>
+                                  <div className="font-bold text-xs uppercase tracking-tight text-slate-900">{org.name}</div>
+                                  <div className="text-[9px] text-slate-600 font-mono">ID: {org.id.slice(0, 10)}...</div>
                                   {org.domain && <div className="text-[9px] text-brand font-mono mt-0.5">{org.domain}</div>}
                                 </td>
                                 <td className="px-4 py-3">
-                                  <div className="text-[11px] font-bold text-slate-300">{org.industry || "Technology"}</div>
-                                  <div className="text-[9px] text-slate-200 mt-0.5">{org.companySize || "11-50 employees"}</div>
+                                  <div className="text-[11px] font-bold text-slate-500">{org.industry || "Technology"}</div>
+                                  <div className="text-[9px] text-slate-600 mt-0.5">{org.companySize || "11-50 employees"}</div>
                                 </td>
                                 <td className="px-4 py-3">
                                   <span className={cn(
@@ -12280,19 +12280,19 @@ function SuperAdminPanel() {
                         <Card className="p-6 space-y-6">
                           <div>
                             <span className="text-[9px] font-black text-brand uppercase tracking-widest">Active Workspace Selected</span>
-                            <h3 className="text-lg font-display text-white mt-1 uppercase font-bold">{org.name}</h3>
-                            <p className="text-[10px] text-slate-200 mt-1">Configure quotas, manual credits and view team members in this tenant.</p>
+                            <h3 className="text-lg font-display text-slate-900 mt-1 uppercase font-bold">{org.name}</h3>
+                            <p className="text-[10px] text-slate-600 mt-1">Configure quotas, manual credits and view team members in this tenant.</p>
                           </div>
 
-                          <div className="p-4 transparent rounded-2xl border border-white/10 space-y-3.5">
-                            <h4 className="text-[10px] font-black uppercase text-slate-200 tracking-widest">Allocate Credits</h4>
+                          <div className="p-4 transparent rounded-2xl border border-slate-200 space-y-3.5">
+                            <h4 className="text-[10px] font-black uppercase text-slate-600 tracking-widest">Allocate Credits</h4>
                             <div className="flex gap-2">
                               <input 
                                 type="number" 
                                 id={`credits-alloc-${org.id}`}
                                 defaultValue="50"
                                 placeholder="Credits" 
-                                className="w-24 glass-premium border border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none"
+                                className="w-24 glass-premium border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none"
                               />
                               <Button
                                 onClick={async () => {
@@ -12303,7 +12303,7 @@ function SuperAdminPanel() {
                                   if (!ok) return;
                                   notify(`Successfully allocated ${amount} credits to ${org.name}!`, 'success');
                                 }}
-                                className="h-auto py-1.5 px-4 glass-premium text-white rounded-xl text-[10px] font-black uppercase tracking-widest"
+                                className="h-auto py-1.5 px-4 glass-premium text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest"
                               >
                                 Allocate
                               </Button>
@@ -12311,16 +12311,16 @@ function SuperAdminPanel() {
                           </div>
 
                           <div className="space-y-3">
-                            <h4 className="text-[10px] font-black uppercase text-slate-200 tracking-widest border-b border-white/10 pb-1.5">Simulated Tenant Users</h4>
+                            <h4 className="text-[10px] font-black uppercase text-slate-600 tracking-widest border-b border-slate-200 pb-1.5">Simulated Tenant Users</h4>
                             <div className="space-y-2">
                               {[
                                 { name: "Sarah Chen", email: "sarah.chen@" + (org.domain || "example.com"), role: "Owner" },
                                 { name: "Marcus Aurelius", email: "marcus.aurelius@" + (org.domain || "example.com"), role: "Recruiter" }
                               ].map(u => (
-                                <div key={u.email} className="flex justify-between items-center transparent/50 p-2.5 rounded-xl border border-white/10">
+                                <div key={u.email} className="flex justify-between items-center transparent/50 p-2.5 rounded-xl border border-slate-200">
                                   <div>
-                                    <p className="text-xs font-bold text-slate-300">{u.name}</p>
-                                    <p className="text-[10px] text-slate-200 font-mono">{u.email}</p>
+                                    <p className="text-xs font-bold text-slate-500">{u.name}</p>
+                                    <p className="text-[10px] text-slate-600 font-mono">{u.email}</p>
                                   </div>
                                   <span className="text-[9px] font-black bg-brand/10 text-brand-light px-2 py-0.5 rounded uppercase tracking-wider">{u.role}</span>
                                 </div>
@@ -12330,10 +12330,10 @@ function SuperAdminPanel() {
                         </Card>
                       );
                     })() : (
-                      <Card className="p-8 border-dashed border-white/10 transparent/20 text-center flex flex-col items-center justify-center space-y-4">
-                        <Users className="w-12 h-12 text-white" />
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Select an Organization</h4>
-                        <p className="text-[10px] text-slate-200 max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
+                      <Card className="p-8 border-dashed border-slate-200 transparent/20 text-center flex flex-col items-center justify-center space-y-4">
+                        <Users className="w-12 h-12 text-slate-900" />
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-600">Select an Organization</h4>
+                        <p className="text-[10px] text-slate-600 max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
                       </Card>
                     )}
                   </div>
@@ -12347,41 +12347,41 @@ function SuperAdminPanel() {
                  {/* Left: Stripe credential forms */}
                  <div className="lg:col-span-2">
                    <Card className="p-6 space-y-6">
-                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Stripe Gateway Keys</h3>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Stripe Gateway Keys</h3>
                      
                      <div className="space-y-4">
                        <div>
-                         <label className="text-[10px] font-bold text-slate-200 uppercase">Stripe Secret Key</label>
+                         <label className="text-[10px] font-bold text-slate-600 uppercase">Stripe Secret Key</label>
                          <input 
                            type="password" 
                            value={stripeSecretKey} 
                            onChange={e => setStripeSecretKey(e.target.value)} 
-                           className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                           className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
                          />
                        </div>
                        <div>
-                         <label className="text-[10px] font-bold text-slate-200 uppercase">Stripe Publishable Key</label>
+                         <label className="text-[10px] font-bold text-slate-600 uppercase">Stripe Publishable Key</label>
                          <input 
                            type="text" 
                            value={stripePublishableKey} 
                            onChange={e => setStripePublishableKey(e.target.value)} 
-                           className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                           className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
                          />
                        </div>
                        <div>
-                         <label className="text-[10px] font-bold text-slate-200 uppercase">Stripe Webhook Secret</label>
+                         <label className="text-[10px] font-bold text-slate-600 uppercase">Stripe Webhook Secret</label>
                          <input 
                            type="password" 
                            value={stripeWebhookSecret} 
                            onChange={e => setStripeWebhookSecret(e.target.value)} 
-                           className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                           className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
                          />
                        </div>
                      </div>
 
                      <Button 
                        onClick={() => notify("Stripe gateway config saved successfully!", "success")}
-                       className="w-full py-2.5 glass-premium text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/10"
+                       className="w-full py-2.5 glass-premium text-slate-900 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-slate-100"
                      >
                        Save Stripe Credentials
                      </Button>
@@ -12391,19 +12391,19 @@ function SuperAdminPanel() {
                  {/* Right: Payment simulator logs */}
                  <div className="space-y-4">
                    <Card className="p-6 space-y-4">
-                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Recent Invoices</h3>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Recent Invoices</h3>
                      <div className="space-y-3">
                        {[
                          { inv: "Inv-9812", name: "Zeta Software Solutions", credits: 500, amount: "$499.00", date: "June 2, 2026", status: "Paid" },
                          { inv: "Inv-9813", name: "Stellar Tech Labs", credits: 1000, amount: "$1,299.00", date: "May 28, 2026", status: "Paid" },
                          { inv: "Inv-9814", name: "Infinity Healthcare Corp", credits: 200, amount: "$250.00", date: "May 20, 2026", status: "Manual" }
                        ].map(i => (
-                         <div key={i.inv} className="transparent/50 p-3 rounded-xl border border-white/10 space-y-1.5 text-[11px]">
+                         <div key={i.inv} className="transparent/50 p-3 rounded-xl border border-slate-200 space-y-1.5 text-[11px]">
                            <div className="flex justify-between font-bold">
-                             <span className="text-slate-300">{i.inv} • {i.name}</span>
-                             <span className="text-white">{i.amount}</span>
+                             <span className="text-slate-500">{i.inv} • {i.name}</span>
+                             <span className="text-slate-900">{i.amount}</span>
                            </div>
-                           <div className="flex justify-between text-[10px] text-slate-200 font-semibold">
+                           <div className="flex justify-between text-[10px] text-slate-600 font-semibold">
                              <span>{i.credits} Credits • {i.date}</span>
                              <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded font-black uppercase tracking-widest">{i.status}</span>
                            </div>
@@ -12435,9 +12435,9 @@ function SuperAdminPanel() {
                        <item.icon className="w-5 h-5" />
                      </div>
                      <div>
-                       <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest leading-none mb-1">{item.label}</p>
-                       <p className="text-2xl font-black text-white leading-none">{item.val}</p>
-                       <p className="text-[10px] text-slate-200 mt-1 font-semibold">{item.trend}</p>
+                       <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">{item.label}</p>
+                       <p className="text-2xl font-black text-slate-900 leading-none">{item.val}</p>
+                       <p className="text-[10px] text-slate-600 mt-1 font-semibold">{item.trend}</p>
                      </div>
                    </Card>
                  ))}
@@ -12445,7 +12445,7 @@ function SuperAdminPanel() {
 
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">API Latency (last 24h)</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">API Latency (last 24h)</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <BarChart data={[
                        { time: "00:00", latency: 790 }, { time: "04:00", latency: 812 }, { time: "08:00", latency: 845 },
@@ -12461,7 +12461,7 @@ function SuperAdminPanel() {
                  </Card>
 
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Firestore Operations Count</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Firestore Operations Count</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <BarChart data={[
                        { time: "00:00", ops: 2100 }, { time: "04:00", ops: 1840 }, { time: "08:00", ops: 2450 },
@@ -12477,7 +12477,7 @@ function SuperAdminPanel() {
                  </Card>
 
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Transcription Delay Trend</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Transcription Delay Trend</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <BarChart data={[
                        { time: "00:00", delay: 115 }, { time: "04:00", delay: 108 }, { time: "08:00", delay: 124 },
@@ -12493,7 +12493,7 @@ function SuperAdminPanel() {
                  </Card>
 
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Active Vetting Queue</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Active Vetting Queue</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <PieChart>
                        <Pie data={[
@@ -12511,7 +12511,7 @@ function SuperAdminPanel() {
                  </Card>
                </div>
 
-               <div className="p-4 transparent border border-white/10 text-slate-200 text-xs font-semibold rounded-2xl">
+               <div className="p-4 transparent border border-slate-200 text-slate-600 text-xs font-semibold rounded-2xl">
                  <p className="font-mono text-[10px]">Last telemetry snapshot: {new Date().toLocaleString()} UTC • All metrics within normal operating thresholds.</p>
                </div>
              </div>
@@ -12523,11 +12523,11 @@ function SuperAdminPanel() {
                 {/* Left Columns: Configs & System Instructions */}
                 <div className="xl:col-span-2 space-y-6">
                   <Card className="p-6 space-y-6">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Agent System Instructions</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Agent System Instructions</h3>
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-200 uppercase">System Prompt Instruction Envelope</label>
+                        <label className="text-[10px] font-bold text-slate-600 uppercase">System Prompt Instruction Envelope</label>
                         <textarea 
                           rows={6}
                           value={systemPrompt} 
@@ -12535,17 +12535,17 @@ function SuperAdminPanel() {
                             setSystemPrompt(e.target.value);
                             localStorage.setItem('sa_system_prompt', e.target.value);
                           }} 
-                          className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none resize-none leading-relaxed"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs font-mono focus:outline-none resize-none leading-relaxed"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <label className="text-[10px] font-bold text-slate-200 uppercase">Model Version</label>
+                          <label className="text-[10px] font-bold text-slate-600 uppercase">Model Version</label>
                           <select 
                             value={selectedModel} 
                             onChange={e => setSelectedModel(e.target.value as any)} 
-                            className="mt-1 block w-full rounded-xl border border-white/10 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
+                            className="mt-1 block w-full rounded-xl border border-slate-200 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
                           >
                             <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                             <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
@@ -12554,7 +12554,7 @@ function SuperAdminPanel() {
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-slate-200 uppercase">Temperature ({temperature})</label>
+                          <label className="text-[10px] font-bold text-slate-600 uppercase">Temperature ({temperature})</label>
                           <input 
                             type="range" 
                             min="0.0" 
@@ -12567,11 +12567,11 @@ function SuperAdminPanel() {
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-slate-200 uppercase">Safety Policy</label>
+                          <label className="text-[10px] font-bold text-slate-600 uppercase">Safety Policy</label>
                           <select 
                             value={safetyFilter} 
                             onChange={e => setSafetyFilter(e.target.value as any)} 
-                            className="mt-1 block w-full rounded-xl border border-white/10 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
+                            className="mt-1 block w-full rounded-xl border border-slate-200 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
                           >
                             <option value="standard">Standard Blocks</option>
                             <option value="strict">Strict Blocks</option>
@@ -12584,7 +12584,7 @@ function SuperAdminPanel() {
 
                   {/* Live Cost Calculator */}
                   <Card className="p-6 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Live Cost Calculator</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Live Cost Calculator</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {[
                         { label: 'Input Token Cost', val: selectedModel === 'gemini-1.5-flash' ? '$0.075/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.10/1M' : '$1.25/1M' },
@@ -12592,26 +12592,26 @@ function SuperAdminPanel() {
                         { label: 'Est. Input Tokens', val: '1,842' },
                         { label: 'Est. Cost / Call', val: selectedModel === 'gemini-1.5-flash' ? '$0.0007' : selectedModel === 'gemini-2.0-flash' ? '$0.0009' : '$0.0115' },
                       ].map((item, i) => (
-                        <div key={i} className="transparent border border-white/10 rounded-xl p-3 text-center">
-                          <p className="text-[9px] font-black uppercase text-slate-200 tracking-wider">{item.label}</p>
-                          <p className="text-sm font-black text-white mt-0.5">{item.val}</p>
+                        <div key={i} className="transparent border border-slate-200 rounded-xl p-3 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-600 tracking-wider">{item.label}</p>
+                          <p className="text-sm font-black text-slate-900 mt-0.5">{item.val}</p>
                         </div>
                       ))}
                     </div>
-                    <p className="text-[9px] text-slate-200 italic">Costs calculated based on {selectedModel} pricing tier with temperature {temperature}.</p>
+                    <p className="text-[9px] text-slate-600 italic">Costs calculated based on {selectedModel} pricing tier with temperature {temperature}.</p>
                   </Card>
 
                   {/* Playground Sandbox */}
                   <Card className="p-6 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Sandbox Test Chamber</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Sandbox Test Chamber</h3>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-200 uppercase">Candidate Test Message Input</label>
+                        <label className="text-[10px] font-bold text-slate-600 uppercase">Candidate Test Message Input</label>
                         <input 
                           type="text"
                           value={playgroundInput}
                           onChange={e => setPlaygroundInput(e.target.value)}
-                          className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs focus:outline-none min-h-[44px]"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-xs focus:outline-none min-h-[44px]"
                         />
                       </div>
                       <Button
@@ -12626,16 +12626,16 @@ function SuperAdminPanel() {
                             setIsPlaygroundTesting(false);
                           }, 1200);
                         }}
-                        className="w-full glass-premium hover:bg-white/10 text-white py-2 rounded-xl text-xs font-bold uppercase tracking-widest"
+                        className="w-full glass-premium hover:bg-slate-100 text-slate-900 py-2 rounded-xl text-xs font-bold uppercase tracking-widest"
                       >
                         {isPlaygroundTesting ? "Running Inference..." : "Run Test Inference"}
                       </Button>
                     </div>
 
                     {playgroundResponse && (
-                      <div className="p-4 transparent rounded-2xl border border-white/10 space-y-2">
+                      <div className="p-4 transparent rounded-2xl border border-slate-200 space-y-2">
                         <span className="text-[9px] font-black text-brand uppercase tracking-widest">AI Recruiter Test Graded Response</span>
-                        <p className="text-xs text-slate-300 leading-relaxed font-semibold">{playgroundResponse}</p>
+                        <p className="text-xs text-slate-500 leading-relaxed font-semibold">{playgroundResponse}</p>
                       </div>
                     )}
                   </Card>
@@ -12644,16 +12644,16 @@ function SuperAdminPanel() {
                 {/* Right Column: Telemetry logs */}
                 <div className="space-y-4">
                   <Card className="p-6 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Playground Sandbox Logs</h3>
-                    <div className="h-64 transparent rounded-2xl p-4 font-mono text-[10px] text-slate-200 overflow-y-auto space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 border-b border-slate-200 pb-2">Playground Sandbox Logs</h3>
+                    <div className="h-64 transparent rounded-2xl p-4 font-mono text-[10px] text-slate-600 overflow-y-auto space-y-2">
                       {playgroundLogs.length > 0 ? playgroundLogs.map((log, idx) => (
                         <p key={idx} className={cn(
                           log.includes('cost') && "text-amber-400",
                           log.includes('completed') && "text-green-400",
-                          !log.includes('cost') && !log.includes('completed') && "text-slate-300"
+                          !log.includes('cost') && !log.includes('completed') && "text-slate-500"
                         )}>{log}</p>
                       )) : (
-                        <p className="text-slate-200 italic">No inference test run logs. Hit 'Run Test Inference' to see token counts and pricing estimation details.</p>
+                        <p className="text-slate-600 italic">No inference test run logs. Hit 'Run Test Inference' to see token counts and pricing estimation details.</p>
                       )}
                     </div>
                   </Card>
@@ -12662,43 +12662,43 @@ function SuperAdminPanel() {
             </div>
           ) : activeTab === 'white-label' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-              <div className="flex justify-between items-center border-b border-white/10 pb-4">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-4">
                 <div>
-                  <h2 className="text-xl font-display font-light text-white">White-Label & Reseller Portal</h2>
-                  <p className="text-slate-200 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
+                  <h2 className="text-xl font-display font-light text-slate-900">White-Label & Reseller Portal</h2>
+                  <p className="text-slate-600 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Portal Identity</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600">Portal Identity</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-200 uppercase">Application Brand Name</label>
+                      <label className="text-[10px] font-bold text-slate-600 uppercase">Application Brand Name</label>
                       <input 
                         type="text" 
                         value={whiteLabelBrandingName} 
                         onChange={(e) => setWhiteLabelBrandingName(e.target.value)} 
-                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-200 uppercase">Custom Logo URL</label>
+                      <label className="text-[10px] font-bold text-slate-600 uppercase">Custom Logo URL</label>
                       <input 
                         type="text" 
                         value={whiteLabelLogoUrl} 
                         onChange={(e) => setWhiteLabelLogoUrl(e.target.value)} 
-                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                   </div>
                 </Card>
 
                 <Card className="p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Reseller Markup Policies</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600">Reseller Markup Policies</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-200 uppercase">Markup Multiplier ({whiteLabelMarkupFactor}x)</label>
+                      <label className="text-[10px] font-bold text-slate-600 uppercase">Markup Multiplier ({whiteLabelMarkupFactor}x)</label>
                       <input 
                         type="range" 
                         min="1.0" 
@@ -12708,11 +12708,11 @@ function SuperAdminPanel() {
                         onChange={(e) => setWhiteLabelMarkupFactor(parseFloat(e.target.value))} 
                         className="mt-1 block w-full cursor-pointer"
                       />
-                      <span className="text-[10px] text-slate-200 mt-1 block">Increases landing page pricing to multiply reseller margins.</span>
+                      <span className="text-[10px] text-slate-600 mt-1 block">Increases landing page pricing to multiply reseller margins.</span>
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-200 uppercase">Billing Currency</label>
-                      <select className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]">
+                      <label className="text-[10px] font-bold text-slate-600 uppercase">Billing Currency</label>
+                      <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]">
                         <option>USD ($)</option>
                         <option>EUR (€)</option>
                         <option>GBP (£)</option>
@@ -12725,18 +12725,18 @@ function SuperAdminPanel() {
             </div>
           ) : activeTab === 'manual' ? (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-6 glass-premium text-white rounded-3xl border border-white/10 shadow-xl shadow-[#161b22]/10">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-6 glass-premium text-slate-900 rounded-3xl border border-slate-200 shadow-xl shadow-[#161b22]/10">
                 <div>
                   <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2 mb-0.5" id="operations-handbook-title">
                     <BookOpen className="w-5 h-5 text-brand-light shrink-0 animate-pulse" />
                     HR Operations Handbook
                   </h2>
-                  <p className="text-slate-200 text-xs">Download and send this complete onboarding kit to corporate organizations via email.</p>
+                  <p className="text-slate-600 text-xs">Download and send this complete onboarding kit to corporate organizations via email.</p>
                 </div>
                 <div className="flex flex-wrap gap-2.5">
                   <Button
                     onClick={handleDownloadPDF}
-                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-slate-900 flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Download PDF Manual
@@ -12744,7 +12744,7 @@ function SuperAdminPanel() {
                   <Button
                     onClick={handleDownloadManual}
                     variant="outline"
-                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-300 border-white/10 hover:bg-white/10 hover:text-white flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-900 flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     Download HTML Manual
@@ -12755,7 +12755,7 @@ function SuperAdminPanel() {
                       window.print();
                     }}
                     variant="outline"
-                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-200 border-white/10 hover:bg-white/10 hover:text-white flex items-center gap-2"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900 flex items-center gap-2"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     Print Layout
@@ -12764,24 +12764,24 @@ function SuperAdminPanel() {
               </div>
 
               {/* The Manual Document Screen Preview */}
-              <Card className="p-6 md:p-10 space-y-12 glass-premium border border-white/10 shadow-sm rounded-3xl max-h-[70vh] overflow-y-auto custom-scrollbar">
+              <Card className="p-6 md:p-10 space-y-12 glass-premium border border-slate-200 shadow-sm rounded-3xl max-h-[70vh] overflow-y-auto custom-scrollbar">
                 {/* Visual Header */}
-                <div className="text-center pb-8 border-b border-white/10 space-y-3.5">
+                <div className="text-center pb-8 border-b border-slate-200 space-y-3.5">
                   <span className="px-3.5 py-1 bg-brand/10 border border-brand/10 rounded-full text-[9px] font-black uppercase tracking-widest text-brand-light inline-block font-mono">
                     Enterprise HR Kit
                   </span>
-                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">AI Hire Operations & Onboarding Manual</h1>
-                  <p className="text-slate-200 text-sm max-w-xl mx-auto font-medium lead-relaxed">
+                  <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">AI Hire Operations & Onboarding Manual</h1>
+                  <p className="text-slate-600 text-sm max-w-xl mx-auto font-medium lead-relaxed">
                     This official guide details the integrated calibration, batch sourcing pipeline, and custom grading frameworks for registered HR organizations.
                   </p>
                 </div>
 
                 {/* Section 1 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-3">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">01</span> The D6 Screening Philosophy
                   </h3>
-                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
                     The platform evaluates candidate resumes across six deep screening dimensions. Rather than matching flat keywords, language parsing engines grade professional experiences dynamically:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -12793,12 +12793,12 @@ function SuperAdminPanel() {
                       { name: 'Cultural Coherence (D5)', desc: 'Flags chronological professional timeline gaps, tenure patterns, and career trajectory stability.' },
                       { name: 'Generative Sincerity (D6)', desc: 'Audits the resume forensically for templated generic explanations, resume padding, and copy-paste indicators.' }
                     ].map(dim => (
-                      <div key={dim.name} className="p-4 transparent border border-white/10 rounded-2xl hover:border-brand/10 transition-colors">
+                      <div key={dim.name} className="p-4 transparent border border-slate-200 rounded-2xl hover:border-brand/10 transition-colors">
                         <h4 className="text-xs font-black uppercase tracking-wider text-brand-light mb-1.5 flex items-center gap-1.5">
                           <Target className="w-3.5 h-3.5 shrink-0" />
                           {dim.name}
                         </h4>
-                        <p className="text-[11px] text-slate-200 leading-relaxed font-semibold">{dim.desc}</p>
+                        <p className="text-[11px] text-slate-600 leading-relaxed font-semibold">{dim.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -12806,10 +12806,10 @@ function SuperAdminPanel() {
 
                 {/* Section 2 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-3">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">02</span> Operational Action Blueprint
                   </h3>
-                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
                     Onboard new hiring teams to live status within minutes by walking them through these 4 primary operational phases:
                   </p>
                   <div className="space-y-4">
@@ -12824,8 +12824,8 @@ function SuperAdminPanel() {
                           {st.step}
                         </div>
                         <div>
-                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 leading-none mb-1">{st.title}</h4>
-                          <p className="text-[11px] text-slate-200 leading-relaxed font-semibold mt-1">{st.text}</p>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 leading-none mb-1">{st.title}</h4>
+                          <p className="text-[11px] text-slate-600 leading-relaxed font-semibold mt-1">{st.text}</p>
                         </div>
                       </div>
                     ))}
@@ -12834,10 +12834,10 @@ function SuperAdminPanel() {
 
                 {/* Section 3 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-3">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">03</span> Grading Settings & Calibration
                   </h3>
-                  <p className="text-slate-200 text-xs font-semibold leading-relaxed">
+                  <p className="text-slate-600 text-xs font-semibold leading-relaxed">
                     Recruitment managers can completely overrule standard weights to map criteria directly with physical job types:
                   </p>
                   <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-[11px] text-emerald-800 leading-relaxed font-semibold">
@@ -12847,28 +12847,28 @@ function SuperAdminPanel() {
 
                 {/* Section 4 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">04</span> Reading Interactive Candidate Dashboards
                   </h3>
-                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
                     Opening any scored candidate row triggers the specialized evaluation scorecard report, showing the following forensic information:
                   </p>
-                  <ul className="list-disc pl-5 text-xs text-slate-200 space-y-2 leading-relaxed font-semibold">
-                    <li><span className="text-slate-300 font-bold">Executive Verdict Narrative:</span> A objective 3-sentence summary analyzing qualifications and general job suitability.</li>
-                    <li><span className="text-slate-300 font-bold">Chronological Padding Checklists:</span> Spots gaps in tenure, rapid changes of employer, or suspiciously generic candidate summaries.</li>
-                    <li><span className="text-slate-300 font-bold">Tailored Interview Prompts:</span> 3 intelligent discussion templates custom-built for interviewers to probe exact weaknesses identified during parsing.</li>
+                  <ul className="list-disc pl-5 text-xs text-slate-600 space-y-2 leading-relaxed font-semibold">
+                    <li><span className="text-slate-500 font-bold">Executive Verdict Narrative:</span> A objective 3-sentence summary analyzing qualifications and general job suitability.</li>
+                    <li><span className="text-slate-500 font-bold">Chronological Padding Checklists:</span> Spots gaps in tenure, rapid changes of employer, or suspiciously generic candidate summaries.</li>
+                    <li><span className="text-slate-500 font-bold">Tailored Interview Prompts:</span> 3 intelligent discussion templates custom-built for interviewers to probe exact weaknesses identified during parsing.</li>
                   </ul>
                 </div>
 
                 {/* Section 5 */}
-                <div className="space-y-4 pt-4 border-t border-white/10">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <div className="space-y-4 pt-4 border-t border-slate-200">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">05</span> Configuration of SMTP Outgoing Servers
                   </h3>
-                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">
                     Shortlisted candidates receive automated invite emails dispatched directly from the organization’s domain setup:
                   </p>
-                  <ol className="list-decimal pl-5 text-xs text-slate-200 space-y-2 leading-relaxed font-semibold">
+                  <ol className="list-decimal pl-5 text-xs text-slate-600 space-y-2 leading-relaxed font-semibold">
                     <li>Visit the <strong>Super Admin Registry</strong> settings panel to specify outgoing details.</li>
                     <li>Key in SMTP server address (e.g. <code>smtp.gmail.com</code>) with authorized credentials. Select Secure SSL (Port 465) or TLS (Port 587).</li>
                     <li>Verify setup using the inline connection verification test block before rolling out mail systems to recruiting staffs.</li>
@@ -12882,17 +12882,17 @@ function SuperAdminPanel() {
                <Card className="p-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <div className="space-y-4">
-                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Master AI Provider</label>
-                        <div className="flex items-center gap-3 p-4 transparent rounded-xl border border-white/10">
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Master AI Provider</label>
+                        <div className="flex items-center gap-3 p-4 transparent rounded-xl border border-slate-200">
                            <Globe className="w-5 h-5 text-brand" />
                            <div>
                               <p className="text-sm font-bold">Google Gemini 1.5 Pro</p>
-                              <p className="text-[10px] text-slate-200">Official Provider for Analysis & Vision</p>
+                              <p className="text-[10px] text-slate-600">Official Provider for Analysis & Vision</p>
                            </div>
                         </div>
                      </div>
                      <div className="space-y-4">
-                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">API Key Status</label>
+                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">API Key Status</label>
                         <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-100">
                            <ShieldCheck className="w-5 h-5 text-green-500" />
                            <div>
@@ -12903,21 +12903,21 @@ function SuperAdminPanel() {
                      </div>
                   </div>
 
-                  <div className="pt-6 border-t border-white/10 space-y-4">
-                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-200">Global Tenant Policies</h3>
-                     <div className="flex items-center justify-between p-4 glass-premium border border-white/10 rounded-xl">
+                  <div className="pt-6 border-t border-slate-200 space-y-4">
+                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-600">Global Tenant Policies</h3>
+                     <div className="flex items-center justify-between p-4 glass-premium border border-slate-200 rounded-xl">
                         <div>
                            <p className="text-sm font-bold">Automatic Red-Flag Detection</p>
-                           <p className="text-[10px] text-slate-200">Enable AI parsing of experience gaps and misalignment</p>
+                           <p className="text-[10px] text-slate-600">Enable AI parsing of experience gaps and misalignment</p>
                         </div>
                         <div className="w-12 h-6 bg-brand-dark rounded-full relative">
                            <div className="absolute right-1 top-1 w-4 h-4 glass-premium rounded-full" />
                         </div>
                      </div>
-                     <div className="flex items-center justify-between p-4 glass-premium border border-white/10 rounded-xl">
+                     <div className="flex items-center justify-between p-4 glass-premium border border-slate-200 rounded-xl">
                         <div>
                            <p className="text-sm font-bold">Candidate GDPR Consent</p>
-                           <p className="text-[10px] text-slate-200">Require explicit recording consent in interview room</p>
+                           <p className="text-[10px] text-slate-600">Require explicit recording consent in interview room</p>
                         </div>
                         <div className="w-12 h-6 bg-brand-dark rounded-full relative">
                            <div className="absolute right-1 top-1 w-4 h-4 glass-premium rounded-full" />
@@ -12935,21 +12935,21 @@ function SuperAdminPanel() {
 
         <div className="space-y-6">
           <h2 className="text-xl font-black">Admin Meta</h2>
-          <Card className="p-6 glass-premium text-white">
+          <Card className="p-6 glass-premium text-slate-900">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <Settings className="w-4 h-4 text-brand-light" />
                 <span className="text-sm font-bold">System Health</span>
                 <span className="ml-auto text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded border border-green-500/30 font-black uppercase">Online</span>
               </div>
-              <div className="h-px bg-white/10" />
+              <div className="h-px bg-slate-100" />
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Storage & Compute</p>
+                <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Storage & Compute</p>
                 <div className="flex justify-between text-xs">
-                   <span className="text-slate-200">Database Instances</span>
+                   <span className="text-slate-600">Database Instances</span>
                    <span className="font-bold">1/1</span>
                 </div>
-                <div className="w-full bg-white/10 h-1 rounded-full">
+                <div className="w-full bg-slate-100 h-1 rounded-full">
                    <div className="w-full bg-brand h-full rounded-full" />
                 </div>
               </div>
@@ -13070,7 +13070,7 @@ function Onboarding() {
     }
   };
 
-  if (checkingInvite) return <div className="h-screen flex items-center justify-center text-slate-200 font-bold uppercase tracking-widest animate-pulse">Securing Invite Context...</div>;
+  if (checkingInvite) return <div className="h-screen flex items-center justify-center text-slate-600 font-bold uppercase tracking-widest animate-pulse">Securing Invite Context...</div>;
 
   return (
     <div className="min-h-screen transparent flex items-center justify-center p-6">
@@ -13082,8 +13082,8 @@ function Onboarding() {
                 <Globe className="w-10 h-10 text-brand-light" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight uppercase">INVITATION ACCEPTED</h2>
-                <p className="text-slate-200 text-sm font-medium mt-1">You've been invited to join <span className="text-brand-light font-black">{invitedOrg.name}</span></p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">INVITATION ACCEPTED</h2>
+                <p className="text-slate-600 text-sm font-medium mt-1">You've been invited to join <span className="text-brand-light font-black">{invitedOrg.name}</span></p>
               </div>
             </div>
 
@@ -13094,7 +13094,7 @@ function Onboarding() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-brand-light uppercase tracking-widest">Organization ID</p>
-                  <p className="text-xs font-mono font-bold text-slate-200">{invitedOrg.id}</p>
+                  <p className="text-xs font-mono font-bold text-slate-600">{invitedOrg.id}</p>
                 </div>
               </div>
 
@@ -13109,7 +13109,7 @@ function Onboarding() {
               
               <button 
                 onClick={() => setInvitedOrg(null)}
-                className="w-full text-center text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-200 transition-colors"
+                className="w-full text-center text-[10px] font-black text-slate-600 uppercase tracking-widest hover:text-slate-600 transition-colors"
               >
                 Or create a new organization instead
               </button>
@@ -13119,32 +13119,32 @@ function Onboarding() {
           <>
             <div className="text-center space-y-2">
               <div className="w-16 h-16 bg-brand-dark rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-brand/20">
-                <Briefcase className="w-8 h-8 text-white" />
+                <Briefcase className="w-8 h-8 text-slate-900" />
               </div>
-              <h2 className="text-2xl font-black text-white tracking-tight">SET UP YOUR WORKSPACE</h2>
-              <p className="text-slate-200 text-sm font-medium">Create an organization to start hiring.</p>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">SET UP YOUR WORKSPACE</h2>
+              <p className="text-slate-600 text-sm font-medium">Create an organization to start hiring.</p>
             </div>
 
             <form onSubmit={handleCreateOrg} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Organization Name</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Organization Name</label>
                 <input 
                   type="text"
                   required
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-500 placeholder:text-slate-500 text-sm"
                   placeholder="e.g. Acme Corp"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Industry</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Industry</label>
                   <select
                     value={orgIndustry}
                     onChange={(e) => setOrgIndustry(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 text-sm glass-premium"
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-500 text-sm glass-premium"
                   >
                     <option value="Technology">Technology</option>
                     <option value="Finance">Finance</option>
@@ -13157,11 +13157,11 @@ function Onboarding() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Company Size</label>
+                  <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Company Size</label>
                   <select
                     value={orgCompanySize}
                     onChange={(e) => setOrgCompanySize(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 text-sm glass-premium"
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-500 text-sm glass-premium"
                   >
                     <option value="1-10">1-10 employees</option>
                     <option value="11-50">11-50 employees</option>
@@ -13174,34 +13174,34 @@ function Onboarding() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">HQ Location</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">HQ Location</label>
                 <input 
                   type="text"
                   value={orgLocation}
                   onChange={(e) => setOrgLocation(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-500 placeholder:text-slate-500 text-sm"
                   placeholder="e.g. San Francisco, CA"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Contact Phone</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Contact Phone</label>
                 <input 
                   type="tel"
                   value={orgPhone}
                   onChange={(e) => setOrgPhone(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-500 placeholder:text-slate-500 text-sm"
                   placeholder="e.g. +1 (555) 123-4567"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Description / Vision</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest px-1">Description / Vision</label>
                 <textarea 
                   value={orgDescription}
                   onChange={(e) => setOrgDescription(e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-500 placeholder:text-slate-500 text-sm resize-none"
                   placeholder="Tell us briefly about your team..."
                 />
               </div>
@@ -13218,12 +13218,12 @@ function Onboarding() {
           </>
         )}
 
-        <p className="text-[10px] text-slate-200 text-center uppercase font-bold tracking-tighter pt-4">
+        <p className="text-[10px] text-slate-600 text-center uppercase font-bold tracking-tighter pt-4">
           By continuing, you agree to our terms of service and professional boundaries.
         </p>
         
-        <div className="pt-4 border-t border-white/10 flex flex-col items-center gap-2">
-          <p className="text-[9px] text-slate-200 font-medium">Connectivity issues?</p>
+        <div className="pt-4 border-t border-slate-200 flex flex-col items-center gap-2">
+          <p className="text-[9px] text-slate-600 font-medium">Connectivity issues?</p>
           <button 
             onClick={async () => {
               try {
@@ -13377,7 +13377,7 @@ function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen transparent text-slate-300 font-sans selection:bg-white/10 overflow-x-hidden relative">
+    <div className="min-h-screen transparent text-slate-500 font-sans selection:bg-slate-100 overflow-x-hidden relative">
       
       {/* Background Canvas Layer */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -13392,39 +13392,39 @@ function LandingPage() {
       <div className="relative z-10 flex flex-col min-h-screen">
         
         {/* Header / Nav */}
-        <header className="sticky top-0 z-50 border-b border-white/10/60 glass-premium/70 backdrop-blur-md">
+        <header className="sticky top-0 z-50 border-b border-slate-200/60 glass-premium/70 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center shadow-sm">
-                <Search className="w-5 h-5 text-white" />
+                <Search className="w-5 h-5 text-slate-900" />
               </div>
-              <span className="font-display text-2xl font-light tracking-tight text-white">
+              <span className="font-display text-2xl font-light tracking-tight text-slate-900">
                 {whiteLabelBrandingName || "HireAI"}
               </span>
             </div>
             
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest">Platform</a>
-              <a href="#simulation" className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
-              <a href="#pricing" className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest">Pricing</a>
+              <a href="#features" className="text-xs font-black text-slate-900 hover:text-slate-900 transition-colors uppercase tracking-widest">Platform</a>
+              <a href="#simulation" className="text-xs font-black text-slate-900 hover:text-slate-900 transition-colors uppercase tracking-widest">Simulation</a>
+              <a href="#pricing" className="text-xs font-black text-slate-900 hover:text-slate-900 transition-colors uppercase tracking-widest">Pricing</a>
             </nav>
 
             <div className="flex items-center gap-3">
               
               <button 
                 onClick={signIn} 
-                className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
+                className="text-xs font-black text-slate-900 hover:text-slate-900 transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
               >
                 Log In
               </button>
               <button 
                 onClick={signIn} 
-                className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors shadow-sm min-h-[44px]"
+                className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full glass-premium text-brand text-xs font-bold uppercase tracking-widest hover:bg-slate-100 transition-colors shadow-sm min-h-[44px]"
               >
                 Deploy Now
               </button>
               <button 
-                className="md:hidden p-2 text-slate-200 hover:bg-white/5 rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="md:hidden p-2 text-slate-600 hover:bg-slate-50 rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle Menu"
               >
@@ -13441,16 +13441,16 @@ function LandingPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-b border-white/10/60 glass-premium/95 backdrop-blur-md overflow-hidden sticky top-20 z-40"
+              className="md:hidden border-b border-slate-200/60 glass-premium/95 backdrop-blur-md overflow-hidden sticky top-20 z-40"
             >
               <div className="px-6 py-6 space-y-4 flex flex-col">
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Platform</a>
-                <a href="#simulation" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Simulation</a>
-                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Pricing</a>
-                <div className="pt-4 border-t border-white/10">
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-slate-900 font-display min-h-[44px] flex items-center">Platform</a>
+                <a href="#simulation" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-slate-900 font-display min-h-[44px] flex items-center">Simulation</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-slate-900 font-display min-h-[44px] flex items-center">Pricing</a>
+                <div className="pt-4 border-t border-slate-200">
                   <button 
                     onClick={() => { signIn(); setMobileMenuOpen(false); }} 
-                    className="w-full py-3 rounded-full glass-premium text-white font-bold uppercase tracking-widest text-xs min-h-[44px] flex items-center justify-center"
+                    className="w-full py-3 rounded-full glass-premium text-slate-900 font-bold uppercase tracking-widest text-xs min-h-[44px] flex items-center justify-center"
                   >
                     Deploy Now
                   </button>
@@ -13465,30 +13465,30 @@ function LandingPage() {
           
           {/* Hero Section */}
           <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-premium border border-white/10/80 mb-10 shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-premium border border-slate-200/80 mb-10 shadow-xs">
               <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-white">Autonomous Talent Lobby Live</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-900">Autonomous Talent Lobby Live</span>
             </div>
             
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black text-white tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto drop-shadow-lg">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black text-slate-900 tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto drop-shadow-lg">
               Scale your recruitment pipeline with <br className="hidden md:block"/>
-              <span className="text-white">Autonomous AI Interviews.</span>
+              <span className="text-slate-900">Autonomous AI Interviews.</span>
             </h1>
             
-            <p className="text-base sm:text-lg text-white max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+            <p className="text-base sm:text-lg text-slate-900 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
               Stop wasting builder and recruiter hours on initial screens. Deploy custom conversational AI agents to conduct rigorous, multi-dimensional screening interviews at absolute scale.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto px-4">
               <button 
                 onClick={signIn} 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full glass-premium text-brand text-xs font-bold uppercase tracking-widest hover:bg-slate-100 transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
               >
                 Start Free Trial
               </button>
               <a 
                 href="#simulation" 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 glass-premium text-white text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-colors min-h-[44px] flex items-center justify-center shadow-lg"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-slate-300 glass-premium text-brand text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-colors min-h-[44px] flex items-center justify-center shadow-lg"
               >
                 Watch Simulation
               </a>
@@ -13496,12 +13496,12 @@ function LandingPage() {
           </section>
 
           {/* Trusted By Brand Ticker */}
-          <section className="py-14 border-y border-white/10/60 glass-premium/40 overflow-hidden backdrop-blur-xs">
-            <p className="text-center text-[10px] font-black uppercase tracking-widest text-white mb-8">Trusted by Elite Engineering Teams</p>
+          <section className="py-14 border-y border-slate-200/60 glass-premium/40 overflow-hidden backdrop-blur-xs">
+            <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-900 mb-8">Trusted by Elite Engineering Teams</p>
             <div className="flex w-full overflow-hidden">
               <div className="flex animate-[marquee_35s_linear_infinite] min-w-full items-center justify-around gap-12 opacity-60">
                 {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
-                  <span key={i} className="text-lg md:text-xl font-display font-light uppercase tracking-tight whitespace-nowrap text-white">{company}</span>
+                  <span key={i} className="text-lg md:text-xl font-display font-light uppercase tracking-tight whitespace-nowrap text-slate-900">{company}</span>
                 ))}
               </div>
             </div>
@@ -13510,19 +13510,19 @@ function LandingPage() {
           {/* Interactive Simulation Console */}
           <section id="simulation" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-display font-black text-white mb-4">See the AI in Action.</h2>
-              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed font-medium">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
+              <h2 className="text-3xl sm:text-4xl font-display font-black text-slate-900 mb-4">See the AI in Action.</h2>
+              <p className="text-slate-900 max-w-2xl mx-auto text-sm leading-relaxed font-medium">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
             </div>
 
-            <div className="glass-premium rounded-2xl border border-white/10 shadow-sm overflow-hidden max-w-5xl mx-auto">
+            <div className="glass-premium rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-5xl mx-auto">
               {/* Console Header */}
-              <div className="h-12 border-b border-white/10 transparent/50 flex items-center px-4 justify-between">
+              <div className="h-12 border-b border-slate-200 transparent/50 flex items-center px-4 justify-between">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-100"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-100"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-100"></div>
                 </div>
-                <div className="text-[10px] font-mono text-slate-200 flex items-center gap-1.5">
+                <div className="text-[10px] font-mono text-slate-600 flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5" />
                   hireai-screening-telemetry
                 </div>
@@ -13531,8 +13531,8 @@ function LandingPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3">
                 {/* Controls Column */}
-                <div className="border-b lg:border-b-0 lg:border-r border-white/10 transparent/20 p-6 flex flex-col gap-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-200 mb-1">Target Role Profile</p>
+                <div className="border-b lg:border-b-0 lg:border-r border-slate-200 transparent/20 p-6 flex flex-col gap-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">Target Role Profile</p>
                   
                   {(Object.keys(roleData) as Array<keyof typeof roleData>).map(role => (
                     <button
@@ -13542,20 +13542,20 @@ function LandingPage() {
                       className={cn(
                         "flex flex-col text-left p-4 rounded-xl border transition-all text-ellipsis overflow-hidden min-h-[44px]",
                         activeRole === role 
-                          ? "glass-premium border-[#161b22] text-white shadow-sm" 
-                          : "glass-premium border-white/10 text-slate-300 hover:transparent"
+                          ? "glass-premium border-[#161b22] text-slate-900 shadow-sm" 
+                          : "glass-premium border-slate-200 text-slate-500 hover:transparent"
                       )}
                     >
                       <span className="text-sm font-semibold mb-1">{roleData[role].title}</span>
-                      <span className={cn("text-[10px] font-mono", activeRole === role ? "text-slate-300" : "text-slate-200")}>{roleData[role].salary}</span>
+                      <span className={cn("text-[10px] font-mono", activeRole === role ? "text-slate-500" : "text-slate-600")}>{roleData[role].salary}</span>
                     </button>
                   ))}
                   
-                  <div className="mt-4 lg:mt-auto pt-4 border-t border-white/10">
+                  <div className="mt-4 lg:mt-auto pt-4 border-t border-slate-200">
                      <button 
                       onClick={() => startSimulation(activeRole)} 
                       disabled={isSimulating}
-                      className="w-full glass-premium text-white hover:bg-white/10 disabled:opacity-50 text-xs font-bold uppercase tracking-widest rounded-full py-3 min-h-[44px] flex items-center justify-center gap-2"
+                      className="w-full glass-premium text-slate-900 hover:bg-slate-100 disabled:opacity-50 text-xs font-bold uppercase tracking-widest rounded-full py-3 min-h-[44px] flex items-center justify-center gap-2"
                      >
                        {isSimulating ? (
                          <>
@@ -13568,7 +13568,7 @@ function LandingPage() {
                 </div>
 
                 {/* Log Screen Column */}
-                <div className="lg:col-span-2 p-6 font-mono text-xs h-[420px] overflow-y-auto transparent text-slate-300 relative flex flex-col">
+                <div className="lg:col-span-2 p-6 font-mono text-xs h-[420px] overflow-y-auto transparent text-slate-500 relative flex flex-col">
                   {simLog.map((log, i) => {
                     const isInterviewer = log.includes('[AI Interviewer]');
                     const isCandidate = log.includes('[Candidate Voice');
@@ -13581,9 +13581,9 @@ function LandingPage() {
                         className={cn(
                           "mb-3.5 leading-relaxed break-words",
                           isInterviewer && "text-cyan-400",
-                          isCandidate && "text-white pl-3.5 border-l-2 border-white/10",
+                          isCandidate && "text-slate-900 pl-3.5 border-l-2 border-slate-200",
                           isPass && "text-emerald-400",
-                          (!isInterviewer && !isCandidate && !isPass) && "text-slate-200"
+                          (!isInterviewer && !isCandidate && !isPass) && "text-slate-600"
                         )}
                       >
                         {log.includes('OK') ? (
@@ -13617,7 +13617,7 @@ function LandingPage() {
                         <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                            <div className="flex flex-col">
                               <span className="text-emerald-400 font-bold uppercase text-[9px] tracking-widest">Verification Complete</span>
-                              <span className="text-white text-xs">Scorecard generated successfully. Ready for evaluation.</span>
+                              <span className="text-slate-900 text-xs">Scorecard generated successfully. Ready for evaluation.</span>
                            </div>
                            <button 
                              onClick={signIn} 
@@ -13636,18 +13636,18 @@ function LandingPage() {
           {/* Bento Grid Features */}
           <section id="features" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
              <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-white mb-4">Enterprise Vetting.</h2>
-              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
+              <h2 className="text-3xl sm:text-4xl font-display font-light text-slate-900 mb-4">Enterprise Vetting.</h2>
+              <p className="text-slate-900 max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                {/* Feature 1: Multi-Agent Screening Pipelines */}
-               <div className="md:col-span-2 md:row-span-2 rounded-2xl glass-premium border border-white/10 p-10 flex flex-col relative overflow-hidden group">
-                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10/60">
-                   <GitBranch className="w-5 h-5 text-slate-300" />
+               <div className="md:col-span-2 md:row-span-2 rounded-2xl glass-premium border border-slate-200 p-10 flex flex-col relative overflow-hidden group">
+                 <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-slate-200/60">
+                   <GitBranch className="w-5 h-5 text-slate-500" />
                  </div>
-                 <h3 className="text-2xl font-display font-light text-white mb-4">Multi-Agent Screening Pipelines</h3>
-                 <p className="text-slate-200 text-sm leading-relaxed mb-8">
+                 <h3 className="text-2xl font-display font-light text-slate-900 mb-4">Multi-Agent Screening Pipelines</h3>
+                 <p className="text-slate-600 text-sm leading-relaxed mb-8">
                    Each screening session orchestrates three specialized agents: a technical interviewer, a behavioral analyst, and an integrity validator. They collaborate in real-time, cross-referencing responses and flagging inconsistencies.
                  </p>
                  
@@ -13666,12 +13666,12 @@ function LandingPage() {
                </div>
 
                {/* Feature 2: Anti-Cheating Identity Vetting */}
-               <div className="rounded-2xl glass-premium border border-white/10 p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-5 border border-white/10/60">
-                   <ShieldCheck className="w-4 h-4 text-slate-300" />
+               <div className="rounded-2xl glass-premium border border-slate-200 p-8 flex flex-col">
+                 <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-200/60">
+                   <ShieldCheck className="w-4 h-4 text-slate-500" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-white mb-3">Anti-Cheating Identity Vetting</h3>
-                 <ul className="space-y-3 text-xs text-slate-200 leading-relaxed">
+                 <h3 className="text-lg font-display font-light text-slate-900 mb-3">Anti-Cheating Identity Vetting</h3>
+                 <ul className="space-y-3 text-xs text-slate-600 leading-relaxed">
                    {[
                      "Real-time face & gaze detection via webcam feeds",
                      "Voiceprint matching against onboarding samples",
@@ -13691,12 +13691,12 @@ function LandingPage() {
                </div>
 
                {/* Feature 3: AI Audio Processing Telemetry */}
-               <div className="rounded-2xl glass-premium border border-white/10 p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-5 border border-white/10/60">
-                   <Volume2 className="w-4 h-4 text-slate-300" />
+               <div className="rounded-2xl glass-premium border border-slate-200 p-8 flex flex-col">
+                 <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center mb-5 border border-slate-200/60">
+                   <Volume2 className="w-4 h-4 text-slate-500" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-white mb-3">AI Audio Processing Telemetry</h3>
-                 <p className="text-xs text-slate-200 leading-relaxed mb-5">
+                 <h3 className="text-lg font-display font-light text-slate-900 mb-3">AI Audio Processing Telemetry</h3>
+                 <p className="text-xs text-slate-600 leading-relaxed mb-5">
                    Real-time speech-to-text transcription with per-token confidence scoring, speaker diarization, and filler-word analytics.
                  </p>
                  <div className="space-y-3 text-[10px] font-mono">
@@ -13706,46 +13706,46 @@ function LandingPage() {
                      { label: "TTS Voice Model", val: "ElevenLabs Turbo v2" },
                      { label: "Filler Detection", val: "Uh/Um ratio, pause analysis" }
                    ].map((row, i) => (
-                     <div key={i} className="flex justify-between items-center border-b border-white/10 pb-2 last:border-0 last:pb-0">
-                       <span className="text-slate-200">{row.label}</span>
-                       <span className="text-slate-300 font-bold">{row.val}</span>
+                     <div key={i} className="flex justify-between items-center border-b border-slate-200 pb-2 last:border-0 last:pb-0">
+                       <span className="text-slate-600">{row.label}</span>
+                       <span className="text-slate-500 font-bold">{row.val}</span>
                      </div>
                    ))}
                  </div>
                </div>
 
                {/* Feature 4: ATS Syncing */}
-               <div className="md:col-span-3 rounded-2xl glass-premium border border-white/10 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+               <div className="md:col-span-3 rounded-2xl glass-premium border border-slate-200 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
                  <div className="space-y-3">
-                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
-                     <Database className="w-3 h-3 text-slate-200" />
-                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-200">Integration Layer</span>
+                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200">
+                     <Database className="w-3 h-3 text-slate-600" />
+                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600">Integration Layer</span>
                    </div>
-                   <h3 className="text-xl font-display font-light text-white">ATS & HRIS Syncing</h3>
-                   <p className="text-sm text-slate-200 max-w-2xl leading-relaxed">
+                   <h3 className="text-xl font-display font-light text-slate-900">ATS & HRIS Syncing</h3>
+                   <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
                      Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks and push scorecards back to your ATS of record.
                    </p>
                  </div>
-                 <button className="px-8 py-3 rounded-full transparent text-white font-bold uppercase tracking-widest text-xs hover:bg-white/10 transition-colors min-h-[44px] flex items-center justify-center shrink-0">
+                 <button className="px-8 py-3 rounded-full transparent text-slate-900 font-bold uppercase tracking-widest text-xs hover:bg-slate-100 transition-colors min-h-[44px] flex items-center justify-center shrink-0">
                    View Integrations
                  </button>
                </div>
 
                {/* Feature 5: White-Label Candidate Lobby */}
-               <div className="md:col-span-3 rounded-2xl glass-premium border border-white/10 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+               <div className="md:col-span-3 rounded-2xl glass-premium border border-slate-200 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
                  <div className="space-y-3">
-                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
-                     <Globe className="w-3 h-3 text-slate-200" />
-                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-200">Reseller & Tenant API</span>
+                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200">
+                     <Globe className="w-3 h-3 text-slate-600" />
+                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600">Reseller & Tenant API</span>
                    </div>
-                   <h3 className="text-xl font-display font-light text-white">White-Label Candidate Lobby</h3>
-                   <p className="text-sm text-slate-200 max-w-2xl leading-relaxed">
+                   <h3 className="text-xl font-display font-light text-slate-900">White-Label Candidate Lobby</h3>
+                   <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
                      Deploy under your own domain with fully custom layout components, logo parameters, emails, and interview invitations for corporate client lobbies.
                    </p>
                  </div>
                  <button 
                    onClick={signIn} 
-                   className="px-8 py-3 rounded-full transparent text-white font-bold uppercase tracking-widest text-xs hover:bg-white/10 transition-colors min-h-[44px] flex items-center justify-center"
+                   className="px-8 py-3 rounded-full transparent text-slate-900 font-bold uppercase tracking-widest text-xs hover:bg-slate-100 transition-colors min-h-[44px] flex items-center justify-center"
                  >
                    Explore API
                  </button>
@@ -13754,34 +13754,34 @@ function LandingPage() {
            </section>
 
           {/* Pricing Section */}
-          <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10/60">
+          <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60">
              <div className="text-center mb-20">
-               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10/80 mb-4">
-                 <CreditCard className="w-3.5 h-3.5 text-slate-200" />
-                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Flexible Licensing</span>
+               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 mb-4">
+                 <CreditCard className="w-3.5 h-3.5 text-slate-600" />
+                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Flexible Licensing</span>
                </div>
-               <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Transparent Pricing.</h2>
-               <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
+               <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Transparent Pricing.</h2>
+               <p className="text-slate-900 max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
                 {/* Starter Plan */}
-                <div className="rounded-3xl glass-premium border border-white/10/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
-                  <h3 className="text-xl font-display text-white mb-2">Starter</h3>
-                  <p className="text-slate-200 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
+                <div className="rounded-3xl glass-premium border border-slate-200/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                  <h3 className="text-xl font-display text-slate-900 mb-2">Starter</h3>
+                  <p className="text-slate-600 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-display text-white">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
-                    <span className="text-slate-200 text-xs">/month</span>
+                    <span className="text-4xl font-display text-slate-900">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
+                    <span className="text-slate-600 text-xs">/month</span>
                   </div>
-                  <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
+                  <ul className="space-y-4 mb-10 flex-1 border-t border-slate-200 pt-6">
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
                   </ul>
                   <button 
                     onClick={signIn} 
-                    className="w-full py-3.5 rounded-full border border-slate-305 hover:transparent text-slate-300 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                    className="w-full py-3.5 rounded-full border border-slate-300 hover:transparent text-slate-500 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
                   >
                     Start Free Trial
                   </button>
@@ -13789,47 +13789,47 @@ function LandingPage() {
 
                 {/* Agency Pro Plan */}
                 <div className="rounded-3xl glass-premium border-2 border-[#161b22] p-10 flex flex-col relative shadow-lg transform md:-translate-y-4 hover:shadow-xl transition-all duration-300">
-                  <div className="absolute top-5 right-5 transparent text-white text-[8px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                  <div className="absolute top-5 right-5 transparent text-slate-900 text-[8px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                     Recommended
                   </div>
                   
-                  <h3 className="text-xl font-display text-white mb-2">Agency Pro</h3>
-                  <p className="text-slate-200 text-sm mb-8">For scaling HR departments and staffing firms.</p>
+                  <h3 className="text-xl font-display text-slate-900 mb-2">Agency Pro</h3>
+                  <p className="text-slate-600 text-sm mb-8">For scaling HR departments and staffing firms.</p>
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-display text-white">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
-                    <span className="text-slate-200 text-xs">/month</span>
+                    <span className="text-4xl font-display text-slate-900">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
+                    <span className="text-slate-600 text-xs">/month</span>
                   </div>
-                  <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
+                  <ul className="space-y-4 mb-10 flex-1 border-t border-slate-200 pt-6">
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
                   </ul>
                   <button 
                     onClick={signIn} 
-                    className="w-full py-3.5 rounded-full transparent hover:bg-white/10 text-white text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
+                    className="w-full py-3.5 rounded-full transparent hover:bg-slate-100 text-slate-900 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
                   >
                     Deploy Pro Now
                   </button>
                 </div>
 
                 {/* Enterprise Plan */}
-                <div className="rounded-3xl glass-premium border border-white/10/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
-                  <h3 className="text-xl font-display text-white mb-2">Enterprise</h3>
-                  <p className="text-slate-200 text-sm mb-8">For global corporations needing high customizability.</p>
+                <div className="rounded-3xl glass-premium border border-slate-200/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                  <h3 className="text-xl font-display text-slate-900 mb-2">Enterprise</h3>
+                  <p className="text-slate-600 text-sm mb-8">For global corporations needing high customizability.</p>
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-display text-white">Custom</span>
+                    <span className="text-4xl font-display text-slate-900">Custom</span>
                   </div>
-                  <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
+                  <ul className="space-y-4 mb-10 flex-1 border-t border-slate-200 pt-6">
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-600"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
                   </ul>
                   <button 
                     onClick={signIn} 
-                    className="w-full py-3.5 rounded-full border border-slate-350 hover:transparent text-slate-300 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                    className="w-full py-3.5 rounded-full border border-slate-350 hover:transparent text-slate-500 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
                   >
                     Request Demo
                   </button>
@@ -13838,14 +13838,14 @@ function LandingPage() {
            </section>
 
           {/* Testimonials Section */}
-          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10/60 glass-premium/10 backdrop-blur-xs">
+          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/60 glass-premium/10 backdrop-blur-xs">
             <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10/80 mb-4">
-                <Star className="w-3.5 h-3.5 text-slate-200" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Customer Success</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 mb-4">
+                <Star className="w-3.5 h-3.5 text-slate-600" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Customer Success</span>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Endorsed by Top Builders.</h2>
-              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
+              <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Endorsed by Top Builders.</h2>
+              <p className="text-slate-900 max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -13866,15 +13866,15 @@ function LandingPage() {
                   role: "Founder, Infinity Healthcare Corp"
                 }
               ].map((t, index) => (
-                <div key={index} className="glass-premium border border-white/10/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
-                  <p className="text-slate-200 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
-                  <div className="flex items-center gap-4 border-t border-white/10 pt-5">
-                    <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-xs text-slate-300">
+                <div key={index} className="glass-premium border border-slate-200/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
+                  <p className="text-slate-600 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
+                  <div className="flex items-center gap-4 border-t border-slate-200 pt-5">
+                    <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-500">
                       {t.author.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white">{t.author}</h4>
-                      <p className="text-[10px] text-slate-200 font-medium">{t.role}</p>
+                      <h4 className="text-xs font-bold text-slate-900">{t.author}</h4>
+                      <p className="text-[10px] text-slate-600 font-medium">{t.role}</p>
                     </div>
                   </div>
                 </div>
@@ -13883,14 +13883,14 @@ function LandingPage() {
           </section>
 
           {/* FAQ Accordion Section */}
-          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-white/10/60">
+          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-slate-200/60">
             <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10/80 mb-4">
-                <Info className="w-3.5 h-3.5 text-slate-200" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Frequently Asked Questions</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/80 mb-4">
+                <Info className="w-3.5 h-3.5 text-slate-600" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">Frequently Asked Questions</span>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Got Questions?</h2>
-              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
+              <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-4">Got Questions?</h2>
+              <p className="text-slate-900 max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
             </div>
 
             <div className="space-y-5">
@@ -13912,13 +13912,13 @@ function LandingPage() {
                   a: "Conducting a single completed candidate interview consumes exactly 1 credit. System Admins can manage top-ups, Stripe payments, and allocate manual credits to different tenant organizations from the admin panel."
                 }
               ].map((faq, index) => (
-                <div key={index} className="glass-premium border border-white/10/80 rounded-2xl overflow-hidden transition-all duration-300">
+                <div key={index} className="glass-premium border border-slate-200/80 rounded-2xl overflow-hidden transition-all duration-300">
                   <button
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-300 hover:transparent/50 transition-colors"
+                    className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-500 hover:transparent/50 transition-colors"
                   >
                     <span>{faq.q}</span>
-                    {openFaq === index ? <ChevronUp className="w-4 h-4 text-slate-200" /> : <ChevronDown className="w-4 h-4 text-slate-200" />}
+                    {openFaq === index ? <ChevronUp className="w-4 h-4 text-slate-600" /> : <ChevronDown className="w-4 h-4 text-slate-600" />}
                   </button>
                   <AnimatePresence initial={false}>
                     {openFaq === index && (
@@ -13927,7 +13927,7 @@ function LandingPage() {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden border-t border-white/10"
+                        className="overflow-hidden border-t border-slate-200"
                       >
                         <div className="px-6 py-5 text-xs text-slate-550 leading-relaxed transparent/20">
                           {faq.a}
@@ -13941,16 +13941,16 @@ function LandingPage() {
           </section>
 
           {/* Footer CTA */}
-          <section className="py-32 px-4 text-center border-t border-white/10 relative overflow-hidden bg-white/5/40">
-            <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-6">
+          <section className="py-32 px-4 text-center border-t border-slate-200 relative overflow-hidden bg-slate-50/40">
+            <h2 className="text-3xl sm:text-5xl font-display font-light text-slate-900 mb-6">
               Upgrade your screening process.
             </h2>
-            <p className="text-slate-200 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-600 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
               Join elite teams deploying autonomous interview lobbies. Verify and screen talent faster.
             </p>
             <button 
               onClick={signIn} 
-              className="px-12 py-4 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors shadow-xs min-h-[44px]"
+              className="px-12 py-4 rounded-full glass-premium text-brand text-xs font-bold uppercase tracking-widest hover:bg-slate-100 transition-colors shadow-xs min-h-[44px]"
             >
               Start Vetting Today
             </button>
@@ -13959,8 +13959,8 @@ function LandingPage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 border-t border-white/10 glass-premium text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-200">
+        <footer className="py-12 border-t border-slate-200 glass-premium text-center">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
             © 2026 HireAI Inc. All rights reserved.
           </p>
         </footer>
@@ -14118,8 +14118,8 @@ export default function App() {
         </div>
       </div>
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-black text-white uppercase tracking-widest">HireAI</h2>
-        <p className="text-[10px] font-bold text-slate-200 uppercase tracking-[0.2em] animate-pulse">Initializing Neural Interface...</p>
+        <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">HireAI</h2>
+        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.2em] animate-pulse">Initializing Neural Interface...</p>
       </div>
     </div>
   );
@@ -14193,7 +14193,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
               <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
-              <p className="text-sm font-bold text-slate-300 leading-relaxed">
+              <p className="text-sm font-bold text-slate-500 leading-relaxed">
                 {confirmState?.msg}
               </p>
             </div>
@@ -14220,7 +14220,7 @@ export default function App() {
                 className={cn(
                   "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
                   n.type === 'success' ? "glass-premium border-green-100 text-green-700" :
-                  n.type === 'error' ? "glass-premium border-red-100 text-red-700" : "glass-premium border-white/10 text-slate-300"
+                  n.type === 'error' ? "glass-premium border-red-100 text-red-700" : "glass-premium border-slate-200 text-slate-500"
                 )}
               >
                 {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 

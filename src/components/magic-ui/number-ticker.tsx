@@ -38,7 +38,7 @@ export function NumberTicker({
     }), [springValue, decimalPlaces])
 
   return (
-    <span ref={ref} className={cn("inline-block tracking-wider text-black tabular-nums dark:text-white", className)} {...props}>
+    <span ref={ref} className={cn("inline-block tracking-wider text-black tabular-nums dark:text-slate-900", className)} {...props}>
       {startValue}
     </span>
   )
