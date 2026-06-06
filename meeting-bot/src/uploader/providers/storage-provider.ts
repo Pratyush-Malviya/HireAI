@@ -11,7 +11,7 @@ export interface UploadOptions {
 }
 
 export interface StorageProvider {
-  readonly name: 's3' | 'azure';
+  readonly name: 's3' | 'azure' | 'firebase';
   validateConfig(): void;
   uploadFile(options: UploadOptions): Promise<boolean>;
   getSignedUrl?(key: string, options?: { expiresInSeconds?: number; contentType?: string }): Promise<string>;

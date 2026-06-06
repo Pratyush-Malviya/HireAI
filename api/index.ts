@@ -2469,8 +2469,28 @@ Rules:
 // ==========================================
 // START MEETING BOT & COMPOSIO ROUTES
 // ==========================================
+import { Composio } from "@composio/core";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import admin from "firebase-admin";
+
+// Initialize Firebase Admin for Storage access if credentials are provided
+if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        // Handle escaped newlines in environment variables
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+    });
+    console.log("Firebase Admin Initialized successfully.");
+  } catch (e) {
+    console.warn("Notice: Failed to initialize Firebase Admin:", e);
+  }
+}
 
 // Status map to track active meeting bot states locally
 const botStatusMap = new Map();
@@ -2488,15 +2508,40 @@ try {
 app.use("/recordings", express.static(recordingsDir));
 
 // Endpoint to check if a recording exists for a candidate
-app.get("/api/meeting/recording-status/:candidateId", (req, res) => {
+app.get("/api/meeting/recording-status/:candidateId", async (req, res) => {
   const { candidateId } = req.params;
-  const webmPath = path.join(recordingsDir, `${candidateId}.webm`);
-  const mp4Path = path.join(recordingsDir, `${candidateId}.mp4`);
   
-  if (fs.existsSync(webmPath)) {
-    return res.json({ exists: true, url: `/recordings/${candidateId}.webm` });
-  } else if (fs.existsSync(mp4Path)) {
-    return res.json({ exists: true, url: `/recordings/${candidateId}.mp4` });
+  // First check Firebase Storage if initialized
+  if (admin.apps.length && process.env.FIREBASE_STORAGE_BUCKET) {
+    try {
+      const bucket = admin.storage().bucket();
+      const webmFile = bucket.file(`recordings/${candidateId}.webm`);
+      const mp4File = bucket.file(`recordings/${candidateId}.mp4`);
+      
+      const [webmExists] = await webmFile.exists();
+      if (webmExists) {
+        const [url] = await webmFile.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 3600 * 1000 });
+        return res.json({ exists: true, url });
+      }
+      
+      const [mp4Exists] = await mp4File.exists();
+      if (mp4Exists) {
+        const [url] = await mp4File.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 3600 * 1000 });
+        return res.json({ exists: true, url });
+      }
+    } catch (err) {
+      console.error("Firebase Storage check failed:", err);
+    }
+  } else {
+    // Fallback to local checking if Firebase isn't configured
+    const webmPath = path.join(recordingsDir, `${candidateId}.webm`);
+    const mp4Path = path.join(recordingsDir, `${candidateId}.mp4`);
+    
+    if (fs.existsSync(webmPath)) {
+      return res.json({ exists: true, url: `/recordings/${candidateId}.webm` });
+    } else if (fs.existsSync(mp4Path)) {
+      return res.json({ exists: true, url: `/recordings/${candidateId}.mp4` });
+    }
   }
   
   // Return current bot status if any
