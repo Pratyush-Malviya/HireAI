@@ -10,6 +10,8 @@ import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
 import { Job, Candidate, Organization, UserProfile } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 import { LandingPage } from './components/LandingPage';
+import { Particles } from './components/magic-ui/particles';
+import { Meteors } from './components/magic-ui/meteors';
 import { generateInterviewResponse, summarizeInterview } from './services/interviewService';
 import { extractTextFromFile } from './services/fileService';
 import jsPDF from 'jspdf';
@@ -2910,13 +2912,20 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     }
 
     return (
-      <div className="flex h-screen transparent font-sans text-white selection:bg-brand/10 overflow-hidden">
-                {/* Sidebar */}
+      <div className="flex h-screen transparent font-sans text-white selection:bg-brand/10 overflow-hidden relative">
+        {/* Global Animated Background Effects */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <Particles className="absolute inset-0 opacity-40" quantity={80} color="#818cf8" size={0.6} />
+          <Meteors number={10} />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-dark/20 via-slate-950 to-[#030712] opacity-80" />
+        </div>
+
+        {/* Sidebar */}
         <aside className={cn("glass-premium text-white flex-col hidden lg:flex shrink-0 border-r border-white/10 transition-all duration-300", isSidebarCollapsed ? "w-20" : "w-64")}>
           <div className={cn("h-16 flex items-center border-b border-white/10 shrink-0", isSidebarCollapsed ? "px-0 justify-center" : "px-6 justify-between")}>
              <div className="flex items-center">
-               <div className={cn("bg-brand-dark rounded-lg flex items-center justify-center shadow-sm shrink-0", isSidebarCollapsed ? "w-10 h-10" : "w-8 h-8 mr-3")}>
-                  <Search className="w-4 h-4 text-white" />
+               <div className={cn("rounded-lg flex items-center justify-center shadow-sm shrink-0 overflow-hidden bg-black", isSidebarCollapsed ? "w-10 h-10" : "w-8 h-8 mr-3")}>
+                  <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
                </div>
                {!isSidebarCollapsed && <span className="font-display font-light text-xl tracking-tight uppercase">{whiteLabelBrandingName || "HireAI"}</span>}
              </div>
@@ -2995,8 +3004,8 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </button>
                 {/* Mobile Logo */}
                 <Link to="/" className="flex items-center lg:hidden hover:opacity-90 transition-opacity select-none">
-                   <div className="bg-brand-dark rounded-lg flex items-center justify-center shadow-sm shrink-0 w-8 h-8 mr-2">
-                      <Search className="w-4 h-4 text-white" />
+                   <div className="rounded-lg flex items-center justify-center shadow-sm shrink-0 w-8 h-8 mr-2 overflow-hidden bg-black">
+                      <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
                    </div>
                    <span className="font-display font-light text-xl tracking-tight uppercase text-white">{whiteLabelBrandingName || "HireAI"}</span>
                 </Link>
@@ -7074,7 +7083,7 @@ function CandidateDetail() {
 
   const handleLaunchMeetingBot = async () => {
     if (!meetingLink) {
-      notify('Please schedule an interview or paste a meeting link first!', 'warning');
+      notify('Please schedule an interview or paste a meeting link first!', 'error');
       return;
     }
     setTriggeringBot(true);

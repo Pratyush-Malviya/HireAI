@@ -16,7 +16,7 @@ import { SparklesText } from "./magic-ui/sparkles-text"
 import { ShimmerButton } from "./magic-ui/shimmer-button"
 import { RainbowButton } from "./magic-ui/rainbow-button"
 import { Ripple } from "./magic-ui/ripple"
-import { cn } from "@/lib/utils"
+import { cn } from "../lib/utils"
 
 const features = [
   {
@@ -81,8 +81,8 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
-                <Search className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden shadow-lg shadow-brand/20 bg-black flex items-center justify-center">
+                <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">HireNow</span>
             </div>
@@ -333,8 +333,8 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <footer className="relative z-10 border-t border-slate-800/50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center">
-              <Search className="w-3 h-3 text-white" />
+            <div className="w-6 h-6 rounded-md overflow-hidden bg-black flex items-center justify-center">
+              <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-sm font-bold text-white">HireNow</span>
           </div>

@@ -154,6 +154,7 @@ export interface Candidate {
   profileTags?: string[];
   createdAt: any;
   status: 'processed' | 'shortlisted' | 'rejected';
+  meetingRecordingUrl?: string;
   interviewStatus?: 'none' | 'invited' | 'in_progress' | 'completed' | 'failed';
   meetLink?: string;
   research?: {
