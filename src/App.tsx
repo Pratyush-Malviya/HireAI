@@ -13404,16 +13404,16 @@ function LandingPage() {
             </div>
             
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Platform</a>
-              <a href="#simulation" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
-              <a href="#pricing" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Pricing</a>
+              <a href="#features" className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest">Platform</a>
+              <a href="#simulation" className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
+              <a href="#pricing" className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest">Pricing</a>
             </nav>
 
             <div className="flex items-center gap-3">
               
               <button 
                 onClick={signIn} 
-                className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
+                className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
               >
                 Log In
               </button>
@@ -13444,9 +13444,9 @@ function LandingPage() {
               className="md:hidden border-b border-[#e6edf3]/60 glass-premium/95 backdrop-blur-md overflow-hidden sticky top-20 z-40"
             >
               <div className="px-6 py-6 space-y-4 flex flex-col">
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-light text-[#0d1117] font-display min-h-[44px] flex items-center">Platform</a>
-                <a href="#simulation" onClick={() => setMobileMenuOpen(false)} className="text-lg font-light text-[#0d1117] font-display min-h-[44px] flex items-center">Simulation</a>
-                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-light text-[#0d1117] font-display min-h-[44px] flex items-center">Pricing</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Platform</a>
+                <a href="#simulation" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Simulation</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Pricing</a>
                 <div className="pt-4 border-t border-[#e6edf3]">
                   <button 
                     onClick={() => { signIn(); setMobileMenuOpen(false); }} 
@@ -13467,15 +13467,15 @@ function LandingPage() {
           <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-premium border border-[#e6edf3]/80 mb-10 shadow-xs">
               <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Autonomous Talent Lobby Live</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">Autonomous Talent Lobby Live</span>
             </div>
             
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-light text-white tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black text-white tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto drop-shadow-lg">
               Scale your recruitment pipeline with <br className="hidden md:block"/>
-              <span className="text-slate-400">Autonomous AI Interviews.</span>
+              <span className="text-brand-light">Autonomous AI Interviews.</span>
             </h1>
             
-            <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-200 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
               Stop wasting builder and recruiter hours on initial screens. Deploy custom conversational AI agents to conduct rigorous, multi-dimensional screening interviews at absolute scale.
             </p>
             
@@ -13488,7 +13488,7 @@ function LandingPage() {
               </button>
               <a 
                 href="#simulation" 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-[#c9d1d9] glass-premium text-slate-300 text-xs font-bold uppercase tracking-widest hover:transparent transition-colors min-h-[44px] flex items-center justify-center"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/20 glass-premium text-white text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-colors min-h-[44px] flex items-center justify-center shadow-lg"
               >
                 Watch Simulation
               </a>
@@ -13497,7 +13497,7 @@ function LandingPage() {
 
           {/* Trusted By Brand Ticker */}
           <section className="py-14 border-y border-[#e6edf3]/60 glass-premium/40 overflow-hidden backdrop-blur-xs">
-            <p className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8">Trusted by Elite Engineering Teams</p>
+            <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-200 mb-8">Trusted by Elite Engineering Teams</p>
             <div className="flex w-full overflow-hidden">
               <div className="flex animate-[marquee_35s_linear_infinite] min-w-full items-center justify-around gap-12 opacity-60">
                 {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
@@ -13510,8 +13510,8 @@ function LandingPage() {
           {/* Interactive Simulation Console */}
           <section id="simulation" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-white mb-4">See the AI in Action.</h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
+              <h2 className="text-3xl sm:text-4xl font-display font-black text-white mb-4">See the AI in Action.</h2>
+              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed font-medium">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
             </div>
 
             <div className="glass-premium rounded-2xl border border-[#e6edf3] shadow-sm overflow-hidden max-w-5xl mx-auto">
