@@ -1,7 +1,7 @@
 import { LogOut, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch } from 'lucide-react';
-import { useEffect, useState, createContext, useContext, useRef, Component, useMemo } from 'react';
+import { useEffect, useState, createContext, useContext, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
@@ -9,10 +9,18 @@ import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
 import { Job, Candidate, Organization, UserProfile } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
-import { LandingPage } from './components/LandingPage';
-import { AuthPage } from './components/AuthPage';
-import { PricingStep } from './components/PricingStep';
-import { PaymentGateway } from './components/PaymentGateway';
+const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
+const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
+const PricingStep = lazy(() => import('./components/PricingStep').then(m => ({ default: m.PricingStep })));
+const PaymentGateway = lazy(() => import('./components/PaymentGateway').then(m => ({ default: m.PaymentGateway })));
+
+function GlobalLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#030712]">
+      <Loader2 className="w-8 h-8 text-brand animate-spin" />
+    </div>
+  );
+}
 import { Particles } from './components/magic-ui/particles';
 import { Meteors } from './components/magic-ui/meteors';
 import { generateInterviewResponse, summarizeInterview } from './services/interviewService';
@@ -10540,8 +10548,8 @@ function OrgAdminPanel() {
                     <Zap className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-black text-white uppercase text-sm tracking-wide">Composio Integrations</h3>
-                    <p className="text-[10px] text-white font-bold uppercase tracking-widest font-mono">Gmail & Google Calendar</p>
+                    <h3 className="font-black text-white uppercase text-sm tracking-wide">Calendar Integrations</h3>
+                    <p className="text-[10px] text-white font-bold uppercase tracking-widest font-mono">Google Workspace</p>
                   </div>
                </div>
                
@@ -10550,7 +10558,7 @@ function OrgAdminPanel() {
                    <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
                      <div className="flex items-center gap-2 text-green-400 font-bold">
                        <CheckCircle2 className="w-5 h-5 text-green-400" />
-                       <span className="uppercase tracking-widest text-[10px]">Google Linked</span>
+                       <span className="uppercase tracking-widest text-[10px]">Google Calendar Connected</span>
                      </div>
                      <button
                        type="button"
@@ -10561,7 +10569,7 @@ function OrgAdminPanel() {
                      </button>
                    </div>
                    <p className="text-[10px] text-white/70 leading-relaxed italic">
-                     Your Gmail and Google Calendar are connected via Composio. Automated interview invites and meeting links will route securely through Composio infrastructure.
+                     Your Google Calendar is successfully connected. Automated interview invites and meeting links will route securely through this integration.
                    </p>
                  </div>
                ) : (
@@ -10581,7 +10589,7 @@ function OrgAdminPanel() {
                      ) : (
                        <Sparkles className="w-4 h-4 mr-2" />
                      )}
-                     {composioLoading ? 'Connecting...' : 'Link Google via Composio'}
+                     {composioLoading ? 'Connecting...' : 'Connect Google Calendar'}
                    </Button>
                  </div>
                )}
@@ -13562,33 +13570,37 @@ export default function App() {
         <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, stripeModalOpen, setStripeModalOpen, theme, setTheme }}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
-              <Routes>
-                <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
-                <Route path="/pay/:orgId" element={<PaymentGateway />} />
-                <Route path="/join/:orgId" element={<Onboarding />} />
-                <Route path="/interview/:candidateId" element={<InterviewRoom />} />
-                {!profile ? (
-                  <Route path="*" element={<Onboarding />} />
-                ) : (
-                  <>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/jobs/new" element={<NewJob />} />
-                    <Route path="/jobs/:jobId" element={<JobDetail />} />
-                    <Route path="/candidates/:candidateId" element={<CandidateDetail />} />
-                    <Route path="/org-admin" element={<OrgAdminPanel />} />
-                    <Route path="/resume-bank" element={<ResumeBank />} />
-                    <Route path="/admin" element={<SuperAdminPanel />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </>
-                )}
-              </Routes>
+              <Suspense fallback={<GlobalLoader />}>
+                <Routes>
+                  <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
+                  <Route path="/pay/:orgId" element={<PaymentGateway />} />
+                  <Route path="/join/:orgId" element={<Onboarding />} />
+                  <Route path="/interview/:candidateId" element={<InterviewRoom />} />
+                  {!profile ? (
+                    <Route path="*" element={<Onboarding />} />
+                  ) : (
+                    <>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/jobs/new" element={<NewJob />} />
+                      <Route path="/jobs/:jobId" element={<JobDetail />} />
+                      <Route path="/candidates/:candidateId" element={<CandidateDetail />} />
+                      <Route path="/org-admin" element={<OrgAdminPanel />} />
+                      <Route path="/resume-bank" element={<ResumeBank />} />
+                      <Route path="/admin" element={<SuperAdminPanel />} />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </>
+                  )}
+                </Routes>
+              </Suspense>
             ) : (
-              <Routes>
-                <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
-                <Route path="/pay/:orgId" element={<PaymentGateway />} />
-                <Route path="/auth" element={<AuthPage onSignIn={handleSignIn} />} />
-                <Route path="*" element={<LandingPage />} />
-              </Routes>
+              <Suspense fallback={<GlobalLoader />}>
+                <Routes>
+                  <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
+                  <Route path="/pay/:orgId" element={<PaymentGateway />} />
+                  <Route path="/auth" element={<AuthPage onSignIn={handleSignIn} />} />
+                  <Route path="*" element={<LandingPage />} />
+                </Routes>
+              </Suspense>
             )}
           <StripeCheckoutModal isOpen={stripeModalOpen} onClose={() => setStripeModalOpen(false)} onPaymentSuccess={handlePaymentSuccess} />
           </Layout>
