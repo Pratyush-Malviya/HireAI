@@ -1,6 +1,7 @@
 "use client"
 
-import { ArrowRight, BarChart3, BookOpen, Brain, Building2, CheckCircle2, ChevronRight, Cpu, FileText, Globe, Heart, Lightbulb, MessageSquare, Search, Shield, Star, Target, Users, Video, Zap } from "lucide-react"
+import { ShieldCheck, Brain, Target, MessageSquare, Video, Clock, LayoutGrid, Zap, CheckCircle2, ChevronRight, BarChart3, Users, Star, ArrowRight, Search, Building2, Lightbulb, Shield, Globe, Cpu, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from "motion/react"
 import { Particles } from "./magic-ui/particles"
 import { BorderBeam } from "./magic-ui/border-beam"
@@ -66,7 +67,8 @@ const testimonials = [
   { name: "James Wilson", role: "CEO at DataDriven", content: "Fair, unbiased, and incredibly thorough. This is the future of talent acquisition.", avatar: "JW" },
 ]
 
-export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
+export function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="relative min-h-screen bg-transparent overflow-hidden">
       {/* Hero Background Effects */}
@@ -90,7 +92,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
               <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
               <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
-              <button onClick={onGetStarted} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
+              <button onClick={() => navigate('/auth')} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
                 Sign In
               </button>
             </div>
@@ -129,7 +131,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
 
           <BlurFade delay={0.4} inView>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <RainbowButton onClick={onGetStarted} className="px-8 py-3.5 text-base font-bold">
+              <RainbowButton onClick={() => navigate('/auth')} className="px-8 py-3.5 text-base font-bold">
                 <Zap className="w-5 h-5" />
                 Start Screening Now
               </RainbowButton>
@@ -312,12 +314,12 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               Join 150+ forward-thinking companies that use HireNow to make smarter hiring decisions.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <RainbowButton onClick={onGetStarted} className="px-10 py-4 text-lg font-bold">
+              <RainbowButton onClick={() => navigate('/auth')} className="px-10 py-4 text-lg font-bold">
                 <Zap className="w-5 h-5" />
                 Get Started Free
               </RainbowButton>
               <button
-                onClick={onGetStarted}
+                onClick={() => navigate('/auth')}
                 className="px-10 py-4 rounded-xl border border-slate-700 text-white font-bold text-lg hover:bg-slate-800/50 transition-all"
               >
                 <Building2 className="w-5 h-5 inline mr-2" />

@@ -10,6 +10,7 @@ import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
 import { Job, Candidate, Organization, UserProfile } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 import { LandingPage } from './components/LandingPage';
+import { AuthPage } from './components/AuthPage';
 import { Particles } from './components/magic-ui/particles';
 import { Meteors } from './components/magic-ui/meteors';
 import { generateInterviewResponse, summarizeInterview } from './services/interviewService';
@@ -13481,7 +13482,8 @@ export default function App() {
             ) : (
               <Routes>
                 <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
-                <Route path="*" element={<LandingPage onGetStarted={handleSignIn} />} />
+                <Route path="/auth" element={<AuthPage onSignIn={handleSignIn} />} />
+                <Route path="*" element={<LandingPage />} />
               </Routes>
             )}
           <StripeCheckoutModal isOpen={stripeModalOpen} onClose={() => setStripeModalOpen(false)} onPaymentSuccess={handlePaymentSuccess} />
