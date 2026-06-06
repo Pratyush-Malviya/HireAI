@@ -2735,14 +2735,28 @@ app.post("/api/composio/connect", async (req, res) => {
     return res.status(500).json({ error: "Composio is not configured" });
   }
   try {
-    const connection = await composio.connectedAccounts.initiate(
-      userId,
-      'googlecalendar',
-      {
-        callback_url: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/`
+    // Find the specific Google Calendar auth config ID dynamically
+    const authConfigs = await composio.authConfigs.list();
+    const googleCalendarConfig = authConfigs.items.find((i: any) => i.toolkit?.slug === 'googlecalendar');
+    
+    if (!googleCalendarConfig) {
+      return res.status(500).json({ error: "Google Calendar integration not found in Composio dashboard." });
+    }
+
+    // Bypass deprecated composio.connectedAccounts.initiate method
+    // Use the v3 link endpoint directly for managed OAuth configs
+    const response = await axios.post("https://backend.composio.dev/api/v3/connected_accounts/link", {
+      auth_config_id: googleCalendarConfig.id,
+      user_id: userId,
+      redirect_uri: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/`
+    }, {
+      headers: {
+        "x-api-key": process.env.COMPOSIO_API_KEY,
+        "Content-Type": "application/json"
       }
-    );
-    res.json({ redirectUrl: connection.redirect_url });
+    });
+    
+    res.json({ redirectUrl: response.data.redirect_url });
   } catch (err: any) {
     console.error("Composio connect initiate error:", err.message);
     res.status(500).json({ error: err.message });
