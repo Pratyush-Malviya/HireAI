@@ -7014,6 +7014,7 @@ function CandidateDetail() {
     }
   };
 
+
   // Composio and Meeting Bot Helper Handlers
   const checkRecordingStatus = async () => {
     if (!candidate?.id) return;
@@ -7070,50 +7071,6 @@ function CandidateDetail() {
         .catch(console.error);
     }
   }, [profile]);
-
-  const handleConnectComposio = async () => {
-    if (!profile?.uid) return;
-    setComposioLoading(true);
-    try {
-      const response = await fetch('/api/composio/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: profile.uid,
-          callbackUrl: window.location.href
-        })
-      });
-      const data = await response.json();
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      } else {
-        notify(data.error || 'Failed to get connection link from Composio.', 'error');
-      }
-    } catch (err) {
-      console.error(err);
-      notify('Error initiating Composio connection.', 'error');
-    } finally {
-      setComposioLoading(false);
-    }
-  };
-
-  const handleDisconnectComposio = async () => {
-    if (!profile?.uid) return;
-    try {
-      const response = await fetch('/api/composio/disconnect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: profile.uid })
-      });
-      if (response.ok) {
-        setComposioConnected(false);
-        notify('Google accounts disconnected from Composio.', 'success');
-      }
-    } catch (err) {
-      console.error(err);
-      notify('Failed to disconnect Composio.', 'error');
-    }
-  };
 
   const handleLaunchMeetingBot = async () => {
     if (!meetingLink) {
@@ -8326,58 +8283,6 @@ function CandidateDetail() {
                   </span>
                 ))}
               </div>
-           </Card>
-
-           {/* Composio Integrations Card */}
-           <Card className="p-6 glass-premium border border-slate-150 rounded-2xl shadow-sm space-y-4">
-              <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center font-black text-white text-xs shadow-inner">
-                   <Zap className="w-4 h-4 text-white" />
-                 </div>
-                 <div>
-                   <h4 className="font-extrabold text-white text-sm">Composio Integrations</h4>
-                   <p className="text-[10px] text-white font-semibold uppercase">Gmail & Google Calendar</p>
-                 </div>
-              </div>
-              
-              {composioConnected ? (
-                <div className="space-y-3">
-                  <div className="p-3 bg-green-50 border border-green-150 rounded-xl flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 text-green-700 font-bold">
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      <span>Google Linked</span>
-                    </div>
-                    <button
-                      onClick={handleDisconnectComposio}
-                      className="text-[10px] font-black uppercase text-red-500 hover:text-red-700 cursor-pointer"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-white leading-relaxed">
-                    Your Gmail and Google Calendar are connected via Composio. Invites and schedule events will route through Composio.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs text-white leading-normal">
-                    Link your Google Workspace in one click to enable automatic interview invitations via Gmail and Google Calendar scheduling.
-                  </p>
-                  <Button
-                    variant="primary"
-                    className="w-full h-10 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-md"
-                    onClick={handleConnectComposio}
-                    disabled={composioLoading}
-                  >
-                    {composioLoading ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3.5 h-3.5" />
-                    )}
-                    {composioLoading ? 'Connecting...' : 'Link Google via Composio'}
-                  </Button>
-                </div>
-              )}
            </Card>
 
            {/* AI Meeting Recorder Bot Card */}
@@ -10558,6 +10463,61 @@ function OrgAdminPanel() {
               </div>
             </Card>
 
+
+            {/* Composio Integrations Card */}
+            <Card className="p-8 glass-premium border border-white/10 shadow-sm rounded-3xl space-y-6">
+               <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                  <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-inner">
+                    <Zap className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-white uppercase text-sm tracking-wide">Composio Integrations</h3>
+                    <p className="text-[10px] text-white font-bold uppercase tracking-widest font-mono">Gmail & Google Calendar</p>
+                  </div>
+               </div>
+               
+               {composioConnected ? (
+                 <div className="space-y-4">
+                   <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
+                     <div className="flex items-center gap-2 text-green-400 font-bold">
+                       <CheckCircle2 className="w-5 h-5 text-green-400" />
+                       <span className="uppercase tracking-widest text-[10px]">Google Linked</span>
+                     </div>
+                     <button
+                       type="button"
+                       onClick={handleDisconnectComposio}
+                       className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
+                     >
+                       Disconnect
+                     </button>
+                   </div>
+                   <p className="text-[10px] text-white/70 leading-relaxed italic">
+                     Your Gmail and Google Calendar are connected via Composio. Automated interview invites and meeting links will route securely through Composio infrastructure.
+                   </p>
+                 </div>
+               ) : (
+                 <div className="space-y-4">
+                   <p className="text-[10px] text-white/70 leading-relaxed">
+                     Link your Google Workspace to empower AI agents to send calendar invitations and track meeting schedules automatically.
+                   </p>
+                   <Button
+                     type="button"
+                     variant="brand"
+                     className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white"
+                     onClick={handleConnectComposio}
+                     disabled={composioLoading || isReadOnly}
+                   >
+                     {composioLoading ? (
+                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                     ) : (
+                       <Sparkles className="w-4 h-4 mr-2" />
+                     )}
+                     {composioLoading ? 'Connecting...' : 'Link Google via Composio'}
+                   </Button>
+                 </div>
+               )}
+            </Card>
+
             {/* Mail Server Controls (SMTP) */}
             <Card className="p-8 space-y-6 glass-premium border border-white/10 shadow-sm rounded-3xl">
               <div className="flex items-center gap-3 border-b border-white/10 pb-4">
@@ -10750,11 +10710,69 @@ function OrgAdminPanel() {
 }
 
 function SuperAdminPanel() {
-  const { isAdmin, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, setStripeModalOpen } = useProfile();
+  const { profile, isAdmin, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, setStripeModalOpen } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label' | 'health' | 'llm') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
   const [stats, setStats] = useState({ jobs: 0, candidates: 0, users: 0, organizations: 0 });
+
+  const [composioConnected, setComposioConnected] = useState(false);
+  const [composioLoading, setComposioLoading] = useState(false);
+
+  useEffect(() => {
+    if (profile?.uid) {
+      fetch(`/api/composio/status?userId=${profile.uid}`)
+        .then(r => r.json())
+        .then(data => {
+          setComposioConnected(!!data.connected);
+        })
+        .catch(console.error);
+    }
+  }, [profile]);
+
+  const handleConnectComposio = async () => {
+    if (!profile?.uid) return;
+    setComposioLoading(true);
+    try {
+      const response = await fetch('/api/composio/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.uid,
+          callbackUrl: window.location.href
+        })
+      });
+      const data = await response.json();
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        notify(data.error || 'Failed to get connection link from Composio.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error initiating Composio connection.', 'error');
+    } finally {
+      setComposioLoading(false);
+    }
+  };
+
+  const handleDisconnectComposio = async () => {
+    if (!profile?.uid) return;
+    try {
+      const response = await fetch('/api/composio/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.uid })
+      });
+      if (response.ok) {
+        setComposioConnected(false);
+        notify('Google accounts disconnected from Composio.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Failed to disconnect Composio.', 'error');
+    }
+  };
 
   // LLM Prompt Playground & Config States
   const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('sa_system_prompt') || "You are an elite, unscripted AI recruiter. Evaluate the candidate's core technical experience. Ask situational and depth questions targeting weak spots. Keep it conversational.");
