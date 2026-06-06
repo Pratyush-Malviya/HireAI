@@ -9607,6 +9607,63 @@ function OrgAdminPanel() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const [composioConnected, setComposioConnected] = useState(false);
+  const [composioLoading, setComposioLoading] = useState(false);
+
+  useEffect(() => {
+    if (profile?.uid) {
+      fetch(`/api/composio/status?userId=${profile.uid}`)
+        .then(r => r.json())
+        .then(data => {
+          setComposioConnected(!!data.connected);
+        })
+        .catch(console.error);
+    }
+  }, [profile]);
+
+  const handleConnectComposio = async () => {
+    if (!profile?.uid) return;
+    setComposioLoading(true);
+    try {
+      const response = await fetch('/api/composio/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.uid,
+          callbackUrl: window.location.href
+        })
+      });
+      const data = await response.json();
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        notify(data.error || 'Failed to get connection link from Composio.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error initiating Composio connection.', 'error');
+    } finally {
+      setComposioLoading(false);
+    }
+  };
+
+  const handleDisconnectComposio = async () => {
+    if (!profile?.uid) return;
+    try {
+      const response = await fetch('/api/composio/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.uid })
+      });
+      if (response.ok) {
+        setComposioConnected(false);
+        notify('Google accounts disconnected from Composio.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Failed to disconnect Composio.', 'error');
+    }
+  };
   // Custom states for Workspace settings editing
   const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace'>('analytics');
 
@@ -10710,69 +10767,13 @@ function OrgAdminPanel() {
 }
 
 function SuperAdminPanel() {
-  const { profile, isAdmin, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, setStripeModalOpen } = useProfile();
+  const { isAdmin, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, setStripeModalOpen } = useProfile();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as 'overview' | 'organizations' | 'payments' | 'integrations' | 'manual' | 'white-label' | 'health' | 'llm') || 'overview';
   const setTab = (tab: string) => setSearchParams({ tab });
   const [stats, setStats] = useState({ jobs: 0, candidates: 0, users: 0, organizations: 0 });
 
-  const [composioConnected, setComposioConnected] = useState(false);
-  const [composioLoading, setComposioLoading] = useState(false);
 
-  useEffect(() => {
-    if (profile?.uid) {
-      fetch(`/api/composio/status?userId=${profile.uid}`)
-        .then(r => r.json())
-        .then(data => {
-          setComposioConnected(!!data.connected);
-        })
-        .catch(console.error);
-    }
-  }, [profile]);
-
-  const handleConnectComposio = async () => {
-    if (!profile?.uid) return;
-    setComposioLoading(true);
-    try {
-      const response = await fetch('/api/composio/connect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: profile.uid,
-          callbackUrl: window.location.href
-        })
-      });
-      const data = await response.json();
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
-      } else {
-        notify(data.error || 'Failed to get connection link from Composio.', 'error');
-      }
-    } catch (err) {
-      console.error(err);
-      notify('Error initiating Composio connection.', 'error');
-    } finally {
-      setComposioLoading(false);
-    }
-  };
-
-  const handleDisconnectComposio = async () => {
-    if (!profile?.uid) return;
-    try {
-      const response = await fetch('/api/composio/disconnect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: profile.uid })
-      });
-      if (response.ok) {
-        setComposioConnected(false);
-        notify('Google accounts disconnected from Composio.', 'success');
-      }
-    } catch (err) {
-      console.error(err);
-      notify('Failed to disconnect Composio.', 'error');
-    }
-  };
 
   // LLM Prompt Playground & Config States
   const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('sa_system_prompt') || "You are an elite, unscripted AI recruiter. Evaluate the candidate's core technical experience. Ask situational and depth questions targeting weak spots. Keep it conversational.");
