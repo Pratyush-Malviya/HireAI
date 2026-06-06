@@ -10,6 +10,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import axios from "axios";
 
 dotenv.config({ path: ".env" });
 dotenv.config({ path: ".env.local", override: true });
