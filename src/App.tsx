@@ -11,6 +11,8 @@ import { Job, Candidate, Organization, UserProfile } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 import { LandingPage } from './components/LandingPage';
 import { AuthPage } from './components/AuthPage';
+import { PricingStep } from './components/PricingStep';
+import { PaymentGateway } from './components/PaymentGateway';
 import { Particles } from './components/magic-ui/particles';
 import { Meteors } from './components/magic-ui/meteors';
 import { generateInterviewResponse, summarizeInterview } from './services/interviewService';
@@ -10829,8 +10831,11 @@ function SuperAdminPanel() {
   const [newOrgLocation, setNewOrgLocation] = useState('');
   const [newOrgPhone, setNewOrgPhone] = useState('');
   const [newOrgDescription, setNewOrgDescription] = useState('');
+  const [newOrgAdminEmail, setNewOrgAdminEmail] = useState('');
+  const [newOrgTier, setNewOrgTier] = useState('pro');
+  const [newOrgSeats, setNewOrgSeats] = useState(1);
   const [onboarding, setOnboarding] = useState(false);
-  const [bulkMode, setBulkMode] = useState(false);
+  const [creationMode, setCreationMode] = useState<'single' | 'provision' | 'bulk'>('single');
   const [bulkOrgNames, setBulkOrgNames] = useState('');
   const navigate = useNavigate();
   const [clearing, setClearing] = useState(false);
@@ -11607,6 +11612,7 @@ function SuperAdminPanel() {
 
     setOnboarding(true);
     try {
+      const isProvision = creationMode === 'provision';
       const orgRef = await addDoc(collection(db, 'organizations'), {
         name: newOrgName.trim(),
         domain: newOrgDomain.trim() || null,
@@ -11617,7 +11623,12 @@ function SuperAdminPanel() {
         description: newOrgDescription.trim(),
         createdAt: serverTimestamp(),
         createdBy: auth.currentUser?.uid,
-        status: 'active'
+        status: isProvision ? 'pending_payment' : 'active',
+        ...(isProvision && {
+          adminEmail: newOrgAdminEmail.trim(),
+          tier: newOrgTier,
+          seatCount: newOrgSeats
+        })
       });
 
       const newOrg: Organization = {
@@ -11631,12 +11642,24 @@ function SuperAdminPanel() {
         description: newOrgDescription.trim() || undefined,
         createdAt: new Date(),
         createdBy: auth.currentUser?.uid || '',
-        status: 'active'
+        status: isProvision ? 'pending_payment' : 'active',
+        ...(isProvision && {
+          adminEmail: newOrgAdminEmail.trim(),
+          tier: newOrgTier as 'starter' | 'pro' | 'enterprise',
+          seatCount: newOrgSeats
+        })
       };
 
       setOrganizations(prev => [newOrg, ...prev]);
       setStats(prev => ({ ...prev, organizations: prev.organizations + 1 }));
-      notify('Organization onboarded successfully', 'success');
+      
+      if (isProvision) {
+        notify(`Payment Link Generated! Copied to clipboard.`, 'success');
+        navigator.clipboard.writeText(`${window.location.origin}/pay/${orgRef.id}`);
+      } else {
+        notify('Organization onboarded successfully', 'success');
+      }
+
       setOnboardModalOpen(false);
       setNewOrgName('');
       setNewOrgDomain('');
@@ -11645,6 +11668,9 @@ function SuperAdminPanel() {
       setNewOrgLocation('');
       setNewOrgPhone('');
       setNewOrgDescription('');
+      setNewOrgAdminEmail('');
+      setNewOrgTier('pro');
+      setNewOrgSeats(1);
     } catch (err) {
       notify('Failed to create organization: ' + (err instanceof Error ? err.message : 'Check permissions'), 'error');
       handleFirestoreError(err, OperationType.CREATE, 'organizations');
@@ -11770,12 +11796,12 @@ function SuperAdminPanel() {
       <Modal 
         isOpen={onboardModalOpen} 
         onClose={() => setOnboardModalOpen(false)} 
-        title={bulkMode ? "Bulk Onboard Organizations" : "Onboard New Organization"}
+        title={creationMode === 'bulk' ? "Bulk Onboard Organizations" : creationMode === 'provision' ? "Provision Payment Link" : "Onboard New Organization"}
       >
         <div className="mb-6 flex p-1 bg-transparent rounded-lg">
            <button 
-             onClick={() => setBulkMode(false)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
+             onClick={() => setCreationMode('single')}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", creationMode === 'single' ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
            >
              Single Entry
            </button>
@@ -11878,6 +11904,48 @@ function SuperAdminPanel() {
                 />
              </div>
 
+             {creationMode === 'provision' && (
+               <div className="pt-2 pb-2 space-y-4 border-y border-white/10 mt-4 mb-2">
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-black text-white uppercase tracking-widest">Admin Email</label>
+                    <input 
+                      type="email"
+                      required
+                      value={newOrgAdminEmail}
+                      onChange={e => setNewOrgAdminEmail(e.target.value)}
+                      placeholder="e.g. founder@acme.com"
+                      className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-white"
+                    />
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   <div className="space-y-1">
+                     <label className="text-[10px] font-black text-white uppercase tracking-widest">Pricing Tier</label>
+                     <select
+                       value={newOrgTier}
+                       onChange={e => setNewOrgTier(e.target.value)}
+                       className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all glass-premium"
+                     >
+                       <option value="starter">Starter ($49/seat)</option>
+                       <option value="pro">Professional ($99/seat)</option>
+                       <option value="enterprise">Enterprise ($199/seat)</option>
+                     </select>
+                   </div>
+                   <div className="space-y-1">
+                      <label className="text-[10px] font-black text-white uppercase tracking-widest">Seat Count</label>
+                      <input 
+                        type="number"
+                        min="1"
+                        max="999"
+                        required
+                        value={newOrgSeats}
+                        onChange={e => setNewOrgSeats(parseInt(e.target.value))}
+                        className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-white"
+                      />
+                   </div>
+                 </div>
+               </div>
+             )}
+
              <div className="flex gap-3 pt-3">
                 <Button 
                   type="button" 
@@ -11889,10 +11957,10 @@ function SuperAdminPanel() {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={onboarding || !newOrgName}
+                  disabled={onboarding || !newOrgName || (creationMode === 'provision' && !newOrgAdminEmail)}
                   className="flex-1 font-black uppercase tracking-widest text-[10px] bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
                 >
-                  {onboarding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Create Organization'}
+                  {onboarding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : creationMode === 'provision' ? 'Generate Link' : 'Create Organization'}
                 </Button>
              </div>
           </form>
@@ -13001,9 +13069,11 @@ function Onboarding() {
   const [orgLocation, setOrgLocation] = useState('');
   const [orgPhone, setOrgPhone] = useState('');
   const [orgDescription, setOrgDescription] = useState('');
+  const [orgDomain, setOrgDomain] = useState('');
   const [invitedOrg, setInvitedOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingInvite, setCheckingInvite] = useState(!!orgId);
+  const [step, setStep] = useState<'pricing' | 'setup'>('pricing');
 
   useEffect(() => {
     if (profile?.organizationId && !orgId) {
@@ -13031,6 +13101,17 @@ function Onboarding() {
 
   const handleJoinInvited = async () => {
     if (!invitedOrg || !auth.currentUser) return;
+
+    // Email Domain Validation (Flow 3)
+    if (invitedOrg.domain) {
+      const userDomain = auth.currentUser.email?.split('@')[1]?.toLowerCase();
+      const expectedDomain = invitedOrg.domain.toLowerCase();
+      if (userDomain !== expectedDomain) {
+        notify(`Email domain mismatch. You must use an @${expectedDomain} email address to join this organization.`, 'error');
+        return;
+      }
+    }
+
     setLoading(true);
     const path = `users/${auth.currentUser.uid}`;
     try {
@@ -13060,6 +13141,7 @@ function Onboarding() {
     try {
       const orgRef = await addDoc(collection(db, 'organizations'), {
         name: orgName.trim(),
+        domain: orgDomain.trim() || null,
         industry: orgIndustry,
         companySize: orgCompanySize,
         location: orgLocation.trim(),
@@ -13100,6 +13182,14 @@ function Onboarding() {
   };
 
   if (checkingInvite) return <div className="h-screen flex items-center justify-center text-white font-bold uppercase tracking-widest animate-pulse">Securing Invite Context...</div>;
+
+  if (!invitedOrg && step === 'pricing') {
+    return (
+      <div className="min-h-screen transparent flex flex-col items-center justify-center p-6">
+        <PricingStep onPaymentComplete={() => setStep('setup')} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen transparent flex items-center justify-center p-6">
@@ -13155,16 +13245,28 @@ function Onboarding() {
             </div>
 
             <form onSubmit={handleCreateOrg} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Organization Name</label>
-                <input 
-                  type="text"
-                  required
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-white placeholder:text-white text-sm"
-                  placeholder="e.g. Acme Corp"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Organization Name</label>
+                  <input 
+                    type="text"
+                    required
+                    value={orgName}
+                    onChange={(e) => setOrgName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-white placeholder:text-white text-sm"
+                    placeholder="e.g. Acme Corp"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Allowed Email Domain</label>
+                  <input 
+                    type="text"
+                    value={orgDomain}
+                    onChange={(e) => setOrgDomain(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-white placeholder:text-white text-sm"
+                    placeholder="e.g. acme.com (optional)"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -13462,6 +13564,7 @@ export default function App() {
             {user ? (
               <Routes>
                 <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
+                <Route path="/pay/:orgId" element={<PaymentGateway />} />
                 <Route path="/join/:orgId" element={<Onboarding />} />
                 <Route path="/interview/:candidateId" element={<InterviewRoom />} />
                 {!profile ? (
@@ -13482,6 +13585,7 @@ export default function App() {
             ) : (
               <Routes>
                 <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
+                <Route path="/pay/:orgId" element={<PaymentGateway />} />
                 <Route path="/auth" element={<AuthPage onSignIn={handleSignIn} />} />
                 <Route path="*" element={<LandingPage />} />
               </Routes>
