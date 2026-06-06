@@ -347,7 +347,7 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, { ha
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-black text-white uppercase tracking-tight">System Fault Detected</h1>
-              <p className="text-slate-400 text-sm font-medium">An unexpected error occurred. This might be due to a connectivity issue or a data mismatch.</p>
+              <p className="text-slate-200 text-sm font-medium">An unexpected error occurred. This might be due to a connectivity issue or a data mismatch.</p>
             </div>
             {this.state.error && (
               <div className="p-4 glass-premium rounded-xl border border-white/10 text-left">
@@ -488,7 +488,7 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
         <div className="p-8 border-b border-white/10 flex items-center justify-between transparent/50">
           <h3 className="font-display font-bold text-xl text-white tracking-tight">{title}</h3>
           <button onClick={onClose} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-white/10 group">
-            <Plus className="w-5 h-5 rotate-45 text-slate-400 group-hover:text-slate-400" />
+            <Plus className="w-5 h-5 rotate-45 text-slate-200 group-hover:text-slate-200" />
           </button>
         </div>
         <div className="p-8">
@@ -639,7 +639,7 @@ function AudioWaveform({ analyserRef, isListening }: { analyserRef: React.RefObj
     <div className="flex flex-col items-center justify-center gap-1.5 mb-4 shrink-0">
       <span className={cn(
         "text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300",
-        isListening ? "text-brand-light animate-pulse" : "text-slate-400"
+        isListening ? "text-brand-light animate-pulse" : "text-slate-200"
       )}>
         {isListening ? "● LISTENING (SPEAK NOW)" : "MIC IDLE"}
       </span>
@@ -1661,7 +1661,7 @@ function InterviewRoom() {
           </div>
           <div className="space-y-2">
             <h3 className="text-lg font-black text-slate-100 uppercase tracking-wide">Access Denied</h3>
-            <p className="text-xs text-slate-400 leading-relaxed font-medium">
+            <p className="text-xs text-slate-200 leading-relaxed font-medium">
               You are not authorized to access this interview lobby. Please ensure you are logged in with the correct email address associated with your invitation.
             </p>
           </div>
@@ -1687,7 +1687,7 @@ function InterviewRoom() {
     );
   }
 
-  if (!candidate) return <div className="p-12 text-center text-slate-400">Loading Interview Room...</div>;
+  if (!candidate) return <div className="p-12 text-center text-slate-200">Loading Interview Room...</div>;
 
   return (
     <div className="w-full min-h-screen flex flex-col gap-6 transparent text-slate-100 relative overflow-hidden p-4 sm:p-6 md:p-8 rounded-none">
@@ -1779,7 +1779,7 @@ function InterviewRoom() {
             <button
               onClick={() => setSidebarTab('monitor')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
-                sidebarTab === 'monitor' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-400 hover:text-[#e6edf3]"
+                sidebarTab === 'monitor' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-[#e6edf3]"
               )}
             >
               <Shield className="w-3.5 h-3.5" /> Monitor
@@ -1787,7 +1787,7 @@ function InterviewRoom() {
             <button
               onClick={() => setSidebarTab('transcript')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
-                sidebarTab === 'transcript' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-400 hover:text-[#e6edf3]"
+                sidebarTab === 'transcript' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-[#e6edf3]"
               )}
             >
               <FileText className="w-3.5 h-3.5" /> Transcript
@@ -1825,7 +1825,7 @@ function InterviewRoom() {
                            className="w-full h-full object-cover scale-150 rotate-y-180" 
                          />
                       ) : (
-                        <Users className="w-5 h-5 text-slate-400" />
+                        <Users className="w-5 h-5 text-slate-200" />
                       )}
                     </div>
                     <div>
@@ -1842,14 +1842,14 @@ function InterviewRoom() {
                 <div className="space-y-3.5">
                   <div className="flex items-center gap-1.5 border-b border-white/10 pb-2">
                     <Sliders className="w-4 h-4 text-brand" />
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Integrity Dashboard</h4>
+                    <h4 className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Integrity Dashboard</h4>
                   </div>
 
                   {/* Tab Tracking Pill */}
                   <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
                       <span className="block text-[10px] font-black text-[#e6edf3] uppercase tracking-wider mb-0.5">Tab Focus</span>
-                      <span className="text-[9px] text-slate-400 font-medium">Warnings: {tabWarnings} / 3</span>
+                      <span className="text-[9px] text-slate-200 font-medium">Warnings: {tabWarnings} / 3</span>
                     </div>
                     <div className="flex gap-1.5">
                       {[1, 2, 3].map(i => (
@@ -1918,7 +1918,7 @@ function InterviewRoom() {
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-1.5 border-b border-white/10 pb-2">
                     <Volume2 className="w-4 h-4 text-brand" />
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interviewer Voice</h4>
+                    <h4 className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Interviewer Voice</h4>
                   </div>
                   <div className="relative">
                     <select
@@ -1935,7 +1935,7 @@ function InterviewRoom() {
                         </option>
                       ))}
                     </select>
-                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-200">
                       <ChevronDown className="w-3.5 h-3.5" />
                     </div>
                   </div>
@@ -1952,11 +1952,11 @@ function InterviewRoom() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
-                          m.role === 'model' ? "bg-brand/20 text-brand-light border border-brand/30" : "bg-[#30363d] text-slate-400"
+                          m.role === 'model' ? "bg-brand/20 text-brand-light border border-brand/30" : "bg-[#30363d] text-slate-200"
                         )}>
                           {m.role === 'model' ? 'AI' : 'You'}
                         </span>
-                        <span className="text-[8px] font-medium text-slate-400">{formatDateTime(new Date(m.timestamp))}</span>
+                        <span className="text-[8px] font-medium text-slate-200">{formatDateTime(new Date(m.timestamp))}</span>
                       </div>
                       <p className="text-xs text-slate-303 leading-relaxed pl-1">
                         {m.text}
@@ -1978,7 +1978,7 @@ function InterviewRoom() {
                   {messages.length === 0 && !input && (
                     <div className="h-full flex flex-col items-center justify-center opacity-25 py-24">
                       <RotateCcw className="w-8 h-8 mb-2 animate-pulse text-brand-light" />
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Feed Calibrated</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-200">Feed Calibrated</p>
                     </div>
                   )}
                   <div ref={scrollRef} />
@@ -1997,13 +1997,13 @@ function InterviewRoom() {
               <div className="w-2 h-2 rounded-full bg-red-655 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
               <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Room</span>
               <div className="h-3 w-px bg-[#30363d]" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {candidateId.substring(0, 8)}</span>
+              <span className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">ID: {candidateId.substring(0, 8)}</span>
             </div>
             
             {!concluded && (
               <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-3.5 shadow-2xl pointer-events-auto">
                 <div className="flex flex-col items-end">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Room Signal</span>
+                  <span className="text-[8px] font-black text-slate-200 uppercase tracking-widest leading-none mb-1">Room Signal</span>
                   <div className="w-24 h-1 bg-[#30363d] rounded-full overflow-hidden">
                      <motion.div 
                         className={cn("h-full transition-all duration-75", volume > 80 ? "bg-red-500" : "bg-brand")}
@@ -2089,7 +2089,7 @@ function InterviewRoom() {
             {messages.length === 0 ? (
               <div className="relative z-10 text-center w-full max-w-2xl mx-auto p-8 animate-in fade-in zoom-in-95 duration-500 glass-premium/40 backdrop-blur-xl border border-white/10/80 rounded-3xl shadow-2xl mt-4 sm:mt-10">
                 <h2 className="text-2xl font-black text-white tracking-tight mb-2 uppercase">Lobby Pre-Check</h2>
-                <p className="text-slate-400 text-xs font-medium mb-8 leading-relaxed max-w-md mx-auto">Ensure your webcam is clear, your microphone is picking up audio, and your background is free of distractions.</p>
+                <p className="text-slate-200 text-xs font-medium mb-8 leading-relaxed max-w-md mx-auto">Ensure your webcam is clear, your microphone is picking up audio, and your background is free of distractions.</p>
                 
                 {/* Equipment Check Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -2098,7 +2098,7 @@ function InterviewRoom() {
                     {stream?.getVideoTracks()[0]?.enabled !== false ? (
                       <video ref={bindVideo} autoPlay muted className="w-full h-full object-cover scale-100 rotate-y-180 rounded-xl" />
                     ) : (
-                      <div className="text-slate-400 flex flex-col items-center">
+                      <div className="text-slate-200 flex flex-col items-center">
                         <Video className="w-6 h-6 mb-2" />
                         <span className="text-[10px] uppercase font-bold tracking-widest">No Video</span>
                       </div>
@@ -2123,7 +2123,7 @@ function InterviewRoom() {
                            />
                          ))}
                        </div>
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Test Mic Output</p>
+                       <p className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">Test Mic Output</p>
                     </div>
                   </div>
                 </div>
@@ -2143,7 +2143,7 @@ function InterviewRoom() {
                   </label>
                 </div>
                 
-                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-white rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] shadow-brand-dark/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-[#30363d] text-slate-400 cursor-not-allowed")}>
+                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-white rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] shadow-brand-dark/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-[#30363d] text-slate-200 cursor-not-allowed")}>
                   Initialize Screening
                 </Button>
               </div>
@@ -2186,7 +2186,7 @@ function InterviewRoom() {
                     {stream?.getVideoTracks()[0]?.enabled === false && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 glass-premium">
                          <CameraOff className="w-12 h-12 text-slate-300 animate-pulse" />
-                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Webcam Inactive</p>
+                         <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Webcam Inactive</p>
                       </div>
                     )}
                   </div>
@@ -2396,7 +2396,7 @@ function InterviewRoom() {
                         </motion.div>
                       ) : (
                         <div className="text-center py-1 transparent/40 rounded-full border border-[#161b22]/60 max-w-[200px] mx-auto">
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                          <span className="text-[8px] font-black text-slate-200 uppercase tracking-[0.2em]">
                              {isSpeaking ? "Receiving Data" : isListening ? "Listening" : "Idle mic status"}
                           </span>
                         </div>
@@ -2493,7 +2493,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
             <h3 className="font-display font-light text-xl text-white tracking-tight">Stripe Secure Checkout</h3>
           </div>
           <button onClick={onClose} disabled={isProcessing} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-250">
-            <Plus className="w-5 h-5 rotate-45 text-slate-400" />
+            <Plus className="w-5 h-5 rotate-45 text-slate-200" />
           </button>
         </div>
 
@@ -2502,7 +2502,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
             <form onSubmit={handlePay} className="space-y-6">
               {/* Plan selector */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Choose Package / Plan</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-200">Choose Package / Plan</label>
                 <div className="grid grid-cols-1 gap-3">
                   {(Object.keys(plans) as Array<keyof typeof plans>).map(planKey => (
                     <button
@@ -2516,7 +2516,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                     >
                       <div>
                         <p className="text-sm font-semibold text-white">{plans[planKey].name}</p>
-                        <p className="text-[10px] text-slate-400">Credit addition or upgrade</p>
+                        <p className="text-[10px] text-slate-200">Credit addition or upgrade</p>
                       </div>
                       <span className="text-sm font-bold text-white">{plans[planKey].price}</span>
                     </button>
@@ -2527,13 +2527,13 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
               {/* Secure details */}
               <div className="space-y-4 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <ShieldCheck className="w-4 h-4 text-slate-400" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secure Payment Details</span>
+                  <ShieldCheck className="w-4 h-4 text-slate-200" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-200">Secure Payment Details</span>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Cardholder Name</label>
+                    <label className="text-[10px] font-bold text-slate-200 uppercase">Cardholder Name</label>
                     <input
                       required
                       type="text"
@@ -2545,7 +2545,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Card Number</label>
+                    <label className="text-[10px] font-bold text-slate-200 uppercase">Card Number</label>
                     <input
                       required
                       type="text"
@@ -2558,7 +2558,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Expiration</label>
+                      <label className="text-[10px] font-bold text-slate-200 uppercase">Expiration</label>
                       <input
                         required
                         type="text"
@@ -2569,7 +2569,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">CVC</label>
+                      <label className="text-[10px] font-bold text-slate-200 uppercase">CVC</label>
                       <input
                         required
                         type="text"
@@ -2606,11 +2606,11 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
               <Loader2 className="w-12 h-12 text-slate-300 animate-spin" />
               <div className="space-y-1 text-center">
                 <p className="text-sm font-semibold text-white">Authorizing Card Transaction</p>
-                <p className="text-xs text-slate-400">Secured via Stripe Gateway Protocols</p>
+                <p className="text-xs text-slate-200">Secured via Stripe Gateway Protocols</p>
               </div>
 
               {/* Console log display */}
-              <div className="w-full transparent rounded-2xl p-4 font-mono text-[9px] text-slate-400 h-40 overflow-y-auto border border-[#161b22] text-left space-y-1">
+              <div className="w-full transparent rounded-2xl p-4 font-mono text-[9px] text-slate-200 h-40 overflow-y-auto border border-[#161b22] text-left space-y-1">
                 {processingLog.map((log, i) => (
                   <div key={i} className={cn(log.includes('successfully') ? "text-emerald-400" : "text-slate-300")}>
                     <span className="text-cyan-400">➜</span> {log}
@@ -2627,7 +2627,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-display font-light text-white">Payment Completed!</h3>
-                <p className="text-slate-400 text-sm max-w-sm">
+                <p className="text-slate-200 text-sm max-w-sm">
                   Your payment was verified. {plans[selectedPlan as keyof typeof plans].name} has been provisioned to your workspace.
                 </p>
               </div>
@@ -2690,7 +2690,7 @@ function PublicSharedScorecard() {
     return (
       <div className="min-h-screen transparent flex items-center justify-center flex-col gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
-        <span className="text-xs uppercase font-bold text-slate-400">Loading Shared Scorecard...</span>
+        <span className="text-xs uppercase font-bold text-slate-200">Loading Shared Scorecard...</span>
       </div>
     );
   }
@@ -2700,7 +2700,7 @@ function PublicSharedScorecard() {
       <div className="min-h-screen transparent flex items-center justify-center flex-col gap-4">
         <AlertCircle className="w-12 h-12 text-red-500" />
         <h2 className="text-xl font-display font-light text-white">Scorecard Not Found</h2>
-        <p className="text-slate-400 text-sm">The requested talent evaluation profile does not exist or link expired.</p>
+        <p className="text-slate-200 text-sm">The requested talent evaluation profile does not exist or link expired.</p>
       </div>
     );
   }
@@ -2727,13 +2727,13 @@ function PublicSharedScorecard() {
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div>
               <h1 className="text-3xl font-display font-light text-white mb-1">{candidate.fullName}</h1>
-              <p className="text-slate-400 text-sm font-medium">{candidate.currentRole} Candidate</p>
-              {job && <p className="text-xs text-slate-400 mt-1">Applying for: {job.title}</p>}
+              <p className="text-slate-200 text-sm font-medium">{candidate.currentRole} Candidate</p>
+              {job && <p className="text-xs text-slate-200 mt-1">Applying for: {job.title}</p>}
             </div>
             
             <div className="flex items-center gap-4 transparent px-6 py-4 rounded-2xl border border-[#e6edf3]/60">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Match Rating</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-200">Match Rating</p>
                 <p className="text-2xl font-display text-white mt-0.5">{candidate.scorecard?.compositeScore}%</p>
               </div>
               <div className="w-2 h-10 rounded-full bg-[#e6edf3] overflow-hidden">
@@ -2744,13 +2744,13 @@ function PublicSharedScorecard() {
 
           {/* D6 Scorecard */}
           <div className="pt-6 border-t border-white/10">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">D6 Assessment Scorecard</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 mb-4">D6 Assessment Scorecard</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {Object.entries(candidate.scorecard?.dimensions || {}).map(([key, value]: any) => {
                 if (key === 'redFlags' || key === 'signalDensity') return null;
                 return (
                   <div key={key} className="transparent/50 border border-[#e6edf3]/40 p-4 rounded-2xl text-center">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
+                    <p className="text-[10px] font-bold text-slate-200 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
                     <p className="text-lg font-display text-white font-medium mt-1">{value?.score}%</p>
                   </div>
                 );
@@ -2761,22 +2761,22 @@ function PublicSharedScorecard() {
           {/* Summary */}
           {candidate.scorecard?.recommendation?.summary && (
             <div className="pt-6 border-t border-white/10 space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Executive Summary</h3>
-              <p className="text-sm leading-relaxed text-slate-400 transparent/40 p-4 rounded-2xl border border-[#e6edf3]/30">{candidate.scorecard.recommendation.summary}</p>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Executive Summary</h3>
+              <p className="text-sm leading-relaxed text-slate-200 transparent/40 p-4 rounded-2xl border border-[#e6edf3]/30">{candidate.scorecard.recommendation.summary}</p>
             </div>
           )}
 
           {/* Interview logs */}
           {interview && (
             <div className="pt-6 border-t border-white/10 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Conversation Transcripts</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Conversation Transcripts</h3>
               <div className="space-y-4 max-h-[300px] overflow-y-auto border border-[#e6edf3]/50 rounded-2xl p-4 transparent/30">
                 {interview.messages?.map((msg: any, i: number) => (
                   <div key={i} className="text-xs leading-relaxed">
                     <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-white")}>
                       {msg.role === 'assistant' ? 'AI Screener' : 'Candidate'}
                     </p>
-                    <p className="text-slate-400 mt-0.5">{msg.content}</p>
+                    <p className="text-slate-200 mt-0.5">{msg.content}</p>
                   </div>
                 ))}
               </div>
@@ -2920,7 +2920,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                </div>
                {!isSidebarCollapsed && <span className="font-display font-light text-xl tracking-tight uppercase">{whiteLabelBrandingName || "HireAI"}</span>}
              </div>
-             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-[#30363d] rounded-lg text-slate-400 hover:text-white transition-colors">
+             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-[#30363d] rounded-lg text-slate-200 hover:text-white transition-colors">
                <Menu className="w-4 h-4" />
              </button>
           </div>
@@ -2976,11 +2976,11 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
               {!isSidebarCollapsed && (
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white truncate">{user.email}</p>
-                  <p className="text-[10px] text-slate-400 truncate">Authenticated</p>
+                  <p className="text-[10px] text-slate-200 truncate">Authenticated</p>
                 </div>
               )}
             </div>
-            <Button variant="ghost" className={cn("text-slate-400 hover:text-white hover:bg-[#30363d] text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
+            <Button variant="ghost" className={cn("text-slate-200 hover:text-white hover:bg-[#30363d] text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
               <LogOut className={cn("shrink-0", isSidebarCollapsed ? "w-5 h-5" : "w-4 h-4 mr-2")} /> 
               {!isSidebarCollapsed && "Logout"}
             </Button>
@@ -2990,7 +2990,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header className="h-16 glass-premium border-b border-[#e6edf3] flex items-center justify-between px-4 sm:px-6 shrink-0">
              <div className="flex items-center gap-4">
-                <button className="lg:hidden p-2 text-slate-400 hover:bg-[#21262d] rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <button className="lg:hidden p-2 text-slate-200 hover:bg-[#21262d] rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                    <Menu className="w-5 h-5" />
                 </button>
                 {/* Mobile Logo */}
@@ -3022,7 +3022,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-brand-light hover:text-brand-light transition-colors">System Admin</Link>
                     )}
                     <div className="pt-4 border-t border-white/10">
-                      <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-white hover:bg-[#30363d] text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
+                      <Button variant="ghost" className="w-full justify-start text-slate-200 hover:text-white hover:bg-[#30363d] text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
                         <LogOut className="w-4 h-4 mr-2" /> Logout
                       </Button>
                     </div>
@@ -3110,7 +3110,7 @@ function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/10">
         <div>
           <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Active Pipelines</h1>
-          <p className="text-slate-400 max-w-2xl text-xs sm:text-lg leading-relaxed font-black uppercase tracking-widest opacity-60">
+          <p className="text-slate-200 max-w-2xl text-xs sm:text-lg leading-relaxed font-black uppercase tracking-widest opacity-60">
             Autonomous Talent Orchestration
           </p>
         </div>
@@ -3133,7 +3133,7 @@ function Dashboard() {
             <Briefcase className="w-10 h-10 text-brand-light" />
           </div>
           <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Workspace Empty</h3>
-          <p className="text-slate-400 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
+          <p className="text-slate-200 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
           <Button onClick={() => navigate('/jobs/new')} size="lg" className="rounded-2xl h-14 font-black uppercase tracking-widest text-xs">Post Your First Job</Button>
         </Card>
       ) : (
@@ -3163,7 +3163,7 @@ function Dashboard() {
                    <div className="flex justify-between items-start">
                      <div className="flex-1 min-w-0">
                        <h3 className="text-2xl font-black mb-3 group-hover:text-brand-light transition-colors line-clamp-2 tracking-tighter leading-tight uppercase">{job.title}</h3>
-                       <p className="text-[10px] text-slate-400 mb-8 flex items-center gap-1.5 font-black uppercase tracking-widest">
+                       <p className="text-[10px] text-slate-200 mb-8 flex items-center gap-1.5 font-black uppercase tracking-widest">
                          <Clock className="w-3 h-3" /> Initialized {formatDate(job.createdAt)}
                        </p>
                      </div>
@@ -3177,7 +3177,7 @@ function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-4 pt-6 mt-auto border-t border-slate-50">
-                  <div className="flex items-center gap-2 text-slate-400 font-black uppercase tracking-[0.2em] text-[10px]">
+                  <div className="flex items-center gap-2 text-slate-200 font-black uppercase tracking-[0.2em] text-[10px]">
                     <div className="flex -space-x-2">
                        {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-[#21262d] border-2 border-white" />)}
                     </div>
@@ -3486,7 +3486,7 @@ function ResumeBank() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
         <div>
           <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Resume Bank</h1>
-          <p className="text-slate-400 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
+          <p className="text-slate-200 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button
@@ -3514,7 +3514,7 @@ function ResumeBank() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Total Candidates</span>
+            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Total Candidates</span>
             <span className="text-2xl font-black">{stats.totalUnique}</span>
           </div>
         </Card>
@@ -3523,7 +3523,7 @@ function ResumeBank() {
             <Database className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Screenings Run</span>
+            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Screenings Run</span>
             <span className="text-2xl font-black">{stats.totalScreenings}</span>
           </div>
         </Card>
@@ -3532,7 +3532,7 @@ function ResumeBank() {
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Avg. Best Fit</span>
+            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Avg. Best Fit</span>
             <span className="text-2xl font-black">{stats.avgScore}%</span>
           </div>
         </Card>
@@ -3541,7 +3541,7 @@ function ResumeBank() {
             <Brain className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Top Domain Track</span>
+            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Top Domain Track</span>
             <span className="text-xs font-black truncate max-w-[150px] block mt-1 uppercase tracking-tight text-violet-750 bg-violet-50/50 px-2 py-0.5 rounded-lg border border-violet-100/50">{stats.topTag}</span>
           </div>
         </Card>
@@ -3554,9 +3554,9 @@ function ResumeBank() {
             
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Search</label>
+                <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Search</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
+                  <Search className="w-4 h-4 text-slate-200 absolute left-3 top-3.5" />
                   <input
                     type="text"
                     className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
@@ -3569,7 +3569,7 @@ function ResumeBank() {
 
               {allUniqueTags.length > 0 && (
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Filter by Tags</label>
+                  <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Filter by Tags</label>
                   <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                     {allUniqueTags.map(tag => {
                       const isSelected = selectedTags.includes(tag);
@@ -3587,7 +3587,7 @@ function ResumeBank() {
                             "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
                             isSelected
                               ? "bg-brand-dark border-brand-dark text-white shadow-sm"
-                              : "transparent border-[#e6edf3] text-slate-400 hover:bg-[#21262d] hover:border-slate-350"
+                              : "transparent border-[#e6edf3] text-slate-200 hover:bg-[#21262d] hover:border-slate-350"
                           )}
                         >
                           {tag}
@@ -3606,13 +3606,13 @@ function ResumeBank() {
             {loading ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-10 h-10 text-brand animate-spin" />
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Resume Bank...</p>
+                <p className="text-slate-200 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Resume Bank...</p>
               </div>
             ) : filteredResumes.length === 0 ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
                 <Database className="w-12 h-12 text-slate-300 animate-pulse" />
                 <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">No Resumes Found</h3>
-                <p className="text-slate-400 text-xs">Adjust your search parameters to find profiles.</p>
+                <p className="text-slate-200 text-xs">Adjust your search parameters to find profiles.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -3637,11 +3637,11 @@ function ResumeBank() {
                           }}
                         />
                       </th>
-                      <th className="w-1/4 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
-                      <th className="w-1/3 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tags & Career Track</th>
-                      <th className="w-1/5 px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Original Campaign</th>
-                      <th className="w-24 px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Screenings</th>
-                      <th className="w-32 px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                      <th className="w-1/4 px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Candidate</th>
+                      <th className="w-1/3 px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Tags & Career Track</th>
+                      <th className="w-1/5 px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Original Campaign</th>
+                      <th className="w-24 px-6 py-4 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">Screenings</th>
+                      <th className="w-32 px-6 py-4 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -3676,18 +3676,18 @@ function ResumeBank() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-black text-slate-400 text-xs shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-black text-slate-200 text-xs shrink-0">
                                 {candidate.fullName?.charAt(0) || '?'}
                               </div>
                               <div className="min-w-0">
                                 <h4 className="text-xs font-extrabold text-white truncate">{candidate.fullName}</h4>
-                                <p className="text-[10px] text-slate-400 font-bold truncate">{candidate.email}</p>
+                                <p className="text-[10px] text-slate-200 font-bold truncate">{candidate.email}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="space-y-1.5">
-                              <p className="text-[10px] text-slate-400 font-black uppercase tracking-wide truncate">
+                              <p className="text-[10px] text-slate-200 font-black uppercase tracking-wide truncate">
                                 {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
                               </p>
                               <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
@@ -3700,10 +3700,10 @@ function ResumeBank() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="text-[10px] text-slate-400 font-extrabold truncate">
+                            <p className="text-[10px] text-slate-200 font-extrabold truncate">
                               {getJobTitle(candidate.jobId)}
                             </p>
-                            <p className="text-[8px] text-slate-400 mt-0.5 uppercase tracking-widest font-black">
+                            <p className="text-[8px] text-slate-200 mt-0.5 uppercase tracking-widest font-black">
                               {formatDate(candidate.createdAt)}
                             </p>
                           </td>
@@ -3725,7 +3725,7 @@ function ResumeBank() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand hover:bg-brand/10 border border-[#e6edf3] hover:border-brand/10 flex items-center gap-1.5 ml-auto"
+                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand hover:bg-brand/10 border border-[#e6edf3] hover:border-brand/10 flex items-center gap-1.5 ml-auto"
                               onClick={() => handleSingleReScreen(candidate)}
                             >
                               <Zap className="w-3 h-3 text-brand fill-brand/20" /> Re-Screen
@@ -3771,10 +3771,10 @@ function ResumeBank() {
             
             <div className="space-y-1">
               <h4 className="text-sm font-black text-slate-300 uppercase tracking-widest">Analyzing Candidate Files</h4>
-              <p className="text-xs text-slate-400">Executing LLM scoring engine against target job profile.</p>
+              <p className="text-xs text-slate-200">Executing LLM scoring engine against target job profile.</p>
             </div>
 
-            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-400 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-200 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
               {screeningLogs.map((log, i) => (
                 <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
                   <span className="text-cyan-400">➜</span> {log}
@@ -3795,10 +3795,10 @@ function ResumeBank() {
             </div>
 
             <div className="space-y-2 text-left">
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Target Job Position</label>
+              <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Target Job Position</label>
               {jobs.length === 0 ? (
                 <div className="p-4 border border-[#e6edf3] rounded-xl transparent text-center">
-                  <p className="text-xs text-slate-400 font-medium">No active jobs. Please post a job first.</p>
+                  <p className="text-xs text-slate-200 font-medium">No active jobs. Please post a job first.</p>
                   <Button
                     variant="outline"
                     className="mt-3 text-[10px] uppercase font-bold tracking-wider"
@@ -3833,11 +3833,11 @@ function ResumeBank() {
                           <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-brand" : "text-slate-300")}>
                             {job.title}
                           </h4>
-                          <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
+                          <p className="text-[9px] text-slate-200 font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           {alreadyScreened && (
-                            <span className="text-[8px] font-black bg-[#21262d] text-slate-400 border border-[#e6edf3] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                            <span className="text-[8px] font-black bg-[#21262d] text-slate-200 border border-[#e6edf3] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                           )}
                           {!alreadyScreened && (
                             <div className={cn(
@@ -3982,14 +3982,14 @@ function NewJob() {
         </Button>
         <div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Initialize Campaign</h1>
-          <p className="text-slate-400 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and customize screening dimensions for precise candidate fit evaluation.</p>
+          <p className="text-slate-200 text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and customize screening dimensions for precise candidate fit evaluation.</p>
         </div>
       </div>
 
       <Card className="p-6 sm:p-10 border-white/10 shadow-2xl shadow-brand/10 rounded-[2.5rem] glass-premium/80 backdrop-blur-xl">
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Campaign Title</label>
+            <label className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em] px-1">Campaign Title</label>
             <input
               required
               type="text"
@@ -4001,7 +4001,7 @@ function NewJob() {
           </div>
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1 mb-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Requirement Context</label>
+              <label className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em]">Requirement Context</label>
               <label className="text-[10px] font-black text-brand-light hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest">
                 <Plus className="w-3.5 h-3.5" />
                 <span>Upload PDF/DOCX</span>
@@ -4020,7 +4020,7 @@ function NewJob() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
+            <label className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
             <input
               required
               type="number"
@@ -4044,7 +4044,7 @@ function NewJob() {
                 <Sliders className="w-4 h-4 text-brand" />
                 <span>Scoring Matrix & Passing Thresholds Configuration ({showConfig ? 'Hide' : 'Customize'})</span>
               </div>
-              <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform", showConfig && "rotate-180")} />
+              <ChevronDown className={cn("w-4 h-4 text-slate-200 transition-transform", showConfig && "rotate-180")} />
             </button>
 
             {showConfig && (
@@ -4057,7 +4057,7 @@ function NewJob() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passed Match</label>
+                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Passed Match</label>
                         <span className="text-sm font-black text-green-600 bg-green-50 px-2.5 py-0.5 rounded-lg border border-green-100">{passedThreshold}%</span>
                       </div>
                       <input
@@ -4069,12 +4069,12 @@ function NewJob() {
                         value={passedThreshold}
                         onChange={(e) => setPassedThreshold(Number(e.target.value))}
                       />
-                      <p className="text-[9px] text-slate-400 font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
+                      <p className="text-[9px] text-slate-200 font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
                     </div>
 
                     <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Low Match (Failed)</label>
+                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Low Match (Failed)</label>
                         <span className="text-sm font-black text-red-600 bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-100">{lowThreshold}%</span>
                       </div>
                       <input
@@ -4086,7 +4086,7 @@ function NewJob() {
                         value={lowThreshold}
                         onChange={(e) => setLowThreshold(Number(e.target.value))}
                       />
-                      <p className="text-[9px] text-slate-400 font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
+                      <p className="text-[9px] text-slate-200 font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
                     </div>
                   </div>
                 </div>
@@ -4106,7 +4106,7 @@ function NewJob() {
                   <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
                         <input
                           type="text"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4115,7 +4115,7 @@ function NewJob() {
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4125,7 +4125,7 @@ function NewJob() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
                         className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
@@ -4139,7 +4139,7 @@ function NewJob() {
                   <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
                         <input
                           type="text"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4148,7 +4148,7 @@ function NewJob() {
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4158,7 +4158,7 @@ function NewJob() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
                         className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
@@ -4172,7 +4172,7 @@ function NewJob() {
                   <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
                         <input
                           type="text"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4181,7 +4181,7 @@ function NewJob() {
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4191,7 +4191,7 @@ function NewJob() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
                         className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
@@ -4205,7 +4205,7 @@ function NewJob() {
                   <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
                         <input
                           type="text"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4214,7 +4214,7 @@ function NewJob() {
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4224,7 +4224,7 @@ function NewJob() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
                         className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
@@ -4238,7 +4238,7 @@ function NewJob() {
                   <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
                         <input
                           type="text"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4247,7 +4247,7 @@ function NewJob() {
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                        <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
                           className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -4257,7 +4257,7 @@ function NewJob() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
+                      <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
                         className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
@@ -5202,7 +5202,7 @@ function JobDetail() {
                    <RotateCcw className="w-3 h-3" /> Autonomous
                 </span>
               </div>
-              <p className="text-slate-400 text-sm max-w-lg leading-relaxed">
+              <p className="text-slate-200 text-sm max-w-lg leading-relaxed">
                 End-to-end AI screening — website voice interviews, instant fit scoring, and autonomous reporting.
               </p>
             </div>
@@ -5251,10 +5251,10 @@ function JobDetail() {
             <span className="font-black uppercase tracking-wider text-xs">Job Details & Description</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+            <span className="text-[10px] text-slate-200 font-semibold uppercase tracking-wider">
               {isJobDescCollapsed ? 'Expand to view' : 'Collapse'}
             </span>
-            <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-300", !isJobDescCollapsed && "rotate-180")} />
+            <ChevronDown className={cn("w-4 h-4 text-slate-200 transition-transform duration-300", !isJobDescCollapsed && "rotate-180")} />
           </div>
         </button>
 
@@ -5272,33 +5272,33 @@ function JobDetail() {
                 {job.requirements && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transparent/30 p-5 rounded-2xl border border-white/10">
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Role Type</span>
+                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Role Type</span>
                       <span className="text-xs font-bold text-slate-300">{job.requirements.role_type || 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Seniority</span>
+                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Seniority</span>
                       <span className="text-xs font-bold text-slate-300">{job.requirements.role_seniority || 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Min Experience</span>
+                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Min Experience</span>
                       <span className="text-xs font-bold text-slate-300">{job.requirements.min_experience_years !== undefined ? `${job.requirements.min_experience_years} Years` : 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Location</span>
+                      <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Location</span>
                       <span className="text-xs font-bold text-slate-300">{job.requirements.location_requirement || 'N/A'}</span>
                     </div>
                     {job.requirements.required_education && (
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Required Education</span>
+                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Required Education</span>
                         <span className="text-xs font-bold text-slate-300">{job.requirements.required_education}</span>
                       </div>
                     )}
                     {job.requirements.preferred_industries && job.requirements.preferred_industries.length > 0 && (
                       <div className="space-y-1 md:col-span-2 lg:col-span-3">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Preferred Industries</span>
+                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Preferred Industries</span>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {job.requirements.preferred_industries.map((ind, i) => (
-                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-[#21262d] text-slate-400 rounded-md">{ind}</span>
+                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-[#21262d] text-slate-200 rounded-md">{ind}</span>
                           ))}
                         </div>
                       </div>
@@ -5311,7 +5311,7 @@ function JobDetail() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {job.requirements.must_have_skills && job.requirements.must_have_skills.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Must-Have Skills</span>
+                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Must-Have Skills</span>
                         <div className="flex flex-wrap gap-1.5">
                           {job.requirements.must_have_skills.map((skill, i) => (
                             <span key={i} className="text-[10px] font-extrabold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg">{skill}</span>
@@ -5321,7 +5321,7 @@ function JobDetail() {
                     )}
                     {job.requirements.nice_to_have_skills && job.requirements.nice_to_have_skills.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Nice-To-Have Skills</span>
+                        <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Nice-To-Have Skills</span>
                         <div className="flex flex-wrap gap-1.5">
                           {job.requirements.nice_to_have_skills.map((skill, i) => (
                             <span key={i} className="text-[10px] font-extrabold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg">{skill}</span>
@@ -5334,8 +5334,8 @@ function JobDetail() {
 
                 {/* Job Description Text */}
                 <div className="space-y-2 border-t border-white/10 pt-5">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Full Job Description Context</span>
-                  <div className="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap font-medium max-h-80 overflow-y-auto transparent/20 p-4 rounded-xl border border-white/10/50 custom-scrollbar">
+                  <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Full Job Description Context</span>
+                  <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-medium max-h-80 overflow-y-auto transparent/20 p-4 rounded-xl border border-white/10/50 custom-scrollbar">
                     {job.description}
                   </div>
                 </div>
@@ -5356,7 +5356,7 @@ function JobDetail() {
           <Card key={s.label} className="p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between border-white/10 shadow-sm hover:shadow-md transition-shadow">
             <div className="text-center sm:text-left mb-2 sm:mb-0">
               <p className="text-2xl md:text-3xl font-black mb-1">{s.count}</p>
-              <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+              <p className="text-[9px] md:text-[10px] font-black text-slate-200 uppercase tracking-widest">{s.label}</p>
             </div>
             <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
               <svg className="w-12 h-12 md:w-14 md:h-14 -rotate-90">
@@ -5378,8 +5378,8 @@ function JobDetail() {
           <div className="sticky top-24 space-y-10">
             <details className="lg:block group open:mb-8 lg:open:mb-0" open>
               <summary className="list-none cursor-pointer lg:cursor-default flex items-center justify-between lg:mb-4">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Filters</h3>
-                <Filter className="w-4 h-4 text-slate-400 lg:hidden group-open:rotate-180 transition-transform" />
+                <h3 className="text-[10px] font-black text-slate-200 uppercase tracking-[0.2em]">Active Filters</h3>
+                <Filter className="w-4 h-4 text-slate-200 lg:hidden group-open:rotate-180 transition-transform" />
               </summary>
               <div className="space-y-8 mt-4 lg:mt-0">
                 <div>
@@ -5396,7 +5396,7 @@ function JobDetail() {
                         <input type="radio" className="hidden" name="status" value={status} checked={statusFilter === status} onChange={() => setStatusFilter(status)} />
                         <span className={cn(
                           "text-xs font-bold transition-colors truncate",
-                          statusFilter === status ? "text-brand-light" : "text-slate-400 group-hover:text-white"
+                          statusFilter === status ? "text-brand-light" : "text-slate-200 group-hover:text-white"
                         )}>{status}</span>
                       </label>
                     ))}
@@ -5416,7 +5416,7 @@ function JobDetail() {
                         <input type="radio" className="hidden" name="role" value={role} checked={roleFilter === role} onChange={() => setRoleFilter(role)} />
                         <span className={cn(
                           "text-xs font-bold transition-colors truncate",
-                          roleFilter === role ? "text-brand-light" : "text-slate-400 group-hover:text-white"
+                          roleFilter === role ? "text-brand-light" : "text-slate-200 group-hover:text-white"
                         )}>{role}</span>
                       </label>
                     ))}
@@ -5444,7 +5444,7 @@ function JobDetail() {
                             />
                             <span className={cn(
                               "text-xs font-bold transition-colors truncate",
-                              isChecked ? "text-brand-light font-black" : "text-slate-400 group-hover:text-white"
+                              isChecked ? "text-brand-light font-black" : "text-slate-200 group-hover:text-white"
                             )}>{tag}</span>
                           </label>
                         );
@@ -5475,7 +5475,7 @@ function JobDetail() {
                         {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1.5 truncate">
+                    <p className="text-[10px] text-slate-200 mt-1.5 truncate">
                       {uploadProgress.current === uploadProgress.total ? 'Processing complete' : `Target: ${uploadProgress.currentFileName || 'Initializing...'}`}
                     </p>
                   </div>
@@ -5483,10 +5483,10 @@ function JobDetail() {
 
                 {/* Progress and indicators */}
                 <div className="flex items-center gap-4 w-full md:w-auto md:justify-end">
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-200 shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5 text-slate-300" /> {uploadProgress.success}
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
+                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-200 shrink-0">
                     <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> {uploadProgress.skipped}
                   </div>
 
@@ -5508,7 +5508,7 @@ function JobDetail() {
                     </Button>
                   ) : (
                     uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && (
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-[#21262d] px-2 py-1 rounded border border-[#e6edf3]">
+                      <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-[#21262d] px-2 py-1 rounded border border-[#e6edf3]">
                         <Clock className="w-3.5 h-3.5 animate-spin" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
                       </span>
                     )
@@ -5518,7 +5518,7 @@ function JobDetail() {
 
               {/* Dynamic Console Telemetry Logs */}
               {uploadProgress.logs && uploadProgress.logs.length > 0 && (
-                <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-400 h-32 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+                <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-200 h-32 overflow-y-auto border border-[#161b22] space-y-1 text-left">
                   {uploadProgress.logs.map((log, i) => (
                     <div key={i} className={cn(log.includes('[Pass]') ? "text-emerald-400" : "text-slate-300")}>
                       <span className="text-cyan-400">➜</span> {log}
@@ -5533,7 +5533,7 @@ function JobDetail() {
             <div className="flex items-center gap-4">
               <div>
                 <h2 className="text-2xl font-black">Candidates ({filteredCandidates.length})</h2>
-                <p className="text-slate-400 text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
+                <p className="text-slate-200 text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
               </div>
               {candidates.length > 0 && (
                 <Button 
@@ -5584,7 +5584,7 @@ function JobDetail() {
               )}
               <div className="flex flex-wrap items-center gap-2 bg-[#21262d] p-1 rounded-xl border border-[#e6edf3]">
                 <div className="flex items-center gap-2 px-2 border-r border-[#e6edf3] h-7">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort</span>
+                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sort</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
                     value={sortBy} 
@@ -5596,7 +5596,7 @@ function JobDetail() {
                   </select>
                 </div>
                 <div className="flex items-center gap-2 px-2 border-r border-[#e6edf3] h-7">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
+                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
                     value={statusFilter} 
@@ -5609,7 +5609,7 @@ function JobDetail() {
                   </select>
                 </div>
                 <div className="flex items-center gap-2 px-2 h-7">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</span>
+                  <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Role</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[80px] sm:max-w-[120px] truncate" 
                     value={roleFilter} 
@@ -5623,7 +5623,7 @@ function JobDetail() {
                 </div>
               </div>
               <div className="relative group flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-200 group-focus-within:text-brand transition-colors" />
                 <input 
                   type="text" 
                   placeholder="Search candidates..." 
@@ -5635,13 +5635,13 @@ function JobDetail() {
               <div className="flex bg-[#21262d] p-1 rounded-xl border border-[#e6edf3] h-9 shrink-0">
                 <button 
                   onClick={() => setViewMode('list')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-400")}
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-200")}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setViewMode('grid')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-400")}
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-200")}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -5652,10 +5652,10 @@ function JobDetail() {
           {filteredCandidates.length === 0 ? (
             <div className="p-20 text-center border-2 border-dashed border-[#e6edf3] rounded-2xl glass-premium/50">
               <div className="w-16 h-16 bg-[#21262d] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#e6edf3]">
-                <Users className="w-8 h-8 text-slate-400" />
+                <Users className="w-8 h-8 text-slate-200" />
               </div>
               <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">No Matching Candidates</h3>
-              <p className="text-slate-400 text-xs">Adjust your search or filters to find specific applicants.</p>
+              <p className="text-slate-200 text-xs">Adjust your search or filters to find specific applicants.</p>
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6">
@@ -5691,7 +5691,7 @@ function JobDetail() {
                                 <Sparkles className="w-2.5 h-2.5 animate-pulse" /> Forensic Screening
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 ">
+                            <p className="text-[10px] text-slate-200 font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 ">
                               {candidate.currentRole} 
                               <span className="w-1 h-1 rounded-full bg-[#c9d1d9]" />
                               Active Session
@@ -5711,7 +5711,7 @@ function JobDetail() {
                             <div className="w-2 h-2 rounded-full bg-brand animate-ping" />
                             Analyzing Resume Stack
                           </div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-200 animate-pulse">
                             Generating Scorecard...
                           </div>
                         </div>
@@ -5782,7 +5782,7 @@ function JobDetail() {
                         "w-14 h-14 rounded-2xl border flex items-center justify-center font-black text-xl shrink-0 transition-colors",
                         isBestMatch 
                           ? "bg-brand-dark text-white border-brand-dark shadow-lg" 
-                          : "transparent border-white/10 text-slate-400 group-hover:bg-brand/10 group-hover:text-brand"
+                          : "transparent border-white/10 text-slate-200 group-hover:bg-brand/10 group-hover:text-brand"
                       )}>
                         {candidate.fullName.charAt(0)}
                       </div>
@@ -5799,7 +5799,7 @@ function JobDetail() {
                            )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-1.5 ">
+                          <p className="text-[10px] text-slate-200 font-black uppercase tracking-widest flex items-center gap-1.5 ">
                             {candidate.currentRole} 
                             <span className="w-1 h-1 rounded-full bg-[#e6edf3]" />
                             {formatDate(candidate.createdAt)}
@@ -5823,12 +5823,12 @@ function JobDetail() {
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-8 h-14 overflow-hidden content-start">
                        {candidate.scorecard.skillsAnalysis?.confirmed?.slice(0, 6).map((skill, ridx) => (
-                         <span key={ridx} className="px-2 py-1 transparent text-slate-400 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                         <span key={ridx} className="px-2 py-1 transparent text-slate-200 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                            {skill}
                          </span>
                        ))}
                        {candidate.scorecard.skillsAnalysis?.confirmed?.length > 6 && (
-                         <span className="px-2 py-1 bg-[#21262d] text-slate-400 rounded-lg border border-[#e6edf3] text-[10px] font-black uppercase tracking-widest">
+                         <span className="px-2 py-1 bg-[#21262d] text-slate-200 rounded-lg border border-[#e6edf3] text-[10px] font-black uppercase tracking-widest">
                            +{candidate.scorecard.skillsAnalysis.confirmed.length - 6}
                          </span>
                        )}
@@ -5850,7 +5850,7 @@ function JobDetail() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-light hover:bg-brand/10 border border-transparent hover:border-brand/10"
+                          className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand-light hover:bg-brand/10 border border-transparent hover:border-brand/10"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRetryScreening(candidate);
@@ -5898,10 +5898,10 @@ function JobDetail() {
                           }}
                         />
                       </th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
-                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Score</th>
-                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-slate-200 uppercase tracking-widest">Candidate</th>
+                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">Score</th>
+                      <th className="px-6 py-4 text-center text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</th>
+                      <th className="px-6 py-4 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -5937,7 +5937,7 @@ function JobDetail() {
                                       <Sparkles className="w-2.5 h-2.5 mr-0.5 animate-pulse" /> Screening
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Active session</p>
+                                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">Active session</p>
                                 </div>
                               </div>
                             </td>
@@ -5959,7 +5959,7 @@ function JobDetail() {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <span className="text-[10px] font-bold text-slate-400">Forensic Indexing...</span>
+                              <span className="text-[10px] font-bold text-slate-200">Forensic Indexing...</span>
                             </td>
                           </tr>
                         );
@@ -5995,7 +5995,7 @@ function JobDetail() {
                              <div className="flex items-center gap-3">
                                 <div className={cn(
                                   "w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs",
-                                  isBestMatch ? "bg-brand-dark text-white" : "bg-[#21262d] text-slate-400"
+                                  isBestMatch ? "bg-brand-dark text-white" : "bg-[#21262d] text-slate-200"
                                 )}>
                                   {candidate.fullName.charAt(0)}
                                 </div>
@@ -6016,7 +6016,7 @@ function JobDetail() {
                                       </span>
                                     )}
                                   </div>
-                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{candidate.currentRole}</p>
+                                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">{candidate.currentRole}</p>
                                   {candidate.profileTags && candidate.profileTags.length > 0 && (
                                     <div className="flex flex-wrap gap-1 mt-1">
                                       {candidate.profileTags.map((tag, i) => (
@@ -6059,7 +6059,7 @@ function JobDetail() {
                           <td className="px-6 py-4 text-center">
                              <span className={cn(
                                 "text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest",
-                                candidate.status === 'processed' ? "bg-green-50 text-green-600" : "bg-[#21262d] text-slate-400"
+                                candidate.status === 'processed' ? "bg-green-50 text-green-600" : "bg-[#21262d] text-slate-200"
                              )}>
                                {candidate.status}
                              </span>
@@ -6069,7 +6069,7 @@ function JobDetail() {
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
-                                  className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-light"
+                                  className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand-light"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRetryScreening(candidate);
@@ -6123,7 +6123,7 @@ function JobDetail() {
         title="Scoring Configuration & Threshold Rules"
       >
         <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-          <p className="text-xs font-semibold text-slate-400 leading-relaxed">
+          <p className="text-xs font-semibold text-slate-200 leading-relaxed">
             Specify customized candidate screening dimensions, weights, and match-classification thresholds. Updates are real-time and saved directly to the database.
           </p>
 
@@ -6135,7 +6135,7 @@ function JobDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 p-3 transparent rounded-xl border border-white/10">
                 <div className="flex justify-between items-center">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Passed Match</label>
+                  <label className="text-[9px] font-black text-slate-200 uppercase tracking-widest">Passed Match</label>
                   <span className="text-xs font-black text-green-600 glass-premium px-2 py-0.5 rounded border border-green-100">{editPassedThresh}%</span>
                 </div>
                 <input
@@ -6150,7 +6150,7 @@ function JobDetail() {
 
               <div className="space-y-2 p-3 transparent rounded-xl border border-white/10">
                 <div className="flex justify-between items-center">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Low Match (Fail)</label>
+                  <label className="text-[9px] font-black text-slate-200 uppercase tracking-widest">Low Match (Fail)</label>
                   <span className="text-xs font-black text-red-600 glass-premium px-2 py-0.5 rounded border border-red-100">{editLowThresh}%</span>
                 </div>
                 <input
@@ -6180,7 +6180,7 @@ function JobDetail() {
             <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 1 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 1 Name</label>
                   <input
                     type="text"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6189,7 +6189,7 @@ function JobDetail() {
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6210,7 +6210,7 @@ function JobDetail() {
             <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 2 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 2 Name</label>
                   <input
                     type="text"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6219,7 +6219,7 @@ function JobDetail() {
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6240,7 +6240,7 @@ function JobDetail() {
             <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 3 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 3 Name</label>
                   <input
                     type="text"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6249,7 +6249,7 @@ function JobDetail() {
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
@@ -6270,7 +6270,7 @@ function JobDetail() {
             <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 4 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 4 Name</label>
                   <input
                     type="text"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6279,7 +6279,7 @@ function JobDetail() {
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
@@ -6300,7 +6300,7 @@ function JobDetail() {
             <div className="p-4 transparent border border-white/10 rounded-xl space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-8 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 5 Name</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 5 Name</label>
                   <input
                     type="text"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
@@ -6309,7 +6309,7 @@ function JobDetail() {
                   />
                 </div>
                 <div className="md:col-span-4 space-y-1">
-                  <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
+                  <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
                     className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
@@ -6375,7 +6375,7 @@ function JobDetail() {
           <div className="space-y-6">
             <div className="p-4 transparent border border-white/10 rounded-2xl text-left space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Candidate Profile</span>
+                <span className="text-[10px] font-black uppercase text-slate-200 tracking-wider">Candidate Profile</span>
                 {inviteEmailInput ? (
                   <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Email Extracted
@@ -6388,7 +6388,7 @@ function JobDetail() {
               </div>
               <div className="space-y-1">
                 <h4 className="text-sm font-extrabold text-slate-300">{activeInviteCandidate.fullName}</h4>
-                <p className="text-xs text-slate-400 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+                <p className="text-xs text-slate-200 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
               </div>
             </div>
 
@@ -6401,13 +6401,13 @@ function JobDetail() {
                   </div>
                   <div className="space-y-1">
                     <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 1: Send Email Invite</h5>
-                    <p className="text-[11px] text-slate-400 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recipient Email Address</label>
+                    <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
                       className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
@@ -6456,7 +6456,7 @@ function JobDetail() {
                   </div>
                   <div className="space-y-1">
                     <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
-                    <p className="text-[11px] text-slate-400 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
+                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
                   </div>
                 </div>
 
@@ -6467,7 +6467,7 @@ function JobDetail() {
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-[#e6edf3] text-slate-400 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-[#e6edf3] text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -6486,7 +6486,7 @@ function JobDetail() {
               <Button
                 variant="outline"
                 type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-400 border-[#e6edf3] rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-[#e6edf3] rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
@@ -6529,10 +6529,10 @@ function JobDetail() {
             
             <div className="space-y-1">
               <h4 className="text-sm font-black text-slate-300 uppercase tracking-widest">Analyzing Candidate Files</h4>
-              <p className="text-xs text-slate-400">Executing LLM scoring engine against target job profile.</p>
+              <p className="text-xs text-slate-200">Executing LLM scoring engine against target job profile.</p>
             </div>
 
-            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-400 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-slate-200 h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
               {screeningPreUploadedLogs.map((log, i) => (
                 <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
                   <span className="text-cyan-400">➜</span> {log}
@@ -6542,12 +6542,12 @@ function JobDetail() {
           </div>
         ) : (
           <div className="p-6 space-y-6 text-left">
-            <p className="text-xs font-semibold text-slate-400 leading-relaxed">
+            <p className="text-xs font-semibold text-slate-200 leading-relaxed">
               Select one or more candidates from your organization's historical talent pool to screen against this job role.
             </p>
 
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <Search className="w-4 h-4 text-slate-200 absolute left-3 top-3" />
               <input
                 type="text"
                 className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
@@ -6561,10 +6561,10 @@ function JobDetail() {
               {loadingOrgCandidates ? (
                 <div className="p-10 text-center flex flex-col items-center justify-center space-y-2">
                   <Loader2 className="w-6 h-6 text-brand-light animate-spin" />
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">Loading Resumes...</p>
+                  <p className="text-xs text-slate-200 font-bold uppercase tracking-widest animate-pulse">Loading Resumes...</p>
                 </div>
               ) : filteredAndUnscreenedResumes.length === 0 ? (
-                <div className="p-10 text-center text-slate-400 text-xs">No resumes found.</div>
+                <div className="p-10 text-center text-slate-200 text-xs">No resumes found.</div>
               ) : (
                 filteredAndUnscreenedResumes.map(candidate => {
                   const candKey = candidate.resumeHash || `${(candidate.fullName || '').toLowerCase()}_${(candidate.email || '').toLowerCase()}`;
@@ -6601,15 +6601,15 @@ function JobDetail() {
                         />
                         <div className="min-w-0">
                           <h4 className="text-xs font-bold text-slate-300 truncate">{candidate.fullName}</h4>
-                          <p className="text-[10px] text-slate-400 font-semibold truncate">{candidate.email}</p>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight truncate mt-0.5">
+                          <p className="text-[10px] text-slate-200 font-semibold truncate">{candidate.email}</p>
+                          <p className="text-[9px] text-slate-200 font-bold uppercase tracking-tight truncate mt-0.5">
                             {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {candidate.alreadyScreened ? (
-                          <span className="text-[8px] font-black bg-[#e6edf3] text-slate-400 border border-[#c9d1d9] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                          <span className="text-[8px] font-black bg-[#e6edf3] text-slate-200 border border-[#c9d1d9] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                         ) : (
                           <span className="text-[9px] font-black text-brand-light bg-brand/10 px-2 py-0.5 rounded-lg border border-brand/20">
                             Best Fit: {candidate.bestScore}%
@@ -7192,7 +7192,7 @@ function CandidateDetail() {
     return unsub;
   }, [candidateId, profile]);
 
-  if (loading) return <div className="h-screen flex items-center justify-center font-medium text-slate-400">Loading screening report...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center font-medium text-slate-200">Loading screening report...</div>;
   if (!candidate) return <div className="p-20 text-center">Candidate report not found</div>;
 
   const { scorecard } = candidate;
@@ -7450,7 +7450,7 @@ function CandidateDetail() {
               </>
             )}
            </Button>
-           <Button variant="outline" className="text-slate-400 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
+           <Button variant="outline" className="text-slate-200 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
              <Database className="w-3.5 h-3.5 mr-1 sm:mr-2" /> PDF
            </Button>
            <Button
@@ -7547,7 +7547,7 @@ function CandidateDetail() {
               
               <div className="p-8 space-y-6">
                 <div>
-                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Available Slots (Grounding Analysis)</h4>
+                  <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Available Slots (Grounding Analysis)</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[300px] overflow-auto pr-2 custom-scrollbar">
                     {availableSlots.length > 0 ? availableSlots.map((slot, i) => (
                       <button
@@ -7557,7 +7557,7 @@ function CandidateDetail() {
                           "p-4 rounded-xl border text-left transition-all",
                           selectedSlot?.start === slot.start 
                             ? "bg-brand-dark border-brand-dark text-white shadow-lg" 
-                            : "transparent border-white/10 text-slate-400 hover:border-brand-light"
+                            : "transparent border-white/10 text-slate-200 hover:border-brand-light"
                         )}
                       >
                         <div className="flex items-center gap-2 mb-1">
@@ -7567,7 +7567,7 @@ function CandidateDetail() {
                         <div className="text-[10px] font-black opacity-80">{slot.label.split(' @ ')[0]}</div>
                       </button>
                     )) : (
-                      <p className="text-sm text-slate-400 italic py-8 text-center col-span-2">No available slots found in the next 14 days. Please check your calendar settings.</p>
+                      <p className="text-sm text-slate-200 italic py-8 text-center col-span-2">No available slots found in the next 14 days. Please check your calendar settings.</p>
                     )}
                   </div>
                 </div>
@@ -7588,8 +7588,8 @@ function CandidateDetail() {
                   </div>
                 )}
                 
-                <p className="text-[10px] text-slate-400 text-center italic">
-                  Scheduling an interview will automatically create a Google Meet link and send a calendar invitation to <span className="font-bold text-slate-400">{candidate.email}</span>.
+                <p className="text-[10px] text-slate-200 text-center italic">
+                  Scheduling an interview will automatically create a Google Meet link and send a calendar invitation to <span className="font-bold text-slate-200">{candidate.email}</span>.
                 </p>
               </div>
             </Card>
@@ -7649,7 +7649,7 @@ function CandidateDetail() {
                       <span className="text-[10px] font-black text-red-500">-{flag.penalty} pts</span>
                    </div>
                    <h4 className="font-black text-white text-sm mb-1 uppercase tracking-tight">{flag.label}</h4>
-                   <p className="text-xs text-slate-400 leading-relaxed italic">{flag.rationale}</p>
+                   <p className="text-xs text-slate-200 leading-relaxed italic">{flag.rationale}</p>
                 </div>
               ))}
            </div>
@@ -7675,10 +7675,10 @@ function CandidateDetail() {
              "w-32 h-32 rounded-3xl flex flex-col items-center justify-center shrink-0 border-4 shadow-lg shadow-black/40 backdrop-blur-md",
               scorecard?.recommendation?.status === 'perfect' ? "bg-green-500/10 border-green-500/40 text-green-400" :
               scorecard?.recommendation?.status === 'strong' ? "bg-brand/10 border-brand/40 text-brand-light" :
-              scorecard?.recommendation?.status === 'potential' ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-slate-500/10 border-slate-500/40 text-slate-400"
+              scorecard?.recommendation?.status === 'potential' ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-slate-500/10 border-slate-500/40 text-slate-200"
           )}>
             <span className="text-5xl font-black tracking-tighter">{scorecard?.compositeScore || 0}</span>
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Match Index</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-200 mt-1">Match Index</span>
           </div>
           <div className="flex-1 text-center md:text-left space-y-3">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
@@ -7717,7 +7717,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'core' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-slate-300 hover:transparent"
+              : "text-slate-200 hover:text-slate-300 hover:transparent"
           )}
         >
           <FileText className="w-4 h-4" />
@@ -7730,7 +7730,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'offer' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-slate-300 hover:transparent"
+              : "text-slate-200 hover:text-slate-300 hover:transparent"
           )}
         >
           <Award className="w-4 h-4" />
@@ -7743,7 +7743,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'campaign' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-slate-300 hover:transparent"
+              : "text-slate-200 hover:text-slate-300 hover:transparent"
           )}
         >
           <Send className="w-4 h-4" />
@@ -7756,7 +7756,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'proctoring' 
               ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-slate-300 hover:transparent"
+              : "text-slate-200 hover:text-slate-300 hover:transparent"
           )}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -7785,7 +7785,7 @@ function CandidateDetail() {
             </div>
           )}
           {!researching && candidate.research && (
-             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-[#30363d] px-2 py-1 rounded">
+             <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest bg-[#30363d] px-2 py-1 rounded">
                Last validated {formatDateTime(candidate.research.lastResearchedAt)}
              </span>
           )}
@@ -7802,7 +7802,7 @@ function CandidateDetail() {
                 <div className="h-2 bg-[#21262d] rounded-full w-5/6 animate-pulse mx-auto" />
                 <div className="h-2 bg-[#21262d] rounded-full w-4/6 animate-pulse mx-auto" />
               </div>
-              <p className="text-xs text-slate-400 mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
+              <p className="text-xs text-slate-200 mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
             </div>
           ) : candidate.research ? (
             (() => {
@@ -7870,7 +7870,7 @@ function CandidateDetail() {
                           <p className="text-xs font-bold text-slate-300">
                             {isUnverified ? 'Unverified Audit Profile' : 'Verified Identity Level'}
                           </p>
-                          <p className="text-[11px] text-slate-400 mt-1">
+                          <p className="text-[11px] text-slate-200 mt-1">
                             {isUnverified 
                               ? 'Profile falls below the 85% confidence threshold. Sensitive insights are hidden.' 
                               : `Excellent identity resolution from verified professional social registries.`
@@ -7907,7 +7907,7 @@ function CandidateDetail() {
                                 <span className="text-xs font-black text-slate-300">{p.name}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-slate-400'}`}>
+                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-slate-200'}`}>
                                   {isVer ? 'Verified' : 'Unverified'}
                                 </span>
                                 {isVer ? (
@@ -7975,8 +7975,8 @@ function CandidateDetail() {
                               </div>
                               
                               <div className="p-3 transparent rounded-xl border border-white/10 space-y-2">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Growth Trajectory</span>
-                                <p className="text-xs text-slate-400 leading-relaxed font-semibold">{growthTrajectory}</p>
+                                <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block">Growth Trajectory</span>
+                                <p className="text-xs text-slate-200 leading-relaxed font-semibold">{growthTrajectory}</p>
                               </div>
                             </div>
                           </div>
@@ -8007,20 +8007,20 @@ function CandidateDetail() {
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="p-4 transparent rounded-xl border border-white/10 space-y-2 text-center">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Engineering Depth</span>
+                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Engineering Depth</span>
                               <div className="text-3xl font-black text-brand-light">{engDepth}%</div>
-                              <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Based on codebase validation and engineering design overlap.</p>
+                              <p className="text-[10px] text-slate-200 font-medium leading-relaxed">Based on codebase validation and engineering design overlap.</p>
                             </div>
                             <div className="p-4 transparent rounded-xl border border-white/10 space-y-2 text-center">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Problem Solving</span>
+                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Problem Solving</span>
                               <div className="text-3xl font-black text-brand-light">{problemSolving}%</div>
-                              <p className="text-[10px] text-slate-400 font-medium leading-relaxed font-sans">Derived from community contributions, stack trace, and complexity metrics.</p>
+                              <p className="text-[10px] text-slate-200 font-medium leading-relaxed font-sans">Derived from community contributions, stack trace, and complexity metrics.</p>
                             </div>
                           </div>
 
                           <div className="p-3.5 transparent rounded-xl border border-white/10 space-y-1">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1 font-sans">Technical Insights Narrative</span>
-                            <p className="text-xs text-slate-400 leading-relaxed font-sans">{res.technical_depth || 'Technical alignment verified across primary languages and architectures.'}</p>
+                            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1 font-sans">Technical Insights Narrative</span>
+                            <p className="text-xs text-slate-200 leading-relaxed font-sans">{res.technical_depth || 'Technical alignment verified across primary languages and architectures.'}</p>
                           </div>
                         </div>
 
@@ -8043,13 +8043,13 @@ function CandidateDetail() {
 
                           <div className="space-y-4 font-sans">
                             <div className="p-3.5 transparent rounded-xl border border-white/10 space-y-1">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Communication Quality Check</span>
-                              <p className="text-xs text-slate-400 leading-relaxed font-semibold">{communicationQuality}</p>
+                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1">Communication Quality Check</span>
+                              <p className="text-xs text-slate-200 leading-relaxed font-semibold">{communicationQuality}</p>
                             </div>
 
                             <div className="p-3.5 transparent rounded-xl border border-white/10 space-y-1">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Leadership Potential</span>
-                              <p className="text-xs text-slate-400 leading-relaxed">{res.leadership_potential || 'Capable of leading technical scopes and guiding complex features proactively.'}</p>
+                              <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1">Leadership Potential</span>
+                              <p className="text-xs text-slate-200 leading-relaxed">{res.leadership_potential || 'Capable of leading technical scopes and guiding complex features proactively.'}</p>
                             </div>
                           </div>
                         </div>
@@ -8079,7 +8079,7 @@ function CandidateDetail() {
                             <p className="text-xs font-bold text-slate-300">
                               {riskScore > 20 ? 'Potential inconsistencies detected:' : 'No potential inconsistencies detected.'}
                             </p>
-                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                            <p className="text-xs text-slate-200 mt-1 leading-relaxed">
                               {riskSignals}
                             </p>
                           </div>
@@ -8107,7 +8107,7 @@ function CandidateDetail() {
                             className={`block p-3 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-[#21262d]/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-[11px] font-bold text-slate-400 line-clamp-1 group-hover:text-brand-light italic">
+                              <span className="text-[11px] font-bold text-slate-200 line-clamp-1 group-hover:text-brand-light italic">
                                 {source.title || source.uri}
                               </span>
                               {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-brand-light shrink-0" />}
@@ -8115,7 +8115,7 @@ function CandidateDetail() {
                           </a>
                         ))}
                         {sources.length === 0 && (
-                          <p className="text-xs text-slate-400 italic">No public references compiled.</p>
+                          <p className="text-xs text-slate-200 italic">No public references compiled.</p>
                         )}
                       </div>
                     </div>
@@ -8127,7 +8127,7 @@ function CandidateDetail() {
                           <CheckCircle2 className="text-brand-light w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-wider">Audit Integrity (v5.0)</span>
                         </div>
-                        <p className="text-[10px] text-slate-400 leading-relaxed italic font-sans">
+                        <p className="text-[10px] text-slate-200 leading-relaxed italic font-sans">
                           Multi-source background synthesis. Built in real-time under zero-trust guidelines. Verify physical certs before hire.
                         </p>
                       </div>
@@ -8155,7 +8155,7 @@ function CandidateDetail() {
                 <Globe className="w-10 h-10 text-slate-300" />
               </div>
               <h4 className="text-xl font-black text-white mb-2">Footprint Analysis Missing</h4>
-              <p className="text-sm text-slate-400 max-w-md mx-auto mb-8">
+              <p className="text-sm text-slate-200 max-w-md mx-auto mb-8">
                 Perform a deep web research to uncover the candidate's professional presence across LinkedIn, GitHub, industry registries, and public portfolios.
               </p>
               <Button 
@@ -8183,7 +8183,7 @@ function CandidateDetail() {
                 <FileText className="w-5 h-5 text-brand" />
                 D6+ Forensic Analysis Reports
               </h2>
-              <p className="text-xs text-slate-400 font-semibold tracking-wide">Deconstructed adversarial talent reports across major scoring dimensions</p>
+              <p className="text-xs text-slate-200 font-semibold tracking-wide">Deconstructed adversarial talent reports across major scoring dimensions</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -8196,10 +8196,10 @@ function CandidateDetail() {
                     </div>
                     <div>
                       <h3 className="font-black text-white text-sm uppercase tracking-wider">D6 Executive Summary & Match Narrative</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">CORE FIT & SYNTHESIS</p>
+                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">CORE FIT & SYNTHESIS</p>
                     </div>
                   </div>
-                  <div className="text-slate-400 text-xs sm:text-sm leading-relaxed prose prose-indigo max-w-none flex-1">
+                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-indigo max-w-none flex-1">
                     <Markdown>{d6Sections.executiveSummary}</Markdown>
                   </div>
                 </Card>
@@ -8214,10 +8214,10 @@ function CandidateDetail() {
                     </div>
                     <div>
                       <h3 className="font-black text-white text-sm uppercase tracking-wider">Dimensional Performance Ledger</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">D1-D5 BREAKDOWN DECONSTRUCTION</p>
+                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">D1-D5 BREAKDOWN DECONSTRUCTION</p>
                     </div>
                   </div>
-                  <div className="text-slate-400 text-xs sm:text-sm leading-relaxed prose prose-blue max-w-none flex-1">
+                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-blue max-w-none flex-1">
                     <Markdown>{d6Sections.performanceLedger}</Markdown>
                   </div>
                 </Card>
@@ -8232,10 +8232,10 @@ function CandidateDetail() {
                     </div>
                     <div>
                       <h3 className="font-black text-white text-sm uppercase tracking-wider">D6 Auditing, Penalties & Anomalies</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">ADVERSARIAL STABILITY & GAP EVALUATION</p>
+                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">ADVERSARIAL STABILITY & GAP EVALUATION</p>
                     </div>
                   </div>
-                  <div className="text-slate-400 text-xs sm:text-sm leading-relaxed prose prose-amber max-w-none flex-1">
+                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-amber max-w-none flex-1">
                     <Markdown>{d6Sections.auditingAnomalies}</Markdown>
                   </div>
                 </Card>
@@ -8250,10 +8250,10 @@ function CandidateDetail() {
                     </div>
                     <div>
                       <h3 className="font-black text-white text-sm uppercase tracking-wider">Hiring Recommendation & Interview Strategy</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">PRESCRIPTIVE PANEL EVALUATION QUESTIONS</p>
+                      <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">PRESCRIPTIVE PANEL EVALUATION QUESTIONS</p>
                     </div>
                   </div>
-                  <div className="text-slate-400 text-xs sm:text-sm leading-relaxed prose prose-emerald max-w-none flex-1">
+                  <div className="text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-emerald max-w-none flex-1">
                     <Markdown>{d6Sections.interviewStrategy}</Markdown>
                   </div>
                 </Card>
@@ -8267,29 +8267,29 @@ function CandidateDetail() {
         {/* Profile Details */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="p-6">
-             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Quick Stats</h3>
+             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Quick Stats</h3>
              <div className="space-y-4">
                <div>
                  <p className="text-sm font-bold text-white">{candidate.currentRole}</p>
-                 <p className="text-xs text-slate-400">@{candidate.currentCompany}</p>
+                 <p className="text-xs text-slate-200">@{candidate.currentCompany}</p>
                </div>
                <div className="flex justify-between items-center py-3 border-y border-slate-50">
-                 <span className="text-sm text-slate-400">Exp. Years</span>
+                 <span className="text-sm text-slate-200">Exp. Years</span>
                  <span className="font-bold text-brand-light">{candidate.totalExperience}Y</span>
                </div>
                <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                 <span className="text-sm text-slate-400">Location</span>
+                 <span className="text-sm text-slate-200">Location</span>
                  <span className="font-bold">{candidate.location}</span>
                </div>
                <div className="flex justify-between items-center pt-1">
-                 <span className="text-sm text-slate-400">Screened On</span>
+                 <span className="text-sm text-slate-200">Screened On</span>
                  <span className="text-sm font-bold text-slate-300">{formatDateTime(candidate.createdAt)}</span>
                </div>
              </div>
           </Card>
 
           <Card className="p-6 transparent">
-             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Red Flags (D6)</h3>
+             <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Red Flags (D6)</h3>
              <div className="space-y-4">
                {scorecard?.dimensions?.redFlags?.flags?.length > 0 ? scorecard.dimensions.redFlags.flags.map((flag, idx) => (
                  <div key={idx} className="glass-premium p-4 rounded-xl border border-white/10 flex flex-col gap-2 shadow-sm">
@@ -8301,13 +8301,13 @@ function CandidateDetail() {
                      <p className="text-sm font-black text-slate-300">{flag.label}</p>
                      <span className="ml-auto text-[10px] text-red-500 font-black uppercase tracking-tighter">-{flag.penalty} pts</span>
                    </div>
-                   <p className="text-xs text-slate-400 leading-relaxed italic border-l-2 border-white/10 pl-3 py-1">
+                   <p className="text-xs text-slate-200 leading-relaxed italic border-l-2 border-white/10 pl-3 py-1">
                      {flag.rationale}
                    </p>
                  </div>
                )) : (
                  <div className="p-4 text-center border-2 border-dashed border-[#e6edf3] rounded-xl">
-                   <p className="text-xs text-slate-400">No risk signals detected.</p>
+                   <p className="text-xs text-slate-200">No risk signals detected.</p>
                  </div>
                )}
                <div className="pt-2 flex justify-between items-center text-xs font-black uppercase border-t border-[#e6edf3] mt-2">
@@ -8318,7 +8318,7 @@ function CandidateDetail() {
           </Card>
 
            <Card className="p-6">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Confirmed Skill Tags</h3>
+              <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Confirmed Skill Tags</h3>
               <div className="flex flex-wrap gap-1.5">
                 {scorecard?.skillsAnalysis?.confirmed?.map((s, idx) => (
                   <span key={idx} className="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-black rounded uppercase tracking-tighter border border-green-100 italic">
@@ -8336,7 +8336,7 @@ function CandidateDetail() {
                  </div>
                  <div>
                    <h4 className="font-extrabold text-slate-300 text-sm">Composio Integrations</h4>
-                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Gmail & Google Calendar</p>
+                   <p className="text-[10px] text-slate-200 font-semibold uppercase">Gmail & Google Calendar</p>
                  </div>
               </div>
               
@@ -8354,13 +8354,13 @@ function CandidateDetail() {
                       Disconnect
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                  <p className="text-[10px] text-slate-200 leading-relaxed">
                     Your Gmail and Google Calendar are connected via Composio. Invites and schedule events will route through Composio.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-slate-400 leading-normal">
+                  <p className="text-xs text-slate-200 leading-normal">
                     Link your Google Workspace in one click to enable automatic interview invitations via Gmail and Google Calendar scheduling.
                   </p>
                   <Button
@@ -8388,13 +8388,13 @@ function CandidateDetail() {
                  </div>
                  <div>
                    <h4 className="font-extrabold text-slate-300 text-sm">AI Meeting Recorder Bot</h4>
-                   <p className="text-[10px] text-slate-400 font-semibold uppercase">External Meeting Capture</p>
+                   <p className="text-[10px] text-slate-200 font-semibold uppercase">External Meeting Capture</p>
                  </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 transparent border border-slate-150 rounded-xl">
-                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Bot Status</span>
+                  <span className="text-[10px] font-black uppercase text-slate-200 tracking-wider">Bot Status</span>
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "w-2 h-2 rounded-full",
@@ -8411,7 +8411,7 @@ function CandidateDetail() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
+                  <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
                   <input
                     type="text"
                     className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
@@ -8422,7 +8422,7 @@ function CandidateDetail() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Bot Display Name</label>
+                  <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Bot Display Name</label>
                   <input
                     type="text"
                     className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
@@ -8455,7 +8455,7 @@ function CandidateDetail() {
 
                 {recordingUrl && (
                   <div className="space-y-2 pt-3 border-t border-white/10 animate-in fade-in duration-500">
-                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recorded Meeting Stream</span>
+                    <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recorded Meeting Stream</span>
                     <div className="relative rounded-2xl overflow-hidden border border-[#e6edf3] shadow-lg transparent aspect-video">
                       <video
                         src={recordingUrl}
@@ -8477,7 +8477,7 @@ function CandidateDetail() {
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-black">D6 Scoring Engine</h2>
                 <div className="group relative">
-                  <Info className="w-4 h-4 text-slate-400 cursor-help" />
+                  <Info className="w-4 h-4 text-slate-200 cursor-help" />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 glass-premium text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none">
                     <p className="leading-relaxed">
                       <span className="font-black text-brand-light block mb-1 uppercase tracking-widest">D6+ Scoring Architecture</span>
@@ -8488,7 +8488,7 @@ function CandidateDetail() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400">Integrity Score:</span>
+                <span className="text-xs font-bold text-slate-200">Integrity Score:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
                   (candidate.scorecard.integrityScore || 100) >= 90 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
@@ -8497,7 +8497,7 @@ function CandidateDetail() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400">Signal Density:</span>
+                <span className="text-xs font-bold text-slate-200">Signal Density:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
                   (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-light" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-[#21262d] text-slate-300" : "bg-red-100 text-red-700"
@@ -8506,7 +8506,7 @@ function CandidateDetail() {
                 </span>
                 {candidate.scorecard.dimensions?.signalDensity?.rationale && (
                   <div className="group relative">
-                    <Info className="w-3 h-3 text-slate-400 cursor-help" />
+                    <Info className="w-3 h-3 text-slate-200 cursor-help" />
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 glass-premium text-white text-[8px] font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none">
                       {candidate.scorecard.dimensions.signalDensity.rationale}
                     </div>
@@ -8588,7 +8588,7 @@ function CandidateDetail() {
                   amber: { bg: 'bg-amber-50/10', text: 'text-amber-400', bgActive: 'bg-amber-50', textActive: 'text-amber-600', border: 'border-amber-100' },
                   rose: { bg: 'bg-rose-50/10', text: 'text-rose-400', bgActive: 'bg-rose-50', textActive: 'text-rose-600', border: 'border-rose-100' },
                 };
-                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-400', bgActive: 'bg-[#21262d]', textActive: 'text-slate-300', border: 'border-slate-150' };
+                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-200', bgActive: 'bg-[#21262d]', textActive: 'text-slate-300', border: 'border-slate-150' };
 
                 return (
                   <Card key={dimInfo.id} className={cn(
@@ -8619,7 +8619,7 @@ function CandidateDetail() {
                           )}
                         </div>
                         <div className="flex flex-col items-center md:items-center">
-                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{dimInfo.id}</span>
+                           <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">{dimInfo.id}</span>
                            <div className={cn(
                              "w-1 h-8 rounded-full my-2 hidden md:block",
                              dim ? (dim.score >= 80 ? "bg-green-200" : dim.score >= 50 ? "bg-amber-200" : "bg-red-200") : "bg-[#21262d]"
@@ -8649,10 +8649,10 @@ function CandidateDetail() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <p className="text-[10px] text-slate-400 font-medium italic">{dimInfo.description}</p>
+                                <p className="text-[10px] text-slate-200 font-medium italic">{dimInfo.description}</p>
                                 <span className={cn(
                                   "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border",
-                                  dimInfo.weight === 'High' ? "bg-brand/10 text-brand-light border-brand/10" : "transparent text-slate-400 border-white/10"
+                                  dimInfo.weight === 'High' ? "bg-brand/10 text-brand-light border-brand/10" : "transparent text-slate-200 border-white/10"
                                 )}>
                                   {dimInfo.weight} Weight
                                 </span>
@@ -8687,8 +8687,8 @@ function CandidateDetail() {
                                     dim.score >= 80 ? "bg-green-500" : dim.score >= 50 ? "bg-amber-500" : "bg-red-500"
                                   )} />
                                   <div className="flex-1">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">AI Scoring Rationale</span>
-                                    <p className="text-sm text-slate-400 leading-relaxed font-medium line-clamp-2 group-open/rationale:line-clamp-none">
+                                    <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-2">AI Scoring Rationale</span>
+                                    <p className="text-sm text-slate-200 leading-relaxed font-medium line-clamp-2 group-open/rationale:line-clamp-none">
                                       {dim.rationale}
                                     </p>
                                   </div>
@@ -8699,7 +8699,7 @@ function CandidateDetail() {
 
                             {dim.citations && dim.citations.length > 0 && (
                               <div className="space-y-2">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Signal Citations</span>
+                                <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest block pl-1">Signal Citations</span>
                                 <div className="flex flex-wrap gap-2">
                                   {dim.citations.map((cite: any, cidx: number) => (
                                     <div 
@@ -8710,7 +8710,7 @@ function CandidateDetail() {
                                       <div className="w-4 h-4 rounded-full glass-premium flex items-center justify-center text-[7px] font-black text-white shrink-0">
                                         {cidx + 1}
                                       </div>
-                                      <span className="text-[10px] font-bold text-slate-400 group-hover/cite:text-brand-light max-w-[120px] truncate">
+                                      <span className="text-[10px] font-bold text-slate-200 group-hover/cite:text-brand-light max-w-[120px] truncate">
                                         {cite.claim}
                                       </span>
                                       <div className="w-1.5 h-1.5 rounded-full bg-[#e6edf3]" />
@@ -8723,7 +8723,7 @@ function CandidateDetail() {
                           </div>
                         ) : (
                           <div className="py-4 text-center border-2 border-dashed border-white/10 rounded-2xl transparent/30">
-                            <p className="text-xs text-slate-400 italic">No analysis data available for this dimension.</p>
+                            <p className="text-xs text-slate-200 italic">No analysis data available for this dimension.</p>
                           </div>
                         )}
                       </div>
@@ -8736,12 +8736,12 @@ function CandidateDetail() {
 
           <Card className="p-6 transparent border-2 border-dashed border-[#e6edf3]">
              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-[#e6edf3] flex items-center justify-center font-black text-slate-400 text-xs shadow-inner">
+                <div className="w-8 h-8 rounded-full bg-[#e6edf3] flex items-center justify-center font-black text-slate-200 text-xs shadow-inner">
                   PII
                 </div>
                 <h4 className="font-bold text-slate-300">PII Isolation & Compliance</h4>
              </div>
-             <p className="text-xs text-slate-400 leading-relaxed">
+             <p className="text-xs text-slate-200 leading-relaxed">
                As per our Section 06 policies, Personally Identifiable Information is strictly isolated. Read access is restricted to the hiring manager. No demographic signals are used in scoring.
              </p>
           </Card>
@@ -8753,7 +8753,7 @@ function CandidateDetail() {
                 </div>
                 <div>
                    <h3 className="font-black text-lg text-white">Proctoring & Integrity (Section 3.4)</h3>
-                   <p className="text-xs text-slate-400">Multi-layer security monitoring logs</p>
+                   <p className="text-xs text-slate-200">Multi-layer security monitoring logs</p>
                 </div>
              </div>
              <div className="space-y-3">
@@ -8786,7 +8786,7 @@ function CandidateDetail() {
                 </div>
                 <div>
                    <h3 className="font-black text-lg">Interview Flow Sequence (3.5)</h3>
-                   <p className="text-xs text-slate-400">Adaptive voice interaction state</p>
+                   <p className="text-xs text-slate-200">Adaptive voice interaction state</p>
                 </div>
              </div>
              <div className="space-y-4 relative">
@@ -8831,13 +8831,13 @@ function CandidateDetail() {
               </div>
               <div>
                 <h3 className="font-black text-white text-base uppercase tracking-wider">Offer Letter Builder</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Configure Official Offer Parameters</p>
+                <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">Configure Official Offer Parameters</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Base Salary (Annual Amount)</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-2">Base Salary (Annual Amount)</label>
                 <div className="flex gap-4 items-center">
                   <input 
                     type="range" 
@@ -8859,7 +8859,7 @@ function CandidateDetail() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Currency Selector</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Currency Selector</label>
                   <select 
                     value={offerCurrency} 
                     onChange={(e) => setOfferCurrency(e.target.value)}
@@ -8874,7 +8874,7 @@ function CandidateDetail() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Expected Start Date</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Expected Start Date</label>
                   <input 
                     type="date" 
                     value={offerStartDate} 
@@ -8885,18 +8885,18 @@ function CandidateDetail() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Perks & Core Benefits Ledger</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Perks & Core Benefits Ledger</label>
                 <textarea 
                   rows={3}
                   value={offerBenefits} 
                   onChange={(e) => setOfferBenefits(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#e6edf3] text-xs text-slate-400 leading-relaxed font-sans focus:border-brand focus:outline-none"
+                  className="w-full p-3 rounded-xl border border-[#e6edf3] text-xs text-slate-200 leading-relaxed font-sans focus:border-brand focus:outline-none"
                   placeholder="Provide details on health insurance, stock units, equity, or work setups..."
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Employment Level</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">Employment Level</label>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                   {['Standard Full-time', 'Consultant Contract', 'Internship Trial'].map((type) => (
                     <button 
@@ -8945,7 +8945,7 @@ function CandidateDetail() {
                   setOfferState('draft');
                   notify('Offer contract draft cleared.', 'info');
                 }}
-                className="sm:w-32 border-slate-250 text-slate-400 text-xs font-black uppercase tracking-wider h-11"
+                className="sm:w-32 border-slate-250 text-slate-200 text-xs font-black uppercase tracking-wider h-11"
               >
                 Reset Draft
               </Button>
@@ -8971,7 +8971,7 @@ function CandidateDetail() {
                     <div key={st} className="flex items-center">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider",
-                        offerState === st ? "bg-brand-dark text-white shadow" : "text-slate-400"
+                        offerState === st ? "bg-brand-dark text-white shadow" : "text-slate-200"
                       )}>
                         {st}
                       </span>
@@ -8990,11 +8990,11 @@ function CandidateDetail() {
                   <h2 className="text-xl font-black uppercase tracking-widest text-brand-light leading-none mb-1">
                     {organization?.name || 'HIRENOW'}
                   </h2>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Official Talent Agreement Letter</p>
+                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-widest">Official Talent Agreement Letter</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[9px] text-slate-400 font-mono">ID: OFF_{candidateId?.slice(0,6)}</p>
-                  <p className="text-[9px] text-slate-400 font-mono">DATE: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  <p className="text-[9px] text-slate-200 font-mono">ID: OFF_{candidateId?.slice(0,6)}</p>
+                  <p className="text-[9px] text-slate-200 font-mono">DATE: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                 </div>
               </div>
 
@@ -9002,7 +9002,7 @@ function CandidateDetail() {
               <div className="p-8 sm:p-12 space-y-6 flex-1 text-slate-750 text-xs sm:text-sm leading-relaxed font-sans max-h-[550px] overflow-y-auto custom-scrollbar">
                 <div className="space-y-1">
                   <p className="font-extrabold text-white text-left">Dear {candidate.fullName},</p>
-                  <p className="text-left">Applied Email: <span className="font-mono text-slate-400 font-semibold">{candidate.email}</span></p>
+                  <p className="text-left">Applied Email: <span className="font-mono text-slate-200 font-semibold">{candidate.email}</span></p>
                 </div>
 
                 <p className="text-left">
@@ -9038,25 +9038,25 @@ function CandidateDetail() {
 
                 <div className="space-y-2 text-left">
                   <h4 className="font-black text-white uppercase text-xs tracking-wider">Compensations & Benefits Ledger</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed italic pr-2">
+                  <p className="text-xs text-slate-200 leading-relaxed italic pr-2">
                     {offerBenefits}
                   </p>
                 </div>
 
-                <p className="text-[11px] text-slate-400 italic text-left">
+                <p className="text-[11px] text-slate-200 italic text-left">
                   To confirm your acceptance, kindly click the simulated e-signature simulation block below. Signing this document constitutes your legal binding of employment.
                 </p>
 
                 {/* Simulated Handwritten Candidate Sign Block */}
                 <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="text-left">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Authorized Signatory</span>
+                    <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest block mb-2">Authorized Signatory</span>
                     <p className="font-semibold text-slate-300">HR Director</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{organization?.name || 'HIRENOW'}</p>
+                    <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">{organization?.name || 'HIRENOW'}</p>
                   </div>
 
                   <div className="border-2 border-dashed border-brand/20 rounded-2xl p-4 transparent min-w-[200px] text-center relative group">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Candidate Signatory Signature</span>
+                    <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest block mb-1">Candidate Signatory Signature</span>
                     
                     {offerState === 'accepted' ? (
                       <div className="py-2">
@@ -9101,14 +9101,14 @@ function CandidateDetail() {
               </div>
 
               {/* PDF Print and Standalone footer */}
-              <div className="transparent py-3 px-8 border-t border-white/10 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+              <div className="transparent py-3 px-8 border-t border-white/10 flex justify-between items-center text-[10px] text-slate-200 font-medium">
                 <p>© 2026 {organization?.name || 'HireAI'} • Confidentially Guarded</p>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => {
                       window.print();
                     }}
-                    className="flex items-center gap-1 hover:text-slate-400 font-semibold"
+                    className="flex items-center gap-1 hover:text-slate-200 font-semibold"
                   >
                     <Printer className="w-3.5 h-3.5" /> Print Draft
                   </button>
@@ -9130,13 +9130,13 @@ function CandidateDetail() {
               </div>
               <div>
                 <h3 className="font-black text-white text-base uppercase tracking-wider">Automated Campaigns Workspace</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Configure Multi-Channel Outbound Triggers</p>
+                <p className="text-[10px] text-slate-200 font-bold uppercase tracking-tight">Configure Multi-Channel Outbound Triggers</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Message Template Picker</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-2">Message Template Picker</label>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { id: 'invite', label: 'Invite to AI Voice Assessment', icon: Mic },
@@ -9165,8 +9165,8 @@ function CandidateDetail() {
               </div>
 
               <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">WhatsApp / SMS Dynamic Template Text</label>
-                <div className="transparent rounded-xl p-4 border border-white/10 font-mono text-xs text-slate-400 leading-relaxed text-left relative pl-10">
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest block mb-1.5">WhatsApp / SMS Dynamic Template Text</label>
+                <div className="transparent rounded-xl p-4 border border-white/10 font-mono text-xs text-slate-200 leading-relaxed text-left relative pl-10">
                   <div className="absolute top-4 left-4 bg-emerald-100 p-1 rounded-full text-emerald-650">
                     <Send className="w-3 h-3" />
                   </div>
@@ -9191,7 +9191,7 @@ function CandidateDetail() {
               <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
                 <div className="text-left">
                   <h4 className="text-[10px] font-black text-emerald-950 uppercase tracking-widest block mb-0.5">Campaign Outbound Targets</h4>
-                  <p className="text-xs text-slate-400 leading-normal font-sans">
+                  <p className="text-xs text-slate-200 leading-normal font-sans">
                     Email address: <span className="font-semibold text-white">{candidate.email}</span> • Mobile: <span className="font-semibold text-white">Registered</span>
                   </p>
                 </div>
@@ -9284,7 +9284,7 @@ function CandidateDetail() {
                   
                   {/* Whatsapp tick timing footer */}
                   <div className="flex justify-end gap-1 items-center mt-2 pb-0.5 pointer-events-none">
-                    <span className="text-[8px] text-slate-400">9:41 AM</span>
+                    <span className="text-[8px] text-slate-200">9:41 AM</span>
                     <div className="flex items-center text-blue-500 scale-90">
                       <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                     </div>
@@ -9301,7 +9301,7 @@ function CandidateDetail() {
 
             {/* Campaign Metrics Ledger Ledger */}
             <Card className="p-6">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Outbound Delivery Campaign Log</h4>
+              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Outbound Delivery Campaign Log</h4>
               <div className="space-y-3">
                 {outboundLogs.map((log) => (
                   <div key={log.id} className="p-3 transparent rounded-xl border border-white/10 flex items-center justify-between text-xs gap-4 font-sans text-left">
@@ -9314,18 +9314,18 @@ function CandidateDetail() {
                       </div>
                       <div>
                         <p className="font-extrabold text-white">{log.template}</p>
-                        <p className="text-[10px] text-slate-400 truncate max-w-[200px]">{log.recipient}</p>
+                        <p className="text-[10px] text-slate-200 truncate max-w-[200px]">{log.recipient}</p>
                       </div>
                     </div>
 
                     <div className="text-right">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest",
-                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-[#21262d] text-slate-400"
+                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-[#21262d] text-slate-200"
                       )}>
                         {log.status}
                       </span>
-                      <p className="text-[9px] text-slate-400 mt-1">{log.timestamp}</p>
+                      <p className="text-[9px] text-slate-200 mt-1">{log.timestamp}</p>
                     </div>
                   </div>
                 ))}
@@ -9373,9 +9373,9 @@ function CandidateDetail() {
                   </div>
                 ) : (
                   <div className="text-center space-y-2 py-10 font-sans">
-                    <Camera className="w-12 h-12 text-slate-400 mx-auto" />
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">PROCTORING MONITORING FEED STANDBY</p>
-                    <p className="text-[10px] text-slate-400 p-2 max-w-sm mx-auto leading-relaxed">Simulate live visual checks & eye trace mapping used during voice sessions.</p>
+                    <Camera className="w-12 h-12 text-slate-200 mx-auto" />
+                    <p className="text-xs font-black text-slate-200 uppercase tracking-widest">PROCTORING MONITORING FEED STANDBY</p>
+                    <p className="text-[10px] text-slate-200 p-2 max-w-sm mx-auto leading-relaxed">Simulate live visual checks & eye trace mapping used during voice sessions.</p>
                   </div>
                 )}
               </div>
@@ -9408,14 +9408,14 @@ function CandidateDetail() {
                 </Button>
 
                 <div className="flex gap-2">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-widest font-mono">INTEGRITY MATRIX ACTIVE</span>
+                  <span className="text-[10px] text-slate-200 uppercase tracking-widest font-mono">INTEGRITY MATRIX ACTIVE</span>
                 </div>
               </div>
             </Card>
 
             {/* Simulated candidate actions launcher */}
             <Card className="p-6">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Simulate Candidate Adversarial Cheating Patterns</h4>
+              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Simulate Candidate Adversarial Cheating Patterns</h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Button 
                   onClick={() => {
@@ -9457,7 +9457,7 @@ function CandidateDetail() {
           {/* Proctoring telemetry stats */}
           <div className="space-y-6">
             <Card className="p-6 space-y-4">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest pb-2 border-b border-white/10">Integrity Telemetry Index</h4>
+              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest pb-2 border-b border-white/10">Integrity Telemetry Index</h4>
               
               <div className="flex gap-3 items-center py-2 text-left">
                 <div className={cn(
@@ -9467,7 +9467,7 @@ function CandidateDetail() {
                   {Math.max(0, 100 - (tabSwitchCountMock * 25) - (cameraAnomalyMock ? 50 : 0) - (gazeDeviationMock ? 15 : 0))}%
                 </div>
                 <div>
-                  <span className="text-[9px] font-black bg-[#21262d] text-slate-400 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
+                  <span className="text-[9px] font-black bg-[#21262d] text-slate-200 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
                   <p className="text-xs font-bold text-slate-300">
                     {(tabSwitchCountMock > 2 || cameraAnomalyMock) ? 'Severe Security Penalty Alert' : (tabSwitchCountMock > 0 || gazeDeviationMock) ? 'Anomalous Integrity' : 'Elite Verified Safe Profile'}
                   </p>
@@ -9476,22 +9476,22 @@ function CandidateDetail() {
 
               <div className="space-y-3 pt-2 text-left">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Off-screen Outbreaks</span>
+                  <span className="text-slate-200 font-medium">Off-screen Outbreaks</span>
                   <span className="font-extrabold text-slate-300">{gazeDeviationMock ? '1 active' : '0 detected'}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Tab Switch Deviations</span>
+                  <span className="text-slate-200 font-medium">Tab Switch Deviations</span>
                   <span className="font-extrabold text-slate-300">{tabSwitchCountMock} triggers</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400 font-medium">Secondary Audio Signal</span>
+                  <span className="text-slate-200 font-medium">Secondary Audio Signal</span>
                   <span className="font-extrabold text-slate-300">0.0dB Stable</span>
                 </div>
               </div>
             </Card>
 
             <Card className="p-6">
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Adversarial Violation Ledger</h4>
+              <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest mb-4">Adversarial Violation Ledger</h4>
               <div className="space-y-3">
                 {tabSwitchCountMock > 0 && (
                   <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs flex justify-between items-center font-sans text-left">
@@ -9513,7 +9513,7 @@ function CandidateDetail() {
                 )}
                 {!cameraAnomalyMock && !gazeDeviationMock && tabSwitchCountMock === 0 && (
                   <div className="py-6 text-center border-2 border-dashed border-white/10 rounded-2xl transparent/50">
-                    <p className="text-xs text-slate-400 italic">No violation blocks detected.</p>
+                    <p className="text-xs text-slate-200 italic">No violation blocks detected.</p>
                   </div>
                 )}
               </div>
@@ -9535,7 +9535,7 @@ function CandidateDetail() {
           <div className="space-y-6">
             <div className="p-4 transparent border border-white/10 rounded-2xl text-left space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Candidate Profile</span>
+                <span className="text-[10px] font-black uppercase text-slate-200 tracking-wider">Candidate Profile</span>
                 {inviteEmailInput ? (
                   <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Email Extracted
@@ -9548,7 +9548,7 @@ function CandidateDetail() {
               </div>
               <div className="space-y-1">
                 <h4 className="text-sm font-extrabold text-slate-300">{activeInviteCandidate.fullName}</h4>
-                <p className="text-xs text-slate-400 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+                <p className="text-xs text-slate-200 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
               </div>
             </div>
 
@@ -9561,13 +9561,13 @@ function CandidateDetail() {
                   </div>
                   <div className="space-y-1">
                     <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 1: Send Email Invite</h5>
-                    <p className="text-[11px] text-slate-400 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recipient Email Address</label>
+                    <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
                       className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
@@ -9616,7 +9616,7 @@ function CandidateDetail() {
                   </div>
                   <div className="space-y-1">
                     <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
-                    <p className="text-[11px] text-slate-400 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
+                    <p className="text-[11px] text-slate-200 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
                   </div>
                 </div>
 
@@ -9627,7 +9627,7 @@ function CandidateDetail() {
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-[#e6edf3] text-slate-400 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-[#e6edf3] text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -9646,7 +9646,7 @@ function CandidateDetail() {
               <Button
                 variant="outline"
                 type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-400 border-[#e6edf3] rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-[#e6edf3] rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
@@ -9681,14 +9681,14 @@ function MetricCard({
     <Card className="p-6 glass-premium/80 backdrop-blur-sm border border-white/10 hover:border-brand/20 transition-all shadow-sm">
       <div className="flex justify-between items-start mb-4">
         <div className="min-w-0">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-snug">{label}</p>
+          <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest mb-1 leading-snug">{label}</p>
           <p className="text-4xl font-black text-white tracking-tight leading-none truncate">{val}</p>
         </div>
         <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", iconBg, iconColor)}>
           <Icon className="w-5 h-5 font-bold" />
         </div>
       </div>
-      <p className="text-xs text-slate-400 leading-relaxed font-medium mt-auto">{desc}</p>
+      <p className="text-xs text-slate-200 leading-relaxed font-medium mt-auto">{desc}</p>
     </Card>
   );
 }
@@ -10042,7 +10042,7 @@ function OrgAdminPanel() {
       <div className="h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-brand-light" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Metrics Panel...</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-200">Loading Metrics Panel...</p>
         </div>
       </div>
     );
@@ -10056,13 +10056,13 @@ function OrgAdminPanel() {
         title="Filters"
       >
         <div className="space-y-6">
-          <p className="text-slate-400 text-xs">
+          <p className="text-slate-200 text-xs">
             Adjust the date range, working hours, and organization for HR Agent metrics.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date range</label>
+              <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Date range</label>
               <select
                 value={dateRange}
                 onChange={e => setDateRange(e.target.value)}
@@ -10076,7 +10076,7 @@ function OrgAdminPanel() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</label>
+              <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization</label>
               {isSuperAdmin ? (
                 <select
                   value={selectedOrgId}
@@ -10089,14 +10089,14 @@ function OrgAdminPanel() {
                   ))}
                 </select>
               ) : (
-                <div className="w-full bg-[#21262d]/50 border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-slate-400 select-none text-sm">
+                <div className="w-full bg-[#21262d]/50 border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-slate-200 select-none text-sm">
                   {organization?.name || 'My Organization'}
                 </div>
               )}
             </div>
 
             <div className="md:col-span-2 space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 overflow-visible">
+              <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-1.5 overflow-visible">
                 Working hours 
                 <div className="group relative">
                   <span className="cursor-help text-slate-300 hover:text-brand transition-colors">
@@ -10118,7 +10118,7 @@ function OrgAdminPanel() {
                     className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
                   />
                 </div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">to</span>
+                <span className="text-xs font-bold text-slate-200 uppercase tracking-widest font-mono">to</span>
                 <div className="relative flex-1">
                   <input
                     type="time" 
@@ -10148,7 +10148,7 @@ function OrgAdminPanel() {
         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-brand/10 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 relative">
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-slate-200 text-[10px] font-black uppercase tracking-widest">
               <span className="text-brand-light">◀</span>
               <span>{activeOrgName} Admin Panel</span>
             </div>
@@ -10167,7 +10167,7 @@ function OrgAdminPanel() {
             "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
             activePanelTab === 'analytics' 
               ? "border-b-2 border-brand-dark text-brand-light font-black pb-[11px]" 
-              : "border-transparent text-slate-400 hover:text-slate-400"
+              : "border-transparent text-slate-200 hover:text-slate-200"
           )}
         >
           <BarChart3 className="w-4 h-4" />
@@ -10179,7 +10179,7 @@ function OrgAdminPanel() {
             "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
             activePanelTab === 'workspace' 
               ? "border-b-2 border-brand-dark text-brand-light font-black pb-[11px]" 
-              : "border-transparent text-slate-400 hover:text-slate-400"
+              : "border-transparent text-slate-200 hover:text-slate-200"
           )}
         >
           <Settings className="w-4 h-4" />
@@ -10195,7 +10195,7 @@ function OrgAdminPanel() {
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase leading-none mb-1">
             HR Agent Metrics Dashboard
           </h2>
-          <p className="text-slate-400 text-xs sm:text-sm">
+          <p className="text-slate-200 text-xs sm:text-sm">
             Monitor interview activity, resume screening throughput, and working-hours efficiency from a single admin view.
           </p>
         </div>
@@ -10204,7 +10204,7 @@ function OrgAdminPanel() {
           onClick={() => setFiltersOpen(true)}
           className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-[#e6edf3] text-slate-300 hover:transparent shrink-0 shadow-sm rounded-xl"
         >
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-slate-200" />
           Filters
         </Button>
       </div>
@@ -10260,7 +10260,7 @@ function OrgAdminPanel() {
           <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-3xl h-full flex flex-col justify-between">
             <div className="mb-6">
               <h3 className="text-lg font-black text-white uppercase tracking-tight">Activity Trend</h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-200">
                 Daily trend for interviews conducted and resumes screened in the selected range.
               </p>
             </div>
@@ -10300,8 +10300,8 @@ function OrgAdminPanel() {
                   <div className="w-16 h-16 rounded-2xl transparent flex items-center justify-center text-slate-300 mb-3">
                     <FileText className="w-8 h-8" />
                   </div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">No Activity Data</p>
-                  <p className="text-[10px] text-slate-400 italic">No candidates/interviews available in the selected range.</p>
+                  <p className="text-xs font-bold text-slate-200 uppercase tracking-widest mb-1">No Activity Data</p>
+                  <p className="text-[10px] text-slate-200 italic">No candidates/interviews available in the selected range.</p>
                 </div>
               )}
             </div>
@@ -10313,7 +10313,7 @@ function OrgAdminPanel() {
           <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-3xl h-full flex flex-col justify-between">
             <div className="mb-6">
               <h3 className="text-lg font-black text-white uppercase tracking-tight">Working Hours Distribution</h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-200">
                 Percentage split between interviews held during and outside working hours.
               </p>
             </div>
@@ -10348,17 +10348,17 @@ function OrgAdminPanel() {
                     <div className="flex items-center justify-between p-2.5 bg-green-50/50 rounded-xl border border-green-100/40">
                       <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded-full bg-[#10b981]" />
-                        <span className="text-xs font-black uppercase text-slate-400 tracking-tight">Working Hours</span>
+                        <span className="text-xs font-black uppercase text-slate-200 tracking-tight">Working Hours</span>
                       </div>
-                      <span className="text-xs font-black text-green-700">{workingHoursPercent.toFixed(1)}% <span className="text-slate-400 font-medium font-mono text-[10px]">({workingHoursCount})</span></span>
+                      <span className="text-xs font-black text-green-700">{workingHoursPercent.toFixed(1)}% <span className="text-slate-200 font-medium font-mono text-[10px]">({workingHoursCount})</span></span>
                     </div>
 
                     <div className="flex items-center justify-between p-2.5 bg-orange-50/50 rounded-xl border border-orange-100/40">
                       <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded-full bg-[#f97316]" />
-                        <span className="text-xs font-black uppercase text-slate-400 tracking-tight">Outside Working Hours</span>
+                        <span className="text-xs font-black uppercase text-slate-200 tracking-tight">Outside Working Hours</span>
                       </div>
-                      <span className="text-xs font-black text-orange-700">{outsideHoursPercent.toFixed(1)}% <span className="text-slate-400 font-medium font-mono text-[10px]">({outsideHoursCount})</span></span>
+                      <span className="text-xs font-black text-orange-700">{outsideHoursPercent.toFixed(1)}% <span className="text-slate-200 font-medium font-mono text-[10px]">({outsideHoursCount})</span></span>
                     </div>
                   </div>
                 </div>
@@ -10367,8 +10367,8 @@ function OrgAdminPanel() {
                   <div className="w-16 h-16 rounded-2xl transparent flex items-center justify-center text-slate-300 mb-3">
                     <Clock className="w-8 h-8" />
                   </div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">No Completed Interviews</p>
-                  <p className="text-[10px] text-slate-400 italic font-medium">Completed interviews are required to view working hours split.</p>
+                  <p className="text-xs font-bold text-slate-200 uppercase tracking-widest mb-1">No Completed Interviews</p>
+                  <p className="text-[10px] text-slate-200 italic font-medium">Completed interviews are required to view working hours split.</p>
                 </div>
               )}
             </div>
@@ -10398,13 +10398,13 @@ function OrgAdminPanel() {
                 </div>
                 <div>
                   <h3 className="font-black text-white uppercase text-sm tracking-wide">Company Identity</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Workspace Profile Details</p>
+                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-widest">Workspace Profile Details</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Name</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization Name</label>
                   <input
                     type="text"
                     required
@@ -10417,7 +10417,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Web Domain</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Web Domain</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10429,7 +10429,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Industry</label>
                   <select
                     disabled={isReadOnly}
                     value={orgIndustry}
@@ -10443,7 +10443,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Size</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Company Size</label>
                   <select
                     disabled={isReadOnly}
                     value={orgCompanySize}
@@ -10457,7 +10457,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">HQ Location</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">HQ Location</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10469,7 +10469,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Phone</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Contact Phone</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10481,7 +10481,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description / Vision Statement</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Description / Vision Statement</label>
                   <textarea
                     disabled={isReadOnly}
                     rows={4}
@@ -10496,10 +10496,10 @@ function OrgAdminPanel() {
               <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="col-span-1 sm:col-span-3">
                   <h4 className="font-bold text-slate-300 text-sm">Official Working Hours</h4>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Used to track after-hours interviews</p>
+                  <p className="text-[10px] font-bold text-slate-200 uppercase tracking-widest mt-0.5">Used to track after-hours interviews</p>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Time</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Start Time</label>
                   <input
                     type="time"
                     disabled={isReadOnly}
@@ -10509,7 +10509,7 @@ function OrgAdminPanel() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Time</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">End Time</label>
                   <input
                     type="time"
                     disabled={isReadOnly}
@@ -10519,7 +10519,7 @@ function OrgAdminPanel() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Timezone</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Timezone</label>
                   <select
                     disabled={isReadOnly}
                     value={orgWorkingHoursTimezone}
@@ -10536,7 +10536,7 @@ function OrgAdminPanel() {
               <div className="pt-4 border-t border-white/10">
                 <div className="mb-4">
                   <h4 className="font-bold text-slate-300 text-sm">Bot Speaking Pace</h4>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Control how fast the AI interviewer speaks</p>
+                  <p className="text-[10px] font-bold text-slate-200 uppercase tracking-widest mt-0.5">Control how fast the AI interviewer speaks</p>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                   {[
@@ -10549,7 +10549,7 @@ function OrgAdminPanel() {
                       type="button"
                       disabled={isReadOnly}
                       onClick={() => setBotSpeakingPace(pace.value)}
-                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-white/10 text-slate-400 hover:border-[#e6edf3]'}`}
+                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-white/10 text-slate-200 hover:border-[#e6edf3]'}`}
                     >
                       {pace.label}
                     </button>
@@ -10566,13 +10566,13 @@ function OrgAdminPanel() {
                 </div>
                 <div>
                   <h3 className="font-black text-white uppercase text-sm tracking-wide">Candidate Invitation Mail Server</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest font-mono">Custom SMTP Settings</p>
+                  <p className="text-[10px] text-slate-200 font-bold uppercase tracking-widest font-mono">Custom SMTP Settings</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SMTP Outgoing Host</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">SMTP Outgoing Host</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10584,7 +10584,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Port</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Port</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10606,13 +10606,13 @@ function OrgAdminPanel() {
                     />
                     <div>
                       <p className="text-xs font-black text-slate-300 uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
-                      <p className="text-[10px] text-slate-400 font-medium">Configure secure SSL/TLS. Set checked for port 465, false/unchecked for port 587 (STARTTLS).</p>
+                      <p className="text-[10px] text-slate-200 font-medium">Configure secure SSL/TLS. Set checked for port 465, false/unchecked for port 587 (STARTTLS).</p>
                     </div>
                   </label>
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SMTP Account Username</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">SMTP Account Username</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10624,7 +10624,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SMTP Password</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">SMTP Password</label>
                   <input
                     type="password"
                     disabled={isReadOnly}
@@ -10636,7 +10636,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Display Name (From)</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sender Display Name (From)</label>
                   <input
                     type="text"
                     disabled={isReadOnly}
@@ -10648,7 +10648,7 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sender Email (From)</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sender Email (From)</label>
                   <input
                     type="email"
                     disabled={isReadOnly}
@@ -11442,7 +11442,7 @@ function SuperAdminPanel() {
       <div className="h-[60vh] flex flex-col items-center justify-center p-12 text-center">
         <ShieldCheck className="w-16 h-16 text-[#e6edf3] mb-6" />
         <h2 className="text-2xl font-black text-white uppercase">Access Restricted</h2>
-        <p className="text-slate-400 mt-2">Only platform super-administrators can access this registry.</p>
+        <p className="text-slate-200 mt-2">Only platform super-administrators can access this registry.</p>
         <Button variant="outline" className="mt-8" onClick={() => navigate('/')}>Return to Workspace</Button>
       </div>
     );
@@ -11731,7 +11731,7 @@ function SuperAdminPanel() {
     <div className="h-[60vh] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-brand-light" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Platform Data...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-200">Loading Platform Data...</p>
       </div>
     </div>
   );
@@ -11746,13 +11746,13 @@ function SuperAdminPanel() {
         <div className="mb-6 flex p-1 bg-[#21262d] rounded-lg">
            <button 
              onClick={() => setBulkMode(false)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-300")}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-300")}
            >
              Single Entry
            </button>
            <button 
              onClick={() => setBulkMode(true)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-300")}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-300")}
            >
              Bulk Upload
            </button>
@@ -11761,7 +11761,7 @@ function SuperAdminPanel() {
         {!bulkMode ? (
           <form onSubmit={handleCreateOrg} className="space-y-4">
              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Name</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Company Name</label>
                 <input 
                   autoFocus
                   required
@@ -11774,7 +11774,7 @@ function SuperAdminPanel() {
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div className="space-y-1">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry</label>
+                 <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Industry</label>
                  <select
                    value={newOrgIndustry}
                    onChange={e => setNewOrgIndustry(e.target.value)}
@@ -11791,7 +11791,7 @@ function SuperAdminPanel() {
                </div>
 
                <div className="space-y-1">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Company Size</label>
+                 <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Company Size</label>
                  <select
                    value={newOrgCompanySize}
                    onChange={e => setNewOrgCompanySize(e.target.value)}
@@ -11809,7 +11809,7 @@ function SuperAdminPanel() {
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">HQ Location</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">HQ Location</label>
                   <input 
                     value={newOrgLocation}
                     onChange={e => setNewOrgLocation(e.target.value)}
@@ -11818,7 +11818,7 @@ function SuperAdminPanel() {
                   />
                </div>
                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Phone</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Contact Phone</label>
                   <input 
                     value={newOrgPhone}
                     onChange={e => setNewOrgPhone(e.target.value)}
@@ -11829,7 +11829,7 @@ function SuperAdminPanel() {
              </div>
 
              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Domain (Optional)</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Email Domain (Optional)</label>
                 <input 
                   value={newOrgDomain}
                   onChange={e => setNewOrgDomain(e.target.value)}
@@ -11839,7 +11839,7 @@ function SuperAdminPanel() {
              </div>
 
              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description / Vision</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Description / Vision</label>
                 <textarea 
                   value={newOrgDescription}
                   onChange={e => setNewOrgDescription(e.target.value)}
@@ -11870,7 +11870,7 @@ function SuperAdminPanel() {
         ) : (
           <form onSubmit={handleBulkOnboard} className="space-y-6">
              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Names</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization Names</label>
                 <textarea 
                   autoFocus
                   required
@@ -11880,7 +11880,7 @@ function SuperAdminPanel() {
                   placeholder="Acme Corp&#10;Globex Ltd&#10;Soylent Inc"
                   className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
                 />
-                <p className="text-[10px] text-slate-400 font-medium italic">Enter one company name per line.</p>
+                <p className="text-[10px] text-slate-200 font-medium italic">Enter one company name per line.</p>
              </div>
              <div className="flex gap-3 pt-4">
                 <Button 
@@ -11908,7 +11908,7 @@ function SuperAdminPanel() {
             <ShieldCheck className="w-8 h-8 text-brand shrink-0" />
             <span className="truncate">Super Admin Registry</span>
           </h1>
-          <p className="text-slate-400 text-sm">Platform-wide governance and organization management.</p>
+          <p className="text-slate-200 text-sm">Platform-wide governance and organization management.</p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Button 
@@ -11938,7 +11938,7 @@ function SuperAdminPanel() {
                 <s.icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">{s.label}</p>
+                <p className="text-[10px] font-black uppercase text-slate-200 tracking-widest leading-none mb-1">{s.label}</p>
                 <p className="text-3xl font-black leading-none">{s.val}</p>
               </div>
             </div>
@@ -11951,43 +11951,43 @@ function SuperAdminPanel() {
           <div className="flex gap-2 sm:gap-4 border-b border-[#e6edf3] overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
              <button 
                onClick={() => setTab('overview')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                Overview
              </button>
              <button 
                onClick={() => setTab('organizations')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                Organizations
              </button>
              <button 
                onClick={() => setTab('payments')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                Payments
              </button>
              <button 
                onClick={() => setTab('health')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                System Health
              </button>
              <button 
                onClick={() => setTab('llm')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                LLM Playground
              </button>
              <button 
                onClick={() => setTab('white-label')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                White-Label
              </button>
              <button 
                onClick={() => setTab('manual')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
              >
                User Manual
              </button>
@@ -12001,18 +12001,18 @@ function SuperAdminPanel() {
                     <p className="text-3xl font-black">{recentCandidates.length}+</p>
                  </Card>
                  <Card className="p-6">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Database Health</p>
+                    <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Database Health</p>
                     <p className="text-3xl font-black">99.9%</p>
                  </Card>
                  <Card className="p-6">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Platform Status</p>
+                    <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Platform Status</p>
                     <p className="text-3xl font-black text-green-500">Online</p>
                  </Card>
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Weekly Screening Volume</h3>
+                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-200">Weekly Screening Volume</h3>
                    <ResponsiveContainer width="100%" height={180}>
                      <BarChart data={[
                        { day: "Mon", screenings: 42 },
@@ -12032,7 +12032,7 @@ function SuperAdminPanel() {
                    </ResponsiveContainer>
                  </Card>
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pass Rate Distribution</h3>
+                   <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-200">Pass Rate Distribution</h3>
                    <ResponsiveContainer width="100%" height={180}>
                      <PieChart>
                        <Pie data={[
@@ -12062,11 +12062,11 @@ function SuperAdminPanel() {
                     <table className="w-full min-w-[700px]">
                       <thead className="transparent border-b border-white/10">
                         <tr>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Candidate</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Org ID</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Score</th>
-                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</th>
-                          <th className="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Candidate</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Org ID</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Score</th>
+                          <th className="px-6 py-4 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Time</th>
+                          <th className="px-6 py-4 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -12074,9 +12074,9 @@ function SuperAdminPanel() {
                           <tr key={c.id} className="hover:transparent transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
                             <td className="px-6 py-4">
                               <div className="font-bold text-sm group-hover:text-brand-light transition-colors uppercase tracking-tight">{c.fullName}</div>
-                              <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
+                              <div className="text-[10px] text-slate-200 font-mono italic">{c.email}</div>
                             </td>
-                            <td className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">
+                            <td className="px-6 py-4 text-[10px] font-black text-slate-200 uppercase">
                               {c.organizationId?.slice(0, 8) || 'LEGACY'}
                             </td>
                             <td className="px-6 py-4">
@@ -12087,7 +12087,7 @@ function SuperAdminPanel() {
                                 {c.scorecard.compositeScore}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-[10px] font-bold text-slate-400">
+                            <td className="px-6 py-4 text-[10px] font-bold text-slate-200">
                               {formatDateTime(c.createdAt)}
                             </td>
                             <td className="px-6 py-4 text-right">
@@ -12127,7 +12127,7 @@ function SuperAdminPanel() {
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="font-bold text-sm text-white uppercase tracking-tight">{c.fullName}</div>
-                          <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
+                          <div className="text-[10px] text-slate-200 font-mono italic">{c.email}</div>
                         </div>
                         <span className={cn(
                           "px-2 py-0.5 rounded text-[10px] font-black shadow-sm shrink-0",
@@ -12137,12 +12137,12 @@ function SuperAdminPanel() {
                         </span>
                       </div>
                       
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold text-slate-400">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold text-slate-200">
                         <div>
-                          <span className="text-slate-400 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-slate-300">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
+                          <span className="text-slate-200 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-slate-300">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
                         </div>
                         <div>
-                          <span className="text-slate-400 font-bold uppercase tracking-wider">Time:</span> <span className="text-slate-750">{formatDateTime(c.createdAt)}</span>
+                          <span className="text-slate-200 font-bold uppercase tracking-wider">Time:</span> <span className="text-slate-750">{formatDateTime(c.createdAt)}</span>
                         </div>
                       </div>
                       
@@ -12166,7 +12166,7 @@ function SuperAdminPanel() {
                     </div>
                   ))}
                   {recentCandidates.length === 0 && (
-                    <div className="text-center py-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <div className="text-center py-8 text-xs font-bold text-slate-200 uppercase tracking-widest">
                       No candidates screened yet
                     </div>
                   )}
@@ -12193,10 +12193,10 @@ function SuperAdminPanel() {
                         <table className="w-full min-w-[600px]">
                           <thead className="transparent border-b border-white/10">
                             <tr>
-                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization</th>
-                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Industry & Size</th>
-                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                              <th className="px-4 py-3 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Organization</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Industry & Size</th>
+                              <th className="px-4 py-3 text-left text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</th>
+                              <th className="px-4 py-3 text-right text-[10px] font-black text-slate-200 uppercase tracking-widest">Action</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
@@ -12211,12 +12211,12 @@ function SuperAdminPanel() {
                               >
                                 <td className="px-4 py-3">
                                   <div className="font-bold text-xs uppercase tracking-tight text-white">{org.name}</div>
-                                  <div className="text-[9px] text-slate-400 font-mono">ID: {org.id.slice(0, 10)}...</div>
+                                  <div className="text-[9px] text-slate-200 font-mono">ID: {org.id.slice(0, 10)}...</div>
                                   {org.domain && <div className="text-[9px] text-brand font-mono mt-0.5">{org.domain}</div>}
                                 </td>
                                 <td className="px-4 py-3">
                                   <div className="text-[11px] font-bold text-slate-300">{org.industry || "Technology"}</div>
-                                  <div className="text-[9px] text-slate-400 mt-0.5">{org.companySize || "11-50 employees"}</div>
+                                  <div className="text-[9px] text-slate-200 mt-0.5">{org.companySize || "11-50 employees"}</div>
                                 </td>
                                 <td className="px-4 py-3">
                                   <span className={cn(
@@ -12281,11 +12281,11 @@ function SuperAdminPanel() {
                           <div>
                             <span className="text-[9px] font-black text-brand uppercase tracking-widest">Active Workspace Selected</span>
                             <h3 className="text-lg font-display text-white mt-1 uppercase font-bold">{org.name}</h3>
-                            <p className="text-[10px] text-slate-400 mt-1">Configure quotas, manual credits and view team members in this tenant.</p>
+                            <p className="text-[10px] text-slate-200 mt-1">Configure quotas, manual credits and view team members in this tenant.</p>
                           </div>
 
                           <div className="p-4 transparent rounded-2xl border border-white/10 space-y-3.5">
-                            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Allocate Credits</h4>
+                            <h4 className="text-[10px] font-black uppercase text-slate-200 tracking-widest">Allocate Credits</h4>
                             <div className="flex gap-2">
                               <input 
                                 type="number" 
@@ -12311,7 +12311,7 @@ function SuperAdminPanel() {
                           </div>
 
                           <div className="space-y-3">
-                            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-white/10 pb-1.5">Simulated Tenant Users</h4>
+                            <h4 className="text-[10px] font-black uppercase text-slate-200 tracking-widest border-b border-white/10 pb-1.5">Simulated Tenant Users</h4>
                             <div className="space-y-2">
                               {[
                                 { name: "Sarah Chen", email: "sarah.chen@" + (org.domain || "example.com"), role: "Owner" },
@@ -12320,7 +12320,7 @@ function SuperAdminPanel() {
                                 <div key={u.email} className="flex justify-between items-center transparent/50 p-2.5 rounded-xl border border-white/10">
                                   <div>
                                     <p className="text-xs font-bold text-slate-300">{u.name}</p>
-                                    <p className="text-[10px] text-slate-400 font-mono">{u.email}</p>
+                                    <p className="text-[10px] text-slate-200 font-mono">{u.email}</p>
                                   </div>
                                   <span className="text-[9px] font-black bg-brand/10 text-brand-light px-2 py-0.5 rounded uppercase tracking-wider">{u.role}</span>
                                 </div>
@@ -12332,8 +12332,8 @@ function SuperAdminPanel() {
                     })() : (
                       <Card className="p-8 border-dashed border-[#e6edf3] transparent/20 text-center flex flex-col items-center justify-center space-y-4">
                         <Users className="w-12 h-12 text-[#e6edf3]" />
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400">Select an Organization</h4>
-                        <p className="text-[10px] text-slate-400 max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Select an Organization</h4>
+                        <p className="text-[10px] text-slate-200 max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
                       </Card>
                     )}
                   </div>
@@ -12347,11 +12347,11 @@ function SuperAdminPanel() {
                  {/* Left: Stripe credential forms */}
                  <div className="lg:col-span-2">
                    <Card className="p-6 space-y-6">
-                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Stripe Gateway Keys</h3>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Stripe Gateway Keys</h3>
                      
                      <div className="space-y-4">
                        <div>
-                         <label className="text-[10px] font-bold text-slate-400 uppercase">Stripe Secret Key</label>
+                         <label className="text-[10px] font-bold text-slate-200 uppercase">Stripe Secret Key</label>
                          <input 
                            type="password" 
                            value={stripeSecretKey} 
@@ -12360,7 +12360,7 @@ function SuperAdminPanel() {
                          />
                        </div>
                        <div>
-                         <label className="text-[10px] font-bold text-slate-400 uppercase">Stripe Publishable Key</label>
+                         <label className="text-[10px] font-bold text-slate-200 uppercase">Stripe Publishable Key</label>
                          <input 
                            type="text" 
                            value={stripePublishableKey} 
@@ -12369,7 +12369,7 @@ function SuperAdminPanel() {
                          />
                        </div>
                        <div>
-                         <label className="text-[10px] font-bold text-slate-400 uppercase">Stripe Webhook Secret</label>
+                         <label className="text-[10px] font-bold text-slate-200 uppercase">Stripe Webhook Secret</label>
                          <input 
                            type="password" 
                            value={stripeWebhookSecret} 
@@ -12391,7 +12391,7 @@ function SuperAdminPanel() {
                  {/* Right: Payment simulator logs */}
                  <div className="space-y-4">
                    <Card className="p-6 space-y-4">
-                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Recent Invoices</h3>
+                     <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Recent Invoices</h3>
                      <div className="space-y-3">
                        {[
                          { inv: "Inv-9812", name: "Zeta Software Solutions", credits: 500, amount: "$499.00", date: "June 2, 2026", status: "Paid" },
@@ -12403,7 +12403,7 @@ function SuperAdminPanel() {
                              <span className="text-slate-300">{i.inv} • {i.name}</span>
                              <span className="text-white">{i.amount}</span>
                            </div>
-                           <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                           <div className="flex justify-between text-[10px] text-slate-200 font-semibold">
                              <span>{i.credits} Credits • {i.date}</span>
                              <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded font-black uppercase tracking-widest">{i.status}</span>
                            </div>
@@ -12435,9 +12435,9 @@ function SuperAdminPanel() {
                        <item.icon className="w-5 h-5" />
                      </div>
                      <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
+                       <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest leading-none mb-1">{item.label}</p>
                        <p className="text-2xl font-black text-white leading-none">{item.val}</p>
-                       <p className="text-[10px] text-slate-400 mt-1 font-semibold">{item.trend}</p>
+                       <p className="text-[10px] text-slate-200 mt-1 font-semibold">{item.trend}</p>
                      </div>
                    </Card>
                  ))}
@@ -12445,7 +12445,7 @@ function SuperAdminPanel() {
 
                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">API Latency (last 24h)</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">API Latency (last 24h)</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <BarChart data={[
                        { time: "00:00", latency: 790 }, { time: "04:00", latency: 812 }, { time: "08:00", latency: 845 },
@@ -12461,7 +12461,7 @@ function SuperAdminPanel() {
                  </Card>
 
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Firestore Operations Count</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Firestore Operations Count</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <BarChart data={[
                        { time: "00:00", ops: 2100 }, { time: "04:00", ops: 1840 }, { time: "08:00", ops: 2450 },
@@ -12477,7 +12477,7 @@ function SuperAdminPanel() {
                  </Card>
 
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Transcription Delay Trend</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Transcription Delay Trend</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <BarChart data={[
                        { time: "00:00", delay: 115 }, { time: "04:00", delay: 108 }, { time: "08:00", delay: 124 },
@@ -12493,7 +12493,7 @@ function SuperAdminPanel() {
                  </Card>
 
                  <Card className="p-6 space-y-4">
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Active Vetting Queue</h3>
+                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Active Vetting Queue</h3>
                    <ResponsiveContainer width="100%" height={160}>
                      <PieChart>
                        <Pie data={[
@@ -12511,7 +12511,7 @@ function SuperAdminPanel() {
                  </Card>
                </div>
 
-               <div className="p-4 transparent border border-[#e6edf3] text-slate-400 text-xs font-semibold rounded-2xl">
+               <div className="p-4 transparent border border-[#e6edf3] text-slate-200 text-xs font-semibold rounded-2xl">
                  <p className="font-mono text-[10px]">Last telemetry snapshot: {new Date().toLocaleString()} UTC • All metrics within normal operating thresholds.</p>
                </div>
              </div>
@@ -12523,11 +12523,11 @@ function SuperAdminPanel() {
                 {/* Left Columns: Configs & System Instructions */}
                 <div className="xl:col-span-2 space-y-6">
                   <Card className="p-6 space-y-6">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Agent System Instructions</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Agent System Instructions</h3>
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-400 uppercase">System Prompt Instruction Envelope</label>
+                        <label className="text-[10px] font-bold text-slate-200 uppercase">System Prompt Instruction Envelope</label>
                         <textarea 
                           rows={6}
                           value={systemPrompt} 
@@ -12541,7 +12541,7 @@ function SuperAdminPanel() {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase">Model Version</label>
+                          <label className="text-[10px] font-bold text-slate-200 uppercase">Model Version</label>
                           <select 
                             value={selectedModel} 
                             onChange={e => setSelectedModel(e.target.value as any)} 
@@ -12554,7 +12554,7 @@ function SuperAdminPanel() {
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase">Temperature ({temperature})</label>
+                          <label className="text-[10px] font-bold text-slate-200 uppercase">Temperature ({temperature})</label>
                           <input 
                             type="range" 
                             min="0.0" 
@@ -12567,7 +12567,7 @@ function SuperAdminPanel() {
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-slate-400 uppercase">Safety Policy</label>
+                          <label className="text-[10px] font-bold text-slate-200 uppercase">Safety Policy</label>
                           <select 
                             value={safetyFilter} 
                             onChange={e => setSafetyFilter(e.target.value as any)} 
@@ -12584,7 +12584,7 @@ function SuperAdminPanel() {
 
                   {/* Live Cost Calculator */}
                   <Card className="p-6 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Live Cost Calculator</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Live Cost Calculator</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {[
                         { label: 'Input Token Cost', val: selectedModel === 'gemini-1.5-flash' ? '$0.075/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.10/1M' : '$1.25/1M' },
@@ -12593,20 +12593,20 @@ function SuperAdminPanel() {
                         { label: 'Est. Cost / Call', val: selectedModel === 'gemini-1.5-flash' ? '$0.0007' : selectedModel === 'gemini-2.0-flash' ? '$0.0009' : '$0.0115' },
                       ].map((item, i) => (
                         <div key={i} className="transparent border border-white/10 rounded-xl p-3 text-center">
-                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">{item.label}</p>
+                          <p className="text-[9px] font-black uppercase text-slate-200 tracking-wider">{item.label}</p>
                           <p className="text-sm font-black text-white mt-0.5">{item.val}</p>
                         </div>
                       ))}
                     </div>
-                    <p className="text-[9px] text-slate-400 italic">Costs calculated based on {selectedModel} pricing tier with temperature {temperature}.</p>
+                    <p className="text-[9px] text-slate-200 italic">Costs calculated based on {selectedModel} pricing tier with temperature {temperature}.</p>
                   </Card>
 
                   {/* Playground Sandbox */}
                   <Card className="p-6 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Sandbox Test Chamber</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Sandbox Test Chamber</h3>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-400 uppercase">Candidate Test Message Input</label>
+                        <label className="text-[10px] font-bold text-slate-200 uppercase">Candidate Test Message Input</label>
                         <input 
                           type="text"
                           value={playgroundInput}
@@ -12644,8 +12644,8 @@ function SuperAdminPanel() {
                 {/* Right Column: Telemetry logs */}
                 <div className="space-y-4">
                   <Card className="p-6 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-white/10 pb-2">Playground Sandbox Logs</h3>
-                    <div className="h-64 transparent rounded-2xl p-4 font-mono text-[10px] text-slate-400 overflow-y-auto space-y-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200 border-b border-white/10 pb-2">Playground Sandbox Logs</h3>
+                    <div className="h-64 transparent rounded-2xl p-4 font-mono text-[10px] text-slate-200 overflow-y-auto space-y-2">
                       {playgroundLogs.length > 0 ? playgroundLogs.map((log, idx) => (
                         <p key={idx} className={cn(
                           log.includes('cost') && "text-amber-400",
@@ -12653,7 +12653,7 @@ function SuperAdminPanel() {
                           !log.includes('cost') && !log.includes('completed') && "text-slate-300"
                         )}>{log}</p>
                       )) : (
-                        <p className="text-slate-400 italic">No inference test run logs. Hit 'Run Test Inference' to see token counts and pricing estimation details.</p>
+                        <p className="text-slate-200 italic">No inference test run logs. Hit 'Run Test Inference' to see token counts and pricing estimation details.</p>
                       )}
                     </div>
                   </Card>
@@ -12665,16 +12665,16 @@ function SuperAdminPanel() {
               <div className="flex justify-between items-center border-b border-[#e6edf3] pb-4">
                 <div>
                   <h2 className="text-xl font-display font-light text-white">White-Label & Reseller Portal</h2>
-                  <p className="text-slate-400 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
+                  <p className="text-slate-200 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Portal Identity</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Portal Identity</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Application Brand Name</label>
+                      <label className="text-[10px] font-bold text-slate-200 uppercase">Application Brand Name</label>
                       <input 
                         type="text" 
                         value={whiteLabelBrandingName} 
@@ -12683,7 +12683,7 @@ function SuperAdminPanel() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Custom Logo URL</label>
+                      <label className="text-[10px] font-bold text-slate-200 uppercase">Custom Logo URL</label>
                       <input 
                         type="text" 
                         value={whiteLabelLogoUrl} 
@@ -12695,10 +12695,10 @@ function SuperAdminPanel() {
                 </Card>
 
                 <Card className="p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Reseller Markup Policies</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Reseller Markup Policies</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Markup Multiplier ({whiteLabelMarkupFactor}x)</label>
+                      <label className="text-[10px] font-bold text-slate-200 uppercase">Markup Multiplier ({whiteLabelMarkupFactor}x)</label>
                       <input 
                         type="range" 
                         min="1.0" 
@@ -12708,10 +12708,10 @@ function SuperAdminPanel() {
                         onChange={(e) => setWhiteLabelMarkupFactor(parseFloat(e.target.value))} 
                         className="mt-1 block w-full cursor-pointer"
                       />
-                      <span className="text-[10px] text-slate-400 mt-1 block">Increases landing page pricing to multiply reseller margins.</span>
+                      <span className="text-[10px] text-slate-200 mt-1 block">Increases landing page pricing to multiply reseller margins.</span>
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Billing Currency</label>
+                      <label className="text-[10px] font-bold text-slate-200 uppercase">Billing Currency</label>
                       <select className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]">
                         <option>USD ($)</option>
                         <option>EUR (€)</option>
@@ -12731,7 +12731,7 @@ function SuperAdminPanel() {
                     <BookOpen className="w-5 h-5 text-brand-light shrink-0 animate-pulse" />
                     HR Operations Handbook
                   </h2>
-                  <p className="text-slate-400 text-xs">Download and send this complete onboarding kit to corporate organizations via email.</p>
+                  <p className="text-slate-200 text-xs">Download and send this complete onboarding kit to corporate organizations via email.</p>
                 </div>
                 <div className="flex flex-wrap gap-2.5">
                   <Button
@@ -12755,7 +12755,7 @@ function SuperAdminPanel() {
                       window.print();
                     }}
                     variant="outline"
-                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-400 border-white/10 hover:bg-[#30363d] hover:text-white flex items-center gap-2"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-200 border-white/10 hover:bg-[#30363d] hover:text-white flex items-center gap-2"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     Print Layout
@@ -12771,7 +12771,7 @@ function SuperAdminPanel() {
                     Enterprise HR Kit
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">AI Hire Operations & Onboarding Manual</h1>
-                  <p className="text-slate-400 text-sm max-w-xl mx-auto font-medium lead-relaxed">
+                  <p className="text-slate-200 text-sm max-w-xl mx-auto font-medium lead-relaxed">
                     This official guide details the integrated calibration, batch sourcing pipeline, and custom grading frameworks for registered HR organizations.
                   </p>
                 </div>
@@ -12781,7 +12781,7 @@ function SuperAdminPanel() {
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">01</span> The D6 Screening Philosophy
                   </h3>
-                  <p className="text-slate-400 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
                     The platform evaluates candidate resumes across six deep screening dimensions. Rather than matching flat keywords, language parsing engines grade professional experiences dynamically:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -12798,7 +12798,7 @@ function SuperAdminPanel() {
                           <Target className="w-3.5 h-3.5 shrink-0" />
                           {dim.name}
                         </h4>
-                        <p className="text-[11px] text-slate-400 leading-relaxed font-semibold">{dim.desc}</p>
+                        <p className="text-[11px] text-slate-200 leading-relaxed font-semibold">{dim.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -12809,7 +12809,7 @@ function SuperAdminPanel() {
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">02</span> Operational Action Blueprint
                   </h3>
-                  <p className="text-slate-400 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
                     Onboard new hiring teams to live status within minutes by walking them through these 4 primary operational phases:
                   </p>
                   <div className="space-y-4">
@@ -12825,7 +12825,7 @@ function SuperAdminPanel() {
                         </div>
                         <div>
                           <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 leading-none mb-1">{st.title}</h4>
-                          <p className="text-[11px] text-slate-400 leading-relaxed font-semibold mt-1">{st.text}</p>
+                          <p className="text-[11px] text-slate-200 leading-relaxed font-semibold mt-1">{st.text}</p>
                         </div>
                       </div>
                     ))}
@@ -12837,7 +12837,7 @@ function SuperAdminPanel() {
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">03</span> Grading Settings & Calibration
                   </h3>
-                  <p className="text-slate-400 text-xs font-semibold leading-relaxed">
+                  <p className="text-slate-200 text-xs font-semibold leading-relaxed">
                     Recruitment managers can completely overrule standard weights to map criteria directly with physical job types:
                   </p>
                   <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-[11px] text-emerald-800 leading-relaxed font-semibold">
@@ -12850,10 +12850,10 @@ function SuperAdminPanel() {
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">04</span> Reading Interactive Candidate Dashboards
                   </h3>
-                  <p className="text-slate-400 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
                     Opening any scored candidate row triggers the specialized evaluation scorecard report, showing the following forensic information:
                   </p>
-                  <ul className="list-disc pl-5 text-xs text-slate-400 space-y-2 leading-relaxed font-semibold">
+                  <ul className="list-disc pl-5 text-xs text-slate-200 space-y-2 leading-relaxed font-semibold">
                     <li><span className="text-slate-300 font-bold">Executive Verdict Narrative:</span> A objective 3-sentence summary analyzing qualifications and general job suitability.</li>
                     <li><span className="text-slate-300 font-bold">Chronological Padding Checklists:</span> Spots gaps in tenure, rapid changes of employer, or suspiciously generic candidate summaries.</li>
                     <li><span className="text-slate-300 font-bold">Tailored Interview Prompts:</span> 3 intelligent discussion templates custom-built for interviewers to probe exact weaknesses identified during parsing.</li>
@@ -12865,10 +12865,10 @@ function SuperAdminPanel() {
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                     <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">05</span> Configuration of SMTP Outgoing Servers
                   </h3>
-                  <p className="text-slate-400 text-xs font-medium leading-relaxed">
+                  <p className="text-slate-200 text-xs font-medium leading-relaxed">
                     Shortlisted candidates receive automated invite emails dispatched directly from the organization’s domain setup:
                   </p>
-                  <ol className="list-decimal pl-5 text-xs text-slate-400 space-y-2 leading-relaxed font-semibold">
+                  <ol className="list-decimal pl-5 text-xs text-slate-200 space-y-2 leading-relaxed font-semibold">
                     <li>Visit the <strong>Super Admin Registry</strong> settings panel to specify outgoing details.</li>
                     <li>Key in SMTP server address (e.g. <code>smtp.gmail.com</code>) with authorized credentials. Select Secure SSL (Port 465) or TLS (Port 587).</li>
                     <li>Verify setup using the inline connection verification test block before rolling out mail systems to recruiting staffs.</li>
@@ -12882,17 +12882,17 @@ function SuperAdminPanel() {
                <Card className="p-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <div className="space-y-4">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Master AI Provider</label>
+                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Master AI Provider</label>
                         <div className="flex items-center gap-3 p-4 transparent rounded-xl border border-white/10">
                            <Globe className="w-5 h-5 text-brand" />
                            <div>
                               <p className="text-sm font-bold">Google Gemini 1.5 Pro</p>
-                              <p className="text-[10px] text-slate-400">Official Provider for Analysis & Vision</p>
+                              <p className="text-[10px] text-slate-200">Official Provider for Analysis & Vision</p>
                            </div>
                         </div>
                      </div>
                      <div className="space-y-4">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">API Key Status</label>
+                        <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest">API Key Status</label>
                         <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-100">
                            <ShieldCheck className="w-5 h-5 text-green-500" />
                            <div>
@@ -12904,11 +12904,11 @@ function SuperAdminPanel() {
                   </div>
 
                   <div className="pt-6 border-t border-white/10 space-y-4">
-                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Global Tenant Policies</h3>
+                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-200">Global Tenant Policies</h3>
                      <div className="flex items-center justify-between p-4 glass-premium border border-[#e6edf3] rounded-xl">
                         <div>
                            <p className="text-sm font-bold">Automatic Red-Flag Detection</p>
-                           <p className="text-[10px] text-slate-400">Enable AI parsing of experience gaps and misalignment</p>
+                           <p className="text-[10px] text-slate-200">Enable AI parsing of experience gaps and misalignment</p>
                         </div>
                         <div className="w-12 h-6 bg-brand-dark rounded-full relative">
                            <div className="absolute right-1 top-1 w-4 h-4 glass-premium rounded-full" />
@@ -12917,7 +12917,7 @@ function SuperAdminPanel() {
                      <div className="flex items-center justify-between p-4 glass-premium border border-[#e6edf3] rounded-xl">
                         <div>
                            <p className="text-sm font-bold">Candidate GDPR Consent</p>
-                           <p className="text-[10px] text-slate-400">Require explicit recording consent in interview room</p>
+                           <p className="text-[10px] text-slate-200">Require explicit recording consent in interview room</p>
                         </div>
                         <div className="w-12 h-6 bg-brand-dark rounded-full relative">
                            <div className="absolute right-1 top-1 w-4 h-4 glass-premium rounded-full" />
@@ -12944,9 +12944,9 @@ function SuperAdminPanel() {
               </div>
               <div className="h-px bg-[#30363d]" />
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage & Compute</p>
+                <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Storage & Compute</p>
                 <div className="flex justify-between text-xs">
-                   <span className="text-slate-400">Database Instances</span>
+                   <span className="text-slate-200">Database Instances</span>
                    <span className="font-bold">1/1</span>
                 </div>
                 <div className="w-full bg-[#30363d] h-1 rounded-full">
@@ -13070,7 +13070,7 @@ function Onboarding() {
     }
   };
 
-  if (checkingInvite) return <div className="h-screen flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">Securing Invite Context...</div>;
+  if (checkingInvite) return <div className="h-screen flex items-center justify-center text-slate-200 font-bold uppercase tracking-widest animate-pulse">Securing Invite Context...</div>;
 
   return (
     <div className="min-h-screen transparent flex items-center justify-center p-6">
@@ -13083,7 +13083,7 @@ function Onboarding() {
               </div>
               <div>
                 <h2 className="text-2xl font-black text-white tracking-tight uppercase">INVITATION ACCEPTED</h2>
-                <p className="text-slate-400 text-sm font-medium mt-1">You've been invited to join <span className="text-brand-light font-black">{invitedOrg.name}</span></p>
+                <p className="text-slate-200 text-sm font-medium mt-1">You've been invited to join <span className="text-brand-light font-black">{invitedOrg.name}</span></p>
               </div>
             </div>
 
@@ -13094,7 +13094,7 @@ function Onboarding() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-brand-light uppercase tracking-widest">Organization ID</p>
-                  <p className="text-xs font-mono font-bold text-slate-400">{invitedOrg.id}</p>
+                  <p className="text-xs font-mono font-bold text-slate-200">{invitedOrg.id}</p>
                 </div>
               </div>
 
@@ -13109,7 +13109,7 @@ function Onboarding() {
               
               <button 
                 onClick={() => setInvitedOrg(null)}
-                className="w-full text-center text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-400 transition-colors"
+                className="w-full text-center text-[10px] font-black text-slate-200 uppercase tracking-widest hover:text-slate-200 transition-colors"
               >
                 Or create a new organization instead
               </button>
@@ -13122,12 +13122,12 @@ function Onboarding() {
                 <Briefcase className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-black text-white tracking-tight">SET UP YOUR WORKSPACE</h2>
-              <p className="text-slate-400 text-sm font-medium">Create an organization to start hiring.</p>
+              <p className="text-slate-200 text-sm font-medium">Create an organization to start hiring.</p>
             </div>
 
             <form onSubmit={handleCreateOrg} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Organization Name</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Organization Name</label>
                 <input 
                   type="text"
                   required
@@ -13140,7 +13140,7 @@ function Onboarding() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Industry</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Industry</label>
                   <select
                     value={orgIndustry}
                     onChange={(e) => setOrgIndustry(e.target.value)}
@@ -13157,7 +13157,7 @@ function Onboarding() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Company Size</label>
+                  <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Company Size</label>
                   <select
                     value={orgCompanySize}
                     onChange={(e) => setOrgCompanySize(e.target.value)}
@@ -13174,7 +13174,7 @@ function Onboarding() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">HQ Location</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">HQ Location</label>
                 <input 
                   type="text"
                   value={orgLocation}
@@ -13185,7 +13185,7 @@ function Onboarding() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Contact Phone</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Contact Phone</label>
                 <input 
                   type="tel"
                   value={orgPhone}
@@ -13196,7 +13196,7 @@ function Onboarding() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Description / Vision</label>
+                <label className="text-[10px] font-black text-slate-200 uppercase tracking-widest px-1">Description / Vision</label>
                 <textarea 
                   value={orgDescription}
                   onChange={(e) => setOrgDescription(e.target.value)}
@@ -13218,12 +13218,12 @@ function Onboarding() {
           </>
         )}
 
-        <p className="text-[10px] text-slate-400 text-center uppercase font-bold tracking-tighter pt-4">
+        <p className="text-[10px] text-slate-200 text-center uppercase font-bold tracking-tighter pt-4">
           By continuing, you agree to our terms of service and professional boundaries.
         </p>
         
         <div className="pt-4 border-t border-white/10 flex flex-col items-center gap-2">
-          <p className="text-[9px] text-slate-400 font-medium">Connectivity issues?</p>
+          <p className="text-[9px] text-slate-200 font-medium">Connectivity issues?</p>
           <button 
             onClick={async () => {
               try {
@@ -13424,7 +13424,7 @@ function LandingPage() {
                 Deploy Now
               </button>
               <button 
-                className="md:hidden p-2 text-slate-400 hover:bg-[#21262d] rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="md:hidden p-2 text-slate-200 hover:bg-[#21262d] rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle Menu"
               >
@@ -13522,7 +13522,7 @@ function LandingPage() {
                   <div className="w-2.5 h-2.5 rounded-full bg-[#e6edf3]"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-[#e6edf3]"></div>
                 </div>
-                <div className="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+                <div className="text-[10px] font-mono text-slate-200 flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5" />
                   hireai-screening-telemetry
                 </div>
@@ -13532,7 +13532,7 @@ function LandingPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3">
                 {/* Controls Column */}
                 <div className="border-b lg:border-b-0 lg:border-r border-[#e6edf3] transparent/20 p-6 flex flex-col gap-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Target Role Profile</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-200 mb-1">Target Role Profile</p>
                   
                   {(Object.keys(roleData) as Array<keyof typeof roleData>).map(role => (
                     <button
@@ -13547,7 +13547,7 @@ function LandingPage() {
                       )}
                     >
                       <span className="text-sm font-semibold mb-1">{roleData[role].title}</span>
-                      <span className={cn("text-[10px] font-mono", activeRole === role ? "text-slate-300" : "text-slate-400")}>{roleData[role].salary}</span>
+                      <span className={cn("text-[10px] font-mono", activeRole === role ? "text-slate-300" : "text-slate-200")}>{roleData[role].salary}</span>
                     </button>
                   ))}
                   
@@ -13583,7 +13583,7 @@ function LandingPage() {
                           isInterviewer && "text-cyan-400",
                           isCandidate && "text-[#e6edf3] pl-3.5 border-l-2 border-white/10",
                           isPass && "text-emerald-400",
-                          (!isInterviewer && !isCandidate && !isPass) && "text-slate-400"
+                          (!isInterviewer && !isCandidate && !isPass) && "text-slate-200"
                         )}
                       >
                         {log.includes('OK') ? (
@@ -13637,7 +13637,7 @@ function LandingPage() {
           <section id="features" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
              <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-display font-light text-white mb-4">Enterprise Vetting.</h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
+              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -13647,7 +13647,7 @@ function LandingPage() {
                    <GitBranch className="w-5 h-5 text-slate-300" />
                  </div>
                  <h3 className="text-2xl font-display font-light text-white mb-4">Multi-Agent Screening Pipelines</h3>
-                 <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                 <p className="text-slate-200 text-sm leading-relaxed mb-8">
                    Each screening session orchestrates three specialized agents: a technical interviewer, a behavioral analyst, and an integrity validator. They collaborate in real-time, cross-referencing responses and flagging inconsistencies.
                  </p>
                  
@@ -13671,7 +13671,7 @@ function LandingPage() {
                    <ShieldCheck className="w-4 h-4 text-slate-300" />
                  </div>
                  <h3 className="text-lg font-display font-light text-white mb-3">Anti-Cheating Identity Vetting</h3>
-                 <ul className="space-y-3 text-xs text-slate-400 leading-relaxed">
+                 <ul className="space-y-3 text-xs text-slate-200 leading-relaxed">
                    {[
                      "Real-time face & gaze detection via webcam feeds",
                      "Voiceprint matching against onboarding samples",
@@ -13696,7 +13696,7 @@ function LandingPage() {
                    <Volume2 className="w-4 h-4 text-slate-300" />
                  </div>
                  <h3 className="text-lg font-display font-light text-white mb-3">AI Audio Processing Telemetry</h3>
-                 <p className="text-xs text-slate-400 leading-relaxed mb-5">
+                 <p className="text-xs text-slate-200 leading-relaxed mb-5">
                    Real-time speech-to-text transcription with per-token confidence scoring, speaker diarization, and filler-word analytics.
                  </p>
                  <div className="space-y-3 text-[10px] font-mono">
@@ -13707,7 +13707,7 @@ function LandingPage() {
                      { label: "Filler Detection", val: "Uh/Um ratio, pause analysis" }
                    ].map((row, i) => (
                      <div key={i} className="flex justify-between items-center border-b border-white/10 pb-2 last:border-0 last:pb-0">
-                       <span className="text-slate-400">{row.label}</span>
+                       <span className="text-slate-200">{row.label}</span>
                        <span className="text-slate-300 font-bold">{row.val}</span>
                      </div>
                    ))}
@@ -13718,11 +13718,11 @@ function LandingPage() {
                <div className="md:col-span-3 rounded-2xl glass-premium border border-[#e6edf3] p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
                  <div className="space-y-3">
                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]">
-                     <Database className="w-3 h-3 text-slate-400" />
-                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Integration Layer</span>
+                     <Database className="w-3 h-3 text-slate-200" />
+                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-200">Integration Layer</span>
                    </div>
                    <h3 className="text-xl font-display font-light text-white">ATS & HRIS Syncing</h3>
-                   <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+                   <p className="text-sm text-slate-200 max-w-2xl leading-relaxed">
                      Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks and push scorecards back to your ATS of record.
                    </p>
                  </div>
@@ -13735,11 +13735,11 @@ function LandingPage() {
                <div className="md:col-span-3 rounded-2xl glass-premium border border-[#e6edf3] p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
                  <div className="space-y-3">
                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]">
-                     <Globe className="w-3 h-3 text-slate-400" />
-                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Reseller & Tenant API</span>
+                     <Globe className="w-3 h-3 text-slate-200" />
+                     <span className="text-[9px] font-bold uppercase tracking-wider text-slate-200">Reseller & Tenant API</span>
                    </div>
                    <h3 className="text-xl font-display font-light text-white">White-Label Candidate Lobby</h3>
-                   <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+                   <p className="text-sm text-slate-200 max-w-2xl leading-relaxed">
                      Deploy under your own domain with fully custom layout components, logo parameters, emails, and interview invitations for corporate client lobbies.
                    </p>
                  </div>
@@ -13757,27 +13757,27 @@ function LandingPage() {
           <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#e6edf3]/60">
              <div className="text-center mb-20">
                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]/80 mb-4">
-                 <CreditCard className="w-3.5 h-3.5 text-slate-400" />
-                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Flexible Licensing</span>
+                 <CreditCard className="w-3.5 h-3.5 text-slate-200" />
+                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Flexible Licensing</span>
                </div>
                <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Transparent Pricing.</h2>
-               <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
+               <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
                 {/* Starter Plan */}
                 <div className="rounded-3xl glass-premium border border-[#e6edf3]/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
                   <h3 className="text-xl font-display text-white mb-2">Starter</h3>
-                  <p className="text-slate-400 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
+                  <p className="text-slate-200 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
                   <div className="mb-8 flex items-baseline gap-1">
                     <span className="text-4xl font-display text-white">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
-                    <span className="text-slate-400 text-xs">/month</span>
+                    <span className="text-slate-200 text-xs">/month</span>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>500</strong> candidate interviews / mo</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Core ATS Webhook Syncing</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-dimensional scorecards</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Email support in 24 hours</li>
                   </ul>
                   <button 
                     onClick={signIn} 
@@ -13794,17 +13794,17 @@ function LandingPage() {
                   </div>
                   
                   <h3 className="text-xl font-display text-white mb-2">Agency Pro</h3>
-                  <p className="text-slate-400 text-sm mb-8">For scaling HR departments and staffing firms.</p>
+                  <p className="text-slate-200 text-sm mb-8">For scaling HR departments and staffing firms.</p>
                   <div className="mb-8 flex items-baseline gap-1">
                     <span className="text-4xl font-display text-white">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
-                    <span className="text-slate-400 text-xs">/month</span>
+                    <span className="text-slate-200 text-xs">/month</span>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> <strong>Unlimited</strong> candidate interviews</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Advanced webcam & audio cheating checks</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Custom white-labeled portal subdomains</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Bespoke HR evaluation templates</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated Account Manager</li>
                   </ul>
                   <button 
                     onClick={signIn} 
@@ -13817,15 +13817,15 @@ function LandingPage() {
                 {/* Enterprise Plan */}
                 <div className="rounded-3xl glass-premium border border-[#e6edf3]/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
                   <h3 className="text-xl font-display text-white mb-2">Enterprise</h3>
-                  <p className="text-slate-400 text-sm mb-8">For global corporations needing high customizability.</p>
+                  <p className="text-slate-200 text-sm mb-8">For global corporations needing high customizability.</p>
                   <div className="mb-8 flex items-baseline gap-1">
                     <span className="text-4xl font-display text-white">Custom</span>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
-                    <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Direct API programmatic integration</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Dedicated custom fine-tuned LLM models</li>
+                    <li className="flex items-center gap-2.5 text-xs text-slate-200"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> 99.9% Uptime SLA guarantees</li>
                   </ul>
                   <button 
                     onClick={signIn} 
@@ -13841,11 +13841,11 @@ function LandingPage() {
           <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#e6edf3]/60 glass-premium/10 backdrop-blur-xs">
             <div className="text-center mb-20">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]/80 mb-4">
-                <Star className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Customer Success</span>
+                <Star className="w-3.5 h-3.5 text-slate-200" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Customer Success</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Endorsed by Top Builders.</h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
+              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -13867,14 +13867,14 @@ function LandingPage() {
                 }
               ].map((t, index) => (
                 <div key={index} className="glass-premium border border-[#e6edf3]/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
-                  <p className="text-slate-400 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
+                  <p className="text-slate-200 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
                   <div className="flex items-center gap-4 border-t border-white/10 pt-5">
                     <div className="w-9 h-9 rounded-full bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-bold text-xs text-slate-300">
                       {t.author.charAt(0)}
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-white">{t.author}</h4>
-                      <p className="text-[10px] text-slate-400 font-medium">{t.role}</p>
+                      <p className="text-[10px] text-slate-200 font-medium">{t.role}</p>
                     </div>
                   </div>
                 </div>
@@ -13886,11 +13886,11 @@ function LandingPage() {
           <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-[#e6edf3]/60">
             <div className="text-center mb-20">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]/80 mb-4">
-                <Info className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Frequently Asked Questions</span>
+                <Info className="w-3.5 h-3.5 text-slate-200" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Frequently Asked Questions</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Got Questions?</h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
+              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
             </div>
 
             <div className="space-y-5">
@@ -13918,7 +13918,7 @@ function LandingPage() {
                     className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-300 hover:transparent/50 transition-colors"
                   >
                     <span>{faq.q}</span>
-                    {openFaq === index ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {openFaq === index ? <ChevronUp className="w-4 h-4 text-slate-200" /> : <ChevronDown className="w-4 h-4 text-slate-200" />}
                   </button>
                   <AnimatePresence initial={false}>
                     {openFaq === index && (
@@ -13945,7 +13945,7 @@ function LandingPage() {
             <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-6">
               Upgrade your screening process.
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-200 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
               Join elite teams deploying autonomous interview lobbies. Verify and screen talent faster.
             </p>
             <button 
@@ -13960,7 +13960,7 @@ function LandingPage() {
 
         {/* Footer */}
         <footer className="py-12 border-t border-[#e6edf3] glass-premium text-center">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-200">
             © 2026 HireAI Inc. All rights reserved.
           </p>
         </footer>
@@ -14119,7 +14119,7 @@ export default function App() {
       </div>
       <div className="space-y-2 text-center">
         <h2 className="text-xl font-black text-white uppercase tracking-widest">HireAI</h2>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] animate-pulse">Initializing Neural Interface...</p>
+        <p className="text-[10px] font-bold text-slate-200 uppercase tracking-[0.2em] animate-pulse">Initializing Neural Interface...</p>
       </div>
     </div>
   );
