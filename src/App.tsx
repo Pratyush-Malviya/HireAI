@@ -9650,19 +9650,48 @@ function OrgAdminPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: profile.uid,
-          callbackUrl: window.location.href
+          callbackUrl: window.location.origin + '/org-admin' // Ensure valid callback
         })
       });
       const data = await response.json();
+      
       if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+        const authWindow = window.open(data.redirectUrl, 'composio_auth', 'width=600,height=700');
+        
+        // Poll for connection status while popup is open
+        const pollInterval = setInterval(() => {
+          if (authWindow?.closed) {
+            clearInterval(pollInterval);
+            setComposioLoading(false);
+            // Final check just in case
+            fetch(`/api/composio/status?userId=${profile.uid}`)
+              .then(r => r.json())
+              .then(statusData => {
+                if (statusData.connected) {
+                  setComposioConnected(true);
+                }
+              }).catch(() => {});
+          } else {
+            fetch(`/api/composio/status?userId=${profile.uid}`)
+              .then(r => r.json())
+              .then(statusData => {
+                if (statusData.connected) {
+                  clearInterval(pollInterval);
+                  authWindow?.close();
+                  setComposioConnected(true);
+                  setComposioLoading(false);
+                  notify('Google Calendar connected successfully!', 'success');
+                }
+              }).catch(() => {});
+          }
+        }, 2000);
       } else {
         notify(data.error || 'Failed to get connection link from Composio.', 'error');
+        setComposioLoading(false);
       }
     } catch (err) {
       console.error(err);
       notify('Error initiating Composio connection.', 'error');
-    } finally {
       setComposioLoading(false);
     }
   };
