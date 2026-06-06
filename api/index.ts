@@ -101,6 +101,18 @@ const getOAuthClient = () => {
 };
 
 // Auth Routes
+app.get("/api/debug", (req, res) => {
+  res.status(200).json({
+    hasComposioKey: !!process.env.COMPOSIO_API_KEY,
+    hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+    hasGeminiKey: !!process.env.GEMINI_API_KEY,
+    hasViteFirebase: !!process.env.VITE_FIREBASE_API_KEY,
+    nodeEnv: process.env.NODE_ENV,
+    vercelRegion: process.env.VERCEL_REGION || "local",
+    time: new Date().toISOString()
+  });
+});
+
 app.get("/api/auth/google/url", (req, res) => {
   const oauth2Client = getOAuthClient();
   const url = oauth2Client.generateAuthUrl({
