@@ -431,7 +431,7 @@ function PlaceholderScoreCircle({ isProcessing }: { isProcessing: boolean }) {
           className="text-brand animate-pulse" 
         />
       </svg>
-      <div className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center bg-brand/10 border border-brand/10 text-brand-dark z-10 font-black">
+      <div className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center bg-brand/10 border border-brand/10 text-brand-light z-10 font-black">
         <span className="text-[7.5px] font-black uppercase opacity-80 leading-none mb-0.5 tracking-tighter">SCREEN</span>
         <span className="text-sm font-mono leading-none">{progress}%</span>
       </div>
@@ -486,7 +486,7 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
         className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden border border-[#e6edf3]"
       >
         <div className="p-8 border-b border-white/10 flex items-center justify-between transparent/50">
-          <h3 className="font-display font-bold text-xl text-[#161b22] tracking-tight">{title}</h3>
+          <h3 className="font-display font-bold text-xl text-white tracking-tight">{title}</h3>
           <button onClick={onClose} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-white/10 group">
             <Plus className="w-5 h-5 rotate-45 text-slate-400 group-hover:text-slate-400" />
           </button>
@@ -503,8 +503,8 @@ function Button({ className, variant = 'primary', size = 'md', as: Component = '
   const variants = {
     primary: 'glass-premium text-white hover:bg-[#30363d] shadow-sm',
     secondary: 'bg-brand-dark text-white hover:bg-brand-dark shadow-sm',
-    outline: 'border border-[#e6edf3] hover:border-[#c9d1d9] hover:transparent text-[#30363d] font-medium',
-    ghost: 'hover:bg-[#21262d] text-[#30363d] font-medium',
+    outline: 'border border-[#e6edf3] hover:border-[#c9d1d9] hover:transparent text-slate-300 font-medium',
+    ghost: 'hover:bg-[#21262d] text-slate-300 font-medium',
     brand: 'bg-brand-dark text-white hover:bg-brand-dark font-medium tracking-tight',
   };
   const sizes = {
@@ -2135,7 +2135,7 @@ function InterviewRoom() {
                       id="osint-consent"
                       checked={osintConsent}
                       onChange={(e) => setOsintConsent(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 glass-premium text-brand-dark focus:ring-brand/30 focus:ring-offset-[#0d1117] cursor-pointer"
+                      className="w-4 h-4 rounded border-white/10 glass-premium text-brand-light focus:ring-brand/30 focus:ring-offset-[#0d1117] cursor-pointer"
                     />
                   </div>
                   <label htmlFor="osint-consent" className="text-[11px] text-slate-300 font-medium cursor-pointer leading-relaxed">
@@ -2185,7 +2185,7 @@ function InterviewRoom() {
                     
                     {stream?.getVideoTracks()[0]?.enabled === false && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 glass-premium">
-                         <CameraOff className="w-12 h-12 text-[#30363d] animate-pulse" />
+                         <CameraOff className="w-12 h-12 text-slate-300 animate-pulse" />
                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Webcam Inactive</p>
                       </div>
                     )}
@@ -2490,7 +2490,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
             <div className="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center shrink-0 shadow-sm">
               <CreditCard className="w-4 h-4 text-white" />
             </div>
-            <h3 className="font-display font-light text-xl text-[#161b22] tracking-tight">Stripe Secure Checkout</h3>
+            <h3 className="font-display font-light text-xl text-white tracking-tight">Stripe Secure Checkout</h3>
           </div>
           <button onClick={onClose} disabled={isProcessing} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-250">
             <Plus className="w-5 h-5 rotate-45 text-slate-400" />
@@ -2515,10 +2515,10 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       )}
                     >
                       <div>
-                        <p className="text-sm font-semibold text-[#161b22]">{plans[planKey].name}</p>
+                        <p className="text-sm font-semibold text-white">{plans[planKey].name}</p>
                         <p className="text-[10px] text-slate-400">Credit addition or upgrade</p>
                       </div>
-                      <span className="text-sm font-bold text-[#161b22]">{plans[planKey].price}</span>
+                      <span className="text-sm font-bold text-white">{plans[planKey].price}</span>
                     </button>
                   ))}
                 </div>
@@ -2587,7 +2587,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-full border border-[#e6edf3] text-[#30363d] text-xs font-bold uppercase tracking-widest min-h-[44px]"
+                  className="flex-1 py-3 rounded-full border border-[#e6edf3] text-slate-300 text-xs font-bold uppercase tracking-widest min-h-[44px]"
                 >
                   Cancel
                 </button>
@@ -2603,9 +2603,9 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
 
           {step === 'processing' && (
             <div className="flex flex-col items-center justify-center py-10 space-y-6">
-              <Loader2 className="w-12 h-12 text-[#30363d] animate-spin" />
+              <Loader2 className="w-12 h-12 text-slate-300 animate-spin" />
               <div className="space-y-1 text-center">
-                <p className="text-sm font-semibold text-[#161b22]">Authorizing Card Transaction</p>
+                <p className="text-sm font-semibold text-white">Authorizing Card Transaction</p>
                 <p className="text-xs text-slate-400">Secured via Stripe Gateway Protocols</p>
               </div>
 
@@ -2626,7 +2626,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-display font-light text-[#161b22]">Payment Completed!</h3>
+                <h3 className="text-2xl font-display font-light text-white">Payment Completed!</h3>
                 <p className="text-slate-400 text-sm max-w-sm">
                   Your payment was verified. {plans[selectedPlan as keyof typeof plans].name} has been provisioned to your workspace.
                 </p>
@@ -2689,7 +2689,7 @@ function PublicSharedScorecard() {
   if (loading) {
     return (
       <div className="min-h-screen transparent flex items-center justify-center flex-col gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-[#30363d]" />
+        <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
         <span className="text-xs uppercase font-bold text-slate-400">Loading Shared Scorecard...</span>
       </div>
     );
@@ -2699,14 +2699,14 @@ function PublicSharedScorecard() {
     return (
       <div className="min-h-screen transparent flex items-center justify-center flex-col gap-4">
         <AlertCircle className="w-12 h-12 text-red-500" />
-        <h2 className="text-xl font-display font-light text-[#161b22]">Scorecard Not Found</h2>
+        <h2 className="text-xl font-display font-light text-white">Scorecard Not Found</h2>
         <p className="text-slate-400 text-sm">The requested talent evaluation profile does not exist or link expired.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen transparent font-sans text-[#30363d] p-6 md:p-12 relative">
+    <div className="min-h-screen transparent font-sans text-slate-300 p-6 md:p-12 relative">
       <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         
         {/* Header Branding */}
@@ -2715,7 +2715,7 @@ function PublicSharedScorecard() {
             <div className="w-8 h-8 rounded-lg transparent flex items-center justify-center shadow-sm">
               <Search className="w-4 h-4 text-white" />
             </div>
-            <span className="font-display font-light text-lg tracking-tight text-[#161b22]">HireAI Shared Talent Review</span>
+            <span className="font-display font-light text-lg tracking-tight text-white">HireAI Shared Talent Review</span>
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 border border-emerald-200/50 px-3 py-1 rounded-full">
             Verified Evaluation
@@ -2726,7 +2726,7 @@ function PublicSharedScorecard() {
         <div className="glass-premium rounded-3xl border border-[#e6edf3]/80 p-8 shadow-sm space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div>
-              <h1 className="text-3xl font-display font-light text-[#161b22] mb-1">{candidate.fullName}</h1>
+              <h1 className="text-3xl font-display font-light text-white mb-1">{candidate.fullName}</h1>
               <p className="text-slate-400 text-sm font-medium">{candidate.currentRole} Candidate</p>
               {job && <p className="text-xs text-slate-400 mt-1">Applying for: {job.title}</p>}
             </div>
@@ -2734,7 +2734,7 @@ function PublicSharedScorecard() {
             <div className="flex items-center gap-4 transparent px-6 py-4 rounded-2xl border border-[#e6edf3]/60">
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Match Rating</p>
-                <p className="text-2xl font-display text-[#161b22] mt-0.5">{candidate.scorecard?.compositeScore}%</p>
+                <p className="text-2xl font-display text-white mt-0.5">{candidate.scorecard?.compositeScore}%</p>
               </div>
               <div className="w-2 h-10 rounded-full bg-[#e6edf3] overflow-hidden">
                 <div className="h-full glass-premium" style={{ height: `${candidate.scorecard?.compositeScore}%` }} />
@@ -2751,7 +2751,7 @@ function PublicSharedScorecard() {
                 return (
                   <div key={key} className="transparent/50 border border-[#e6edf3]/40 p-4 rounded-2xl text-center">
                     <p className="text-[10px] font-bold text-slate-400 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
-                    <p className="text-lg font-display text-[#161b22] font-medium mt-1">{value?.score}%</p>
+                    <p className="text-lg font-display text-white font-medium mt-1">{value?.score}%</p>
                   </div>
                 );
               })}
@@ -2773,7 +2773,7 @@ function PublicSharedScorecard() {
               <div className="space-y-4 max-h-[300px] overflow-y-auto border border-[#e6edf3]/50 rounded-2xl p-4 transparent/30">
                 {interview.messages?.map((msg: any, i: number) => (
                   <div key={i} className="text-xs leading-relaxed">
-                    <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-[#161b22]")}>
+                    <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-white")}>
                       {msg.role === 'assistant' ? 'AI Screener' : 'Candidate'}
                     </p>
                     <p className="text-slate-400 mt-0.5">{msg.content}</p>
@@ -2910,7 +2910,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     }
 
     return (
-      <div className="flex h-screen transparent font-sans text-[#161b22] selection:bg-brand/10 overflow-hidden">
+      <div className="flex h-screen transparent font-sans text-white selection:bg-brand/10 overflow-hidden">
                 {/* Sidebar */}
         <aside className={cn("glass-premium text-white flex-col hidden lg:flex shrink-0 border-r border-white/10 transition-all duration-300", isSidebarCollapsed ? "w-20" : "w-64")}>
           <div className={cn("h-16 flex items-center border-b border-white/10 shrink-0", isSidebarCollapsed ? "px-0 justify-center" : "px-6 justify-between")}>
@@ -2998,7 +2998,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                    <div className="bg-brand-dark rounded-lg flex items-center justify-center shadow-sm shrink-0 w-8 h-8 mr-2">
                       <Search className="w-4 h-4 text-white" />
                    </div>
-                   <span className="font-display font-light text-xl tracking-tight uppercase text-[#161b22]">{whiteLabelBrandingName || "HireAI"}</span>
+                   <span className="font-display font-light text-xl tracking-tight uppercase text-white">{whiteLabelBrandingName || "HireAI"}</span>
                 </Link>
              </div>
              <div className="flex items-center gap-3">
@@ -3130,7 +3130,7 @@ function Dashboard() {
       ) : jobs.length === 0 ? (
         <Card className="p-12 sm:p-20 text-center glass-premium border-dashed border-2 border-[#e6edf3] rounded-[3rem]">
           <div className="w-20 h-20 bg-brand/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <Briefcase className="w-10 h-10 text-brand-dark" />
+            <Briefcase className="w-10 h-10 text-brand-light" />
           </div>
           <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Workspace Empty</h3>
           <p className="text-slate-400 mb-10 max-w-sm mx-auto font-medium">No talent pipelines detected. Initialize your first job opening to start the 2026 screening protocol.</p>
@@ -3162,7 +3162,7 @@ function Dashboard() {
                    </div>
                    <div className="flex justify-between items-start">
                      <div className="flex-1 min-w-0">
-                       <h3 className="text-2xl font-black mb-3 group-hover:text-brand-dark transition-colors line-clamp-2 tracking-tighter leading-tight uppercase">{job.title}</h3>
+                       <h3 className="text-2xl font-black mb-3 group-hover:text-brand-light transition-colors line-clamp-2 tracking-tighter leading-tight uppercase">{job.title}</h3>
                        <p className="text-[10px] text-slate-400 mb-8 flex items-center gap-1.5 font-black uppercase tracking-widest">
                          <Clock className="w-3 h-3" /> Initialized {formatDate(job.createdAt)}
                        </p>
@@ -3183,7 +3183,7 @@ function Dashboard() {
                     </div>
                     <span>Talent Pipeline</span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand-dark ml-auto group-hover:translate-x-1 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand-light ml-auto group-hover:translate-x-1 group-hover:bg-brand-dark group-hover:text-white transition-all">
                      <ChevronRight className="w-5 h-5" />
                   </div>
                 </div>
@@ -3550,7 +3550,7 @@ function ResumeBank() {
       <div className="grid grid-cols-12 gap-8 items-start">
         <aside className="col-span-12 lg:col-span-3 space-y-6">
           <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-2xl">
-            <h3 className="text-xs font-black text-[#161b22] uppercase tracking-widest mb-6">Filter Resumes</h3>
+            <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6">Filter Resumes</h3>
             
             <div className="space-y-6">
               <div className="space-y-2">
@@ -3559,7 +3559,7 @@ function ResumeBank() {
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
                   <input
                     type="text"
-                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
                     placeholder="Name, role, company..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -3611,7 +3611,7 @@ function ResumeBank() {
             ) : filteredResumes.length === 0 ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
                 <Database className="w-12 h-12 text-slate-300 animate-pulse" />
-                <h3 className="text-sm font-black text-[#30363d] uppercase tracking-widest">No Resumes Found</h3>
+                <h3 className="text-sm font-black text-slate-300 uppercase tracking-widest">No Resumes Found</h3>
                 <p className="text-slate-400 text-xs">Adjust your search parameters to find profiles.</p>
               </div>
             ) : (
@@ -3680,7 +3680,7 @@ function ResumeBank() {
                                 {candidate.fullName?.charAt(0) || '?'}
                               </div>
                               <div className="min-w-0">
-                                <h4 className="text-xs font-extrabold text-[#161b22] truncate">{candidate.fullName}</h4>
+                                <h4 className="text-xs font-extrabold text-white truncate">{candidate.fullName}</h4>
                                 <p className="text-[10px] text-slate-400 font-bold truncate">{candidate.email}</p>
                               </div>
                             </div>
@@ -3709,7 +3709,7 @@ function ResumeBank() {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <div className="inline-flex flex-col items-center">
-                              <span className="text-[10px] font-black text-[#30363d] bg-[#21262d] border border-[#e6edf3]/50 px-2 py-0.5 rounded-full leading-none mb-1">
+                              <span className="text-[10px] font-black text-slate-300 bg-[#21262d] border border-[#e6edf3]/50 px-2 py-0.5 rounded-full leading-none mb-1">
                                 {candidate.screeningsCount}x
                               </span>
                               <span className={cn(
@@ -3770,7 +3770,7 @@ function ResumeBank() {
             </div>
             
             <div className="space-y-1">
-              <h4 className="text-sm font-black text-[#30363d] uppercase tracking-widest">Analyzing Candidate Files</h4>
+              <h4 className="text-sm font-black text-slate-300 uppercase tracking-widest">Analyzing Candidate Files</h4>
               <p className="text-xs text-slate-400">Executing LLM scoring engine against target job profile.</p>
             </div>
 
@@ -3786,7 +3786,7 @@ function ResumeBank() {
           <div className="p-6 space-y-6 text-left">
             <div className="transparent border border-slate-150 p-4 rounded-xl space-y-1 text-left">
               <h5 className="text-[10px] font-black uppercase text-slate-450 tracking-wider">Candidate Scope</h5>
-              <p className="text-xs font-bold text-[#30363d]">
+              <p className="text-xs font-bold text-slate-300">
                 {reScreeningCandidate ? `Re-screening candidate: ${reScreeningCandidate.fullName}` : `Bulk screening: ${selectedResumes.length} selected resumes`}
               </p>
               <p className="text-[10px] text-brand font-semibold mt-1">
@@ -3830,7 +3830,7 @@ function ResumeBank() {
                         )}
                       >
                         <div className="min-w-0">
-                          <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-brand" : "text-[#30363d]")}>
+                          <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-brand" : "text-slate-300")}>
                             {job.title}
                           </h4>
                           <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
@@ -3993,7 +3993,7 @@ function NewJob() {
             <input
               required
               type="text"
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-[#161b22] placeholder:text-slate-300"
+              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-slate-300"
               placeholder="e.g. Senior Staff Engineer (Cloud Infrastructure)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -4002,7 +4002,7 @@ function NewJob() {
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1 mb-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Requirement Context</label>
-              <label className="text-[10px] font-black text-brand-dark hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest">
+              <label className="text-[10px] font-black text-brand-light hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest">
                 <Plus className="w-3.5 h-3.5" />
                 <span>Upload PDF/DOCX</span>
                 <input type="file" theme-target-id="job-file-input" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile} />
@@ -4026,7 +4026,7 @@ function NewJob() {
               type="number"
               min="5"
               max="120"
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-[#161b22] placeholder:text-slate-300"
+              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-slate-300"
               value={interviewDurationMinutes}
               onChange={(e) => setInterviewDurationMinutes(Number(e.target.value))}
             />
@@ -4038,7 +4038,7 @@ function NewJob() {
               type="button"
               id="toggle-config-btn"
               onClick={() => setShowConfig(!showConfig)}
-              className="flex items-center justify-between w-full p-4 transparent hover:bg-[#21262d]/85 rounded-2xl transition-all border border-white/10 font-bold text-xs uppercase tracking-wider text-[#30363d] shadow-sm"
+              className="flex items-center justify-between w-full p-4 transparent hover:bg-[#21262d]/85 rounded-2xl transition-all border border-white/10 font-bold text-xs uppercase tracking-wider text-slate-300 shadow-sm"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-brand" />
@@ -4051,7 +4051,7 @@ function NewJob() {
               <div className="mt-6 space-y-8 p-6 transparent/50 rounded-3xl border border-white/10/50 animate-in fade-in slide-in-from-top-2 duration-300">
                 {/* Threshold Section */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-black uppercase text-[#30363d] tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
                     <Target className="w-4 h-4 text-brand" /> Screening Thresholds
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -4094,10 +4094,10 @@ function NewJob() {
                 {/* Custom Dimensions Section */}
                 <div className="space-y-6">
                   <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                    <h3 className="text-xs font-black uppercase text-[#30363d] tracking-wider flex items-center gap-2">
+                    <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
                       <Briefcase className="w-4 h-4 text-brand" /> Screening Criteria Parameters
                     </h3>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-brand-dark">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-brand-light">
                       Cumulate Weights: {Number(d1Weight) + Number(d2Weight) + Number(d3Weight) + Number(d4Weight) + Number(d5Weight)}%
                     </span>
                   </div>
@@ -4109,7 +4109,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d1Name}
                           onChange={(e) => setD1Name(e.target.value)}
                         />
@@ -4118,7 +4118,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d1Weight}
                           onChange={(e) => setD1Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4128,7 +4128,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d1Desc}
                         onChange={(e) => setD1Desc(e.target.value)}
                       />
@@ -4142,7 +4142,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d2Name}
                           onChange={(e) => setD2Name(e.target.value)}
                         />
@@ -4151,7 +4151,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d2Weight}
                           onChange={(e) => setD2Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4161,7 +4161,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d2Desc}
                         onChange={(e) => setD2Desc(e.target.value)}
                       />
@@ -4175,7 +4175,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d3Name}
                           onChange={(e) => setD3Name(e.target.value)}
                         />
@@ -4184,7 +4184,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d3Weight}
                           onChange={(e) => setD3Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4194,7 +4194,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d3Desc}
                         onChange={(e) => setD3Desc(e.target.value)}
                       />
@@ -4208,7 +4208,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d4Name}
                           onChange={(e) => setD4Name(e.target.value)}
                         />
@@ -4217,7 +4217,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d4Weight}
                           onChange={(e) => setD4Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4227,7 +4227,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d4Desc}
                         onChange={(e) => setD4Desc(e.target.value)}
                       />
@@ -4241,7 +4241,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d5Name}
                           onChange={(e) => setD5Name(e.target.value)}
                         />
@@ -4250,7 +4250,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d5Weight}
                           onChange={(e) => setD5Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4260,7 +4260,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d5Desc}
                         onChange={(e) => setD5Desc(e.target.value)}
                       />
@@ -5192,13 +5192,13 @@ function JobDetail() {
             <ChevronRight className="w-4 h-4 rotate-180" /> Back to Agents
           </Button>
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center text-brand-dark border border-brand/10 shadow-sm">
+            <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center text-brand-light border border-brand/10 shadow-sm">
               <Briefcase className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-2xl font-black tracking-tight">{job.title}</h1>
-                <span className="px-2 py-0.5 bg-brand/10 text-brand-dark text-[10px] font-black uppercase tracking-widest rounded-lg border border-brand/10 flex items-center gap-1">
+                <span className="px-2 py-0.5 bg-brand/10 text-brand-light text-[10px] font-black uppercase tracking-widest rounded-lg border border-brand/10 flex items-center gap-1">
                    <RotateCcw className="w-3 h-3" /> Autonomous
                 </span>
               </div>
@@ -5214,7 +5214,7 @@ function JobDetail() {
             variant="outline"
             id="scoring-settings-btn"
             onClick={() => setShowSettingsDrawer(true)}
-            className="px-5 h-12 rounded-xl text-sm font-bold border-brand/10 hover:transparent transition-all text-brand-dark flex items-center gap-1.5"
+            className="px-5 h-12 rounded-xl text-sm font-bold border-brand/10 hover:transparent transition-all text-brand-light flex items-center gap-1.5"
           >
             <Sliders className="w-4 h-4" />
             Evaluation Settings
@@ -5223,7 +5223,7 @@ function JobDetail() {
           <Button
             variant="outline"
             onClick={() => setIsSelectResumeModalOpen(true)}
-            className="px-5 h-12 rounded-xl text-sm font-bold border-[#e6edf3] hover:transparent transition-all text-[#30363d] flex items-center gap-1.5"
+            className="px-5 h-12 rounded-xl text-sm font-bold border-[#e6edf3] hover:transparent transition-all text-slate-300 flex items-center gap-1.5"
           >
             <Database className="w-4 h-4 text-brand" />
             Screen Pre-uploaded Resumes
@@ -5244,7 +5244,7 @@ function JobDetail() {
         <button
           type="button"
           onClick={() => setIsJobDescCollapsed(!isJobDescCollapsed)}
-          className="w-full flex items-center justify-between p-5 transparent/50 hover:transparent transition-all font-bold text-sm text-[#30363d]"
+          className="w-full flex items-center justify-between p-5 transparent/50 hover:transparent transition-all font-bold text-sm text-slate-300"
         >
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-brand" />
@@ -5273,24 +5273,24 @@ function JobDetail() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transparent/30 p-5 rounded-2xl border border-white/10">
                     <div className="space-y-1">
                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Role Type</span>
-                      <span className="text-xs font-bold text-[#30363d]">{job.requirements.role_type || 'N/A'}</span>
+                      <span className="text-xs font-bold text-slate-300">{job.requirements.role_type || 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Seniority</span>
-                      <span className="text-xs font-bold text-[#30363d]">{job.requirements.role_seniority || 'N/A'}</span>
+                      <span className="text-xs font-bold text-slate-300">{job.requirements.role_seniority || 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Min Experience</span>
-                      <span className="text-xs font-bold text-[#30363d]">{job.requirements.min_experience_years !== undefined ? `${job.requirements.min_experience_years} Years` : 'N/A'}</span>
+                      <span className="text-xs font-bold text-slate-300">{job.requirements.min_experience_years !== undefined ? `${job.requirements.min_experience_years} Years` : 'N/A'}</span>
                     </div>
                     <div className="space-y-1">
                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Location</span>
-                      <span className="text-xs font-bold text-[#30363d]">{job.requirements.location_requirement || 'N/A'}</span>
+                      <span className="text-xs font-bold text-slate-300">{job.requirements.location_requirement || 'N/A'}</span>
                     </div>
                     {job.requirements.required_education && (
                       <div className="space-y-1">
                         <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Required Education</span>
-                        <span className="text-xs font-bold text-[#30363d]">{job.requirements.required_education}</span>
+                        <span className="text-xs font-bold text-slate-300">{job.requirements.required_education}</span>
                       </div>
                     )}
                     {job.requirements.preferred_industries && job.requirements.preferred_industries.length > 0 && (
@@ -5383,7 +5383,7 @@ function JobDetail() {
               </summary>
               <div className="space-y-8 mt-4 lg:mt-0">
                 <div>
-                  <h4 className="text-xs font-black text-[#161b22] uppercase tracking-widest mb-4">Status</h4>
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Status</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', 'Processing Resume', 'Ready to Invite', 'Invite Sent', 'Scheduled', 'Evaluating', 'Passed', 'Failed'].map(status => (
                       <label key={`status-filter-${status}`} className="flex items-center gap-3 cursor-pointer group">
@@ -5396,14 +5396,14 @@ function JobDetail() {
                         <input type="radio" className="hidden" name="status" value={status} checked={statusFilter === status} onChange={() => setStatusFilter(status)} />
                         <span className={cn(
                           "text-xs font-bold transition-colors truncate",
-                          statusFilter === status ? "text-brand-dark" : "text-slate-400 group-hover:text-[#161b22]"
+                          statusFilter === status ? "text-brand-light" : "text-slate-400 group-hover:text-white"
                         )}>{status}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-[#161b22] uppercase tracking-widest mb-4">Role</h4>
+                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Role</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3">
                     {['All', ...Array.from(new Set(candidates.map(c => c.currentRole))).filter(r => r && r !== 'All')].slice(0, 5).map(role => (
                       <label key={`role-filter-${role}`} className="flex items-center gap-3 cursor-pointer group">
@@ -5416,7 +5416,7 @@ function JobDetail() {
                         <input type="radio" className="hidden" name="role" value={role} checked={roleFilter === role} onChange={() => setRoleFilter(role)} />
                         <span className={cn(
                           "text-xs font-bold transition-colors truncate",
-                          roleFilter === role ? "text-brand-dark" : "text-slate-400 group-hover:text-[#161b22]"
+                          roleFilter === role ? "text-brand-light" : "text-slate-400 group-hover:text-white"
                         )}>{role}</span>
                       </label>
                     ))}
@@ -5424,7 +5424,7 @@ function JobDetail() {
                 </div>
                 {allTags.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-black text-[#161b22] uppercase tracking-widest mb-4">Tags</h4>
+                    <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Tags</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                       {allTags.map(tag => {
                         const isChecked = tagFilter.includes(tag);
@@ -5432,7 +5432,7 @@ function JobDetail() {
                           <label key={`tag-filter-${tag}`} className="flex items-center gap-3 cursor-pointer group">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded text-brand-dark focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9] cursor-pointer"
                               checked={isChecked} 
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -5444,7 +5444,7 @@ function JobDetail() {
                             />
                             <span className={cn(
                               "text-xs font-bold transition-colors truncate",
-                              isChecked ? "text-brand-dark font-black" : "text-slate-400 group-hover:text-[#161b22]"
+                              isChecked ? "text-brand-light font-black" : "text-slate-400 group-hover:text-white"
                             )}>{tag}</span>
                           </label>
                         );
@@ -5464,14 +5464,14 @@ function JobDetail() {
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full md:w-auto">
                   <div className="w-8 h-8 rounded-lg bg-[#21262d] border border-[#e6edf3] flex items-center justify-center shrink-0">
-                    <Cpu className="w-4 h-4 text-[#30363d] animate-pulse" />
+                    <Cpu className="w-4 h-4 text-slate-300 animate-pulse" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-xs font-bold tracking-widest uppercase text-slate-850 leading-none">
                         {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Ingestion Pipeline'}
                       </p>
-                      <span className="text-[10px] font-mono font-bold bg-[#21262d] px-1.5 py-0.5 rounded text-[#30363d] border border-[#e6edf3]/50">
+                      <span className="text-[10px] font-mono font-bold bg-[#21262d] px-1.5 py-0.5 rounded text-slate-300 border border-[#e6edf3]/50">
                         {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
                       </span>
                     </div>
@@ -5484,7 +5484,7 @@ function JobDetail() {
                 {/* Progress and indicators */}
                 <div className="flex items-center gap-4 w-full md:w-auto md:justify-end">
                   <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#30363d]" /> {uploadProgress.success}
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-300" /> {uploadProgress.success}
                   </div>
                   <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 shrink-0">
                     <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> {uploadProgress.skipped}
@@ -5574,7 +5574,7 @@ function JobDetail() {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="bg-brand/10 text-brand-dark border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9"
+                  className="bg-brand/10 text-brand-light border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9"
                   onClick={handleResearchAll}
                   disabled={researchingAll || uploading}
                 >
@@ -5635,13 +5635,13 @@ function JobDetail() {
               <div className="flex bg-[#21262d] p-1 rounded-xl border border-[#e6edf3] h-9 shrink-0">
                 <button 
                   onClick={() => setViewMode('list')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-dark" : "text-slate-400 hover:text-slate-400")}
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-400")}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setViewMode('grid')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-brand-dark" : "text-slate-400 hover:text-slate-400")}
+                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-400")}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -5654,7 +5654,7 @@ function JobDetail() {
               <div className="w-16 h-16 bg-[#21262d] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#e6edf3]">
                 <Users className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="text-sm font-black text-[#161b22] uppercase tracking-widest mb-1">No Matching Candidates</h3>
+              <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">No Matching Candidates</h3>
               <p className="text-slate-400 text-xs">Adjust your search or filters to find specific applicants.</p>
             </div>
           ) : viewMode === 'grid' ? (
@@ -5684,10 +5684,10 @@ function JobDetail() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-black text-[#30363d] truncate text-base tracking-tight animate-pulse">
+                              <h3 className="font-black text-slate-300 truncate text-base tracking-tight animate-pulse">
                                 {candidate.fullName}
                               </h3>
-                              <span className="text-[8px] font-black bg-brand bg-brand/10 text-brand-dark px-2 py-0.5 rounded-full uppercase tracking-widest border border-brand/20 flex items-center gap-1 shrink-0 animate-pulse">
+                              <span className="text-[8px] font-black bg-brand bg-brand/10 text-brand-light px-2 py-0.5 rounded-full uppercase tracking-widest border border-brand/20 flex items-center gap-1 shrink-0 animate-pulse">
                                 <Sparkles className="w-2.5 h-2.5 animate-pulse" /> Forensic Screening
                               </span>
                             </div>
@@ -5707,7 +5707,7 @@ function JobDetail() {
                         </div>
                         
                         <div className="flex items-center justify-between pt-5 border-t border-slate-50">
-                          <div className="px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-brand/10 text-brand-dark border border-brand/10">
+                          <div className="px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-brand/10 text-brand-light border border-brand/10">
                             <div className="w-2 h-2 rounded-full bg-brand animate-ping" />
                             Analyzing Resume Stack
                           </div>
@@ -5790,7 +5790,7 @@ function JobDetail() {
                         <div className="flex items-center gap-2">
                            <h3 className={cn(
                              "font-black truncate text-base tracking-tight transition-colors",
-                             isBestMatch ? "text-brand-dark" : "text-[#161b22] group-hover:text-brand-dark"
+                             isBestMatch ? "text-brand-light" : "text-white group-hover:text-brand-light"
                            )}>
                              {candidate.fullName}
                            </h3>
@@ -5850,7 +5850,7 @@ function JobDetail() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-dark hover:bg-brand/10 border border-transparent hover:border-brand/10"
+                          className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-light hover:bg-brand/10 border border-transparent hover:border-brand/10"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRetryScreening(candidate);
@@ -5860,7 +5860,7 @@ function JobDetail() {
                           {retryingScreening === candidate.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3 mr-1" />}
                           Re-Screen
                         </Button>
-                        <Button variant="ghost" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest border border-white/10 rounded-xl hover:bg-brand/10 hover:text-brand-dark" onClick={(e) => {
+                        <Button variant="ghost" className="h-8 px-3 text-[10px] font-black uppercase tracking-widest border border-white/10 rounded-xl hover:bg-brand/10 hover:text-brand-light" onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/candidates/${candidate.id}`);
                         }}>
@@ -5885,7 +5885,7 @@ function JobDetail() {
                       <th className="w-12 px-6 py-4">
                         <input 
                           type="checkbox"
-                          className="w-4 h-4 rounded text-brand-dark focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                          className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9] cursor-pointer"
                           checked={filteredCandidates.length > 0 && filteredCandidates.every(c => selectedCandidates.includes(c.id))}
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -5930,7 +5930,7 @@ function JobDetail() {
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <p className="text-sm font-black text-[#30363d] truncate animate-pulse">
+                                    <p className="text-sm font-black text-slate-300 truncate animate-pulse">
                                       {candidate.fullName}
                                     </p>
                                     <span className="text-[7px] font-black text-brand bg-brand/10 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-brand/10 flex items-center gap-1">
@@ -5954,7 +5954,7 @@ function JobDetail() {
                               </div>
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <span className="text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest bg-brand/10 text-brand-dark animate-pulse">
+                              <span className="text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest bg-brand/10 text-brand-light animate-pulse">
                                 Screening
                               </span>
                             </td>
@@ -5977,7 +5977,7 @@ function JobDetail() {
                           <td className="px-6 py-4 w-12" onClick={(e) => e.stopPropagation()}>
                             <input 
                               type="checkbox"
-                              className="w-4 h-4 rounded text-brand-dark focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9] cursor-pointer"
                               checked={isSelected}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -6003,12 +6003,12 @@ function JobDetail() {
                                   <div className="flex items-center gap-2">
                                     <p className={cn(
                                       "text-sm font-bold transition-colors",
-                                      isBestMatch ? "text-brand-dark" : "text-[#161b22] group-hover:text-brand-dark"
+                                      isBestMatch ? "text-brand-light" : "text-white group-hover:text-brand-light"
                                     )}>
                                       {candidate.fullName}
                                     </p>
                                     {isBestMatch && (
-                                      <Star className="w-3.5 h-3.5 text-brand-dark fill-current" />
+                                      <Star className="w-3.5 h-3.5 text-brand-light fill-current" />
                                     )}
                                     {candidate.research && (
                                       <span className="text-[8px] font-black text-brand bg-brand/10 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-brand/10 flex items-center gap-1">
@@ -6040,7 +6040,7 @@ function JobDetail() {
                                     {candidate.scorecard.compositeScore}% Match
                                   </span>
                                   {isBestMatch && (
-                                    <span className="text-[8px] font-black text-brand-dark uppercase tracking-widest">TOP</span>
+                                    <span className="text-[8px] font-black text-brand-light uppercase tracking-widest">TOP</span>
                                   )}
                                 </div>
                                 <div className="h-1.5 w-full bg-[#21262d] rounded-full overflow-hidden border border-[#e6edf3]/50">
@@ -6069,7 +6069,7 @@ function JobDetail() {
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
-                                  className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-dark"
+                                  className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-light"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleRetryScreening(candidate);
@@ -6081,7 +6081,7 @@ function JobDetail() {
                                 </Button>
                                <Button 
                                  variant="outline" 
-                                 className="h-8 text-[10px] font-black uppercase tracking-widest border-brand/10 text-brand-dark hover:bg-brand/10 min-w-[150px] flex items-center justify-center gap-1.5"
+                                 className="h-8 text-[10px] font-black uppercase tracking-widest border-brand/10 text-brand-light hover:bg-brand/10 min-w-[150px] flex items-center justify-center gap-1.5"
                                  onClick={(e) => {
                                    e.stopPropagation();
                                    setActiveInviteCandidate(candidate);
@@ -6129,7 +6129,7 @@ function JobDetail() {
 
           {/* Thresholds */}
           <div className="space-y-4 border-b border-white/10 pb-5">
-            <h3 className="text-xs font-black uppercase text-[#30363d] tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
               <Target className="w-4 h-4 text-brand" /> Screening Thresholds
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -6168,10 +6168,10 @@ function JobDetail() {
           {/* Custom Criteria Weights & Names */}
           <div className="space-y-5">
             <div className="flex justify-between items-center pb-2">
-              <h3 className="text-xs font-black uppercase text-[#30363d] tracking-wider flex items-center gap-2">
+              <h3 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-brand" /> Screening Criteria Parameters
               </h3>
-              <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-brand-dark">
+              <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-brand-light">
                 Total Weight: {Number(editD1Weight) + Number(editD2Weight) + Number(editD3Weight) + Number(editD4Weight) + Number(editD5Weight)}%
               </span>
             </div>
@@ -6183,7 +6183,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 1 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD1Name}
                     onChange={(e) => setEditD1Name(e.target.value)}
                   />
@@ -6192,7 +6192,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD1Weight}
                     onChange={(e) => setEditD1Weight(Math.max(0, Number(editD1Weight)))}
                   />
@@ -6200,7 +6200,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD1Desc}
                 onChange={(e) => setEditD1Desc(e.target.value)}
               />
@@ -6213,7 +6213,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 2 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD2Name}
                     onChange={(e) => setEditD2Name(e.target.value)}
                   />
@@ -6222,7 +6222,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD2Weight}
                     onChange={(e) => setEditD2Weight(Math.max(0, Number(editD2Weight)))}
                   />
@@ -6230,7 +6230,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD2Desc}
                 onChange={(e) => setEditD2Desc(e.target.value)}
               />
@@ -6243,7 +6243,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 3 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD3Name}
                     onChange={(e) => setEditD3Name(e.target.value)}
                   />
@@ -6252,7 +6252,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
                     value={editD3Weight}
                     onChange={(e) => setEditD3Weight(Math.max(0, Number(editD3Weight)))}
                   />
@@ -6260,7 +6260,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD3Desc}
                 onChange={(e) => setEditD3Desc(e.target.value)}
               />
@@ -6273,7 +6273,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 4 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD4Name}
                     onChange={(e) => setEditD4Name(e.target.value)}
                   />
@@ -6282,7 +6282,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
                     value={editD4Weight}
                     onChange={(e) => setEditD4Weight(Math.max(0, Number(editD4Weight)))}
                   />
@@ -6290,7 +6290,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD4Desc}
                 onChange={(e) => setEditD4Desc(e.target.value)}
               />
@@ -6303,7 +6303,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Metric 5 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD5Name}
                     onChange={(e) => setEditD5Name(e.target.value)}
                   />
@@ -6312,7 +6312,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] text-[#30363d]"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
                     value={editD5Weight}
                     onChange={(e) => setEditD5Weight(Math.max(0, Number(editD5Weight)))}
                   />
@@ -6320,7 +6320,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-[#30363d] leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD5Desc}
                 onChange={(e) => setEditD5Desc(e.target.value)}
               />
@@ -6332,7 +6332,7 @@ function JobDetail() {
           <Button
             type="button"
             variant="outline"
-            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-[#30363d] border-[#e6edf3]"
+            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-300 border-[#e6edf3]"
             onClick={() => setShowSettingsDrawer(false)}
           >
             Cancel
@@ -6341,7 +6341,7 @@ function JobDetail() {
           <Button
             type="button"
             variant="outline"
-            className="flex-1 h-12 text-[10px] uppercase font-black text-brand-dark border-brand/10 tracking-widest"
+            className="flex-1 h-12 text-[10px] uppercase font-black text-brand-light border-brand/10 tracking-widest"
             disabled={reevaluatingAll}
             onClick={async () => {
               await handleSaveSettings();
@@ -6387,7 +6387,7 @@ function JobDetail() {
                 )}
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-extrabold text-[#30363d]">{activeInviteCandidate.fullName}</h4>
+                <h4 className="text-sm font-extrabold text-slate-300">{activeInviteCandidate.fullName}</h4>
                 <p className="text-xs text-slate-400 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
               </div>
             </div>
@@ -6396,11 +6396,11 @@ function JobDetail() {
               {/* Option 1: Send via Email */}
               <div className="p-4 border border-[#e6edf3]/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-brand/10 text-brand-dark rounded-xl mt-0.5">
+                  <div className="p-2 bg-brand/10 text-brand-light rounded-xl mt-0.5">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-[#30363d] uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 1: Send Email Invite</h5>
                     <p className="text-[11px] text-slate-400 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
                   </div>
                 </div>
@@ -6410,14 +6410,14 @@ function JobDetail() {
                     <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-[#30363d] transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
                     />
                   </div>
 
-                  <div className="px-3.5 py-2.5 bg-brand/10 border border-brand/10 rounded-xl text-[11px] font-semibold text-brand-dark flex items-center gap-2">
+                  <div className="px-3.5 py-2.5 bg-brand/10 border border-brand/10 rounded-xl text-[11px] font-semibold text-brand-light flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 20H5a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V18a2 2 0 01-2 2h-2" /></svg>
                     A beautiful branded HTML invitation email will be sent automatically.
                   </div>
@@ -6455,7 +6455,7 @@ function JobDetail() {
                     <ExternalLink className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-[#30363d] uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
+                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
                     <p className="text-[11px] text-slate-400 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
                   </div>
                 </div>
@@ -6528,7 +6528,7 @@ function JobDetail() {
             </div>
             
             <div className="space-y-1">
-              <h4 className="text-sm font-black text-[#30363d] uppercase tracking-widest">Analyzing Candidate Files</h4>
+              <h4 className="text-sm font-black text-slate-300 uppercase tracking-widest">Analyzing Candidate Files</h4>
               <p className="text-xs text-slate-400">Executing LLM scoring engine against target job profile.</p>
             </div>
 
@@ -6550,7 +6550,7 @@ function JobDetail() {
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input
                 type="text"
-                className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-[#30363d]"
+                className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
                 placeholder="Search by name, role, or company..."
                 value={preUploadedSearchQuery}
                 onChange={(e) => setPreUploadedSearchQuery(e.target.value)}
@@ -6560,7 +6560,7 @@ function JobDetail() {
             <div className="border border-slate-150 rounded-xl max-h-[350px] overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
               {loadingOrgCandidates ? (
                 <div className="p-10 text-center flex flex-col items-center justify-center space-y-2">
-                  <Loader2 className="w-6 h-6 text-brand-dark animate-spin" />
+                  <Loader2 className="w-6 h-6 text-brand-light animate-spin" />
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">Loading Resumes...</p>
                 </div>
               ) : filteredAndUnscreenedResumes.length === 0 ? (
@@ -6600,7 +6600,7 @@ function JobDetail() {
                           className="w-4 h-4 rounded text-brand focus:ring-brand border-[#c9d1d9] cursor-pointer disabled:cursor-not-allowed"
                         />
                         <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-[#30363d] truncate">{candidate.fullName}</h4>
+                          <h4 className="text-xs font-bold text-slate-300 truncate">{candidate.fullName}</h4>
                           <p className="text-[10px] text-slate-400 font-semibold truncate">{candidate.email}</p>
                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight truncate mt-0.5">
                             {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
@@ -6611,7 +6611,7 @@ function JobDetail() {
                         {candidate.alreadyScreened ? (
                           <span className="text-[8px] font-black bg-[#e6edf3] text-slate-400 border border-[#c9d1d9] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                         ) : (
-                          <span className="text-[9px] font-black text-brand-dark bg-brand/10 px-2 py-0.5 rounded-lg border border-brand/20">
+                          <span className="text-[9px] font-black text-brand-light bg-brand/10 px-2 py-0.5 rounded-lg border border-brand/20">
                             Best Fit: {candidate.bestScore}%
                           </span>
                         )}
@@ -7434,7 +7434,7 @@ function CandidateDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
            <Button 
             variant="outline" 
-            className="text-brand-dark border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
+            className="text-brand-light border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
             onClick={handleDeepResearch} 
             disabled={researching}
            >
@@ -7455,7 +7455,7 @@ function CandidateDetail() {
            </Button>
            <Button
              variant="outline"
-             className="text-brand-dark border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4 flex items-center gap-1.5"
+             className="text-brand-light border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4 flex items-center gap-1.5"
              onClick={fetchAvailability}
            >
              <Calendar className="w-3.5 h-3.5" />
@@ -7575,8 +7575,8 @@ function CandidateDetail() {
                 {selectedSlot && (
                   <div className="p-4 bg-brand/10 rounded-2xl border border-brand/10 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] font-black text-brand-dark uppercase block mb-1">Selected Session</span>
-                      <p className="text-sm font-bold text-brand-dark">{selectedSlot.label}</p>
+                      <span className="text-[10px] font-black text-brand-light uppercase block mb-1">Selected Session</span>
+                      <p className="text-sm font-bold text-brand-light">{selectedSlot.label}</p>
                     </div>
                     <Button 
                       className="bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] font-black uppercase tracking-widest text-xs h-10 px-6 shadow-md"
@@ -7648,7 +7648,7 @@ function CandidateDetail() {
                       </span>
                       <span className="text-[10px] font-black text-red-500">-{flag.penalty} pts</span>
                    </div>
-                   <h4 className="font-black text-[#161b22] text-sm mb-1 uppercase tracking-tight">{flag.label}</h4>
+                   <h4 className="font-black text-white text-sm mb-1 uppercase tracking-tight">{flag.label}</h4>
                    <p className="text-xs text-slate-400 leading-relaxed italic">{flag.rationale}</p>
                 </div>
               ))}
@@ -7716,8 +7716,8 @@ function CandidateDetail() {
           className={cn(
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'core' 
-              ? "glass-premium text-brand-dark shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-[#30363d] hover:transparent"
+              ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
+              : "text-slate-400 hover:text-slate-300 hover:transparent"
           )}
         >
           <FileText className="w-4 h-4" />
@@ -7729,8 +7729,8 @@ function CandidateDetail() {
           className={cn(
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'offer' 
-              ? "glass-premium text-brand-dark shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-[#30363d] hover:transparent"
+              ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
+              : "text-slate-400 hover:text-slate-300 hover:transparent"
           )}
         >
           <Award className="w-4 h-4" />
@@ -7742,8 +7742,8 @@ function CandidateDetail() {
           className={cn(
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'campaign' 
-              ? "glass-premium text-brand-dark shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-[#30363d] hover:transparent"
+              ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
+              : "text-slate-400 hover:text-slate-300 hover:transparent"
           )}
         >
           <Send className="w-4 h-4" />
@@ -7755,8 +7755,8 @@ function CandidateDetail() {
           className={cn(
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'proctoring' 
-              ? "glass-premium text-brand-dark shadow-md scale-102 font-extrabold" 
-              : "text-slate-400 hover:text-[#30363d] hover:transparent"
+              ? "glass-premium text-brand-light shadow-md scale-102 font-extrabold" 
+              : "text-slate-400 hover:text-slate-300 hover:transparent"
           )}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -7796,7 +7796,7 @@ function CandidateDetail() {
               <div className="flex justify-center mb-6">
                 <div className="w-16 h-16 border-4 border-brand border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-lg font-black text-[#30363d]">Synthesizing Digital Presence...</p>
+              <p className="text-lg font-black text-slate-300">Synthesizing Digital Presence...</p>
               <div className="max-w-md mx-auto space-y-2">
                 <div className="h-2 bg-[#21262d] rounded-full w-full animate-pulse" />
                 <div className="h-2 bg-[#21262d] rounded-full w-5/6 animate-pulse mx-auto" />
@@ -7841,7 +7841,7 @@ function CandidateDetail() {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-rose-500' : 'text-emerald-500'}`} />
-                          <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">7. Confidence Meter</h4>
+                          <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">7. Confidence Meter</h4>
                         </div>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
                           status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
@@ -7864,10 +7864,10 @@ function CandidateDetail() {
                               strokeDashoffset={175 - (175 * confidence) / 100}
                               strokeLinecap="round" fill="transparent" />
                           </svg>
-                          <span className="absolute text-sm font-black text-[#30363d]">{confidence}%</span>
+                          <span className="absolute text-sm font-black text-slate-300">{confidence}%</span>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-[#30363d]">
+                          <p className="text-xs font-bold text-slate-300">
                             {isUnverified ? 'Unverified Audit Profile' : 'Verified Identity Level'}
                           </p>
                           <p className="text-[11px] text-slate-400 mt-1">
@@ -7884,7 +7884,7 @@ function CandidateDetail() {
                     <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-[#e6edf3]/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
                       <div className="flex items-center gap-2 mb-4">
                         <Users className="w-5 h-5 text-brand" />
-                        <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">1. Verified Profiles</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">1. Verified Profiles</h4>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -7904,7 +7904,7 @@ function CandidateDetail() {
                             >
                               <div className="flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full ${isVer ? 'bg-emerald-500' : 'bg-[#8b949e]'}`} />
-                                <span className="text-xs font-black text-[#30363d]">{p.name}</span>
+                                <span className="text-xs font-black text-slate-300">{p.name}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
                                 <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-slate-400'}`}>
@@ -7948,9 +7948,9 @@ function CandidateDetail() {
                         <div id="deep-research-summary-card" className="md:col-span-2 p-6 glass-premium border border-white/10 rounded-2xl shadow-sm space-y-4">
                           <div className="flex items-center gap-2 pb-2 border-b border-white/10">
                             <Sparkles className="w-5 h-5 text-brand" />
-                            <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">2. DeepResearch Summary</h4>
+                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">2. DeepResearch Summary</h4>
                           </div>
-                          <div className="text-[#30363d] text-sm leading-relaxed prose prose-indigo max-w-none max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                          <div className="text-slate-300 text-sm leading-relaxed prose prose-indigo max-w-none max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                             <Markdown>{summaryText}</Markdown>
                           </div>
                         </div>
@@ -7960,12 +7960,12 @@ function CandidateDetail() {
                           <div>
                             <div className="flex items-center gap-2 pb-2 border-b border-white/10 mb-4">
                               <Briefcase className="w-5 h-5 text-brand" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">3. Career Timeline</h4>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">3. Career Timeline</h4>
                             </div>
                             
                             <div className="space-y-4">
                               <div>
-                                <div className="flex justify-between text-xs font-bold text-[#30363d] mb-1.5">
+                                <div className="flex justify-between text-xs font-bold text-slate-300 mb-1.5">
                                   <span>Career Stability Rating</span>
                                   <span className="font-extrabold">{stabilityScore}%</span>
                                 </div>
@@ -7981,12 +7981,12 @@ function CandidateDetail() {
                             </div>
                           </div>
 
-                          <div className="p-3.5 bg-brand/10 border border-brand/10 rounded-xl space-y-1 text-[11px] text-brand-dark font-medium">
-                            <div className="flex items-center gap-1 text-brand-dark font-extrabold text-[10px] uppercase tracking-wide">
+                          <div className="p-3.5 bg-brand/10 border border-brand/10 rounded-xl space-y-1 text-[11px] text-brand-light font-medium">
+                            <div className="flex items-center gap-1 text-brand-light font-extrabold text-[10px] uppercase tracking-wide">
                               <Check className="w-3.5 h-3.5" />
                               Promotion Patterns Checked
                             </div>
-                            <p className="text-brand-dark/80 leading-normal">Past roles verified with progressive titles, steady promotions, and realistic tenure periods.</p>
+                            <p className="text-brand-light/80 leading-normal">Past roles verified with progressive titles, steady promotions, and realistic tenure periods.</p>
                           </div>
                         </div>
                       </div>
@@ -7998,9 +7998,9 @@ function CandidateDetail() {
                           <div className="flex items-center justify-between pb-2 border-b border-white/10">
                             <div className="flex items-center gap-2">
                               <Cpu className="w-5 h-5 text-brand" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">4. Technical Intelligence</h4>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">4. Technical Intelligence</h4>
                             </div>
-                            <span className="text-[10px] font-black uppercase bg-brand/10 text-brand-dark px-2 py-0.5 rounded tracking-wider">
+                            <span className="text-[10px] font-black uppercase bg-brand/10 text-brand-light px-2 py-0.5 rounded tracking-wider">
                               Assessed: {seniority}
                             </span>
                           </div>
@@ -8008,12 +8008,12 @@ function CandidateDetail() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="p-4 transparent rounded-xl border border-white/10 space-y-2 text-center">
                               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Engineering Depth</span>
-                              <div className="text-3xl font-black text-brand-dark">{engDepth}%</div>
+                              <div className="text-3xl font-black text-brand-light">{engDepth}%</div>
                               <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Based on codebase validation and engineering design overlap.</p>
                             </div>
                             <div className="p-4 transparent rounded-xl border border-white/10 space-y-2 text-center">
                               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Problem Solving</span>
-                              <div className="text-3xl font-black text-brand-dark">{problemSolving}%</div>
+                              <div className="text-3xl font-black text-brand-light">{problemSolving}%</div>
                               <p className="text-[10px] text-slate-400 font-medium leading-relaxed font-sans">Derived from community contributions, stack trace, and complexity metrics.</p>
                             </div>
                           </div>
@@ -8029,7 +8029,7 @@ function CandidateDetail() {
                           <div className="flex items-center justify-between pb-2 border-b border-white/10">
                             <div className="flex items-center gap-2">
                               <Brain className="w-5 h-5 text-brand" />
-                              <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">5. Leadership & Communication</h4>
+                              <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">5. Leadership & Communication</h4>
                             </div>
           
                               <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded tracking-wider">
@@ -8060,7 +8060,7 @@ function CandidateDetail() {
 <div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
                           <div className="flex items-center gap-2">
                             <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-rose-500' : 'text-emerald-500'}`} />
-                            <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">6. Risk Signals</h4>
+                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">6. Risk Signals</h4>
                           </div>
                           <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
                             riskScore > 40 ? 'bg-rose-100 text-rose-800' :
@@ -8076,7 +8076,7 @@ function CandidateDetail() {
                             {riskScore > 20 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-[#30363d]">
+                            <p className="text-xs font-bold text-slate-300">
                               {riskScore > 20 ? 'Potential inconsistencies detected:' : 'No potential inconsistencies detected.'}
                             </p>
                             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
@@ -8094,7 +8094,7 @@ function CandidateDetail() {
                     <div id="evidence-sources-card" className="lg:col-span-2 p-6 transparent border border-[#e6edf3]/60 rounded-2xl">
                       <div className="flex items-center gap-2 mb-4">
                         <BookOpen className="w-5 h-5 text-brand" />
-                        <h4 className="text-xs font-black uppercase tracking-widest text-[#30363d]">8. Evidence Sources / Reference Grounding Links</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">8. Evidence Sources / Reference Grounding Links</h4>
                       </div>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -8107,7 +8107,7 @@ function CandidateDetail() {
                             className={`block p-3 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-[#21262d]/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-[11px] font-bold text-slate-400 line-clamp-1 group-hover:text-brand-dark italic">
+                              <span className="text-[11px] font-bold text-slate-400 line-clamp-1 group-hover:text-brand-light italic">
                                 {source.title || source.uri}
                               </span>
                               {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-slate-300 group-hover:text-brand-light shrink-0" />}
@@ -8123,8 +8123,8 @@ function CandidateDetail() {
                     {/* REFRESH ACTION AND AUDIT SUMMARY PANEL */}
                     <div className="p-6 transparent border border-[#e6edf3]/60 rounded-2xl flex flex-col justify-between space-y-4">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-[#30363d]">
-                          <CheckCircle2 className="text-brand-dark w-4 h-4" />
+                        <div className="flex items-center gap-2 text-slate-300">
+                          <CheckCircle2 className="text-brand-light w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-wider">Audit Integrity (v5.0)</span>
                         </div>
                         <p className="text-[10px] text-slate-400 leading-relaxed italic font-sans">
@@ -8134,7 +8134,7 @@ function CandidateDetail() {
                       
                       <Button 
                         variant="outline" 
-                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-brand-dark border-brand/20 glass-premium hover:bg-[#21262d] hover:border-brand-light hover:text-brand-dark transition-all"
+                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-brand-light border-brand/20 glass-premium hover:bg-[#21262d] hover:border-brand-light hover:text-brand-light transition-all"
                         onClick={handleDeepResearch}
                       >
                         <RotateCcw className="w-3.5 h-3.5 mr-2" /> Refresh Grounding Audit
@@ -8154,7 +8154,7 @@ function CandidateDetail() {
               <div className="w-20 h-20 transparent rounded-full flex items-center justify-center mb-6 border border-white/10">
                 <Globe className="w-10 h-10 text-slate-300" />
               </div>
-              <h4 className="text-xl font-black text-[#161b22] mb-2">Footprint Analysis Missing</h4>
+              <h4 className="text-xl font-black text-white mb-2">Footprint Analysis Missing</h4>
               <p className="text-sm text-slate-400 max-w-md mx-auto mb-8">
                 Perform a deep web research to uncover the candidate's professional presence across LinkedIn, GitHub, industry registries, and public portfolios.
               </p>
@@ -8179,7 +8179,7 @@ function CandidateDetail() {
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="border-b border-[#e6edf3] pb-2">
-              <h2 className="text-xl font-black text-[#30363d] uppercase tracking-widest flex items-center gap-2">
+              <h2 className="text-xl font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brand" />
                 D6+ Forensic Analysis Reports
               </h2>
@@ -8191,11 +8191,11 @@ function CandidateDetail() {
               {d6Sections.executiveSummary && (
                 <Card id="d6-executive-summary" className="p-6 border-l-4 border-l-brand glass-premium shadow-md shadow-brand/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
                   <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
-                    <div className="p-2 bg-brand/10 text-brand-dark rounded-lg shrink-0">
+                    <div className="p-2 bg-brand/10 text-brand-light rounded-lg shrink-0">
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-[#161b22] text-sm uppercase tracking-wider">D6 Executive Summary & Match Narrative</h3>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wider">D6 Executive Summary & Match Narrative</h3>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">CORE FIT & SYNTHESIS</p>
                     </div>
                   </div>
@@ -8213,7 +8213,7 @@ function CandidateDetail() {
                       <BarChart3 className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-[#161b22] text-sm uppercase tracking-wider">Dimensional Performance Ledger</h3>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wider">Dimensional Performance Ledger</h3>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">D1-D5 BREAKDOWN DECONSTRUCTION</p>
                     </div>
                   </div>
@@ -8231,7 +8231,7 @@ function CandidateDetail() {
                       <Shield className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-[#161b22] text-sm uppercase tracking-wider">D6 Auditing, Penalties & Anomalies</h3>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wider">D6 Auditing, Penalties & Anomalies</h3>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">ADVERSARIAL STABILITY & GAP EVALUATION</p>
                     </div>
                   </div>
@@ -8249,7 +8249,7 @@ function CandidateDetail() {
                       <Lightbulb className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-black text-[#161b22] text-sm uppercase tracking-wider">Hiring Recommendation & Interview Strategy</h3>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wider">Hiring Recommendation & Interview Strategy</h3>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">PRESCRIPTIVE PANEL EVALUATION QUESTIONS</p>
                     </div>
                   </div>
@@ -8270,12 +8270,12 @@ function CandidateDetail() {
              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Quick Stats</h3>
              <div className="space-y-4">
                <div>
-                 <p className="text-sm font-bold text-[#161b22]">{candidate.currentRole}</p>
+                 <p className="text-sm font-bold text-white">{candidate.currentRole}</p>
                  <p className="text-xs text-slate-400">@{candidate.currentCompany}</p>
                </div>
                <div className="flex justify-between items-center py-3 border-y border-slate-50">
                  <span className="text-sm text-slate-400">Exp. Years</span>
-                 <span className="font-bold text-brand-dark">{candidate.totalExperience}Y</span>
+                 <span className="font-bold text-brand-light">{candidate.totalExperience}Y</span>
                </div>
                <div className="flex justify-between items-center pb-3 border-b border-slate-50">
                  <span className="text-sm text-slate-400">Location</span>
@@ -8283,7 +8283,7 @@ function CandidateDetail() {
                </div>
                <div className="flex justify-between items-center pt-1">
                  <span className="text-sm text-slate-400">Screened On</span>
-                 <span className="text-sm font-bold text-[#30363d]">{formatDateTime(candidate.createdAt)}</span>
+                 <span className="text-sm font-bold text-slate-300">{formatDateTime(candidate.createdAt)}</span>
                </div>
              </div>
           </Card>
@@ -8298,7 +8298,7 @@ function CandidateDetail() {
                        "w-2 h-2 rounded-full shrink-0",
                        flag.severity === 'high' ? "bg-red-500" : flag.severity === 'medium' ? "bg-amber-500" : "bg-[#8b949e]"
                      )} />
-                     <p className="text-sm font-black text-[#30363d]">{flag.label}</p>
+                     <p className="text-sm font-black text-slate-300">{flag.label}</p>
                      <span className="ml-auto text-[10px] text-red-500 font-black uppercase tracking-tighter">-{flag.penalty} pts</span>
                    </div>
                    <p className="text-xs text-slate-400 leading-relaxed italic border-l-2 border-white/10 pl-3 py-1">
@@ -8331,11 +8331,11 @@ function CandidateDetail() {
            {/* Composio Integrations Card */}
            <Card className="p-6 glass-premium border border-slate-150 rounded-2xl shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center font-black text-brand-dark text-xs shadow-inner">
-                   <Zap className="w-4 h-4 text-brand-dark" />
+                 <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center font-black text-brand-light text-xs shadow-inner">
+                   <Zap className="w-4 h-4 text-brand-light" />
                  </div>
                  <div>
-                   <h4 className="font-extrabold text-[#30363d] text-sm">Composio Integrations</h4>
+                   <h4 className="font-extrabold text-slate-300 text-sm">Composio Integrations</h4>
                    <p className="text-[10px] text-slate-400 font-semibold uppercase">Gmail & Google Calendar</p>
                  </div>
               </div>
@@ -8387,7 +8387,7 @@ function CandidateDetail() {
                    <Video className="w-4 h-4 text-white" />
                  </div>
                  <div>
-                   <h4 className="font-extrabold text-[#30363d] text-sm">AI Meeting Recorder Bot</h4>
+                   <h4 className="font-extrabold text-slate-300 text-sm">AI Meeting Recorder Bot</h4>
                    <p className="text-[10px] text-slate-400 font-semibold uppercase">External Meeting Capture</p>
                  </div>
               </div>
@@ -8402,7 +8402,7 @@ function CandidateDetail() {
                       botStatus === 'recording' ? "bg-red-500 animate-pulse" :
                       botStatus === 'joining' ? "bg-amber-500 animate-pulse" : "bg-[#8b949e]"
                     )} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#30363d]">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
                       {botStatus === 'completed' ? 'Recording Ready' :
                        botStatus === 'recording' ? 'Live Recording' :
                        botStatus === 'joining' ? 'Lobby / Joining' : 'Idle / Ready'}
@@ -8414,7 +8414,7 @@ function CandidateDetail() {
                   <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-[#30363d] focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     placeholder="Paste meeting link here"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
@@ -8425,7 +8425,7 @@ function CandidateDetail() {
                   <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Bot Display Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-[#30363d] focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     value={botName}
                     onChange={(e) => setBotName(e.target.value)}
                   />
@@ -8500,7 +8500,7 @@ function CandidateDetail() {
                 <span className="text-xs font-bold text-slate-400">Signal Density:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
-                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-dark" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-[#21262d] text-[#30363d]" : "bg-red-100 text-red-700"
+                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-light" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-[#21262d] text-slate-300" : "bg-red-100 text-red-700"
                 )}>
                   {candidate.scorecard.dimensions?.signalDensity?.score || '--'}/100
                 </span>
@@ -8582,13 +8582,13 @@ function CandidateDetail() {
                 
                 // Static colors map to ensure compilation in Tailwind CSS v4 without dynamic class name construction
                 const staticColorsMap: Record<string, { bg: string; text: string; bgActive: string; textActive: string; border: string }> = {
-                  indigo: { bg: 'bg-brand/10', text: 'text-brand-light', bgActive: 'bg-brand/10', textActive: 'text-brand-dark', border: 'border-brand/10' },
+                  indigo: { bg: 'bg-brand/10', text: 'text-brand-light', bgActive: 'bg-brand/10', textActive: 'text-brand-light', border: 'border-brand/10' },
                   blue: { bg: 'bg-blue-50/10', text: 'text-blue-400', bgActive: 'bg-blue-50', textActive: 'text-blue-600', border: 'border-blue-100' },
                   emerald: { bg: 'bg-emerald-50/10', text: 'text-emerald-400', bgActive: 'bg-emerald-50', textActive: 'text-emerald-600', border: 'border-emerald-100' },
                   amber: { bg: 'bg-amber-50/10', text: 'text-amber-400', bgActive: 'bg-amber-50', textActive: 'text-amber-600', border: 'border-amber-100' },
                   rose: { bg: 'bg-rose-50/10', text: 'text-rose-400', bgActive: 'bg-rose-50', textActive: 'text-rose-600', border: 'border-rose-100' },
                 };
-                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-400', bgActive: 'bg-[#21262d]', textActive: 'text-[#30363d]', border: 'border-slate-150' };
+                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-400', bgActive: 'bg-[#21262d]', textActive: 'text-slate-300', border: 'border-slate-150' };
 
                 return (
                   <Card key={dimInfo.id} className={cn(
@@ -8636,7 +8636,7 @@ function CandidateDetail() {
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <h3 className="font-black text-[#161b22] uppercase tracking-tight">{dimInfo.label}</h3>
+                                <h3 className="font-black text-white uppercase tracking-tight">{dimInfo.label}</h3>
                                 <div className="group/info relative">
                                   <Info className="w-3.5 h-3.5 text-slate-300 hover:text-brand-light transition-colors cursor-help" />
                                   <div className="absolute bottom-full left-0 mb-2 w-64 p-3 glass-premium text-white text-[10px] font-medium rounded-xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-50 shadow-xl border border-white/10 pointer-events-none">
@@ -8652,7 +8652,7 @@ function CandidateDetail() {
                                 <p className="text-[10px] text-slate-400 font-medium italic">{dimInfo.description}</p>
                                 <span className={cn(
                                   "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border",
-                                  dimInfo.weight === 'High' ? "bg-brand/10 text-brand-dark border-brand/10" : "transparent text-slate-400 border-white/10"
+                                  dimInfo.weight === 'High' ? "bg-brand/10 text-brand-light border-brand/10" : "transparent text-slate-400 border-white/10"
                                 )}>
                                   {dimInfo.weight} Weight
                                 </span>
@@ -8710,7 +8710,7 @@ function CandidateDetail() {
                                       <div className="w-4 h-4 rounded-full glass-premium flex items-center justify-center text-[7px] font-black text-white shrink-0">
                                         {cidx + 1}
                                       </div>
-                                      <span className="text-[10px] font-bold text-slate-400 group-hover/cite:text-brand-dark max-w-[120px] truncate">
+                                      <span className="text-[10px] font-bold text-slate-400 group-hover/cite:text-brand-light max-w-[120px] truncate">
                                         {cite.claim}
                                       </span>
                                       <div className="w-1.5 h-1.5 rounded-full bg-[#e6edf3]" />
@@ -8739,7 +8739,7 @@ function CandidateDetail() {
                 <div className="w-8 h-8 rounded-full bg-[#e6edf3] flex items-center justify-center font-black text-slate-400 text-xs shadow-inner">
                   PII
                 </div>
-                <h4 className="font-bold text-[#30363d]">PII Isolation & Compliance</h4>
+                <h4 className="font-bold text-slate-300">PII Isolation & Compliance</h4>
              </div>
              <p className="text-xs text-slate-400 leading-relaxed">
                As per our Section 06 policies, Personally Identifiable Information is strictly isolated. Read access is restricted to the hiring manager. No demographic signals are used in scoring.
@@ -8752,7 +8752,7 @@ function CandidateDetail() {
                    <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                   <h3 className="font-black text-lg text-[#161b22]">Proctoring & Integrity (Section 3.4)</h3>
+                   <h3 className="font-black text-lg text-white">Proctoring & Integrity (Section 3.4)</h3>
                    <p className="text-xs text-slate-400">Multi-layer security monitoring logs</p>
                 </div>
              </div>
@@ -8826,11 +8826,11 @@ function CandidateDetail() {
           {/* Controls Form */}
           <Card className="p-8 space-y-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-brand/10 text-brand-dark rounded-lg">
+              <div className="p-2 bg-brand/10 text-brand-light rounded-lg">
                 <Sliders className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-[#161b22] text-base uppercase tracking-wider">Offer Letter Builder</h3>
+                <h3 className="font-black text-white text-base uppercase tracking-wider">Offer Letter Builder</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Configure Official Offer Parameters</p>
               </div>
             </div>
@@ -8863,7 +8863,7 @@ function CandidateDetail() {
                   <select 
                     value={offerCurrency} 
                     onChange={(e) => setOfferCurrency(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-[#e6edf3] text-xs font-bold text-[#30363d] glass-premium"
+                    className="w-full p-3 rounded-xl border border-[#e6edf3] text-xs font-bold text-slate-300 glass-premium"
                   >
                     <option value="INR">INR (₹) - Indian Rupee</option>
                     <option value="USD">USD ($) - US Dollar</option>
@@ -9001,23 +9001,23 @@ function CandidateDetail() {
               {/* Main Page Sheet Content */}
               <div className="p-8 sm:p-12 space-y-6 flex-1 text-slate-750 text-xs sm:text-sm leading-relaxed font-sans max-h-[550px] overflow-y-auto custom-scrollbar">
                 <div className="space-y-1">
-                  <p className="font-extrabold text-[#161b22] text-left">Dear {candidate.fullName},</p>
+                  <p className="font-extrabold text-white text-left">Dear {candidate.fullName},</p>
                   <p className="text-left">Applied Email: <span className="font-mono text-slate-400 font-semibold">{candidate.email}</span></p>
                 </div>
 
                 <p className="text-left">
-                  Following the meticulous evaluation of your credentials and your high-signal technical voice interview, we are absolutely delighted to extend our official offer of employment at <strong className="text-[#161b22] font-extrabold">{organization?.name || 'our organization'}</strong>.
+                  Following the meticulous evaluation of your credentials and your high-signal technical voice interview, we are absolutely delighted to extend our official offer of employment at <strong className="text-white font-extrabold">{organization?.name || 'our organization'}</strong>.
                 </p>
 
                 {/* Offer key ledger parameters */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-brand/10 rounded-2xl border border-brand/10 font-sans text-left">
                   <div>
-                    <span className="text-[9px] font-black text-brand-dark uppercase tracking-widest block mb-0.5">Proposed Position / Job Title</span>
-                    <p className="font-black text-brand-dark text-sm">{job?.title || 'Unknown Role'}</p>
+                    <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block mb-0.5">Proposed Position / Job Title</span>
+                    <p className="font-black text-brand-light text-sm">{job?.title || 'Unknown Role'}</p>
                   </div>
                   <div>
-                    <span className="text-[9px] font-black text-brand-dark uppercase tracking-widest block mb-0.5">Annual Package (CTC)</span>
-                    <p className="font-black text-brand-dark text-sm">
+                    <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block mb-0.5">Annual Package (CTC)</span>
+                    <p className="font-black text-brand-light text-sm">
                       {offerCurrency === 'INR' && '₹'}
                       {offerCurrency === 'USD' && '$'}
                       {offerCurrency === 'GBP' && '£'}
@@ -9027,17 +9027,17 @@ function CandidateDetail() {
                     </p>
                   </div>
                   <div>
-                    <span className="text-[9px] font-black text-brand-dark uppercase tracking-widest block mb-0.5">Joining Commencement Date</span>
-                    <p className="font-black text-[#30363d] text-xs">{offerStartDate}</p>
+                    <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block mb-0.5">Joining Commencement Date</span>
+                    <p className="font-black text-slate-300 text-xs">{offerStartDate}</p>
                   </div>
                   <div>
-                    <span className="text-[9px] font-black text-brand-dark uppercase tracking-widest block mb-0.5">Compliance Isolation</span>
-                    <p className="font-black text-[#30363d] text-xs">Section 06 ISO Certified</p>
+                    <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block mb-0.5">Compliance Isolation</span>
+                    <p className="font-black text-slate-300 text-xs">Section 06 ISO Certified</p>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-left">
-                  <h4 className="font-black text-[#161b22] uppercase text-xs tracking-wider">Compensations & Benefits Ledger</h4>
+                  <h4 className="font-black text-white uppercase text-xs tracking-wider">Compensations & Benefits Ledger</h4>
                   <p className="text-xs text-slate-400 leading-relaxed italic pr-2">
                     {offerBenefits}
                   </p>
@@ -9051,7 +9051,7 @@ function CandidateDetail() {
                 <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   <div className="text-left">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Authorized Signatory</span>
-                    <p className="font-semibold text-[#30363d]">HR Director</p>
+                    <p className="font-semibold text-slate-300">HR Director</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{organization?.name || 'HIRENOW'}</p>
                   </div>
 
@@ -9060,7 +9060,7 @@ function CandidateDetail() {
                     
                     {offerState === 'accepted' ? (
                       <div className="py-2">
-                        <p className="text-center text-brand-dark text-2xl rotate-[-4deg] tracking-wider select-none font-sans font-black">
+                        <p className="text-center text-brand-light text-2xl rotate-[-4deg] tracking-wider select-none font-sans font-black">
                           {candidate.fullName.split(' ').map(n=>n.charAt(0)).join('. ') + '. ' + candidate.fullName.split(' ').slice(-1)}
                         </p>
                         <p className="text-[10px] text-emerald-600 font-extrabold uppercase mt-1">✓ Signature Recorded Securely</p>
@@ -9129,7 +9129,7 @@ function CandidateDetail() {
                 <Send className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-[#161b22] text-base uppercase tracking-wider">Automated Campaigns Workspace</h3>
+                <h3 className="font-black text-white text-base uppercase tracking-wider">Automated Campaigns Workspace</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Configure Multi-Channel Outbound Triggers</p>
               </div>
             </div>
@@ -9192,7 +9192,7 @@ function CandidateDetail() {
                 <div className="text-left">
                   <h4 className="text-[10px] font-black text-emerald-950 uppercase tracking-widest block mb-0.5">Campaign Outbound Targets</h4>
                   <p className="text-xs text-slate-400 leading-normal font-sans">
-                    Email address: <span className="font-semibold text-[#161b22]">{candidate.email}</span> • Mobile: <span className="font-semibold text-[#161b22]">Registered</span>
+                    Email address: <span className="font-semibold text-white">{candidate.email}</span> • Mobile: <span className="font-semibold text-white">Registered</span>
                   </p>
                 </div>
               </div>
@@ -9313,7 +9313,7 @@ function CandidateDetail() {
                         <MessageSquare className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-extrabold text-[#161b22]">{log.template}</p>
+                        <p className="font-extrabold text-white">{log.template}</p>
                         <p className="text-[10px] text-slate-400 truncate max-w-[200px]">{log.recipient}</p>
                       </div>
                     </div>
@@ -9321,7 +9321,7 @@ function CandidateDetail() {
                     <div className="text-right">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest",
-                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-dark" : "bg-[#21262d] text-slate-400"
+                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-[#21262d] text-slate-400"
                       )}>
                         {log.status}
                       </span>
@@ -9468,7 +9468,7 @@ function CandidateDetail() {
                 </div>
                 <div>
                   <span className="text-[9px] font-black bg-[#21262d] text-slate-400 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
-                  <p className="text-xs font-bold text-[#30363d]">
+                  <p className="text-xs font-bold text-slate-300">
                     {(tabSwitchCountMock > 2 || cameraAnomalyMock) ? 'Severe Security Penalty Alert' : (tabSwitchCountMock > 0 || gazeDeviationMock) ? 'Anomalous Integrity' : 'Elite Verified Safe Profile'}
                   </p>
                 </div>
@@ -9477,15 +9477,15 @@ function CandidateDetail() {
               <div className="space-y-3 pt-2 text-left">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-400 font-medium">Off-screen Outbreaks</span>
-                  <span className="font-extrabold text-[#30363d]">{gazeDeviationMock ? '1 active' : '0 detected'}</span>
+                  <span className="font-extrabold text-slate-300">{gazeDeviationMock ? '1 active' : '0 detected'}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-400 font-medium">Tab Switch Deviations</span>
-                  <span className="font-extrabold text-[#30363d]">{tabSwitchCountMock} triggers</span>
+                  <span className="font-extrabold text-slate-300">{tabSwitchCountMock} triggers</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-slate-400 font-medium">Secondary Audio Signal</span>
-                  <span className="font-extrabold text-[#30363d]">0.0dB Stable</span>
+                  <span className="font-extrabold text-slate-300">0.0dB Stable</span>
                 </div>
               </div>
             </Card>
@@ -9547,7 +9547,7 @@ function CandidateDetail() {
                 )}
               </div>
               <div className="space-y-1">
-                <h4 className="text-sm font-extrabold text-[#30363d]">{activeInviteCandidate.fullName}</h4>
+                <h4 className="text-sm font-extrabold text-slate-300">{activeInviteCandidate.fullName}</h4>
                 <p className="text-xs text-slate-400 font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
               </div>
             </div>
@@ -9556,11 +9556,11 @@ function CandidateDetail() {
               {/* Option 1: Send via Email */}
               <div className="p-4 border border-[#e6edf3]/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-brand/10 text-brand-dark rounded-xl mt-0.5">
+                  <div className="p-2 bg-brand/10 text-brand-light rounded-xl mt-0.5">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-[#30363d] uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 1: Send Email Invite</h5>
                     <p className="text-[11px] text-slate-400 font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
                   </div>
                 </div>
@@ -9570,14 +9570,14 @@ function CandidateDetail() {
                     <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-[#30363d] transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
                     />
                   </div>
 
-                  <div className="px-3.5 py-2.5 bg-brand/10 border border-brand/10 rounded-xl text-[11px] font-semibold text-brand-dark flex items-center gap-2">
+                  <div className="px-3.5 py-2.5 bg-brand/10 border border-brand/10 rounded-xl text-[11px] font-semibold text-brand-light flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 20H5a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 11.414V18a2 2 0 01-2 2h-2" /></svg>
                     A beautiful branded HTML invitation email will be sent automatically.
                   </div>
@@ -9615,7 +9615,7 @@ function CandidateDetail() {
                     <ExternalLink className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <h5 className="text-xs font-black text-[#30363d] uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
+                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider">Option 2: Copy Invite/Lobby Link</h5>
                     <p className="text-[11px] text-slate-400 font-semibold leading-normal">Manually copy the unique interview lobby link to invite the candidate via external tools (e.g. WhatsApp, Slack).</p>
                   </div>
                 </div>
@@ -9682,7 +9682,7 @@ function MetricCard({
       <div className="flex justify-between items-start mb-4">
         <div className="min-w-0">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-snug">{label}</p>
-          <p className="text-4xl font-black text-[#161b22] tracking-tight leading-none truncate">{val}</p>
+          <p className="text-4xl font-black text-white tracking-tight leading-none truncate">{val}</p>
         </div>
         <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", iconBg, iconColor)}>
           <Icon className="w-5 h-5 font-bold" />
@@ -10041,7 +10041,7 @@ function OrgAdminPanel() {
     return (
       <div className="h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-dark" />
+          <Loader2 className="w-8 h-8 animate-spin text-brand-light" />
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Metrics Panel...</p>
         </div>
       </div>
@@ -10066,7 +10066,7 @@ function OrgAdminPanel() {
               <select
                 value={dateRange}
                 onChange={e => setDateRange(e.target.value)}
-                className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-sm"
+                className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
               >
                 <option value="7">7 Days</option>
                 <option value="30">30 Days</option>
@@ -10081,7 +10081,7 @@ function OrgAdminPanel() {
                 <select
                   value={selectedOrgId}
                   onChange={e => setSelectedOrgId(e.target.value)}
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-sm"
+                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
                 >
                   <option value="all">All Organizations</option>
                   {organizations.map(org => (
@@ -10115,7 +10115,7 @@ function OrgAdminPanel() {
                     type="time" 
                     value={workingHoursStart}
                     onChange={e => setWorkingHoursStart(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-sm"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
                   />
                 </div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">to</span>
@@ -10124,7 +10124,7 @@ function OrgAdminPanel() {
                     type="time" 
                     value={workingHoursEnd}
                     onChange={e => setWorkingHoursEnd(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-sm"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all text-sm"
                   />
                 </div>
               </div>
@@ -10149,10 +10149,10 @@ function OrgAdminPanel() {
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 relative">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
-              <span className="text-brand-dark">◀</span>
+              <span className="text-brand-light">◀</span>
               <span>{activeOrgName} Admin Panel</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#161b22] uppercase tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
               Manage everything about {activeOrgName}.ai
             </h1>
           </div>
@@ -10166,7 +10166,7 @@ function OrgAdminPanel() {
           className={cn(
             "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
             activePanelTab === 'analytics' 
-              ? "border-b-2 border-brand-dark text-brand-dark font-black pb-[11px]" 
+              ? "border-b-2 border-brand-dark text-brand-light font-black pb-[11px]" 
               : "border-transparent text-slate-400 hover:text-slate-400"
           )}
         >
@@ -10178,7 +10178,7 @@ function OrgAdminPanel() {
           className={cn(
             "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
             activePanelTab === 'workspace' 
-              ? "border-b-2 border-brand-dark text-brand-dark font-black pb-[11px]" 
+              ? "border-b-2 border-brand-dark text-brand-light font-black pb-[11px]" 
               : "border-transparent text-slate-400 hover:text-slate-400"
           )}
         >
@@ -10192,7 +10192,7 @@ function OrgAdminPanel() {
           {/* Sub Header for Metrics Panel */}
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/10 pb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[#161b22] tracking-tight uppercase leading-none mb-1">
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase leading-none mb-1">
             HR Agent Metrics Dashboard
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm">
@@ -10202,7 +10202,7 @@ function OrgAdminPanel() {
         <Button
           variant="outline"
           onClick={() => setFiltersOpen(true)}
-          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-[#e6edf3] text-[#30363d] hover:transparent shrink-0 shadow-sm rounded-xl"
+          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-[#e6edf3] text-slate-300 hover:transparent shrink-0 shadow-sm rounded-xl"
         >
           <Filter className="w-4 h-4 text-slate-400" />
           Filters
@@ -10217,7 +10217,7 @@ function OrgAdminPanel() {
           desc="Jobs added to screen resumes in the selected range"
           icon={Briefcase}
           iconBg="bg-brand/10"
-          iconColor="text-brand-dark"
+          iconColor="text-brand-light"
         />
         <MetricCard
           label="Interviews Conducted"
@@ -10259,7 +10259,7 @@ function OrgAdminPanel() {
         <div className="lg:col-span-2">
           <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-3xl h-full flex flex-col justify-between">
             <div className="mb-6">
-              <h3 className="text-lg font-black text-[#161b22] uppercase tracking-tight">Activity Trend</h3>
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">Activity Trend</h3>
               <p className="text-xs text-slate-400">
                 Daily trend for interviews conducted and resumes screened in the selected range.
               </p>
@@ -10312,7 +10312,7 @@ function OrgAdminPanel() {
         <div className="lg:col-span-1">
           <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-3xl h-full flex flex-col justify-between">
             <div className="mb-6">
-              <h3 className="text-lg font-black text-[#161b22] uppercase tracking-tight">Working Hours Distribution</h3>
+              <h3 className="text-lg font-black text-white uppercase tracking-tight">Working Hours Distribution</h3>
               <p className="text-xs text-slate-400">
                 Percentage split between interviews held during and outside working hours.
               </p>
@@ -10394,10 +10394,10 @@ function OrgAdminPanel() {
             <Card className="p-8 space-y-6 glass-premium border border-white/10 shadow-sm rounded-3xl">
               <div className="flex items-center gap-3 border-b border-white/10 pb-4">
                 <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-brand-dark" />
+                  <Globe className="w-5 h-5 text-brand-light" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#161b22] uppercase text-sm tracking-wide">Company Identity</h3>
+                  <h3 className="font-black text-white uppercase text-sm tracking-wide">Company Identity</h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Workspace Profile Details</p>
                 </div>
               </div>
@@ -10412,7 +10412,7 @@ function OrgAdminPanel() {
                     value={orgName}
                     onChange={e => setOrgName(e.target.value)}
                     placeholder="e.g. Acme Corp"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
 
@@ -10424,7 +10424,7 @@ function OrgAdminPanel() {
                     value={orgDomain}
                     onChange={e => setOrgDomain(e.target.value)}
                     placeholder="e.g. acme.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10434,7 +10434,7 @@ function OrgAdminPanel() {
                     disabled={isReadOnly}
                     value={orgIndustry}
                     onChange={e => setOrgIndustry(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   >
                     {['Technology', 'Finance', 'Healthcare', 'Education', 'Retail', 'Non-Profit', 'Consumer Services', 'Other'].map(ind => (
                       <option key={ind} value={ind}>{ind}</option>
@@ -10448,7 +10448,7 @@ function OrgAdminPanel() {
                     disabled={isReadOnly}
                     value={orgCompanySize}
                     onChange={e => setOrgCompanySize(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   >
                     {['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+'].map(sz => (
                       <option key={sz} value={sz}>{sz} employees</option>
@@ -10464,7 +10464,7 @@ function OrgAdminPanel() {
                     value={orgLocation}
                     onChange={e => setOrgLocation(e.target.value)}
                     placeholder="e.g. San Francisco, CA"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10476,7 +10476,7 @@ function OrgAdminPanel() {
                     value={orgPhone}
                     onChange={e => setOrgPhone(e.target.value)}
                     placeholder="e.g. +1 (555) 123-4567"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10488,14 +10488,14 @@ function OrgAdminPanel() {
                     value={orgDescription}
                     onChange={e => setOrgDescription(e.target.value)}
                     placeholder="Explain your organization's mission, culture and vision of screening..."
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs resize-none disabled:opacity-60 font-medium"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs resize-none disabled:opacity-60 font-medium"
                   />
                 </div>
               </div>
 
               <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="col-span-1 sm:col-span-3">
-                  <h4 className="font-bold text-[#30363d] text-sm">Official Working Hours</h4>
+                  <h4 className="font-bold text-slate-300 text-sm">Official Working Hours</h4>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Used to track after-hours interviews</p>
                 </div>
                 <div className="space-y-1.5">
@@ -10505,7 +10505,7 @@ function OrgAdminPanel() {
                     disabled={isReadOnly}
                     value={orgWorkingHoursStart}
                     onChange={e => setOrgWorkingHoursStart(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -10515,7 +10515,7 @@ function OrgAdminPanel() {
                     disabled={isReadOnly}
                     value={orgWorkingHoursEnd}
                     onChange={e => setOrgWorkingHoursEnd(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -10524,7 +10524,7 @@ function OrgAdminPanel() {
                     disabled={isReadOnly}
                     value={orgWorkingHoursTimezone}
                     onChange={e => setOrgWorkingHoursTimezone(e.target.value)}
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   >
                     {['UTC', 'America/New_York', 'America/Los_Angeles', 'Europe/London', 'Asia/Kolkata', 'Asia/Tokyo', 'Australia/Sydney'].map(tz => (
                       <option key={tz} value={tz}>{tz}</option>
@@ -10535,7 +10535,7 @@ function OrgAdminPanel() {
 
               <div className="pt-4 border-t border-white/10">
                 <div className="mb-4">
-                  <h4 className="font-bold text-[#30363d] text-sm">Bot Speaking Pace</h4>
+                  <h4 className="font-bold text-slate-300 text-sm">Bot Speaking Pace</h4>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Control how fast the AI interviewer speaks</p>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -10549,7 +10549,7 @@ function OrgAdminPanel() {
                       type="button"
                       disabled={isReadOnly}
                       onClick={() => setBotSpeakingPace(pace.value)}
-                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-dark' : 'transparent border-white/10 text-slate-400 hover:border-[#e6edf3]'}`}
+                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-white/10 text-slate-400 hover:border-[#e6edf3]'}`}
                     >
                       {pace.label}
                     </button>
@@ -10562,10 +10562,10 @@ function OrgAdminPanel() {
             <Card className="p-8 space-y-6 glass-premium border border-white/10 shadow-sm rounded-3xl">
               <div className="flex items-center gap-3 border-b border-white/10 pb-4">
                 <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center">
-                  <Database className="w-5 h-5 text-brand-dark" />
+                  <Database className="w-5 h-5 text-brand-light" />
                 </div>
                 <div>
-                  <h3 className="font-black text-[#161b22] uppercase text-sm tracking-wide">Candidate Invitation Mail Server</h3>
+                  <h3 className="font-black text-white uppercase text-sm tracking-wide">Candidate Invitation Mail Server</h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest font-mono">Custom SMTP Settings</p>
                 </div>
               </div>
@@ -10579,7 +10579,7 @@ function OrgAdminPanel() {
                     value={smtpHost}
                     onChange={e => setSmtpHost(e.target.value)}
                     placeholder="smtp.example.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10591,7 +10591,7 @@ function OrgAdminPanel() {
                     value={smtpPort}
                     onChange={e => setSmtpPort(e.target.value)}
                     placeholder="465 / 587"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10602,10 +10602,10 @@ function OrgAdminPanel() {
                       disabled={isReadOnly}
                       checked={smtpSecure}
                       onChange={e => setSmtpSecure(e.target.checked)}
-                      className="w-4 h-4 rounded text-brand-dark focus:ring-brand border-[#c9d1d9]"
+                      className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9]"
                     />
                     <div>
-                      <p className="text-xs font-black text-[#30363d] uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
+                      <p className="text-xs font-black text-slate-300 uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
                       <p className="text-[10px] text-slate-400 font-medium">Configure secure SSL/TLS. Set checked for port 465, false/unchecked for port 587 (STARTTLS).</p>
                     </div>
                   </label>
@@ -10619,7 +10619,7 @@ function OrgAdminPanel() {
                     value={smtpUser}
                     onChange={e => setSmtpUser(e.target.value)}
                     placeholder="user@example.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10631,7 +10631,7 @@ function OrgAdminPanel() {
                     value={smtpPass}
                     onChange={e => setSmtpPass(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10643,7 +10643,7 @@ function OrgAdminPanel() {
                     value={smtpFromName}
                     onChange={e => setSmtpFromName(e.target.value)}
                     placeholder="e.g. Acme Corp Careers"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
 
@@ -10655,20 +10655,20 @@ function OrgAdminPanel() {
                     value={smtpFromEmail}
                     onChange={e => setSmtpFromEmail(e.target.value)}
                     placeholder="e.g. no-reply@example.com"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-[#161b22] focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2.5 font-bold text-white focus:border-brand outline-none transition-all text-xs disabled:opacity-60"
                   />
                 </div>
               </div>
 
               {/* Test Connection Form Inline block */}
               <div className="p-4 transparent rounded-2xl border border-white/10 space-y-3.5">
-                <span className="text-[9px] font-black text-brand-dark uppercase tracking-widest block leading-none">Connection Verification Test</span>
+                <span className="text-[9px] font-black text-brand-light uppercase tracking-widest block leading-none">Connection Verification Test</span>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
                     type="email"
                     id="testSmtpEmailRecipient"
                     placeholder="Test recipient email (e.g. yours)"
-                    className="flex-1 glass-premium border border-[#e6edf3] rounded-xl px-4 py-2 font-semibold text-[#161b22] focus:border-brand outline-none transition-all text-xs"
+                    className="flex-1 glass-premium border border-[#e6edf3] rounded-xl px-4 py-2 font-semibold text-white focus:border-brand outline-none transition-all text-xs"
                   />
                   <Button
                     type="button"
@@ -11441,7 +11441,7 @@ function SuperAdminPanel() {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center p-12 text-center">
         <ShieldCheck className="w-16 h-16 text-[#e6edf3] mb-6" />
-        <h2 className="text-2xl font-black text-[#161b22] uppercase">Access Restricted</h2>
+        <h2 className="text-2xl font-black text-white uppercase">Access Restricted</h2>
         <p className="text-slate-400 mt-2">Only platform super-administrators can access this registry.</p>
         <Button variant="outline" className="mt-8" onClick={() => navigate('/')}>Return to Workspace</Button>
       </div>
@@ -11730,7 +11730,7 @@ function SuperAdminPanel() {
   if (loading) return (
     <div className="h-[60vh] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-dark" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand-light" />
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Platform Data...</p>
       </div>
     </div>
@@ -11746,13 +11746,13 @@ function SuperAdminPanel() {
         <div className="mb-6 flex p-1 bg-[#21262d] rounded-lg">
            <button 
              onClick={() => setBulkMode(false)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-dark" : "text-slate-400 hover:text-[#30363d]")}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-300")}
            >
              Single Entry
            </button>
            <button 
              onClick={() => setBulkMode(true)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-brand-dark" : "text-slate-400 hover:text-[#30363d]")}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-400 hover:text-slate-300")}
            >
              Bulk Upload
            </button>
@@ -11768,7 +11768,7 @@ function SuperAdminPanel() {
                   value={newOrgName}
                   onChange={e => setNewOrgName(e.target.value)}
                   placeholder="e.g. Acme Corporation"
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
                 />
              </div>
              
@@ -11778,7 +11778,7 @@ function SuperAdminPanel() {
                  <select
                    value={newOrgIndustry}
                    onChange={e => setNewOrgIndustry(e.target.value)}
-                   className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all glass-premium"
+                   className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all glass-premium"
                  >
                    <option value="Technology">Technology</option>
                    <option value="Finance">Finance</option>
@@ -11795,7 +11795,7 @@ function SuperAdminPanel() {
                  <select
                    value={newOrgCompanySize}
                    onChange={e => setNewOrgCompanySize(e.target.value)}
-                   className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all glass-premium"
+                   className="w-full transparent border-2 border-white/10 rounded-xl px-3 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all glass-premium"
                  >
                    <option value="1-10">1-10 employees</option>
                    <option value="11-50">11-50 employees</option>
@@ -11814,7 +11814,7 @@ function SuperAdminPanel() {
                     value={newOrgLocation}
                     onChange={e => setNewOrgLocation(e.target.value)}
                     placeholder="e.g. San Francisco"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
                   />
                </div>
                <div className="space-y-1">
@@ -11823,7 +11823,7 @@ function SuperAdminPanel() {
                     value={newOrgPhone}
                     onChange={e => setNewOrgPhone(e.target.value)}
                     placeholder="e.g. +1 (555) 123-4567"
-                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                    className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
                   />
                </div>
              </div>
@@ -11834,7 +11834,7 @@ function SuperAdminPanel() {
                   value={newOrgDomain}
                   onChange={e => setNewOrgDomain(e.target.value)}
                   placeholder="e.g. acme.com"
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all placeholder:text-slate-300 font-mono"
+                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300 font-mono"
                 />
              </div>
 
@@ -11845,7 +11845,7 @@ function SuperAdminPanel() {
                   onChange={e => setNewOrgDescription(e.target.value)}
                   placeholder="Briefly state organization vision or core domain focus..."
                   rows={2}
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#161b22] focus:border-brand outline-none transition-all placeholder:text-slate-300 resize-none font-sans"
+                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300 resize-none font-sans"
                 />
              </div>
 
@@ -11878,7 +11878,7 @@ function SuperAdminPanel() {
                   value={bulkOrgNames}
                   onChange={e => setBulkOrgNames(e.target.value)}
                   placeholder="Acme Corp&#10;Globex Ltd&#10;Soylent Inc"
-                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-[#161b22] focus:border-brand outline-none transition-all placeholder:text-slate-300"
+                  className="w-full transparent border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-white focus:border-brand outline-none transition-all placeholder:text-slate-300"
                 />
                 <p className="text-[10px] text-slate-400 font-medium italic">Enter one company name per line.</p>
              </div>
@@ -11927,7 +11927,7 @@ function SuperAdminPanel() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
-          { label: 'Platform Jobs', val: stats.jobs, icon: Briefcase, color: 'text-brand-dark bg-brand/10' },
+          { label: 'Platform Jobs', val: stats.jobs, icon: Briefcase, color: 'text-brand-light bg-brand/10' },
           { label: 'Total Candidates', val: stats.candidates, icon: Users, color: 'text-green-600 bg-green-50' },
           { label: 'Organizations', val: stats.organizations, icon: Globe, color: 'text-purple-600 bg-purple-50' },
           { label: 'Active Users', val: stats.users, icon: Database, color: 'text-amber-600 bg-amber-50' },
@@ -11951,43 +11951,43 @@ function SuperAdminPanel() {
           <div className="flex gap-2 sm:gap-4 border-b border-[#e6edf3] overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
              <button 
                onClick={() => setTab('overview')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                Overview
              </button>
              <button 
                onClick={() => setTab('organizations')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                Organizations
              </button>
              <button 
                onClick={() => setTab('payments')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                Payments
              </button>
              <button 
                onClick={() => setTab('health')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                System Health
              </button>
              <button 
                onClick={() => setTab('llm')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                LLM Playground
              </button>
              <button 
                onClick={() => setTab('white-label')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                White-Label
              </button>
              <button 
                onClick={() => setTab('manual')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-brand-dark" : "text-slate-400")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-400")}
              >
                User Manual
              </button>
@@ -12073,7 +12073,7 @@ function SuperAdminPanel() {
                         {recentCandidates.map(c => (
                           <tr key={c.id} className="hover:transparent transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
                             <td className="px-6 py-4">
-                              <div className="font-bold text-sm group-hover:text-brand-dark transition-colors uppercase tracking-tight">{c.fullName}</div>
+                              <div className="font-bold text-sm group-hover:text-brand-light transition-colors uppercase tracking-tight">{c.fullName}</div>
                               <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
                             </td>
                             <td className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">
@@ -12126,7 +12126,7 @@ function SuperAdminPanel() {
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="font-bold text-sm text-[#161b22] uppercase tracking-tight">{c.fullName}</div>
+                          <div className="font-bold text-sm text-white uppercase tracking-tight">{c.fullName}</div>
                           <div className="text-[10px] text-slate-400 font-mono italic">{c.email}</div>
                         </div>
                         <span className={cn(
@@ -12139,7 +12139,7 @@ function SuperAdminPanel() {
                       
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-semibold text-slate-400">
                         <div>
-                          <span className="text-slate-400 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-[#30363d]">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
+                          <span className="text-slate-400 font-bold uppercase tracking-wider">Org ID:</span> <span className="font-mono text-slate-300">{c.organizationId?.slice(0, 8) || 'LEGACY'}</span>
                         </div>
                         <div>
                           <span className="text-slate-400 font-bold uppercase tracking-wider">Time:</span> <span className="text-slate-750">{formatDateTime(c.createdAt)}</span>
@@ -12210,12 +12210,12 @@ function SuperAdminPanel() {
                                 )}
                               >
                                 <td className="px-4 py-3">
-                                  <div className="font-bold text-xs uppercase tracking-tight text-[#161b22]">{org.name}</div>
+                                  <div className="font-bold text-xs uppercase tracking-tight text-white">{org.name}</div>
                                   <div className="text-[9px] text-slate-400 font-mono">ID: {org.id.slice(0, 10)}...</div>
                                   {org.domain && <div className="text-[9px] text-brand font-mono mt-0.5">{org.domain}</div>}
                                 </td>
                                 <td className="px-4 py-3">
-                                  <div className="text-[11px] font-bold text-[#30363d]">{org.industry || "Technology"}</div>
+                                  <div className="text-[11px] font-bold text-slate-300">{org.industry || "Technology"}</div>
                                   <div className="text-[9px] text-slate-400 mt-0.5">{org.companySize || "11-50 employees"}</div>
                                 </td>
                                 <td className="px-4 py-3">
@@ -12228,7 +12228,7 @@ function SuperAdminPanel() {
                                   <div className="flex items-center justify-end gap-2">
                                     <Button 
                                       variant="outline" 
-                                      className="h-7 text-[9px] font-black uppercase tracking-widest text-brand-dark border-brand/10 px-2.5 hover:bg-brand/10"
+                                      className="h-7 text-[9px] font-black uppercase tracking-widest text-brand-light border-brand/10 px-2.5 hover:bg-brand/10"
                                       onClick={() => {
                                         const url = `${window.location.origin}/join/${org.id}`;
                                         navigator.clipboard.writeText(url);
@@ -12280,7 +12280,7 @@ function SuperAdminPanel() {
                         <Card className="p-6 space-y-6">
                           <div>
                             <span className="text-[9px] font-black text-brand uppercase tracking-widest">Active Workspace Selected</span>
-                            <h3 className="text-lg font-display text-[#161b22] mt-1 uppercase font-bold">{org.name}</h3>
+                            <h3 className="text-lg font-display text-white mt-1 uppercase font-bold">{org.name}</h3>
                             <p className="text-[10px] text-slate-400 mt-1">Configure quotas, manual credits and view team members in this tenant.</p>
                           </div>
 
@@ -12292,7 +12292,7 @@ function SuperAdminPanel() {
                                 id={`credits-alloc-${org.id}`}
                                 defaultValue="50"
                                 placeholder="Credits" 
-                                className="w-24 glass-premium border border-[#e6edf3] rounded-xl px-3 py-1.5 text-xs font-bold text-[#161b22] focus:outline-none"
+                                className="w-24 glass-premium border border-[#e6edf3] rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none"
                               />
                               <Button
                                 onClick={async () => {
@@ -12319,10 +12319,10 @@ function SuperAdminPanel() {
                               ].map(u => (
                                 <div key={u.email} className="flex justify-between items-center transparent/50 p-2.5 rounded-xl border border-white/10">
                                   <div>
-                                    <p className="text-xs font-bold text-[#30363d]">{u.name}</p>
+                                    <p className="text-xs font-bold text-slate-300">{u.name}</p>
                                     <p className="text-[10px] text-slate-400 font-mono">{u.email}</p>
                                   </div>
-                                  <span className="text-[9px] font-black bg-brand/10 text-brand-dark px-2 py-0.5 rounded uppercase tracking-wider">{u.role}</span>
+                                  <span className="text-[9px] font-black bg-brand/10 text-brand-light px-2 py-0.5 rounded uppercase tracking-wider">{u.role}</span>
                                 </div>
                               ))}
                             </div>
@@ -12400,8 +12400,8 @@ function SuperAdminPanel() {
                        ].map(i => (
                          <div key={i.inv} className="transparent/50 p-3 rounded-xl border border-white/10 space-y-1.5 text-[11px]">
                            <div className="flex justify-between font-bold">
-                             <span className="text-[#30363d]">{i.inv} • {i.name}</span>
-                             <span className="text-[#161b22]">{i.amount}</span>
+                             <span className="text-slate-300">{i.inv} • {i.name}</span>
+                             <span className="text-white">{i.amount}</span>
                            </div>
                            <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
                              <span>{i.credits} Credits • {i.date}</span>
@@ -12425,7 +12425,7 @@ function SuperAdminPanel() {
 
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                  {[
-                   { label: "Gemini API Latency", val: "842ms", trend: "-12% from yesterday", icon: Cpu, color: "text-brand-dark bg-brand/10" },
+                   { label: "Gemini API Latency", val: "842ms", trend: "-12% from yesterday", icon: Cpu, color: "text-brand-light bg-brand/10" },
                    { label: "Audio Transcribe Delay", val: "120ms", trend: "+3% from yesterday", icon: Volume2, color: "text-cyan-600 bg-cyan-50" },
                    { label: "Active Vetting Rooms", val: "3 Active", trend: "+1 since this hour", icon: Users, color: "text-amber-600 bg-amber-50" },
                    { label: "Firestore Operations", val: "17,185", trend: "2.1k ops/hr average", icon: Database, color: "text-emerald-600 bg-emerald-50" }
@@ -12436,7 +12436,7 @@ function SuperAdminPanel() {
                      </div>
                      <div>
                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
-                       <p className="text-2xl font-black text-[#161b22] leading-none">{item.val}</p>
+                       <p className="text-2xl font-black text-white leading-none">{item.val}</p>
                        <p className="text-[10px] text-slate-400 mt-1 font-semibold">{item.trend}</p>
                      </div>
                    </Card>
@@ -12594,7 +12594,7 @@ function SuperAdminPanel() {
                       ].map((item, i) => (
                         <div key={i} className="transparent border border-white/10 rounded-xl p-3 text-center">
                           <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider">{item.label}</p>
-                          <p className="text-sm font-black text-[#161b22] mt-0.5">{item.val}</p>
+                          <p className="text-sm font-black text-white mt-0.5">{item.val}</p>
                         </div>
                       ))}
                     </div>
@@ -12635,7 +12635,7 @@ function SuperAdminPanel() {
                     {playgroundResponse && (
                       <div className="p-4 transparent rounded-2xl border border-white/10 space-y-2">
                         <span className="text-[9px] font-black text-brand uppercase tracking-widest">AI Recruiter Test Graded Response</span>
-                        <p className="text-xs text-[#30363d] leading-relaxed font-semibold">{playgroundResponse}</p>
+                        <p className="text-xs text-slate-300 leading-relaxed font-semibold">{playgroundResponse}</p>
                       </div>
                     )}
                   </Card>
@@ -12664,7 +12664,7 @@ function SuperAdminPanel() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
               <div className="flex justify-between items-center border-b border-[#e6edf3] pb-4">
                 <div>
-                  <h2 className="text-xl font-display font-light text-[#161b22]">White-Label & Reseller Portal</h2>
+                  <h2 className="text-xl font-display font-light text-white">White-Label & Reseller Portal</h2>
                   <p className="text-slate-400 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
                 </div>
               </div>
@@ -12767,10 +12767,10 @@ function SuperAdminPanel() {
               <Card className="p-6 md:p-10 space-y-12 glass-premium border border-white/10 shadow-sm rounded-3xl max-h-[70vh] overflow-y-auto custom-scrollbar">
                 {/* Visual Header */}
                 <div className="text-center pb-8 border-b border-white/10 space-y-3.5">
-                  <span className="px-3.5 py-1 bg-brand/10 border border-brand/10 rounded-full text-[9px] font-black uppercase tracking-widest text-brand-dark inline-block font-mono">
+                  <span className="px-3.5 py-1 bg-brand/10 border border-brand/10 rounded-full text-[9px] font-black uppercase tracking-widest text-brand-light inline-block font-mono">
                     Enterprise HR Kit
                   </span>
-                  <h1 className="text-2xl sm:text-3xl font-black text-[#161b22] tracking-tight">AI Hire Operations & Onboarding Manual</h1>
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">AI Hire Operations & Onboarding Manual</h1>
                   <p className="text-slate-400 text-sm max-w-xl mx-auto font-medium lead-relaxed">
                     This official guide details the integrated calibration, batch sourcing pipeline, and custom grading frameworks for registered HR organizations.
                   </p>
@@ -12778,8 +12778,8 @@ function SuperAdminPanel() {
 
                 {/* Section 1 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-[#30363d] flex items-center gap-2 mb-3">
-                    <span className="text-brand-dark bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">01</span> The D6 Screening Philosophy
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
+                    <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">01</span> The D6 Screening Philosophy
                   </h3>
                   <p className="text-slate-400 text-xs font-medium leading-relaxed">
                     The platform evaluates candidate resumes across six deep screening dimensions. Rather than matching flat keywords, language parsing engines grade professional experiences dynamically:
@@ -12794,7 +12794,7 @@ function SuperAdminPanel() {
                       { name: 'Generative Sincerity (D6)', desc: 'Audits the resume forensically for templated generic explanations, resume padding, and copy-paste indicators.' }
                     ].map(dim => (
                       <div key={dim.name} className="p-4 transparent border border-white/10 rounded-2xl hover:border-brand/10 transition-colors">
-                        <h4 className="text-xs font-black uppercase tracking-wider text-brand-dark mb-1.5 flex items-center gap-1.5">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-brand-light mb-1.5 flex items-center gap-1.5">
                           <Target className="w-3.5 h-3.5 shrink-0" />
                           {dim.name}
                         </h4>
@@ -12806,8 +12806,8 @@ function SuperAdminPanel() {
 
                 {/* Section 2 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-[#30363d] flex items-center gap-2 mb-3">
-                    <span className="text-brand-dark bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">02</span> Operational Action Blueprint
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
+                    <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">02</span> Operational Action Blueprint
                   </h3>
                   <p className="text-slate-400 text-xs font-medium leading-relaxed">
                     Onboard new hiring teams to live status within minutes by walking them through these 4 primary operational phases:
@@ -12820,11 +12820,11 @@ function SuperAdminPanel() {
                       { step: '4', title: 'Sbatch Ingestion Files', text: 'Drag and drop candidate resumes (.pdf, .docx). Parallel pipelines parse files simultaneously, caching texts for re-evaluation runs.' }
                     ].map(st => (
                       <div key={st.step} className="flex gap-4 items-start p-3 bg-brand/10 rounded-2xl border border-brand/10">
-                        <div className="w-7 h-7 bg-brand/10 text-brand-dark rounded-full font-black text-xs flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 bg-brand/10 text-brand-light rounded-full font-black text-xs flex items-center justify-center shrink-0">
                           {st.step}
                         </div>
                         <div>
-                          <h4 className="text-xs font-black uppercase tracking-wider text-[#30363d] leading-none mb-1">{st.title}</h4>
+                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 leading-none mb-1">{st.title}</h4>
                           <p className="text-[11px] text-slate-400 leading-relaxed font-semibold mt-1">{st.text}</p>
                         </div>
                       </div>
@@ -12834,8 +12834,8 @@ function SuperAdminPanel() {
 
                 {/* Section 3 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-[#30363d] flex items-center gap-2 mb-3">
-                    <span className="text-brand-dark bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">03</span> Grading Settings & Calibration
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2 mb-3">
+                    <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">03</span> Grading Settings & Calibration
                   </h3>
                   <p className="text-slate-400 text-xs font-semibold leading-relaxed">
                     Recruitment managers can completely overrule standard weights to map criteria directly with physical job types:
@@ -12847,23 +12847,23 @@ function SuperAdminPanel() {
 
                 {/* Section 4 */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-[#30363d] flex items-center gap-2">
-                    <span className="text-brand-dark bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">04</span> Reading Interactive Candidate Dashboards
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">04</span> Reading Interactive Candidate Dashboards
                   </h3>
                   <p className="text-slate-400 text-xs font-medium leading-relaxed">
                     Opening any scored candidate row triggers the specialized evaluation scorecard report, showing the following forensic information:
                   </p>
                   <ul className="list-disc pl-5 text-xs text-slate-400 space-y-2 leading-relaxed font-semibold">
-                    <li><span className="text-[#30363d] font-bold">Executive Verdict Narrative:</span> A objective 3-sentence summary analyzing qualifications and general job suitability.</li>
-                    <li><span className="text-[#30363d] font-bold">Chronological Padding Checklists:</span> Spots gaps in tenure, rapid changes of employer, or suspiciously generic candidate summaries.</li>
-                    <li><span className="text-[#30363d] font-bold">Tailored Interview Prompts:</span> 3 intelligent discussion templates custom-built for interviewers to probe exact weaknesses identified during parsing.</li>
+                    <li><span className="text-slate-300 font-bold">Executive Verdict Narrative:</span> A objective 3-sentence summary analyzing qualifications and general job suitability.</li>
+                    <li><span className="text-slate-300 font-bold">Chronological Padding Checklists:</span> Spots gaps in tenure, rapid changes of employer, or suspiciously generic candidate summaries.</li>
+                    <li><span className="text-slate-300 font-bold">Tailored Interview Prompts:</span> 3 intelligent discussion templates custom-built for interviewers to probe exact weaknesses identified during parsing.</li>
                   </ul>
                 </div>
 
                 {/* Section 5 */}
                 <div className="space-y-4 pt-4 border-t border-white/10">
-                  <h3 className="text-sm font-black uppercase tracking-wider text-[#30363d] flex items-center gap-2">
-                    <span className="text-brand-dark bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">05</span> Configuration of SMTP Outgoing Servers
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <span className="text-brand-light bg-brand/10 px-2 py-0.5 rounded text-xs font-mono">05</span> Configuration of SMTP Outgoing Servers
                   </h3>
                   <p className="text-slate-400 text-xs font-medium leading-relaxed">
                     Shortlisted candidates receive automated invite emails dispatched directly from the organization’s domain setup:
@@ -13079,17 +13079,17 @@ function Onboarding() {
           <>
             <div className="text-center space-y-4">
               <div className="w-20 h-20 bg-brand/10 rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-xl">
-                <Globe className="w-10 h-10 text-brand-dark" />
+                <Globe className="w-10 h-10 text-brand-light" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-[#161b22] tracking-tight uppercase">INVITATION ACCEPTED</h2>
-                <p className="text-slate-400 text-sm font-medium mt-1">You've been invited to join <span className="text-brand-dark font-black">{invitedOrg.name}</span></p>
+                <h2 className="text-2xl font-black text-white tracking-tight uppercase">INVITATION ACCEPTED</h2>
+                <p className="text-slate-400 text-sm font-medium mt-1">You've been invited to join <span className="text-brand-light font-black">{invitedOrg.name}</span></p>
               </div>
             </div>
 
             <div className="space-y-4 pt-4">
               <div className="p-4 bg-brand/10 rounded-2xl border border-brand/10 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl glass-premium border border-brand/10 flex items-center justify-center font-black text-brand-dark shadow-sm">
+                <div className="w-10 h-10 rounded-xl glass-premium border border-brand/10 flex items-center justify-center font-black text-brand-light shadow-sm">
                   {invitedOrg.name.charAt(0)}
                 </div>
                 <div>
@@ -13121,7 +13121,7 @@ function Onboarding() {
               <div className="w-16 h-16 bg-brand-dark rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-brand/20">
                 <Briefcase className="w-8 h-8 text-white" />
               </div>
-              <h2 className="text-2xl font-black text-[#161b22] tracking-tight">SET UP YOUR WORKSPACE</h2>
+              <h2 className="text-2xl font-black text-white tracking-tight">SET UP YOUR WORKSPACE</h2>
               <p className="text-slate-400 text-sm font-medium">Create an organization to start hiring.</p>
             </div>
 
@@ -13133,7 +13133,7 @@ function Onboarding() {
                   required
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-[#30363d] placeholder:text-slate-300 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm"
                   placeholder="e.g. Acme Corp"
                 />
               </div>
@@ -13144,7 +13144,7 @@ function Onboarding() {
                   <select
                     value={orgIndustry}
                     onChange={(e) => setOrgIndustry(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-[#30363d] text-sm glass-premium"
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 text-sm glass-premium"
                   >
                     <option value="Technology">Technology</option>
                     <option value="Finance">Finance</option>
@@ -13161,7 +13161,7 @@ function Onboarding() {
                   <select
                     value={orgCompanySize}
                     onChange={(e) => setOrgCompanySize(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-[#30363d] text-sm glass-premium"
+                    className="w-full px-3 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 text-sm glass-premium"
                   >
                     <option value="1-10">1-10 employees</option>
                     <option value="11-50">11-50 employees</option>
@@ -13179,7 +13179,7 @@ function Onboarding() {
                   type="text"
                   value={orgLocation}
                   onChange={(e) => setOrgLocation(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-[#30363d] placeholder:text-slate-300 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm"
                   placeholder="e.g. San Francisco, CA"
                 />
               </div>
@@ -13190,7 +13190,7 @@ function Onboarding() {
                   type="tel"
                   value={orgPhone}
                   onChange={(e) => setOrgPhone(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-[#30363d] placeholder:text-slate-300 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm"
                   placeholder="e.g. +1 (555) 123-4567"
                 />
               </div>
@@ -13201,7 +13201,7 @@ function Onboarding() {
                   value={orgDescription}
                   onChange={(e) => setOrgDescription(e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-[#30363d] placeholder:text-slate-300 text-sm resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand-dark transition-all font-bold text-slate-300 placeholder:text-slate-300 text-sm resize-none"
                   placeholder="Tell us briefly about your team..."
                 />
               </div>
@@ -13234,7 +13234,7 @@ function Onboarding() {
                 window.location.reload();
               }
             }}
-            className="text-[10px] font-black text-brand-light hover:text-brand-dark uppercase tracking-widest flex items-center gap-1"
+            className="text-[10px] font-black text-brand-light hover:text-brand-light uppercase tracking-widest flex items-center gap-1"
           >
             <RotateCcw className="w-3 h-3" /> Re-sync Database
           </button>
@@ -13377,7 +13377,7 @@ function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen transparent text-[#30363d] font-sans selection:bg-[#e6edf3] overflow-x-hidden relative">
+    <div className="min-h-screen transparent text-slate-300 font-sans selection:bg-[#e6edf3] overflow-x-hidden relative">
       
       {/* Background Canvas Layer */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -13398,22 +13398,22 @@ function LandingPage() {
               <div className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center shadow-sm">
                 <Search className="w-5 h-5 text-white" />
               </div>
-              <span className="font-display text-2xl font-light tracking-tight text-[#161b22]">
+              <span className="font-display text-2xl font-light tracking-tight text-white">
                 {whiteLabelBrandingName || "HireAI"}
               </span>
             </div>
             
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-xs font-bold text-slate-400 hover:text-[#161b22] transition-colors uppercase tracking-widest">Platform</a>
-              <a href="#simulation" className="text-xs font-bold text-slate-400 hover:text-[#161b22] transition-colors uppercase tracking-widest">Simulation</a>
-              <a href="#pricing" className="text-xs font-bold text-slate-400 hover:text-[#161b22] transition-colors uppercase tracking-widest">Pricing</a>
+              <a href="#features" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Platform</a>
+              <a href="#simulation" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
+              <a href="#pricing" className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest">Pricing</a>
             </nav>
 
             <div className="flex items-center gap-3">
               
               <button 
                 onClick={signIn} 
-                className="text-xs font-bold text-slate-400 hover:text-[#161b22] transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
+                className="text-xs font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
               >
                 Log In
               </button>
@@ -13470,7 +13470,7 @@ function LandingPage() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Autonomous Talent Lobby Live</span>
             </div>
             
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-light text-[#161b22] tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-light text-white tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto">
               Scale your recruitment pipeline with <br className="hidden md:block"/>
               <span className="text-slate-400">Autonomous AI Interviews.</span>
             </h1>
@@ -13488,7 +13488,7 @@ function LandingPage() {
               </button>
               <a 
                 href="#simulation" 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-[#c9d1d9] glass-premium text-[#30363d] text-xs font-bold uppercase tracking-widest hover:transparent transition-colors min-h-[44px] flex items-center justify-center"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-[#c9d1d9] glass-premium text-slate-300 text-xs font-bold uppercase tracking-widest hover:transparent transition-colors min-h-[44px] flex items-center justify-center"
               >
                 Watch Simulation
               </a>
@@ -13501,7 +13501,7 @@ function LandingPage() {
             <div className="flex w-full overflow-hidden">
               <div className="flex animate-[marquee_35s_linear_infinite] min-w-full items-center justify-around gap-12 opacity-60">
                 {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
-                  <span key={i} className="text-lg md:text-xl font-display font-light uppercase tracking-tight whitespace-nowrap text-[#30363d]">{company}</span>
+                  <span key={i} className="text-lg md:text-xl font-display font-light uppercase tracking-tight whitespace-nowrap text-slate-300">{company}</span>
                 ))}
               </div>
             </div>
@@ -13510,7 +13510,7 @@ function LandingPage() {
           {/* Interactive Simulation Console */}
           <section id="simulation" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-[#161b22] mb-4">See the AI in Action.</h2>
+              <h2 className="text-3xl sm:text-4xl font-display font-light text-white mb-4">See the AI in Action.</h2>
               <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
             </div>
 
@@ -13543,7 +13543,7 @@ function LandingPage() {
                         "flex flex-col text-left p-4 rounded-xl border transition-all text-ellipsis overflow-hidden min-h-[44px]",
                         activeRole === role 
                           ? "glass-premium border-[#161b22] text-white shadow-sm" 
-                          : "glass-premium border-[#e6edf3] text-[#30363d] hover:transparent"
+                          : "glass-premium border-[#e6edf3] text-slate-300 hover:transparent"
                       )}
                     >
                       <span className="text-sm font-semibold mb-1">{roleData[role].title}</span>
@@ -13636,7 +13636,7 @@ function LandingPage() {
           {/* Bento Grid Features */}
           <section id="features" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
              <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-display font-light text-[#161b22] mb-4">Enterprise Vetting.</h2>
+              <h2 className="text-3xl sm:text-4xl font-display font-light text-white mb-4">Enterprise Vetting.</h2>
               <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
             </div>
 
@@ -13644,16 +13644,16 @@ function LandingPage() {
                {/* Feature 1: Multi-Agent Screening Pipelines */}
                <div className="md:col-span-2 md:row-span-2 rounded-2xl glass-premium border border-[#e6edf3] p-10 flex flex-col relative overflow-hidden group">
                  <div className="w-12 h-12 rounded-full bg-[#21262d] flex items-center justify-center mb-6 border border-[#e6edf3]/60">
-                   <GitBranch className="w-5 h-5 text-[#30363d]" />
+                   <GitBranch className="w-5 h-5 text-slate-300" />
                  </div>
-                 <h3 className="text-2xl font-display font-light text-[#161b22] mb-4">Multi-Agent Screening Pipelines</h3>
+                 <h3 className="text-2xl font-display font-light text-white mb-4">Multi-Agent Screening Pipelines</h3>
                  <p className="text-slate-400 text-sm leading-relaxed mb-8">
                    Each screening session orchestrates three specialized agents: a technical interviewer, a behavioral analyst, and an integrity validator. They collaborate in real-time, cross-referencing responses and flagging inconsistencies.
                  </p>
                  
                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-auto">
                    {[
-                     { title: "Technical Deep-Diver", desc: "Parses code-level responses, probes system design reasoning, and stress-tests domain expertise with adaptive follow-ups.", color: "bg-brand/10 text-brand-dark border-brand/10" },
+                     { title: "Technical Deep-Diver", desc: "Parses code-level responses, probes system design reasoning, and stress-tests domain expertise with adaptive follow-ups.", color: "bg-brand/10 text-brand-light border-brand/10" },
                      { title: "Behavioral Analyst", desc: "Maps STAR/LARSON frameworks against spoken narratives. Evaluates leadership signals, collaboration patterns, and conflict resolution markers.", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
                      { title: "Integrity Validator", desc: "Runs real-time consistency checks across agent transcripts. Flags contradictions, exaggerated claims, or resume misalignments.", color: "bg-amber-50 text-amber-700 border-amber-100" }
                    ].map((agent, i) => (
@@ -13668,9 +13668,9 @@ function LandingPage() {
                {/* Feature 2: Anti-Cheating Identity Vetting */}
                <div className="rounded-2xl glass-premium border border-[#e6edf3] p-8 flex flex-col">
                  <div className="w-10 h-10 rounded-full bg-[#21262d] flex items-center justify-center mb-5 border border-[#e6edf3]/60">
-                   <ShieldCheck className="w-4 h-4 text-[#30363d]" />
+                   <ShieldCheck className="w-4 h-4 text-slate-300" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-[#161b22] mb-3">Anti-Cheating Identity Vetting</h3>
+                 <h3 className="text-lg font-display font-light text-white mb-3">Anti-Cheating Identity Vetting</h3>
                  <ul className="space-y-3 text-xs text-slate-400 leading-relaxed">
                    {[
                      "Real-time face & gaze detection via webcam feeds",
@@ -13693,9 +13693,9 @@ function LandingPage() {
                {/* Feature 3: AI Audio Processing Telemetry */}
                <div className="rounded-2xl glass-premium border border-[#e6edf3] p-8 flex flex-col">
                  <div className="w-10 h-10 rounded-full bg-[#21262d] flex items-center justify-center mb-5 border border-[#e6edf3]/60">
-                   <Volume2 className="w-4 h-4 text-[#30363d]" />
+                   <Volume2 className="w-4 h-4 text-slate-300" />
                  </div>
-                 <h3 className="text-lg font-display font-light text-[#161b22] mb-3">AI Audio Processing Telemetry</h3>
+                 <h3 className="text-lg font-display font-light text-white mb-3">AI Audio Processing Telemetry</h3>
                  <p className="text-xs text-slate-400 leading-relaxed mb-5">
                    Real-time speech-to-text transcription with per-token confidence scoring, speaker diarization, and filler-word analytics.
                  </p>
@@ -13708,7 +13708,7 @@ function LandingPage() {
                    ].map((row, i) => (
                      <div key={i} className="flex justify-between items-center border-b border-white/10 pb-2 last:border-0 last:pb-0">
                        <span className="text-slate-400">{row.label}</span>
-                       <span className="text-[#30363d] font-bold">{row.val}</span>
+                       <span className="text-slate-300 font-bold">{row.val}</span>
                      </div>
                    ))}
                  </div>
@@ -13721,7 +13721,7 @@ function LandingPage() {
                      <Database className="w-3 h-3 text-slate-400" />
                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Integration Layer</span>
                    </div>
-                   <h3 className="text-xl font-display font-light text-[#161b22]">ATS & HRIS Syncing</h3>
+                   <h3 className="text-xl font-display font-light text-white">ATS & HRIS Syncing</h3>
                    <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
                      Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks and push scorecards back to your ATS of record.
                    </p>
@@ -13738,7 +13738,7 @@ function LandingPage() {
                      <Globe className="w-3 h-3 text-slate-400" />
                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Reseller & Tenant API</span>
                    </div>
-                   <h3 className="text-xl font-display font-light text-[#161b22]">White-Label Candidate Lobby</h3>
+                   <h3 className="text-xl font-display font-light text-white">White-Label Candidate Lobby</h3>
                    <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
                      Deploy under your own domain with fully custom layout components, logo parameters, emails, and interview invitations for corporate client lobbies.
                    </p>
@@ -13760,17 +13760,17 @@ function LandingPage() {
                  <CreditCard className="w-3.5 h-3.5 text-slate-400" />
                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Flexible Licensing</span>
                </div>
-               <h2 className="text-3xl sm:text-5xl font-display font-light text-[#161b22] mb-4">Transparent Pricing.</h2>
+               <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Transparent Pricing.</h2>
                <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
                 {/* Starter Plan */}
                 <div className="rounded-3xl glass-premium border border-[#e6edf3]/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
-                  <h3 className="text-xl font-display text-[#161b22] mb-2">Starter</h3>
+                  <h3 className="text-xl font-display text-white mb-2">Starter</h3>
                   <p className="text-slate-400 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-display text-[#161b22]">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
+                    <span className="text-4xl font-display text-white">${Math.round(499 * (whiteLabelMarkupFactor || 1.0))}</span>
                     <span className="text-slate-400 text-xs">/month</span>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
@@ -13781,7 +13781,7 @@ function LandingPage() {
                   </ul>
                   <button 
                     onClick={signIn} 
-                    className="w-full py-3.5 rounded-full border border-slate-305 hover:transparent text-[#30363d] text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                    className="w-full py-3.5 rounded-full border border-slate-305 hover:transparent text-slate-300 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
                   >
                     Start Free Trial
                   </button>
@@ -13793,10 +13793,10 @@ function LandingPage() {
                     Recommended
                   </div>
                   
-                  <h3 className="text-xl font-display text-[#161b22] mb-2">Agency Pro</h3>
+                  <h3 className="text-xl font-display text-white mb-2">Agency Pro</h3>
                   <p className="text-slate-400 text-sm mb-8">For scaling HR departments and staffing firms.</p>
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-display text-[#161b22]">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
+                    <span className="text-4xl font-display text-white">${Math.round(1299 * (whiteLabelMarkupFactor || 1.0))}</span>
                     <span className="text-slate-400 text-xs">/month</span>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
@@ -13816,10 +13816,10 @@ function LandingPage() {
 
                 {/* Enterprise Plan */}
                 <div className="rounded-3xl glass-premium border border-[#e6edf3]/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
-                  <h3 className="text-xl font-display text-[#161b22] mb-2">Enterprise</h3>
+                  <h3 className="text-xl font-display text-white mb-2">Enterprise</h3>
                   <p className="text-slate-400 text-sm mb-8">For global corporations needing high customizability.</p>
                   <div className="mb-8 flex items-baseline gap-1">
-                    <span className="text-4xl font-display text-[#161b22]">Custom</span>
+                    <span className="text-4xl font-display text-white">Custom</span>
                   </div>
                   <ul className="space-y-4 mb-10 flex-1 border-t border-white/10 pt-6">
                     <li className="flex items-center gap-2.5 text-xs text-slate-400"><Check className="w-4 h-4 text-emerald-500 shrink-0" /> Multi-tenant reseller admin panels</li>
@@ -13829,7 +13829,7 @@ function LandingPage() {
                   </ul>
                   <button 
                     onClick={signIn} 
-                    className="w-full py-3.5 rounded-full border border-slate-350 hover:transparent text-[#30363d] text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
+                    className="w-full py-3.5 rounded-full border border-slate-350 hover:transparent text-slate-300 text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center"
                   >
                     Request Demo
                   </button>
@@ -13844,7 +13844,7 @@ function LandingPage() {
                 <Star className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Customer Success</span>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-display font-light text-[#161b22] mb-4">Endorsed by Top Builders.</h2>
+              <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Endorsed by Top Builders.</h2>
               <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
             </div>
 
@@ -13869,11 +13869,11 @@ function LandingPage() {
                 <div key={index} className="glass-premium border border-[#e6edf3]/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
                   <p className="text-slate-400 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
                   <div className="flex items-center gap-4 border-t border-white/10 pt-5">
-                    <div className="w-9 h-9 rounded-full bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-bold text-xs text-[#30363d]">
+                    <div className="w-9 h-9 rounded-full bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-bold text-xs text-slate-300">
                       {t.author.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-[#161b22]">{t.author}</h4>
+                      <h4 className="text-xs font-bold text-white">{t.author}</h4>
                       <p className="text-[10px] text-slate-400 font-medium">{t.role}</p>
                     </div>
                   </div>
@@ -13889,7 +13889,7 @@ function LandingPage() {
                 <Info className="w-3.5 h-3.5 text-slate-400" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Frequently Asked Questions</span>
               </div>
-              <h2 className="text-3xl sm:text-5xl font-display font-light text-[#161b22] mb-4">Got Questions?</h2>
+              <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Got Questions?</h2>
               <p className="text-slate-400 max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
             </div>
 
@@ -13915,7 +13915,7 @@ function LandingPage() {
                 <div key={index} className="glass-premium border border-[#e6edf3]/80 rounded-2xl overflow-hidden transition-all duration-300">
                   <button
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                    className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-[#30363d] hover:transparent/50 transition-colors"
+                    className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-300 hover:transparent/50 transition-colors"
                   >
                     <span>{faq.q}</span>
                     {openFaq === index ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -13942,7 +13942,7 @@ function LandingPage() {
 
           {/* Footer CTA */}
           <section className="py-32 px-4 text-center border-t border-[#e6edf3] relative overflow-hidden bg-[#21262d]/40">
-            <h2 className="text-3xl sm:text-5xl font-display font-light text-[#161b22] mb-6">
+            <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-6">
               Upgrade your screening process.
             </h2>
             <p className="text-slate-400 text-sm sm:text-base mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -14193,7 +14193,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
               <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
-              <p className="text-sm font-bold text-[#30363d] leading-relaxed">
+              <p className="text-sm font-bold text-slate-300 leading-relaxed">
                 {confirmState?.msg}
               </p>
             </div>
@@ -14220,7 +14220,7 @@ export default function App() {
                 className={cn(
                   "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
                   n.type === 'success' ? "glass-premium border-green-100 text-green-700" :
-                  n.type === 'error' ? "glass-premium border-red-100 text-red-700" : "glass-premium border-white/10 text-[#30363d]"
+                  n.type === 'error' ? "glass-premium border-red-100 text-red-700" : "glass-premium border-white/10 text-slate-300"
                 )}
               >
                 {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
