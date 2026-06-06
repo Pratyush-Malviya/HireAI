@@ -13,6 +13,10 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 
 dotenv.config({ path: ".env" });
 dotenv.config({ path: ".env.local", override: true });
+import { Composio } from "@composio/core";
+const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY;
+const composio = COMPOSIO_API_KEY ? new Composio({ apiKey: COMPOSIO_API_KEY }) : null;
+
 
 const app = express();
 const PORT = 3000;
@@ -194,7 +198,25 @@ app.get("/api/calendar/free-busy", async (req, res) => {
 
 app.post("/api/calendar/schedule", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
-  const { candidateEmail, startTime, endTime, summary, description } = req.body;
+  const { candidateEmail, startTime, endTime, summary, description, useComposio, userId } = req.body;
+
+  if (useComposio && composio && userId) {
+    try {
+      const response = await composio.tools.execute(userId, "GOOGLECALENDAR_CREATE_EVENT", {
+        calendar_id: "primary",
+        summary: summary,
+        description: description,
+        start_datetime: startTime,
+        event_duration_minutes: Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / (60 * 1000)),
+        attendees: [candidateEmail]
+      });
+      console.log("Composio GOOGLECALENDAR_CREATE_EVENT response:", response);
+      return res.json(response.data || response);
+    } catch (err: any) {
+      console.error("Composio scheduling failed:", err.message);
+      return res.status(500).json({ error: "Composio scheduling failed: " + err.message });
+    }
+  }
 
   if (!tokensRaw) return res.status(401).json({ error: "Not authenticated" });
 
@@ -231,8 +253,31 @@ app.post("/api/calendar/schedule", async (req, res) => {
 
 app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
-  const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp, emailBody, subject: subjectOverride } = req.body;
+  const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp, emailBody, subject: subjectOverride, useComposio, userId } = req.body;
   console.log('🔎 send-invite request body:', req.body);
+
+  if (useComposio && composio && userId) {
+    try {
+      const cleanName = safeSanitize(candidateName || "Candidate").substring(0, 100);
+      const cleanTitle = safeSanitize(jobTitle || "Applied Position").substring(0, 150);
+      const subject = subjectOverride || `Interview Invitation: ${cleanTitle} with HireNow`;
+      const body = emailBody || `Hi ${cleanName},\n\nYou are invited to complete an interview for the position of ${cleanTitle}.\n\nPlease join the interview room here: ${interviewLink}`;
+      
+      const response = await composio.tools.execute(userId, "GMAIL_SEND_EMAIL", {
+        to: candidateEmail,
+        recipient: candidateEmail,
+        subject: subject,
+        body: body
+      });
+      console.log("Composio GMAIL_SEND_EMAIL response:", response);
+      return res.json({
+        success: true,
+        message: "Interview invitation email sent successfully via Composio Gmail."
+      });
+    } catch (err: any) {
+      console.error("Composio Gmail send failed:", err.message);
+    }
+  }
 
   // Validate email format strictly to protect against mailing injections or header manipulation
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -2408,6 +2453,266 @@ Rules:
 
 // ==========================================
 // END NVIDIA NIM ROUTES
+
+// ==========================================
+// START MEETING BOT & COMPOSIO ROUTES
+// ==========================================
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+
+// Status map to track active meeting bot states locally
+const botStatusMap = new Map();
+
+// Serves static recording files
+const recordingsDir = path.join(process.cwd(), "public", "recordings");
+if (!fs.existsSync(recordingsDir)) {
+  fs.mkdirSync(recordingsDir, { recursive: true });
+}
+app.use("/recordings", express.static(recordingsDir));
+
+// Endpoint to check if a recording exists for a candidate
+app.get("/api/meeting/recording-status/:candidateId", (req, res) => {
+  const { candidateId } = req.params;
+  const webmPath = path.join(recordingsDir, `${candidateId}.webm`);
+  const mp4Path = path.join(recordingsDir, `${candidateId}.mp4`);
+  
+  if (fs.existsSync(webmPath)) {
+    return res.json({ exists: true, url: `/recordings/${candidateId}.webm` });
+  } else if (fs.existsSync(mp4Path)) {
+    return res.json({ exists: true, url: `/recordings/${candidateId}.mp4` });
+  }
+  
+  // Return current bot status if any
+  const status = botStatusMap.get(candidateId) || "idle";
+  res.json({ exists: false, status });
+});
+
+// Bot status and log callbacks (called by meeting bot)
+app.patch("/api/meeting/app/bot/status", (req, res) => {
+  const { eventId, botId, provider, status } = req.body;
+  const candidateId = botId || eventId;
+  console.log(`🤖 Bot status update for candidate ${candidateId}:`, status);
+  if (candidateId) {
+    const latestStatus = Array.isArray(status) ? status[status.length - 1] : status;
+    botStatusMap.set(candidateId, latestStatus);
+  }
+  res.json({ success: true });
+});
+
+app.patch("/api/meeting/app/bot/log", (req, res) => {
+  const { eventId, botId, provider, level, message, category, subCategory } = req.body;
+  console.log(`🤖 Bot Log [${level.toUpperCase()}] for candidate ${botId || eventId}: ${message} (${category}/${subCategory})`);
+  res.json({ success: true });
+});
+
+// Multipart Uploader Mock APIs
+app.put("/api/files/upload/multipart/init/:teamId/:folderId", (req, res) => {
+  const fileId = uuidv4();
+  const uploadId = uuidv4();
+  const chunkDir = path.join(recordingsDir, `temp_${fileId}`);
+  if (!fs.existsSync(chunkDir)) {
+    fs.mkdirSync(chunkDir, { recursive: true });
+  }
+  console.log(`[Upload Init] fileId: ${fileId}, uploadId: ${uploadId}`);
+  res.json({ success: true, data: { fileId, uploadId } });
+});
+
+app.put("/api/files/upload/multipart/url/:teamId/:folderId/:fileId/:uploadId/:partNumber", (req, res) => {
+  const { fileId, partNumber } = req.params;
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
+  const uploadUrl = `${appUrl}/api/files/upload/chunk/${fileId}/${partNumber}`;
+  res.json({ success: true, data: { uploadUrl } });
+});
+
+app.put("/api/files/upload/chunk/:fileId/:partNumber", (req, res) => {
+  const { fileId, partNumber } = req.params;
+  const chunkDir = path.join(recordingsDir, `temp_${fileId}`);
+  if (!fs.existsSync(chunkDir)) {
+    fs.mkdirSync(chunkDir, { recursive: true });
+  }
+  const chunkPath = path.join(chunkDir, `part_${partNumber}`);
+  const writeStream = fs.createWriteStream(chunkPath);
+  req.pipe(writeStream);
+  
+  req.on("end", () => {
+    res.json({ success: true });
+  });
+  
+  req.on("error", (err) => {
+    console.error(`[Upload Chunk Error] fileId ${fileId} part ${partNumber}:`, err);
+    res.status(500).json({ error: "Failed to write chunk" });
+  });
+});
+
+app.put("/api/files/upload/multipart/finalize/:teamId/:folderId/:fileId/:uploadId", async (req, res) => {
+  const { fileId } = req.params;
+  const { file: fileMeta } = req.body;
+  const botId = fileMeta?.botId || fileId; // botId is the candidateId
+  
+  console.log(`[Upload Finalize] Merging chunks for candidate ${botId} (fileId: ${fileId})`);
+  const chunkDir = path.join(recordingsDir, `temp_${fileId}`);
+  const finalFileName = `${botId}.webm`;
+  const finalPath = path.join(recordingsDir, finalFileName);
+  
+  try {
+    if (!fs.existsSync(chunkDir)) {
+      throw new Error("Temporary chunk directory not found");
+    }
+    
+    const files = fs.readdirSync(chunkDir)
+      .filter(name => name.startsWith("part_"))
+      .sort((a, b) => {
+        const numA = parseInt(a.split("_")[1]);
+        const numB = parseInt(b.split("_")[1]);
+        return numA - numB;
+      });
+      
+    const writeStream = fs.createWriteStream(finalPath);
+    for (const file of files) {
+      const filePath = path.join(chunkDir, file);
+      const readStream = fs.createReadStream(filePath);
+      await new Promise((resolve, reject) => {
+        readStream.pipe(writeStream, { end: false });
+        readStream.on("end", resolve);
+        readStream.on("error", reject);
+      });
+    }
+    writeStream.end();
+    
+    // Clean up temporary chunks recursively
+    fs.rmSync(chunkDir, { recursive: true, force: true });
+    
+    console.log(`[Upload Finalize Success] Merged file written to ${finalPath}`);
+    res.json({
+      success: true,
+      data: {
+        file: {
+          name: finalFileName,
+          url: `/recordings/${finalFileName}`,
+          recordingId: fileId,
+          botId: botId
+        }
+      }
+    });
+  } catch (err: any) {
+    console.error(`[Upload Finalize Error] for fileId ${fileId}:`, err);
+    res.status(500).json({ error: "Merge failed: " + err.message });
+  }
+});
+
+// Bot Webhook Callback
+app.post("/api/meeting/webhook", (req, res) => {
+  const { recordingId, status, blobUrl, metadata } = req.body;
+  console.log("🤖 Webhook received from meeting bot:", req.body);
+  const candidateId = metadata?.botId || metadata?.eventId;
+  if (candidateId) {
+    botStatusMap.set(candidateId, status || "completed");
+  }
+  res.json({ success: true });
+});
+
+// Proxy route to trigger meeting bot join
+app.post("/api/meeting/join", async (req, res) => {
+  const { provider, url, name, teamId, timezone, userId, botId, eventId } = req.body;
+  if (!provider || !url || !name || !teamId || !timezone || !userId || (!botId && !eventId)) {
+    return res.status(400).json({ error: "Missing required fields for joining a meeting" });
+  }
+  
+  const botUrl = process.env.MEETING_BOT_URL || "http://localhost:3001";
+  
+  try {
+    const response = await axios.post(`${botUrl}/${provider}/join`, {
+      bearerToken: "local_meet_bot_key", // matching SCREENAPP_BACKEND_SERVICE_API_KEY
+      url,
+      name,
+      teamId,
+      timezone,
+      userId,
+      botId,
+      eventId
+    });
+    
+    botStatusMap.set(botId || eventId, "joining");
+    res.json(response.data);
+  } catch (err: any) {
+    console.error("Failed to forward join request to meeting bot:", err.message);
+    res.status(500).json({ error: "Failed to trigger meeting bot: " + (err.response?.data?.error || err.message) });
+  }
+});
+
+// Composio Integration Routes
+app.get("/api/composio/status", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId || typeof userId !== "string") {
+    return res.status(400).json({ error: "userId query parameter is required" });
+  }
+  if (!composio) {
+    return res.json({ connected: false, error: "Composio is not configured (missing COMPOSIO_API_KEY)" });
+  }
+  try {
+    const connections = await composio.connectedAccounts.list({
+      user_ids: [userId]
+    });
+    const googleConn = connections.find(c => c.app_name === 'google' || c.toolkit_name === 'google');
+    res.json({
+      connected: !!googleConn,
+      connectionId: googleConn?.id || null
+    });
+  } catch (err: any) {
+    console.error("Composio status check error:", err.message);
+    res.json({ connected: false, error: err.message });
+  }
+});
+
+app.post("/api/composio/connect", async (req, res) => {
+  const { userId, callbackUrl } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+  if (!composio) {
+    return res.status(500).json({ error: "Composio is not configured" });
+  }
+  try {
+    const connection = await composio.connectedAccounts.initiate(
+      userId,
+      'google',
+      {
+        callback_url: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/`
+      }
+    );
+    res.json({ redirectUrl: connection.redirect_url });
+  } catch (err: any) {
+    console.error("Composio connect initiate error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/composio/disconnect", async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+  if (!composio) {
+    return res.status(500).json({ error: "Composio is not configured" });
+  }
+  try {
+    const connections = await composio.connectedAccounts.list({
+      user_ids: [userId]
+    });
+    const googleConns = connections.filter(c => c.app_name === 'google' || c.toolkit_name === 'google');
+    for (const conn of googleConns) {
+      await composio.connectedAccounts.delete(conn.id);
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error("Composio disconnect error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+// ==========================================
+// END MEETING BOT & COMPOSIO ROUTES
+// ==========================================
+
 // ==========================================
 
 async function startServer() {

@@ -6734,6 +6734,15 @@ function CandidateDetail() {
   const { candidateId } = useParams();
   const { profile, organization, isAdmin, setStripeModalOpen, refreshProfile } = useProfile();
   const [candidate, setCandidate] = useState<Candidate | null>(null);
+
+  // Composio and Meeting Bot States
+  const [composioConnected, setComposioConnected] = useState(false);
+  const [composioLoading, setComposioLoading] = useState(false);
+  const [botStatus, setBotStatus] = useState('idle');
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
+  const [meetingLink, setMeetingLink] = useState('');
+  const [botName, setBotName] = useState('HireAI Note Taker');
+  const [triggeringBot, setTriggeringBot] = useState(false);
   const [job, setJob] = useState<Job | null>(null);
   const [interview, setInterview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -6935,7 +6944,9 @@ function CandidateDetail() {
           startTime: selectedSlot.start,
           endTime: selectedSlot.end,
           summary: `Interview: ${candidate.fullName} | HireAI Assessment`,
-          description: `Assessment Summary: ${candidate.scorecard.recommendation.summary}\nCandidate Location: ${candidate.location}\n\nThis meeting was automatically scheduled following high-signal AI screening.`
+          description: `Assessment Summary: ${candidate.scorecard.recommendation.summary}\nCandidate Location: ${candidate.location}\n\nThis meeting was automatically scheduled following high-signal AI screening.`,
+          useComposio: composioConnected,
+          userId: profile?.uid
         })
       });
       
@@ -6944,13 +6955,18 @@ function CandidateDetail() {
         throw new Error(errorData.error || 'Scheduling failed');
       }
       
-      notify('Interview invitation dispatched via Google Calendar.', 'success');
+      const eventData = await response.json();
+      const meetLink = eventData.hangoutLink || eventData.htmlLink || '';
+      
+      notify('Interview invitation dispatched successfully.', 'success');
       setShowScheduler(false);
       
       // Update candidate status
       await updateDoc(doc(db, 'candidates', candidate.id), {
-        interviewStatus: 'invited'
+        interviewStatus: 'invited',
+        meetLink: meetLink
       });
+      setMeetingLink(meetLink);
     } catch (err) {
       console.error(err);
       notify('Failed to schedule interview.', 'error');
@@ -6995,6 +7011,148 @@ function CandidateDetail() {
       notify('Failed to retry screening.', 'error');
     } finally {
       setRetryingScreening(false);
+    }
+  };
+
+  // Composio and Meeting Bot Helper Handlers
+  const checkRecordingStatus = async () => {
+    if (!candidate?.id) return;
+    try {
+      const res = await fetch(`/api/meeting/recording-status/${candidate.id}`);
+      const data = await res.json();
+      if (data.exists) {
+        setRecordingUrl(data.url);
+        setBotStatus('completed');
+        
+        if (!candidate.meetingRecordingUrl) {
+          await updateDoc(doc(db, 'candidates', candidate.id), {
+            meetingRecordingUrl: data.url,
+            interviewStatus: 'completed'
+          });
+        }
+      } else if (data.status) {
+        setBotStatus(data.status);
+      }
+    } catch (err) {
+      console.error("Failed to check recording status:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (candidate?.id) {
+      checkRecordingStatus();
+      
+      const interval = setInterval(() => {
+        if (botStatus === 'joining' || botStatus === 'recording') {
+          checkRecordingStatus();
+        }
+      }, 8000);
+      return () => clearInterval(interval);
+    }
+  }, [candidate?.id, botStatus]);
+
+  useEffect(() => {
+    if (candidate?.meetLink) {
+      setMeetingLink(candidate.meetLink);
+    }
+    if (candidate?.meetingRecordingUrl) {
+      setRecordingUrl(candidate.meetingRecordingUrl);
+    }
+  }, [candidate]);
+
+  useEffect(() => {
+    if (profile?.uid) {
+      fetch(`/api/composio/status?userId=${profile.uid}`)
+        .then(r => r.json())
+        .then(data => {
+          setComposioConnected(!!data.connected);
+        })
+        .catch(console.error);
+    }
+  }, [profile]);
+
+  const handleConnectComposio = async () => {
+    if (!profile?.uid) return;
+    setComposioLoading(true);
+    try {
+      const response = await fetch('/api/composio/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.uid,
+          callbackUrl: window.location.href
+        })
+      });
+      const data = await response.json();
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        notify(data.error || 'Failed to get connection link from Composio.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error initiating Composio connection.', 'error');
+    } finally {
+      setComposioLoading(false);
+    }
+  };
+
+  const handleDisconnectComposio = async () => {
+    if (!profile?.uid) return;
+    try {
+      const response = await fetch('/api/composio/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.uid })
+      });
+      if (response.ok) {
+        setComposioConnected(false);
+        notify('Google accounts disconnected from Composio.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Failed to disconnect Composio.', 'error');
+    }
+  };
+
+  const handleLaunchMeetingBot = async () => {
+    if (!meetingLink) {
+      notify('Please schedule an interview or paste a meeting link first!', 'warning');
+      return;
+    }
+    setTriggeringBot(true);
+    notify('Dispatching meeting bot to join and record...', 'info');
+    try {
+      let provider = 'google';
+      if (meetingLink.includes('zoom.us')) provider = 'zoom';
+      else if (meetingLink.includes('teams.live.com') || meetingLink.includes('teams.microsoft.com')) provider = 'microsoft';
+      
+      const res = await fetch('/api/meeting/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider,
+          url: meetingLink,
+          name: botName,
+          teamId: organization?.id || 'org_default',
+          timezone: organization?.workingHours?.timezone || 'UTC',
+          userId: profile?.uid || 'user_default',
+          botId: candidate.id,
+          eventId: candidate.id
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBotStatus('joining');
+        notify('Bot successfully triggered to join the meeting lobby!', 'success');
+      } else {
+        notify(data.error || 'Failed to trigger the bot.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error communicating with the meeting bot service.', 'error');
+    } finally {
+      setTriggeringBot(false);
     }
   };
 
@@ -7294,6 +7452,14 @@ function CandidateDetail() {
            </Button>
            <Button variant="outline" className="text-slate-600 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
              <Database className="w-3.5 h-3.5 mr-1 sm:mr-2" /> PDF
+           </Button>
+           <Button
+             variant="outline"
+             className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4 flex items-center gap-1.5"
+             onClick={fetchAvailability}
+           >
+             <Calendar className="w-3.5 h-3.5" />
+             Schedule
            </Button>
            
            <Button variant="outline" className="text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={() => {
@@ -8159,6 +8325,147 @@ function CandidateDetail() {
                     {s}
                   </span>
                 ))}
+              </div>
+           </Card>
+
+           {/* Composio Integrations Card */}
+           <Card className="p-6 bg-white border border-slate-150 rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center gap-3">
+                 <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center font-black text-indigo-600 text-xs shadow-inner">
+                   <Zap className="w-4 h-4 text-indigo-600" />
+                 </div>
+                 <div>
+                   <h4 className="font-extrabold text-slate-800 text-sm">Composio Integrations</h4>
+                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Gmail & Google Calendar</p>
+                 </div>
+              </div>
+              
+              {composioConnected ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-50 border border-green-150 rounded-xl flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 text-green-700 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      <span>Google Linked</span>
+                    </div>
+                    <button
+                      onClick={handleDisconnectComposio}
+                      className="text-[10px] font-black uppercase text-red-500 hover:text-red-700 cursor-pointer"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    Your Gmail and Google Calendar are connected via Composio. Invites and schedule events will route through Composio.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-500 leading-normal">
+                    Link your Google Workspace in one click to enable automatic interview invitations via Gmail and Google Calendar scheduling.
+                  </p>
+                  <Button
+                    variant="primary"
+                    className="w-full h-10 bg-indigo-650 hover:bg-indigo-700 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-md"
+                    onClick={handleConnectComposio}
+                    disabled={composioLoading}
+                  >
+                    {composioLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3.5 h-3.5" />
+                    )}
+                    {composioLoading ? 'Connecting...' : 'Link Google via Composio'}
+                  </Button>
+                </div>
+              )}
+           </Card>
+
+           {/* AI Meeting Recorder Bot Card */}
+           <Card className="p-6 bg-white border border-slate-150 rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center gap-3">
+                 <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs shadow-inner">
+                   <Video className="w-4 h-4 text-white" />
+                 </div>
+                 <div>
+                   <h4 className="font-extrabold text-slate-800 text-sm">AI Meeting Recorder Bot</h4>
+                   <p className="text-[10px] text-slate-400 font-semibold uppercase">External Meeting Capture</p>
+                 </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-150 rounded-xl">
+                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Bot Status</span>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "w-2 h-2 rounded-full",
+                      botStatus === 'completed' ? "bg-green-500" :
+                      botStatus === 'recording' ? "bg-red-500 animate-pulse" :
+                      botStatus === 'joining' ? "bg-amber-500 animate-pulse" : "bg-slate-400"
+                    )} />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">
+                      {botStatus === 'completed' ? 'Recording Ready' :
+                       botStatus === 'recording' ? 'Live Recording' :
+                       botStatus === 'joining' ? 'Lobby / Joining' : 'Idle / Ready'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-650 focus:bg-white transition-all shadow-sm"
+                    placeholder="Paste meeting link here"
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Bot Display Name</label>
+                  <input
+                    type="text"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-indigo-650 focus:bg-white transition-all shadow-sm"
+                    value={botName}
+                    onChange={(e) => setBotName(e.target.value)}
+                  />
+                </div>
+
+                {botStatus !== 'completed' && (
+                  <Button
+                    variant="primary"
+                    className={cn(
+                      "w-full h-11 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg",
+                      botStatus === 'joining' || botStatus === 'recording'
+                        ? "bg-slate-700 hover:bg-slate-800 shadow-slate-100"
+                        : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100"
+                    )}
+                    onClick={handleLaunchMeetingBot}
+                    disabled={triggeringBot || !meetingLink}
+                  >
+                    {triggeringBot ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5" />
+                    )}
+                    {triggeringBot ? 'Launching Bot...' : 
+                     botStatus === 'joining' || botStatus === 'recording' ? 'Bot Active (Click to Re-Join)' : 'Launch Meeting Bot'}
+                  </Button>
+                )}
+
+                {recordingUrl && (
+                  <div className="space-y-2 pt-3 border-t border-slate-100 animate-in fade-in duration-500">
+                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider block">Recorded Meeting Stream</span>
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-lg bg-slate-950 aspect-video">
+                      <video
+                        src={recordingUrl}
+                        controls
+                        className="w-full h-full object-contain"
+                        preload="metadata"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
            </Card>
         </div>
