@@ -14,9 +14,9 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand: #238636;
-  --color-brand-dark: #2ea043;
-  --color-brand-light: #3fb950;
+  --color-brand: #6366f1;
+  --color-brand-dark: #4f46e5;
+  --color-brand-light: #d946ef;
 
   @keyframes aurora {
     0% { transform: translate(0, 0) scale(1); }
@@ -135,7 +135,11 @@
 
 @layer base {
   body {
-    @apply font-sans bg-[#0d1117] text-[#c9d1d9] antialiased selection:bg-[#238636]/30;
+    @apply font-sans bg-[#030712] text-[#e2e8f0] antialiased selection:bg-[#6366f1]/30;
+    background-image: 
+      radial-gradient(ellipse at top right, rgba(99, 102, 241, 0.15), transparent 40%),
+      radial-gradient(ellipse at bottom left, rgba(217, 70, 239, 0.1), transparent 40%);
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -143,25 +147,29 @@
   }
 
   *:focus-visible {
-    @apply outline-2 outline-[#238636] outline-offset-2;
+    @apply outline-2 outline-[#6366f1] outline-offset-2;
   }
 }
 
 @layer components {
   .glass {
-    @apply bg-[#161b22]/90 backdrop-blur-xl border border-[#30363d] shadow-xl;
+    @apply bg-[#0f172a]/60 backdrop-blur-2xl border border-white/[0.05] shadow-[0_8px_32px_rgba(0,0,0,0.4)];
   }
   
   .glass-dark {
-    @apply bg-[#0d1117]/95 backdrop-blur-2xl border border-[#30363d] shadow-2xl;
+    @apply bg-[#030712]/80 backdrop-blur-3xl border border-white/[0.02] shadow-[0_16px_48px_rgba(0,0,0,0.6)];
+  }
+
+  .glass-premium {
+    @apply bg-gradient-to-b from-[#1e293b]/40 to-[#0f172a]/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-2xl relative overflow-hidden;
   }
 
   .saas-card {
-    @apply bg-[#161b22] border border-[#30363d] rounded-2xl shadow-lg hover:shadow-[#238636]/10 transition-all duration-300;
+    @apply glass-premium hover:shadow-[#6366f1]/20 hover:border-white/20 transition-all duration-500;
   }
 
   .saas-button {
-    @apply relative overflow-hidden active:scale-95 transition-all duration-200 rounded-xl font-bold tracking-tight;
+    @apply relative overflow-hidden active:scale-95 transition-all duration-300 rounded-xl font-bold tracking-tight shadow-lg;
   }
 }
 
@@ -176,6 +184,6 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-[#30363d] rounded-full hover:bg-[#8b949e] transition-colors;
+  @apply bg-[#1e293b] rounded-full hover:bg-[#334155] transition-colors;
 }
 

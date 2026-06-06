@@ -68,7 +68,7 @@ const testimonials = [
 
 export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
   return (
-    <div className="relative min-h-screen bg-[#0d1117] overflow-hidden">
+    <div className="relative min-h-screen bg-transparent overflow-hidden">
       {/* Hero Background Effects */}
       <div className="absolute inset-0 z-0">
         <Particles className="absolute inset-0" quantity={100} color="#818cf8" size={0.6} />
@@ -77,7 +77,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-50 border-b border-slate-800/50 bg-[#0d1117]/80 backdrop-blur-xl">
+      <nav className="relative z-50 border-b border-slate-800/50 bg-transparent/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               <a href="#features" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Features</a>
               <a href="#stats" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Stats</a>
               <a href="#testimonials" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Testimonials</a>
-              <button onClick={onGetStarted} className="bg-[#161b22] text-slate-950 px-5 py-2 rounded-xl text-sm font-bold hover:bg-[#30363d] transition-all shadow-lg shadow-white/10">
+              <button onClick={onGetStarted} className="glass-premium text-slate-950 px-5 py-2 rounded-xl text-sm font-bold hover:bg-[#30363d] transition-all shadow-lg shadow-white/10">
                 Sign In
               </button>
             </div>
@@ -147,7 +147,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.5} inView>
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-[#8b949e]">
+            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-400">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span>No credit card</span>
@@ -324,7 +324,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                 Book a Demo
               </button>
             </div>
-            <p className="text-sm text-[#8b949e] mt-6">No credit card required • Free credits included • Cancel anytime</p>
+            <p className="text-sm text-slate-400 mt-6">No credit card required • Free credits included • Cancel anytime</p>
           </BlurFade>
         </div>
       </section>
@@ -338,7 +338,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             </div>
             <span className="text-sm font-bold text-slate-400">HireNow</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-[#8b949e]">
+          <div className="flex items-center gap-6 text-xs text-slate-400">
             <span>© 2026 HireNow. All rights reserved.</span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
