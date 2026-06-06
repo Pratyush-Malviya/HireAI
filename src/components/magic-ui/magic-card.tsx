@@ -42,7 +42,7 @@ export function MagicCard({
         background: useMotionTemplate`linear-gradient(var(--color-background) 0 0) padding-box, radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, ${gradientFrom}, ${gradientTo}, transparent 100%) border-box`,
       } as React.CSSProperties}
     >
-      <div className="absolute inset-px z-20 rounded-[inherit] bg-white dark:bg-slate-950" />
+      <div className="absolute inset-px z-20 rounded-[inherit] bg-[#161b22] dark:bg-[#0d1117]" />
       <motion.div
         className="pointer-events-none absolute inset-px z-30 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{

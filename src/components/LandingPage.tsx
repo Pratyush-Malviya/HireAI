@@ -23,13 +23,13 @@ const features = [
     icon: Brain,
     title: "AI-Powered Screening",
     description: "Advanced LLM engines analyze resumes against job requirements with 95%+ accuracy across 15+ dimensions.",
-    gradient: "from-indigo-500 to-violet-600",
+    gradient: "from-brand to-violet-600",
   },
   {
     icon: MessageSquare,
     title: "Autonomous Interviews",
     description: "Voice-enabled AI interviewer conducts natural conversations with real-time proctoring and speech analysis.",
-    gradient: "from-blue-500 to-indigo-600",
+    gradient: "from-blue-500 to-brand",
   },
   {
     icon: Shield,
@@ -47,7 +47,7 @@ const features = [
     icon: Globe,
     title: "Multi-Lingual Support",
     description: "Interview in 8+ languages with neural TTS voices. Global talent, local experience.",
-    gradient: "from-sky-500 to-indigo-600",
+    gradient: "from-sky-500 to-brand",
   },
   {
     icon: Cpu,
@@ -68,20 +68,20 @@ const testimonials = [
 
 export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
   return (
-    <div className="relative min-h-screen bg-slate-950 overflow-hidden">
+    <div className="relative min-h-screen bg-[#0d1117] overflow-hidden">
       {/* Hero Background Effects */}
       <div className="absolute inset-0 z-0">
         <Particles className="absolute inset-0" quantity={100} color="#818cf8" size={0.6} />
         <Meteors number={15} />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-slate-950 to-slate-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-dark/30 via-slate-950 to-slate-950" />
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-50 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
+      <nav className="relative z-50 border-b border-slate-800/50 bg-[#0d1117]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
                 <Search className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">HireNow</span>
@@ -90,7 +90,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               <a href="#features" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Features</a>
               <a href="#stats" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Stats</a>
               <a href="#testimonials" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Testimonials</a>
-              <button onClick={onGetStarted} className="bg-white text-slate-950 px-5 py-2 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all shadow-lg shadow-white/10">
+              <button onClick={onGetStarted} className="bg-[#161b22] text-slate-950 px-5 py-2 rounded-xl text-sm font-bold hover:bg-[#30363d] transition-all shadow-lg shadow-white/10">
                 Sign In
               </button>
             </div>
@@ -102,7 +102,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-300 text-xs font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/20 bg-brand/10 text-brand-light text-xs font-medium mb-8">
               <SparklesText sparklesCount={5} colors={{ first: "#818cf8", second: "#c084fc" }}>
                 <span className="text-xs">AI-Powered Talent Intelligence</span>
               </SparklesText>
@@ -122,8 +122,8 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           <BlurFade delay={0.3} inView>
             <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
               Screen, interview, and evaluate candidates autonomously with advanced LLM analysis,
-              <span className="text-indigo-300"> real-time proctoring</span>, and{" "}
-              <span className="text-indigo-300">neural voice synthesis</span>.
+              <span className="text-brand-light"> real-time proctoring</span>, and{" "}
+              <span className="text-brand-light">neural voice synthesis</span>.
             </p>
           </BlurFade>
 
@@ -147,7 +147,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.5} inView>
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-500">
+            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-[#8b949e]">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span>No credit card</span>
@@ -167,7 +167,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
 
       {/* Stats Section */}
       <section id="stats" className="relative z-10 py-20 border-t border-slate-800/50">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950/5 to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-brand-dark/5 to-slate-950" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -209,7 +209,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             {features.map((feature, i) => (
               <BlurFade key={i} delay={0.1 * i} inView>
                 <div className="relative group">
-                  <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 h-full transition-all duration-300 hover:border-slate-700 hover:shadow-xl hover:shadow-indigo-500/5">
+                  <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 h-full transition-all duration-300 hover:border-slate-700 hover:shadow-xl hover:shadow-brand/5">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg`}>
                       <feature.icon className="w-6 h-6 text-white" />
                     </div>
@@ -226,7 +226,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
 
       {/* How It Works */}
       <section className="relative z-10 py-20 border-t border-slate-800/50">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950/10 to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-brand-dark/10 to-slate-950" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <BlurFade inView className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
@@ -245,8 +245,8 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             ].map((item, i) => (
               <BlurFade key={i} delay={0.2 * i} inView>
                 <div className="relative text-center p-8">
-                  <div className="text-5xl font-black text-indigo-500/20 mb-4">{item.step}</div>
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-500/20">
+                  <div className="text-5xl font-black text-brand/20 mb-4">{item.step}</div>
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-brand/20">
                     <item.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
@@ -279,7 +279,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             {testimonials.map((t, i) => (
               <div key={i} className="w-[320px] p-6 rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white text-xs font-bold">
                     {t.avatar}
                   </div>
                   <div>
@@ -300,8 +300,8 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       {/* CTA Section */}
       <section className="relative z-10 py-20 border-t border-slate-800/50">
         <div className="absolute inset-0">
-          <Ripple mainCircleSize={300} numCircles={5} className="text-indigo-500/10" />
-          <DotPattern glow className="text-indigo-500/5" />
+          <Ripple mainCircleSize={300} numCircles={5} className="text-brand/10" />
+          <DotPattern glow className="text-brand/5" />
         </div>
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <BlurFade inView>
@@ -324,7 +324,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                 Book a Demo
               </button>
             </div>
-            <p className="text-sm text-slate-500 mt-6">No credit card required • Free credits included • Cancel anytime</p>
+            <p className="text-sm text-[#8b949e] mt-6">No credit card required • Free credits included • Cancel anytime</p>
           </BlurFade>
         </div>
       </section>
@@ -333,12 +333,12 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <footer className="relative z-10 border-t border-slate-800/50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center">
               <Search className="w-3 h-3 text-white" />
             </div>
             <span className="text-sm font-bold text-slate-400">HireNow</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-slate-500">
+          <div className="flex items-center gap-6 text-xs text-[#8b949e]">
             <span>© 2026 HireNow. All rights reserved.</span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
