@@ -2476,9 +2476,14 @@ import axios from "axios";
 const botStatusMap = new Map();
 
 // Serves static recording files
-const recordingsDir = path.join(process.cwd(), "public", "recordings");
-if (!fs.existsSync(recordingsDir)) {
-  fs.mkdirSync(recordingsDir, { recursive: true });
+const isVercel = !!process.env.VERCEL;
+const recordingsDir = isVercel ? "/tmp/recordings" : path.join(process.cwd(), "public", "recordings");
+try {
+  if (!fs.existsSync(recordingsDir)) {
+    fs.mkdirSync(recordingsDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn("Notice: Failed to create recordings directory. File saving may fail if running on a read-only serverless platform.");
 }
 app.use("/recordings", express.static(recordingsDir));
 
