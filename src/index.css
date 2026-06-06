@@ -165,7 +165,7 @@
   }
 
   .saas-card {
-    @apply glass-premium hover:shadow-lg hover:shadow-brand/5 hover:border-slate-300 transition-all duration-500;
+    @apply bg-white backdrop-blur-lg border border-slate-200 shadow-sm rounded-2xl relative overflow-hidden hover:shadow-lg hover:shadow-brand/5 hover:border-slate-300 transition-all duration-500;
   }
 
   .saas-button {
