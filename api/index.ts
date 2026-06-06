@@ -2737,7 +2737,7 @@ app.post("/api/composio/connect", async (req, res) => {
   try {
     const connection = await composio.connectedAccounts.initiate(
       userId,
-      'google',
+      'googlecalendar',
       {
         callback_url: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/`
       }
