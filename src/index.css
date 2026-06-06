@@ -135,15 +135,15 @@
 
 @layer base {
   body {
-    @apply font-sans bg-slate-50 text-slate-900 antialiased selection:bg-brand/30;
+    @apply font-sans bg-[#030712] text-white antialiased selection:bg-brand/30;
     background-image: 
-      radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 40%),
-      radial-gradient(circle at bottom left, rgba(217, 70, 239, 0.03), transparent 40%);
+      radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
+      radial-gradient(circle at bottom left, rgba(217, 70, 239, 0.1), transparent 40%);
     background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-slate-900 font-bold;
+    @apply font-display tracking-tight text-white font-bold;
   }
 
   *:focus-visible {
@@ -153,19 +153,19 @@
 
 @layer components {
   .glass {
-    @apply bg-white/60 backdrop-blur-xl border border-slate-200/60 shadow-sm;
+    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
   }
   
   .glass-dark {
-    @apply bg-white/90 backdrop-blur-2xl border border-slate-200 shadow-md;
+    @apply bg-[#030712]/80 backdrop-blur-2xl border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.6)];
   }
 
   .glass-premium {
-    @apply bg-white backdrop-blur-lg border border-slate-200 shadow-sm rounded-2xl relative overflow-hidden;
+    @apply bg-gradient-to-b from-slate-800/40 to-slate-900/40 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-2xl relative overflow-hidden;
   }
 
   .saas-card {
-    @apply bg-white backdrop-blur-lg border border-slate-200 shadow-sm rounded-2xl relative overflow-hidden hover:shadow-lg hover:shadow-brand/5 hover:border-slate-300 transition-all duration-500;
+    @apply bg-[#0f172a]/60 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-2xl relative overflow-hidden hover:shadow-lg hover:shadow-brand/20 hover:border-white/20 transition-all duration-500;
   }
 
   .saas-button {

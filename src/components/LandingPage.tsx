@@ -82,15 +82,15 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
-                <Search className="w-4 h-4 text-slate-900" />
+                <Search className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-bold text-slate-900 tracking-tight">HireNow</span>
+              <span className="text-lg font-bold text-white tracking-tight">HireNow</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-slate-900 hover:text-slate-900 transition-colors font-medium">Features</a>
-              <a href="#stats" className="text-sm text-slate-900 hover:text-slate-900 transition-colors font-medium">Stats</a>
-              <a href="#testimonials" className="text-sm text-slate-900 hover:text-slate-900 transition-colors font-medium">Testimonials</a>
-              <button onClick={onGetStarted} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all shadow-lg shadow-white/10">
+              <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
+              <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
+              <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
+              <button onClick={onGetStarted} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
                 Sign In
               </button>
             </div>
@@ -102,7 +102,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/20 bg-brand/10 text-slate-900 text-xs font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/20 bg-brand/10 text-white text-xs font-medium mb-8">
               <SparklesText sparklesCount={5} colors={{ first: "#818cf8", second: "#c084fc" }}>
                 <span className="text-xs">AI-Powered Talent Intelligence</span>
               </SparklesText>
@@ -110,7 +110,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.2} inView>
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-[1.1] tracking-tight mb-6">
               Autonomous Hiring
               <br />
               <AnimatedGradientText speed={1.5} colorFrom="#818cf8" colorTo="#c084fc">
@@ -120,10 +120,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.3} inView>
-            <p className="text-lg sm:text-xl text-slate-900 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+            <p className="text-lg sm:text-xl text-white max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
               Screen, interview, and evaluate candidates autonomously with advanced LLM analysis,
-              <span className="text-slate-900"> real-time proctoring</span>, and{" "}
-              <span className="text-slate-900">neural voice synthesis</span>.
+              <span className="text-white"> real-time proctoring</span>, and{" "}
+              <span className="text-white">neural voice synthesis</span>.
             </p>
           </BlurFade>
 
@@ -147,7 +147,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.5} inView>
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-900">
+            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-white">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span>No credit card</span>
@@ -178,11 +178,11 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             ].map((stat, i) => (
               <BlurFade key={i} delay={0.1 * i} inView>
                 <div className="text-center">
-                  <div className="text-3xl sm:text-4xl font-black text-slate-900 mb-1">
-                    <NumberTicker value={stat.value} className="text-slate-900" />
+                  <div className="text-3xl sm:text-4xl font-black text-white mb-1">
+                    <NumberTicker value={stat.value} className="text-white" />
                     {stat.suffix}
                   </div>
-                  <div className="text-sm text-slate-900 font-medium">{stat.label}</div>
+                  <div className="text-sm text-white font-medium">{stat.label}</div>
                 </div>
               </BlurFade>
             ))}
@@ -194,13 +194,13 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <section id="features" className="relative z-10 py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <BlurFade inView className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
               Everything You Need to{" "}
               <AnimatedGradientText colorFrom="#818cf8" colorTo="#c084fc">
                 Hire Smarter
               </AnimatedGradientText>
             </h2>
-            <p className="text-slate-900 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               From AI-powered screening to autonomous interviews, HireNow provides a complete talent intelligence platform.
             </p>
           </BlurFade>
@@ -211,10 +211,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                 <div className="relative group">
                   <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm p-6 h-full transition-all duration-300 hover:border-slate-700 hover:shadow-xl hover:shadow-brand/5">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-lg`}>
-                      <feature.icon className="w-6 h-6 text-slate-900" />
+                      <feature.icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">{feature.title}</h3>
-                    <p className="text-slate-900 text-sm leading-relaxed">{feature.description}</p>
+                    <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
+                    <p className="text-white text-sm leading-relaxed">{feature.description}</p>
                     <BorderBeam size={80} duration={8} delay={i * 2} colorFrom="#6366f1" colorTo="#a855f7" />
                   </div>
                 </div>
@@ -229,10 +229,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-brand-dark/10 to-slate-950" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <BlurFade inView className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
               How It Works
             </h2>
-            <p className="text-slate-900 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               Three simple steps to transform your hiring process.
             </p>
           </BlurFade>
@@ -247,10 +247,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                 <div className="relative text-center p-8">
                   <div className="text-5xl font-black text-brand/20 mb-4">{item.step}</div>
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-brand/20">
-                    <item.icon className="w-7 h-7 text-slate-900" />
+                    <item.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
-                  <p className="text-slate-900 text-sm leading-relaxed">{item.desc}</p>
+                  <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
+                  <p className="text-white text-sm leading-relaxed">{item.desc}</p>
                 </div>
               </BlurFade>
             ))}
@@ -262,13 +262,13 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <section id="testimonials" className="relative z-10 py-20 overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
           <BlurFade inView className="text-center">
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
               Trusted by{" "}
               <AnimatedGradientText colorFrom="#60a5fa" colorTo="#a78bfa">
                 Industry Leaders
               </AnimatedGradientText>
             </h2>
-            <p className="text-slate-900 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               See what hiring professionals are saying about HireNow.
             </p>
           </BlurFade>
@@ -279,15 +279,15 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             {testimonials.map((t, i) => (
               <div key={i} className="w-[320px] p-6 rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-slate-900 text-xs font-bold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center text-white text-xs font-bold">
                     {t.avatar}
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-900">{t.name}</div>
-                    <div className="text-xs text-slate-900">{t.role}</div>
+                    <div className="text-sm font-bold text-white">{t.name}</div>
+                    <div className="text-xs text-white">{t.role}</div>
                   </div>
                 </div>
-                <p className="text-sm text-slate-900 leading-relaxed">"{t.content}"</p>
+                <p className="text-sm text-white leading-relaxed">"{t.content}"</p>
                 <div className="flex gap-1 mt-3">
                   {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                 </div>
@@ -305,10 +305,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
         </div>
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <BlurFade inView>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-6 leading-tight">
+            <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 leading-tight">
               Ready to Transform<br />Your Hiring Pipeline?
             </h2>
-            <p className="text-lg text-slate-900 mb-10 max-w-xl mx-auto">
+            <p className="text-lg text-white mb-10 max-w-xl mx-auto">
               Join 150+ forward-thinking companies that use HireNow to make smarter hiring decisions.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -318,13 +318,13 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               </RainbowButton>
               <button
                 onClick={onGetStarted}
-                className="px-10 py-4 rounded-xl border border-slate-700 text-slate-900 font-bold text-lg hover:bg-slate-800/50 transition-all"
+                className="px-10 py-4 rounded-xl border border-slate-700 text-white font-bold text-lg hover:bg-slate-800/50 transition-all"
               >
                 <Building2 className="w-5 h-5 inline mr-2" />
                 Book a Demo
               </button>
             </div>
-            <p className="text-sm text-slate-900 mt-6">No credit card required • Free credits included • Cancel anytime</p>
+            <p className="text-sm text-white mt-6">No credit card required • Free credits included • Cancel anytime</p>
           </BlurFade>
         </div>
       </section>
@@ -334,11 +334,11 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center">
-              <Search className="w-3 h-3 text-slate-900" />
+              <Search className="w-3 h-3 text-white" />
             </div>
-            <span className="text-sm font-bold text-slate-900">HireNow</span>
+            <span className="text-sm font-bold text-white">HireNow</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-slate-900">
+          <div className="flex items-center gap-6 text-xs text-white">
             <span>© 2026 HireNow. All rights reserved.</span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
