@@ -90,7 +90,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
               <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
               <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
-              <button onClick={onGetStarted} className="glass-premium text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-[#30363d] transition-all shadow-lg shadow-white/10">
+              <button onClick={onGetStarted} className="glass-premium text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition-all shadow-lg shadow-white/10">
                 Sign In
               </button>
             </div>

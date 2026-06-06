@@ -377,7 +377,7 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, { ha
                   window.location.reload();
                 }
               }}
-              className="w-full h-12 bg-[#30363d] hover:bg-[#30363d] text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all border border-white/10"
+              className="w-full h-12 bg-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all border border-white/10"
             >
               Attempt Reconnect
             </button>
@@ -483,7 +483,7 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden border border-[#e6edf3]"
+        className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden border border-white/10"
       >
         <div className="p-8 border-b border-white/10 flex items-center justify-between transparent/50">
           <h3 className="font-display font-bold text-xl text-white tracking-tight">{title}</h3>
@@ -501,10 +501,10 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
 
 function Button({ className, variant = 'primary', size = 'md', as: Component = 'button', ...props }: any) {
   const variants = {
-    primary: 'glass-premium text-white hover:bg-[#30363d] shadow-sm',
+    primary: 'glass-premium text-white hover:bg-white/10 shadow-sm',
     secondary: 'bg-brand-dark text-white hover:bg-brand-dark shadow-sm',
-    outline: 'border border-[#e6edf3] hover:border-[#c9d1d9] hover:transparent text-slate-300 font-medium',
-    ghost: 'hover:bg-[#21262d] text-slate-300 font-medium',
+    outline: 'border border-white/10 hover:border-white/20 hover:transparent text-slate-300 font-medium',
+    ghost: 'hover:bg-white/5 text-slate-300 font-medium',
     brand: 'bg-brand-dark text-white hover:bg-brand-dark font-medium tracking-tight',
   };
   const sizes = {
@@ -1677,7 +1677,7 @@ function InterviewRoom() {
                 await signOut(auth);
                 window.location.reload();
               }}
-              className="h-11 bg-[#30363d] hover:bg-slate-750 text-slate-300 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all cursor-pointer"
+              className="h-11 bg-white/10 hover:bg-slate-750 text-slate-300 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all cursor-pointer"
             >
               Sign Out / Switch Account
             </button>
@@ -1759,7 +1759,7 @@ function InterviewRoom() {
                    setIsKeyboardMode(prev => !prev);
                    notify("Keyboard input mode toggled.", "info");
                  }}
-                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#30363d] hover:bg-slate-750 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                 className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-white/10 hover:bg-slate-750 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
                >
                  <Keyboard className="w-3.5 h-3.5" /> {isKeyboardMode ? "Switch to Voice" : "Switch to Keyboard"}
                </button>
@@ -1779,7 +1779,7 @@ function InterviewRoom() {
             <button
               onClick={() => setSidebarTab('monitor')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
-                sidebarTab === 'monitor' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-[#e6edf3]"
+                sidebarTab === 'monitor' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-white"
               )}
             >
               <Shield className="w-3.5 h-3.5" /> Monitor
@@ -1787,7 +1787,7 @@ function InterviewRoom() {
             <button
               onClick={() => setSidebarTab('transcript')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
-                sidebarTab === 'transcript' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-[#e6edf3]"
+                sidebarTab === 'transcript' ? "bg-brand text-white shadow-md shadow-brand-dark/20" : "text-slate-200 hover:text-white"
               )}
             >
               <FileText className="w-3.5 h-3.5" /> Transcript
@@ -1848,7 +1848,7 @@ function InterviewRoom() {
                   {/* Tab Tracking Pill */}
                   <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
-                      <span className="block text-[10px] font-black text-[#e6edf3] uppercase tracking-wider mb-0.5">Tab Focus</span>
+                      <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Tab Focus</span>
                       <span className="text-[9px] text-slate-200 font-medium">Warnings: {tabWarnings} / 3</span>
                     </div>
                     <div className="flex gap-1.5">
@@ -1868,7 +1868,7 @@ function InterviewRoom() {
                   {/* Face Presence Pill */}
                   <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
-                      <span className="block text-[10px] font-black text-[#e6edf3] uppercase tracking-wider mb-0.5">Face Tracking</span>
+                      <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Face Tracking</span>
                       <span className={cn("text-[9px] font-black uppercase tracking-wider", 
                         faceStatus === 'detected' ? "text-green-400" : faceStatus === 'not_detected' ? "text-red-400 animate-pulse" : "text-brand-light"
                       )}>
@@ -1892,7 +1892,7 @@ function InterviewRoom() {
                   {/* Room Sound Meter Pill */}
                   <div className="bg-slate-955/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
-                      <span className="block text-[10px] font-black text-[#e6edf3] uppercase tracking-wider mb-0.5">Room Noise</span>
+                      <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Room Noise</span>
                       <span className={cn("text-[9px] font-black uppercase tracking-wider", 
                         noiseStatus === 'noise_detected' ? "text-amber-400" : "text-green-400"
                       )}>
@@ -1927,7 +1927,7 @@ function InterviewRoom() {
                         const target = botVoiceOptions.find(opt => opt.id === e.target.value);
                         if (target) changeVoice(target);
                       }}
-                      className="w-full transparent border border-slate-850 rounded-xl px-3 py-2.5 font-bold text-[#e6edf3] text-xs focus:ring-1 focus:ring-brand outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
+                      className="w-full transparent border border-slate-850 rounded-xl px-3 py-2.5 font-bold text-white text-xs focus:ring-1 focus:ring-brand outline-none cursor-pointer scale-100 active:scale-[0.98] transition-all appearance-none pr-8"
                     >
                       {botVoiceOptions.map((opt) => (
                         <option key={opt.id} value={opt.id} className="transparent text-slate-300 font-bold">
@@ -1952,7 +1952,7 @@ function InterviewRoom() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
-                          m.role === 'model' ? "bg-brand/20 text-brand-light border border-brand/30" : "bg-[#30363d] text-slate-200"
+                          m.role === 'model' ? "bg-brand/20 text-brand-light border border-brand/30" : "bg-white/10 text-slate-200"
                         )}>
                           {m.role === 'model' ? 'AI' : 'You'}
                         </span>
@@ -1996,7 +1996,7 @@ function InterviewRoom() {
             <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 shadow-2xl pointer-events-auto">
               <div className="w-2 h-2 rounded-full bg-red-655 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
               <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Room</span>
-              <div className="h-3 w-px bg-[#30363d]" />
+              <div className="h-3 w-px bg-white/10" />
               <span className="text-[10px] font-bold text-slate-200 uppercase tracking-widest">ID: {candidateId.substring(0, 8)}</span>
             </div>
             
@@ -2004,7 +2004,7 @@ function InterviewRoom() {
               <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-3.5 shadow-2xl pointer-events-auto">
                 <div className="flex flex-col items-end">
                   <span className="text-[8px] font-black text-slate-200 uppercase tracking-widest leading-none mb-1">Room Signal</span>
-                  <div className="w-24 h-1 bg-[#30363d] rounded-full overflow-hidden">
+                  <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
                      <motion.div 
                         className={cn("h-full transition-all duration-75", volume > 80 ? "bg-red-500" : "bg-brand")}
                         animate={{ width: `${Math.min(volume * 1.5, 100)}%` }}
@@ -2118,7 +2118,7 @@ function InterviewRoom() {
                          {[...Array(12)].map((_, i) => (
                            <motion.div
                              key={i}
-                             className={cn("w-2 rounded-t-full transition-all duration-75", i < (volume / (100/12)) ? "bg-emerald-500" : "bg-[#30363d]")}
+                             className={cn("w-2 rounded-t-full transition-all duration-75", i < (volume / (100/12)) ? "bg-emerald-500" : "bg-white/10")}
                              style={{ height: `${Math.max(15, i < (volume / (100/12)) ? (Math.random() * 60 + 40) : 15)}%` }}
                            />
                          ))}
@@ -2143,7 +2143,7 @@ function InterviewRoom() {
                   </label>
                 </div>
                 
-                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-white rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] shadow-brand-dark/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-[#30363d] text-slate-200 cursor-not-allowed")}>
+                <Button onClick={startInterview} disabled={loading || !osintConsent} className={cn("w-full h-12 text-white rounded-xl shadow-lg font-black tracking-wider uppercase text-xs transition-all", osintConsent ? "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)] shadow-brand-dark/30 cursor-pointer hover:scale-[1.01] active:scale-[0.98]" : "bg-white/10 text-slate-200 cursor-not-allowed")}>
                   Initialize Screening
                 </Button>
               </div>
@@ -2210,7 +2210,7 @@ function InterviewRoom() {
                         >
                           {messages[messages.length - 1]?.role === 'model' ? (
                             <div className="glass-premium/90 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-white/10 shadow-2xl inline-block max-w-lg text-left">
-                              <div className="text-[#e6edf3] text-xs font-semibold leading-relaxed tracking-wide">
+                              <div className="text-white text-xs font-semibold leading-relaxed tracking-wide">
                                  <Markdown>{messages[messages.length - 1]?.text}</Markdown>
                               </div>
                             </div>
@@ -2247,7 +2247,7 @@ function InterviewRoom() {
                              <p className="text-white text-[9px] font-black uppercase tracking-widest mb-1.5 opacity-80">Speech Preview</p>
                              <p className="text-white text-xs font-bold italic leading-relaxed">"{input}"</p>
                              <div className="mt-2.5 flex items-center justify-center">
-                                <Button onClick={() => handleSend()} size="sm" className="h-7 glass-premium text-brand hover:bg-[#21262d] text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
+                                <Button onClick={() => handleSend()} size="sm" className="h-7 glass-premium text-brand hover:bg-white/5 text-[9px] font-black uppercase tracking-widest rounded-full px-4.5 cursor-pointer">
                                   <Send className="w-3 h-3 mr-1.5" /> Confirm & Send
                                 </Button>
                              </div>
@@ -2273,7 +2273,7 @@ function InterviewRoom() {
                       onClick={toggleMute}
                       className={cn(
                         "w-11 h-11 rounded-full p-0 border-white/10 transition-all cursor-pointer",
-                        isMuted ? "bg-red-500/20 text-red-500 border-red-500/50" : "glass-premium hover:bg-slate-850 text-[#e6edf3]"
+                        isMuted ? "bg-red-500/20 text-red-500 border-red-500/50" : "glass-premium hover:bg-slate-850 text-white"
                       )}
                     >
                       {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -2283,7 +2283,7 @@ function InterviewRoom() {
                     <Button
                       variant="outline"
                       onClick={toggleCamera}
-                      className="w-11 h-11 rounded-full p-0 border-white/10 glass-premium hover:bg-slate-850 text-[#e6edf3] cursor-pointer"
+                      className="w-11 h-11 rounded-full p-0 border-white/10 glass-premium hover:bg-slate-850 text-white cursor-pointer"
                     >
                       {stream?.getVideoTracks()[0]?.enabled === false ? <CameraOff className="w-4 h-4 text-red-500" /> : <Camera className="w-4 h-4" />}
                     </Button>
@@ -2297,7 +2297,7 @@ function InterviewRoom() {
                       }}
                       className={cn(
                         "w-11 h-11 rounded-full p-0 border-white/10 transition-all cursor-pointer",
-                        isKeyboardMode ? "bg-brand/20 text-brand-light border-brand/50" : "glass-premium hover:bg-slate-850 text-[#e6edf3]"
+                        isKeyboardMode ? "bg-brand/20 text-brand-light border-brand/50" : "glass-premium hover:bg-slate-850 text-white"
                       )}
                       title={isKeyboardMode ? "Switch to Voice mode" : "Switch to Keyboard mode"}
                     >
@@ -2413,7 +2413,7 @@ function InterviewRoom() {
                   <ShieldCheck className="w-5 h-5 animate-pulse" />
                   <p className="text-xs font-black uppercase tracking-widest">End-to-End Proctoring Log Saved</p>
                </div>
-               <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-12 px-8 glass-premium hover:bg-[#e6edf3] text-slate-955 font-black uppercase tracking-widest rounded-xl text-xs shadow-2xl transition-transform hover:scale-102 active:scale-98 cursor-pointer">
+               <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-12 px-8 glass-premium hover:bg-white/10 text-slate-955 font-black uppercase tracking-widest rounded-xl text-xs shadow-2xl transition-transform hover:scale-102 active:scale-98 cursor-pointer">
                   Review Session Evaluation
                </Button>
             </div>
@@ -2484,7 +2484,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 transparent/50 backdrop-blur-xs animate-in fade-in duration-300">
-      <div className="glass-premium rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-[#e6edf3] flex flex-col max-h-[90vh]">
+      <div className="glass-premium rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/10 flex flex-col max-h-[90vh]">
         <div className="p-6 border-b border-white/10 flex items-center justify-between transparent/50">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center shrink-0 shadow-sm">
@@ -2511,7 +2511,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       onClick={() => setSelectedPlan(planKey)}
                       className={cn(
                         "p-4 rounded-2xl border text-left flex justify-between items-center transition-all min-h-[44px]",
-                        selectedPlan === planKey ? "border-[#161b22] transparent ring-1 ring-[#161b22]" : "border-[#e6edf3] hover:transparent"
+                        selectedPlan === planKey ? "border-[#161b22] transparent ring-1 ring-[#161b22]" : "border-white/10 hover:transparent"
                       )}
                     >
                       <div>
@@ -2540,7 +2540,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       value={cardName}
                       onChange={e => setCardName(e.target.value)}
                       placeholder="Jane Doe"
-                      className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                     />
                   </div>
 
@@ -2552,7 +2552,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       value={cardNumber}
                       onChange={e => setCardNumber(e.target.value.replace(/\D/g, '').substring(0, 16))}
                       placeholder="4242 4242 4242 4242"
-                      className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                     />
                   </div>
 
@@ -2565,7 +2565,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                         value={cardExpiry}
                         onChange={e => setCardExpiry(e.target.value.substring(0, 5))}
                         placeholder="MM/YY"
-                        className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                     <div>
@@ -2576,7 +2576,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                         value={cardCvc}
                         onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').substring(0, 4))}
                         placeholder="123"
-                        className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -2587,13 +2587,13 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-full border border-[#e6edf3] text-slate-300 text-xs font-bold uppercase tracking-widest min-h-[44px]"
+                  className="flex-1 py-3 rounded-full border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-widest min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-full glass-premium text-white hover:bg-[#30363d] text-xs font-bold uppercase tracking-widest shadow-sm min-h-[44px]"
+                  className="flex-1 py-3 rounded-full glass-premium text-white hover:bg-white/10 text-xs font-bold uppercase tracking-widest shadow-sm min-h-[44px]"
                 >
                   Authorize Payment
                 </button>
@@ -2633,7 +2633,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
               </div>
               <button
                 onClick={onClose}
-                className="px-8 py-3 glass-premium text-white hover:bg-[#30363d] text-xs font-bold uppercase tracking-widest rounded-full min-h-[44px]"
+                className="px-8 py-3 glass-premium text-white hover:bg-white/10 text-xs font-bold uppercase tracking-widest rounded-full min-h-[44px]"
               >
                 Return to Dashboard
               </button>
@@ -2710,7 +2710,7 @@ function PublicSharedScorecard() {
       <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         
         {/* Header Branding */}
-        <div className="flex justify-between items-center border-b border-[#e6edf3] pb-6">
+        <div className="flex justify-between items-center border-b border-white/10 pb-6">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg transparent flex items-center justify-center shadow-sm">
               <Search className="w-4 h-4 text-white" />
@@ -2723,7 +2723,7 @@ function PublicSharedScorecard() {
         </div>
 
         {/* Candidate Profile Details */}
-        <div className="glass-premium rounded-3xl border border-[#e6edf3]/80 p-8 shadow-sm space-y-6">
+        <div className="glass-premium rounded-3xl border border-white/10/80 p-8 shadow-sm space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <div>
               <h1 className="text-3xl font-display font-light text-white mb-1">{candidate.fullName}</h1>
@@ -2731,12 +2731,12 @@ function PublicSharedScorecard() {
               {job && <p className="text-xs text-slate-200 mt-1">Applying for: {job.title}</p>}
             </div>
             
-            <div className="flex items-center gap-4 transparent px-6 py-4 rounded-2xl border border-[#e6edf3]/60">
+            <div className="flex items-center gap-4 transparent px-6 py-4 rounded-2xl border border-white/10/60">
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-200">Match Rating</p>
                 <p className="text-2xl font-display text-white mt-0.5">{candidate.scorecard?.compositeScore}%</p>
               </div>
-              <div className="w-2 h-10 rounded-full bg-[#e6edf3] overflow-hidden">
+              <div className="w-2 h-10 rounded-full bg-white/10 overflow-hidden">
                 <div className="h-full glass-premium" style={{ height: `${candidate.scorecard?.compositeScore}%` }} />
               </div>
             </div>
@@ -2749,7 +2749,7 @@ function PublicSharedScorecard() {
               {Object.entries(candidate.scorecard?.dimensions || {}).map(([key, value]: any) => {
                 if (key === 'redFlags' || key === 'signalDensity') return null;
                 return (
-                  <div key={key} className="transparent/50 border border-[#e6edf3]/40 p-4 rounded-2xl text-center">
+                  <div key={key} className="transparent/50 border border-white/10/40 p-4 rounded-2xl text-center">
                     <p className="text-[10px] font-bold text-slate-200 uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
                     <p className="text-lg font-display text-white font-medium mt-1">{value?.score}%</p>
                   </div>
@@ -2762,7 +2762,7 @@ function PublicSharedScorecard() {
           {candidate.scorecard?.recommendation?.summary && (
             <div className="pt-6 border-t border-white/10 space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Executive Summary</h3>
-              <p className="text-sm leading-relaxed text-slate-200 transparent/40 p-4 rounded-2xl border border-[#e6edf3]/30">{candidate.scorecard.recommendation.summary}</p>
+              <p className="text-sm leading-relaxed text-slate-200 transparent/40 p-4 rounded-2xl border border-white/10/30">{candidate.scorecard.recommendation.summary}</p>
             </div>
           )}
 
@@ -2770,7 +2770,7 @@ function PublicSharedScorecard() {
           {interview && (
             <div className="pt-6 border-t border-white/10 space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-200">Conversation Transcripts</h3>
-              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-[#e6edf3]/50 rounded-2xl p-4 transparent/30">
+              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-white/10/50 rounded-2xl p-4 transparent/30">
                 {interview.messages?.map((msg: any, i: number) => (
                   <div key={i} className="text-xs leading-relaxed">
                     <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-white")}>
@@ -2920,24 +2920,24 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                </div>
                {!isSidebarCollapsed && <span className="font-display font-light text-xl tracking-tight uppercase">{whiteLabelBrandingName || "HireAI"}</span>}
              </div>
-             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-[#30363d] rounded-lg text-slate-200 hover:text-white transition-colors">
+             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-1 hover:bg-white/10 rounded-lg text-slate-200 hover:text-white transition-colors">
                <Menu className="w-4 h-4" />
              </button>
           </div>
           <nav className="flex-1 px-3 py-6 flex flex-col gap-2 overflow-y-auto overflow-x-hidden">
-             <Link to="/" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-[#30363d] transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <LayoutGrid className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Dashboard</span>}
              </Link>
-             <Link to="/jobs/new" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-[#30363d] transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/jobs/new" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Briefcase className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Post Job</span>}
              </Link>
-             <Link to="/resume-bank" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-[#30363d] transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/resume-bank" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Database className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Resume Bank</span>}
              </Link>
-             <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-[#30363d] transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+             <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Settings className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">HR Admin</span>}
              </Link>
@@ -2951,12 +2951,12 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
           <div className={cn("p-4 border-t border-white/10 flex flex-col shrink-0 gap-4", isSidebarCollapsed ? "items-center" : "")}>
             {/* Workspace Credits Meter */}
             {!isSidebarCollapsed && (
-              <div className="px-3 py-2 bg-[#30363d]/40 border border-white/10/30 rounded-xl space-y-1.5 mx-2 text-[10px]">
+              <div className="px-3 py-2 bg-white/10/40 border border-white/10/30 rounded-xl space-y-1.5 mx-2 text-[10px]">
                 <div className="flex justify-between font-semibold text-slate-300">
                   <span>Balance</span>
                   <span className="text-white">{(profile?.credits !== undefined ? profile.credits : 50)} Left</span>
                 </div>
-                <div className="w-full h-1 bg-[#30363d] rounded-full overflow-hidden">
+                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-cyan-400" 
                     style={{ width: `${Math.min(100, (((profile?.credits !== undefined ? profile.credits : 50)) / 50) * 100)}%` }} 
@@ -2972,7 +2972,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
             )}
 
             <div className={cn("flex items-center gap-3", isSidebarCollapsed ? "justify-center" : "px-2")}>
-              <div className="w-10 h-10 bg-[#30363d] rounded-full flex items-center justify-center text-sm font-bold shrink-0">{user.email.charAt(0).toUpperCase()}</div>
+              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-sm font-bold shrink-0">{user.email.charAt(0).toUpperCase()}</div>
               {!isSidebarCollapsed && (
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white truncate">{user.email}</p>
@@ -2980,7 +2980,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </div>
               )}
             </div>
-            <Button variant="ghost" className={cn("text-slate-200 hover:text-white hover:bg-[#30363d] text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
+            <Button variant="ghost" className={cn("text-slate-200 hover:text-white hover:bg-white/10 text-xs", isSidebarCollapsed ? "w-10 h-10 p-0 justify-center" : "w-full justify-start px-2")} onClick={() => signOut(auth)}>
               <LogOut className={cn("shrink-0", isSidebarCollapsed ? "w-5 h-5" : "w-4 h-4 mr-2")} /> 
               {!isSidebarCollapsed && "Logout"}
             </Button>
@@ -2988,9 +2988,9 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
         </aside>
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="h-16 glass-premium border-b border-[#e6edf3] flex items-center justify-between px-4 sm:px-6 shrink-0">
+          <header className="h-16 glass-premium border-b border-white/10 flex items-center justify-between px-4 sm:px-6 shrink-0">
              <div className="flex items-center gap-4">
-                <button className="lg:hidden p-2 text-slate-200 hover:bg-[#21262d] rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                <button className="lg:hidden p-2 text-slate-200 hover:bg-white/5 rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                    <Menu className="w-5 h-5" />
                 </button>
                 {/* Mobile Logo */}
@@ -3022,7 +3022,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-brand-light hover:text-brand-light transition-colors">System Admin</Link>
                     )}
                     <div className="pt-4 border-t border-white/10">
-                      <Button variant="ghost" className="w-full justify-start text-slate-200 hover:text-white hover:bg-[#30363d] text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
+                      <Button variant="ghost" className="w-full justify-start text-slate-200 hover:text-white hover:bg-white/10 text-xs px-2" onClick={() => { signOut(auth); setMobileMenuOpen(false); }}>
                         <LogOut className="w-4 h-4 mr-2" /> Logout
                       </Button>
                     </div>
@@ -3124,11 +3124,11 @@ function Dashboard() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-64 glass-premium border border-[#e6edf3] rounded-[2rem] animate-pulse" />
+            <div key={i} className="h-64 glass-premium border border-white/10 rounded-[2rem] animate-pulse" />
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <Card className="p-12 sm:p-20 text-center glass-premium border-dashed border-2 border-[#e6edf3] rounded-[3rem]">
+        <Card className="p-12 sm:p-20 text-center glass-premium border-dashed border-2 border-white/10 rounded-[3rem]">
           <div className="w-20 h-20 bg-brand/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
             <Briefcase className="w-10 h-10 text-brand-light" />
           </div>
@@ -3179,7 +3179,7 @@ function Dashboard() {
                 <div className="flex items-center gap-4 pt-6 mt-auto border-t border-slate-50">
                   <div className="flex items-center gap-2 text-slate-200 font-black uppercase tracking-[0.2em] text-[10px]">
                     <div className="flex -space-x-2">
-                       {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-[#21262d] border-2 border-white" />)}
+                       {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-white/5 border-2 border-white" />)}
                     </div>
                     <span>Talent Pipeline</span>
                   </div>
@@ -3559,7 +3559,7 @@ function ResumeBank() {
                   <Search className="w-4 h-4 text-slate-200 absolute left-3 top-3.5" />
                   <input
                     type="text"
-                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
                     placeholder="Name, role, company..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -3587,7 +3587,7 @@ function ResumeBank() {
                             "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
                             isSelected
                               ? "bg-brand-dark border-brand-dark text-white shadow-sm"
-                              : "transparent border-[#e6edf3] text-slate-200 hover:bg-[#21262d] hover:border-slate-350"
+                              : "transparent border-white/10 text-slate-200 hover:bg-white/5 hover:border-slate-350"
                           )}
                         >
                           {tag}
@@ -3622,7 +3622,7 @@ function ResumeBank() {
                       <th className="w-12 px-6 py-4">
                         <input
                           type="checkbox"
-                          className="w-4 h-4 rounded text-brand focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                          className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer"
                           checked={filteredResumes.length > 0 && filteredResumes.every(r => {
                             const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
                             return selectedResumes.includes(key);
@@ -3663,7 +3663,7 @@ function ResumeBank() {
                           <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
-                              className="w-4 h-4 rounded text-brand focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                              className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer"
                               checked={isSelected}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -3676,7 +3676,7 @@ function ResumeBank() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-black text-slate-200 text-xs shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-black text-slate-200 text-xs shrink-0">
                                 {candidate.fullName?.charAt(0) || '?'}
                               </div>
                               <div className="min-w-0">
@@ -3709,7 +3709,7 @@ function ResumeBank() {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <div className="inline-flex flex-col items-center">
-                              <span className="text-[10px] font-black text-slate-300 bg-[#21262d] border border-[#e6edf3]/50 px-2 py-0.5 rounded-full leading-none mb-1">
+                              <span className="text-[10px] font-black text-slate-300 bg-white/5 border border-white/10/50 px-2 py-0.5 rounded-full leading-none mb-1">
                                 {candidate.screeningsCount}x
                               </span>
                               <span className={cn(
@@ -3725,7 +3725,7 @@ function ResumeBank() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand hover:bg-brand/10 border border-[#e6edf3] hover:border-brand/10 flex items-center gap-1.5 ml-auto"
+                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-slate-200 hover:text-brand hover:bg-brand/10 border border-white/10 hover:border-brand/10 flex items-center gap-1.5 ml-auto"
                               onClick={() => handleSingleReScreen(candidate)}
                             >
                               <Zap className="w-3 h-3 text-brand fill-brand/20" /> Re-Screen
@@ -3797,7 +3797,7 @@ function ResumeBank() {
             <div className="space-y-2 text-left">
               <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Target Job Position</label>
               {jobs.length === 0 ? (
-                <div className="p-4 border border-[#e6edf3] rounded-xl transparent text-center">
+                <div className="p-4 border border-white/10 rounded-xl transparent text-center">
                   <p className="text-xs text-slate-200 font-medium">No active jobs. Please post a job first.</p>
                   <Button
                     variant="outline"
@@ -3825,8 +3825,8 @@ function ResumeBank() {
                           selectedJobId === job.id
                             ? "border-brand-dark bg-brand/10 shadow-sm"
                             : alreadyScreened
-                              ? "border-[#e6edf3] transparent/60 opacity-60 cursor-not-allowed"
-                              : "border-[#e6edf3] hover:border-brand-light glass-premium hover:transparent/20"
+                              ? "border-white/10 transparent/60 opacity-60 cursor-not-allowed"
+                              : "border-white/10 hover:border-brand-light glass-premium hover:transparent/20"
                         )}
                       >
                         <div className="min-w-0">
@@ -3837,12 +3837,12 @@ function ResumeBank() {
                         </div>
                         <div className="flex items-center gap-2">
                           {alreadyScreened && (
-                            <span className="text-[8px] font-black bg-[#21262d] text-slate-200 border border-[#e6edf3] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                            <span className="text-[8px] font-black bg-white/5 text-slate-200 border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                           )}
                           {!alreadyScreened && (
                             <div className={cn(
                               "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                              selectedJobId === job.id ? "border-brand-dark bg-brand-dark" : "border-[#e6edf3] group-hover:border-brand-light"
+                              selectedJobId === job.id ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
                             )}>
                               {selectedJobId === job.id && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
                             </div>
@@ -4038,7 +4038,7 @@ function NewJob() {
               type="button"
               id="toggle-config-btn"
               onClick={() => setShowConfig(!showConfig)}
-              className="flex items-center justify-between w-full p-4 transparent hover:bg-[#21262d]/85 rounded-2xl transition-all border border-white/10 font-bold text-xs uppercase tracking-wider text-slate-300 shadow-sm"
+              className="flex items-center justify-between w-full p-4 transparent hover:bg-white/5/85 rounded-2xl transition-all border border-white/10 font-bold text-xs uppercase tracking-wider text-slate-300 shadow-sm"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-brand" />
@@ -4109,7 +4109,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d1Name}
                           onChange={(e) => setD1Name(e.target.value)}
                         />
@@ -4118,7 +4118,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d1Weight}
                           onChange={(e) => setD1Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4128,7 +4128,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d1Desc}
                         onChange={(e) => setD1Desc(e.target.value)}
                       />
@@ -4142,7 +4142,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d2Name}
                           onChange={(e) => setD2Name(e.target.value)}
                         />
@@ -4151,7 +4151,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d2Weight}
                           onChange={(e) => setD2Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4161,7 +4161,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d2Desc}
                         onChange={(e) => setD2Desc(e.target.value)}
                       />
@@ -4175,7 +4175,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d3Name}
                           onChange={(e) => setD3Name(e.target.value)}
                         />
@@ -4184,7 +4184,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d3Weight}
                           onChange={(e) => setD3Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4194,7 +4194,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d3Desc}
                         onChange={(e) => setD3Desc(e.target.value)}
                       />
@@ -4208,7 +4208,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d4Name}
                           onChange={(e) => setD4Name(e.target.value)}
                         />
@@ -4217,7 +4217,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d4Weight}
                           onChange={(e) => setD4Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4227,7 +4227,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d4Desc}
                         onChange={(e) => setD4Desc(e.target.value)}
                       />
@@ -4241,7 +4241,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
                         <input
                           type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d5Name}
                           onChange={(e) => setD5Name(e.target.value)}
                         />
@@ -4250,7 +4250,7 @@ function NewJob() {
                         <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                         <input
                           type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                           value={d5Weight}
                           onChange={(e) => setD5Weight(Math.max(0, Number(e.target.value)))}
                         />
@@ -4260,7 +4260,7 @@ function NewJob() {
                       <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider">Describe what AI should assess for this dimension</label>
                       <textarea
                         rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                         value={d5Desc}
                         onChange={(e) => setD5Desc(e.target.value)}
                       />
@@ -5223,7 +5223,7 @@ function JobDetail() {
           <Button
             variant="outline"
             onClick={() => setIsSelectResumeModalOpen(true)}
-            className="px-5 h-12 rounded-xl text-sm font-bold border-[#e6edf3] hover:transparent transition-all text-slate-300 flex items-center gap-1.5"
+            className="px-5 h-12 rounded-xl text-sm font-bold border-white/10 hover:transparent transition-all text-slate-300 flex items-center gap-1.5"
           >
             <Database className="w-4 h-4 text-brand" />
             Screen Pre-uploaded Resumes
@@ -5298,7 +5298,7 @@ function JobDetail() {
                         <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Preferred Industries</span>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {job.requirements.preferred_industries.map((ind, i) => (
-                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-[#21262d] text-slate-200 rounded-md">{ind}</span>
+                            <span key={i} className="text-[10px] font-bold px-2 py-0.5 bg-white/5 text-slate-200 rounded-md">{ind}</span>
                           ))}
                         </div>
                       </div>
@@ -5389,7 +5389,7 @@ function JobDetail() {
                       <label key={`status-filter-${status}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                          statusFilter === status ? "border-brand-dark bg-brand-dark" : "border-[#e6edf3] group-hover:border-brand-light"
+                          statusFilter === status ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
                         )}>
                           {statusFilter === status && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
                         </div>
@@ -5409,7 +5409,7 @@ function JobDetail() {
                       <label key={`role-filter-${role}`} className="flex items-center gap-3 cursor-pointer group">
                         <div className={cn(
                           "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                          roleFilter === role ? "border-brand-dark bg-brand-dark" : "border-[#e6edf3] group-hover:border-brand-light"
+                          roleFilter === role ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
                         )}>
                           {roleFilter === role && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
                         </div>
@@ -5432,7 +5432,7 @@ function JobDetail() {
                           <label key={`tag-filter-${tag}`} className="flex items-center gap-3 cursor-pointer group">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20 cursor-pointer"
                               checked={isChecked} 
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -5460,10 +5460,10 @@ function JobDetail() {
         {/* Main Content */}
         <div className="col-span-12 lg:col-span-9 space-y-8">
           {uploadProgress && (
-            <div className="glass-premium border border-[#e6edf3] rounded-2xl p-6 shadow-sm space-y-4 animate-in fade-in-50 slide-in-from-top-4 duration-300">
+            <div className="glass-premium border border-white/10 rounded-2xl p-6 shadow-sm space-y-4 animate-in fade-in-50 slide-in-from-top-4 duration-300">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="w-8 h-8 rounded-lg bg-[#21262d] border border-[#e6edf3] flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                     <Cpu className="w-4 h-4 text-slate-300 animate-pulse" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -5471,7 +5471,7 @@ function JobDetail() {
                       <p className="text-xs font-bold tracking-widest uppercase text-slate-850 leading-none">
                         {researchingAll ? 'Intelligent Multi-Source Research' : 'Autonomous Ingestion Pipeline'}
                       </p>
-                      <span className="text-[10px] font-mono font-bold bg-[#21262d] px-1.5 py-0.5 rounded text-slate-300 border border-[#e6edf3]/50">
+                      <span className="text-[10px] font-mono font-bold bg-white/5 px-1.5 py-0.5 rounded text-slate-300 border border-white/10/50">
                         {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
                       </span>
                     </div>
@@ -5490,7 +5490,7 @@ function JobDetail() {
                     <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> {uploadProgress.skipped}
                   </div>
 
-                  <div className="hidden sm:block w-32 h-1.5 bg-[#21262d] rounded-full overflow-hidden border border-[#e6edf3] shrink-0">
+                  <div className="hidden sm:block w-32 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10 shrink-0">
                     <div 
                       className="h-full glass-premium transition-all duration-300"
                       style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
@@ -5508,7 +5508,7 @@ function JobDetail() {
                     </Button>
                   ) : (
                     uploadProgress.estimatedSecondsRemaining !== undefined && uploadProgress.estimatedSecondsRemaining > 0 && (
-                      <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-[#21262d] px-2 py-1 rounded border border-[#e6edf3]">
+                      <span className="text-[9px] font-black text-slate-200 uppercase tracking-widest flex items-center gap-2 shrink-0 bg-white/5 px-2 py-1 rounded border border-white/10">
                         <Clock className="w-3.5 h-3.5 animate-spin" /> ~{uploadProgress.estimatedSecondsRemaining}s Left
                       </span>
                     )
@@ -5582,8 +5582,8 @@ function JobDetail() {
                   Research Pipeline
                 </Button>
               )}
-              <div className="flex flex-wrap items-center gap-2 bg-[#21262d] p-1 rounded-xl border border-[#e6edf3]">
-                <div className="flex items-center gap-2 px-2 border-r border-[#e6edf3] h-7">
+              <div className="flex flex-wrap items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
                   <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Sort</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
@@ -5595,7 +5595,7 @@ function JobDetail() {
                     <option>Recent</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 px-2 border-r border-[#e6edf3] h-7">
+                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
                   <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Status</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
@@ -5627,12 +5627,12 @@ function JobDetail() {
                 <input 
                   type="text" 
                   placeholder="Search candidates..." 
-                  className="pl-10 pr-4 py-2 transparent border border-[#e6edf3] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all w-full"
+                  className="pl-10 pr-4 py-2 transparent border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="flex bg-[#21262d] p-1 rounded-xl border border-[#e6edf3] h-9 shrink-0">
+              <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 h-9 shrink-0">
                 <button 
                   onClick={() => setViewMode('list')} 
                   className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-200")}
@@ -5650,8 +5650,8 @@ function JobDetail() {
           </div>
 
           {filteredCandidates.length === 0 ? (
-            <div className="p-20 text-center border-2 border-dashed border-[#e6edf3] rounded-2xl glass-premium/50">
-              <div className="w-16 h-16 bg-[#21262d] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#e6edf3]">
+            <div className="p-20 text-center border-2 border-dashed border-white/10 rounded-2xl glass-premium/50">
+              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
                 <Users className="w-8 h-8 text-slate-200" />
               </div>
               <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">No Matching Candidates</h3>
@@ -5700,10 +5700,10 @@ function JobDetail() {
                         </div>
                         
                         <div className="flex gap-2 mb-8 h-10 overflow-hidden items-center">
-                          <div className="h-6 w-20 bg-[#21262d] rounded-lg animate-pulse" />
-                          <div className="h-6 w-28 bg-[#21262d] rounded-lg animate-pulse" />
-                          <div className="h-6 w-16 bg-[#21262d] rounded-lg animate-pulse" />
-                          <div className="h-6 w-24 bg-slate-150 bg-[#21262d] rounded-lg animate-pulse" />
+                          <div className="h-6 w-20 bg-white/5 rounded-lg animate-pulse" />
+                          <div className="h-6 w-28 bg-white/5 rounded-lg animate-pulse" />
+                          <div className="h-6 w-16 bg-white/5 rounded-lg animate-pulse" />
+                          <div className="h-6 w-24 bg-slate-150 bg-white/5 rounded-lg animate-pulse" />
                         </div>
                         
                         <div className="flex items-center justify-between pt-5 border-t border-slate-50">
@@ -5801,7 +5801,7 @@ function JobDetail() {
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-[10px] text-slate-200 font-black uppercase tracking-widest flex items-center gap-1.5 ">
                             {candidate.currentRole} 
-                            <span className="w-1 h-1 rounded-full bg-[#e6edf3]" />
+                            <span className="w-1 h-1 rounded-full bg-white/10" />
                             {formatDate(candidate.createdAt)}
                           </p>
                           {candidate.research && (
@@ -5828,7 +5828,7 @@ function JobDetail() {
                          </span>
                        ))}
                        {candidate.scorecard.skillsAnalysis?.confirmed?.length > 6 && (
-                         <span className="px-2 py-1 bg-[#21262d] text-slate-200 rounded-lg border border-[#e6edf3] text-[10px] font-black uppercase tracking-widest">
+                         <span className="px-2 py-1 bg-white/5 text-slate-200 rounded-lg border border-white/10 text-[10px] font-black uppercase tracking-widest">
                            +{candidate.scorecard.skillsAnalysis.confirmed.length - 6}
                          </span>
                        )}
@@ -5885,7 +5885,7 @@ function JobDetail() {
                       <th className="w-12 px-6 py-4">
                         <input 
                           type="checkbox"
-                          className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                          className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20 cursor-pointer"
                           checked={filteredCandidates.length > 0 && filteredCandidates.every(c => selectedCandidates.includes(c.id))}
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -5920,7 +5920,7 @@ function JobDetail() {
                               <input 
                                 type="checkbox"
                                 disabled
-                                className="w-4 h-4 rounded text-slate-300 border-[#e6edf3] cursor-not-allowed opacity-40 animate-pulse"
+                                className="w-4 h-4 rounded text-slate-300 border-white/10 cursor-not-allowed opacity-40 animate-pulse"
                               />
                             </td>
                             <td className="px-6 py-4">
@@ -5948,7 +5948,7 @@ function JobDetail() {
                                     Analyzing...
                                   </span>
                                 </div>
-                                <div className="h-1.5 w-full bg-[#21262d] rounded-full overflow-hidden border border-[#e6edf3]/50">
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/10/50">
                                   <div className="h-full bg-brand animate-pulse w-[45%]" />
                                 </div>
                               </div>
@@ -5977,7 +5977,7 @@ function JobDetail() {
                           <td className="px-6 py-4 w-12" onClick={(e) => e.stopPropagation()}>
                             <input 
                               type="checkbox"
-                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9] cursor-pointer"
+                              className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20 cursor-pointer"
                               checked={isSelected}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -5995,7 +5995,7 @@ function JobDetail() {
                              <div className="flex items-center gap-3">
                                 <div className={cn(
                                   "w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs",
-                                  isBestMatch ? "bg-brand-dark text-white" : "bg-[#21262d] text-slate-200"
+                                  isBestMatch ? "bg-brand-dark text-white" : "bg-white/5 text-slate-200"
                                 )}>
                                   {candidate.fullName.charAt(0)}
                                 </div>
@@ -6043,7 +6043,7 @@ function JobDetail() {
                                     <span className="text-[8px] font-black text-brand-light uppercase tracking-widest">TOP</span>
                                   )}
                                 </div>
-                                <div className="h-1.5 w-full bg-[#21262d] rounded-full overflow-hidden border border-[#e6edf3]/50">
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/10/50">
                                   <motion.div 
                                     initial={{ width: 0 }}
                                     animate={{ width: `${candidate.scorecard.compositeScore}%` }}
@@ -6059,7 +6059,7 @@ function JobDetail() {
                           <td className="px-6 py-4 text-center">
                              <span className={cn(
                                 "text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest",
-                                candidate.status === 'processed' ? "bg-green-50 text-green-600" : "bg-[#21262d] text-slate-200"
+                                candidate.status === 'processed' ? "bg-green-50 text-green-600" : "bg-white/5 text-slate-200"
                              )}>
                                {candidate.status}
                              </span>
@@ -6183,7 +6183,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 1 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD1Name}
                     onChange={(e) => setEditD1Name(e.target.value)}
                   />
@@ -6192,7 +6192,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD1Weight}
                     onChange={(e) => setEditD1Weight(Math.max(0, Number(editD1Weight)))}
                   />
@@ -6200,7 +6200,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD1Desc}
                 onChange={(e) => setEditD1Desc(e.target.value)}
               />
@@ -6213,7 +6213,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 2 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD2Name}
                     onChange={(e) => setEditD2Name(e.target.value)}
                   />
@@ -6222,7 +6222,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD2Weight}
                     onChange={(e) => setEditD2Weight(Math.max(0, Number(editD2Weight)))}
                   />
@@ -6230,7 +6230,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD2Desc}
                 onChange={(e) => setEditD2Desc(e.target.value)}
               />
@@ -6243,7 +6243,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 3 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD3Name}
                     onChange={(e) => setEditD3Name(e.target.value)}
                   />
@@ -6252,7 +6252,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
                     value={editD3Weight}
                     onChange={(e) => setEditD3Weight(Math.max(0, Number(editD3Weight)))}
                   />
@@ -6260,7 +6260,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD3Desc}
                 onChange={(e) => setEditD3Desc(e.target.value)}
               />
@@ -6273,7 +6273,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 4 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD4Name}
                     onChange={(e) => setEditD4Name(e.target.value)}
                   />
@@ -6282,7 +6282,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
                     value={editD4Weight}
                     onChange={(e) => setEditD4Weight(Math.max(0, Number(editD4Weight)))}
                   />
@@ -6290,7 +6290,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD4Desc}
                 onChange={(e) => setEditD4Desc(e.target.value)}
               />
@@ -6303,7 +6303,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Metric 5 Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300"
                     value={editD5Name}
                     onChange={(e) => setEditD5Name(e.target.value)}
                   />
@@ -6312,7 +6312,7 @@ function JobDetail() {
                   <label className="text-[8px] font-black uppercase text-slate-200 tracking-wider">Weight (%)</label>
                   <input
                     type="number"
-                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
+                    className="w-full text-xs font-bold px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 text-slate-300"
                     value={editD5Weight}
                     onChange={(e) => setEditD5Weight(Math.max(0, Number(editD5Weight)))}
                   />
@@ -6320,7 +6320,7 @@ function JobDetail() {
               </div>
               <textarea
                 rows={2}
-                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-[#e6edf3] rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
+                className="w-full text-xs font-medium px-2 py-1.5 glass-premium border border-white/10 rounded-lg focus:outline-none focus:border-brand text-slate-300 leading-relaxed"
                 value={editD5Desc}
                 onChange={(e) => setEditD5Desc(e.target.value)}
               />
@@ -6332,7 +6332,7 @@ function JobDetail() {
           <Button
             type="button"
             variant="outline"
-            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-300 border-[#e6edf3]"
+            className="flex-1 h-12 text-[10px] uppercase font-black tracking-widest text-slate-300 border-white/10"
             onClick={() => setShowSettingsDrawer(false)}
           >
             Cancel
@@ -6394,7 +6394,7 @@ function JobDetail() {
 
             <div className="space-y-5">
               {/* Option 1: Send via Email */}
-              <div className="p-4 border border-[#e6edf3]/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-brand/10 text-brand-light rounded-xl mt-0.5">
                     <Mail className="w-4 h-4" />
@@ -6410,7 +6410,7 @@ function JobDetail() {
                     <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
@@ -6449,7 +6449,7 @@ function JobDetail() {
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="hidden p-4 border border-[#e6edf3]/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
+              <div className="hidden p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
@@ -6461,13 +6461,13 @@ function JobDetail() {
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-[#e6edf3]/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-[#e6edf3] text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -6486,7 +6486,7 @@ function JobDetail() {
               <Button
                 variant="outline"
                 type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-[#e6edf3] rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-white/10 rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
@@ -6550,7 +6550,7 @@ function JobDetail() {
               <Search className="w-4 h-4 text-slate-200 absolute left-3 top-3" />
               <input
                 type="text"
-                className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
+                className="w-full text-xs font-bold pl-9 pr-4 py-2 transparent border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-slate-300"
                 placeholder="Search by name, role, or company..."
                 value={preUploadedSearchQuery}
                 onChange={(e) => setPreUploadedSearchQuery(e.target.value)}
@@ -6597,7 +6597,7 @@ function JobDetail() {
                               setSelectedPreUploadedResumes(prev => prev.filter(k => k !== candKey));
                             }
                           }}
-                          className="w-4 h-4 rounded text-brand focus:ring-brand border-[#c9d1d9] cursor-pointer disabled:cursor-not-allowed"
+                          className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer disabled:cursor-not-allowed"
                         />
                         <div className="min-w-0">
                           <h4 className="text-xs font-bold text-slate-300 truncate">{candidate.fullName}</h4>
@@ -6609,7 +6609,7 @@ function JobDetail() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {candidate.alreadyScreened ? (
-                          <span className="text-[8px] font-black bg-[#e6edf3] text-slate-200 border border-[#c9d1d9] px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                          <span className="text-[8px] font-black bg-white/10 text-slate-200 border border-white/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
                         ) : (
                           <span className="text-[9px] font-black text-brand-light bg-brand/10 px-2 py-0.5 rounded-lg border border-brand/20">
                             Best Fit: {candidate.bestScore}%
@@ -7421,7 +7421,7 @@ function CandidateDetail() {
             <Button variant="ghost" className="-ml-2 px-2" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
               <ChevronRight className="w-4 h-4 rotate-180" /> <span className="hidden sm:inline">Pipeline</span>
             </Button>
-            <div className="w-px h-6 bg-[#e6edf3]" />
+            <div className="w-px h-6 bg-white/10" />
             <Button 
               variant="ghost" 
               className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[8px] sm:text-[10px]" 
@@ -7690,10 +7690,10 @@ function CandidateDetail() {
               )}>
                 {scorecard?.recommendation?.fitHeader || 'Screening Report'}
               </span>
-              <span className="text-[10px] font-bold bg-[#30363d] text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/10/50">
+              <span className="text-[10px] font-bold bg-white/10 text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/10/50">
                 {candidate.location}
               </span>
-              <span className="text-[10px] font-bold bg-[#30363d] text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/10/50">
+              <span className="text-[10px] font-bold bg-white/10 text-slate-300 px-2.5 py-1 rounded-full uppercase tracking-widest border border-white/10/50">
                 {candidate.totalExperience} Years Experience
               </span>
             </div>
@@ -7709,7 +7709,7 @@ function CandidateDetail() {
       </Card>
 
       {/* State-of-the-art Sub-Tab Navigation Bar */}
-      <div id="candidate-detail-tabs" className="flex flex-wrap items-center gap-2 p-1.5 bg-[#21262d] rounded-2xl border border-[#e6edf3] shadow-sm relative z-20">
+      <div id="candidate-detail-tabs" className="flex flex-wrap items-center gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 shadow-sm relative z-20">
         <Button
           variant="ghost"
           onClick={() => setActiveDetailTab('core')}
@@ -7785,7 +7785,7 @@ function CandidateDetail() {
             </div>
           )}
           {!researching && candidate.research && (
-             <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest bg-[#30363d] px-2 py-1 rounded">
+             <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest bg-white/10 px-2 py-1 rounded">
                Last validated {formatDateTime(candidate.research.lastResearchedAt)}
              </span>
           )}
@@ -7798,9 +7798,9 @@ function CandidateDetail() {
               </div>
               <p className="text-lg font-black text-slate-300">Synthesizing Digital Presence...</p>
               <div className="max-w-md mx-auto space-y-2">
-                <div className="h-2 bg-[#21262d] rounded-full w-full animate-pulse" />
-                <div className="h-2 bg-[#21262d] rounded-full w-5/6 animate-pulse mx-auto" />
-                <div className="h-2 bg-[#21262d] rounded-full w-4/6 animate-pulse mx-auto" />
+                <div className="h-2 bg-white/5 rounded-full w-full animate-pulse" />
+                <div className="h-2 bg-white/5 rounded-full w-5/6 animate-pulse mx-auto" />
+                <div className="h-2 bg-white/5 rounded-full w-4/6 animate-pulse mx-auto" />
               </div>
               <p className="text-xs text-slate-200 mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
             </div>
@@ -7837,7 +7837,7 @@ function CandidateDetail() {
                   {/* Row 1: Section 7 - Confidence Meter Panel & Section 1: Verified Profiles */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* CONFIDENCE METER (Section 7) */}
-                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-rose-50/50 border-rose-200 shadow-rose-100/30' : 'transparent border-[#e6edf3]/60 shadow-slate-100/30 shadow-md'}`}>
+                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-rose-50/50 border-rose-200 shadow-rose-100/30' : 'transparent border-white/10/60 shadow-slate-100/30 shadow-md'}`}>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-rose-500' : 'text-emerald-500'}`} />
@@ -7881,7 +7881,7 @@ function CandidateDetail() {
                     </div>
 
                     {/* VERIFIED PROFILES (Section 1) */}
-                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-[#e6edf3]/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
+                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-white/10/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
                       <div className="flex items-center gap-2 mb-4">
                         <Users className="w-5 h-5 text-brand" />
                         <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">1. Verified Profiles</h4>
@@ -7899,7 +7899,7 @@ function CandidateDetail() {
                               className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                                 isVer 
                                   ? 'bg-emerald-50/40 border-emerald-100 hover:border-emerald-300' 
-                                  : 'bg-[#21262d]/50 border-[#e6edf3]/40 hover:border-[#c9d1d9]'
+                                  : 'bg-white/5/50 border-white/10/40 hover:border-white/20'
                               } ${!p.url || p.url === '#' ? 'pointer-events-none cursor-default' : ''}`}
                             >
                               <div className="flex items-center gap-2">
@@ -7969,7 +7969,7 @@ function CandidateDetail() {
                                   <span>Career Stability Rating</span>
                                   <span className="font-extrabold">{stabilityScore}%</span>
                                 </div>
-                                <div className="h-2 bg-[#21262d] rounded-full overflow-hidden">
+                                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                                   <div className="h-full bg-brand rounded-full transition-all" style={{ width: `${stabilityScore}%` }} />
                                 </div>
                               </div>
@@ -8091,7 +8091,7 @@ function CandidateDetail() {
                   {/* Row 5: Evidence Sources (Section 8) & Refresh Analysis Container */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
                     {/* EVIDENCE SOURCES (Section 8) */}
-                    <div id="evidence-sources-card" className="lg:col-span-2 p-6 transparent border border-[#e6edf3]/60 rounded-2xl">
+                    <div id="evidence-sources-card" className="lg:col-span-2 p-6 transparent border border-white/10/60 rounded-2xl">
                       <div className="flex items-center gap-2 mb-4">
                         <BookOpen className="w-5 h-5 text-brand" />
                         <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">8. Evidence Sources / Reference Grounding Links</h4>
@@ -8104,7 +8104,7 @@ function CandidateDetail() {
                             href={source.uri && source.uri !== '#' ? source.uri : undefined}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`block p-3 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-[#21262d]/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
+                            className={`block p-3 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-white/5/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
                           >
                             <div className="flex items-center justify-between gap-3">
                               <span className="text-[11px] font-bold text-slate-200 line-clamp-1 group-hover:text-brand-light italic">
@@ -8121,7 +8121,7 @@ function CandidateDetail() {
                     </div>
 
                     {/* REFRESH ACTION AND AUDIT SUMMARY PANEL */}
-                    <div className="p-6 transparent border border-[#e6edf3]/60 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div className="p-6 transparent border border-white/10/60 rounded-2xl flex flex-col justify-between space-y-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-slate-300">
                           <CheckCircle2 className="text-brand-light w-4 h-4" />
@@ -8134,7 +8134,7 @@ function CandidateDetail() {
                       
                       <Button 
                         variant="outline" 
-                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-brand-light border-brand/20 glass-premium hover:bg-[#21262d] hover:border-brand-light hover:text-brand-light transition-all"
+                        className="w-full h-11 text-[10px] font-black uppercase tracking-widest text-brand-light border-brand/20 glass-premium hover:bg-white/5 hover:border-brand-light hover:text-brand-light transition-all"
                         onClick={handleDeepResearch}
                       >
                         <RotateCcw className="w-3.5 h-3.5 mr-2" /> Refresh Grounding Audit
@@ -8178,7 +8178,7 @@ function CandidateDetail() {
 
         return (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="border-b border-[#e6edf3] pb-2">
+            <div className="border-b border-white/10 pb-2">
               <h2 className="text-xl font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
                 <FileText className="w-5 h-5 text-brand" />
                 D6+ Forensic Analysis Reports
@@ -8306,11 +8306,11 @@ function CandidateDetail() {
                    </p>
                  </div>
                )) : (
-                 <div className="p-4 text-center border-2 border-dashed border-[#e6edf3] rounded-xl">
+                 <div className="p-4 text-center border-2 border-dashed border-white/10 rounded-xl">
                    <p className="text-xs text-slate-200">No risk signals detected.</p>
                  </div>
                )}
-               <div className="pt-2 flex justify-between items-center text-xs font-black uppercase border-t border-[#e6edf3] mt-2">
+               <div className="pt-2 flex justify-between items-center text-xs font-black uppercase border-t border-white/10 mt-2">
                  <span>Total Penalty</span>
                  <span className="text-red-600">-{scorecard?.dimensions?.redFlags?.totalPenalty || 0} Points</span>
                </div>
@@ -8414,7 +8414,7 @@ function CandidateDetail() {
                   <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-white/10 rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     placeholder="Paste meeting link here"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
@@ -8425,7 +8425,7 @@ function CandidateDetail() {
                   <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Bot Display Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-[#e6edf3] rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-white/10 rounded-xl text-slate-300 focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     value={botName}
                     onChange={(e) => setBotName(e.target.value)}
                   />
@@ -8437,7 +8437,7 @@ function CandidateDetail() {
                     className={cn(
                       "w-full h-11 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg",
                       botStatus === 'joining' || botStatus === 'recording'
-                        ? "bg-[#30363d] hover:bg-[#30363d] shadow-slate-100"
+                        ? "bg-white/10 hover:bg-white/10 shadow-slate-100"
                         : "bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] shadow-brand/10"
                     )}
                     onClick={handleLaunchMeetingBot}
@@ -8456,7 +8456,7 @@ function CandidateDetail() {
                 {recordingUrl && (
                   <div className="space-y-2 pt-3 border-t border-white/10 animate-in fade-in duration-500">
                     <span className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recorded Meeting Stream</span>
-                    <div className="relative rounded-2xl overflow-hidden border border-[#e6edf3] shadow-lg transparent aspect-video">
+                    <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-lg transparent aspect-video">
                       <video
                         src={recordingUrl}
                         controls
@@ -8500,7 +8500,7 @@ function CandidateDetail() {
                 <span className="text-xs font-bold text-slate-200">Signal Density:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
-                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-light" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-[#21262d] text-slate-300" : "bg-red-100 text-red-700"
+                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-brand-light" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-white/5 text-slate-300" : "bg-red-100 text-red-700"
                 )}>
                   {candidate.scorecard.dimensions?.signalDensity?.score || '--'}/100
                 </span>
@@ -8588,7 +8588,7 @@ function CandidateDetail() {
                   amber: { bg: 'bg-amber-50/10', text: 'text-amber-400', bgActive: 'bg-amber-50', textActive: 'text-amber-600', border: 'border-amber-100' },
                   rose: { bg: 'bg-rose-50/10', text: 'text-rose-400', bgActive: 'bg-rose-50', textActive: 'text-rose-600', border: 'border-rose-100' },
                 };
-                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-200', bgActive: 'bg-[#21262d]', textActive: 'text-slate-300', border: 'border-slate-150' };
+                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-slate-200', bgActive: 'bg-white/5', textActive: 'text-slate-300', border: 'border-slate-150' };
 
                 return (
                   <Card key={dimInfo.id} className={cn(
@@ -8622,7 +8622,7 @@ function CandidateDetail() {
                            <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">{dimInfo.id}</span>
                            <div className={cn(
                              "w-1 h-8 rounded-full my-2 hidden md:block",
-                             dim ? (dim.score >= 80 ? "bg-green-200" : dim.score >= 50 ? "bg-amber-200" : "bg-red-200") : "bg-[#21262d]"
+                             dim ? (dim.score >= 80 ? "bg-green-200" : dim.score >= 50 ? "bg-amber-200" : "bg-red-200") : "bg-white/5"
                            )} />
                         </div>
                       </div>
@@ -8713,7 +8713,7 @@ function CandidateDetail() {
                                       <span className="text-[10px] font-bold text-slate-200 group-hover/cite:text-brand-light max-w-[120px] truncate">
                                         {cite.claim}
                                       </span>
-                                      <div className="w-1.5 h-1.5 rounded-full bg-[#e6edf3]" />
+                                      <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
                                       <Search className="w-2.5 h-2.5 text-slate-300" />
                                     </div>
                                   ))}
@@ -8734,9 +8734,9 @@ function CandidateDetail() {
             </div>
           </Card>
 
-          <Card className="p-6 transparent border-2 border-dashed border-[#e6edf3]">
+          <Card className="p-6 transparent border-2 border-dashed border-white/10">
              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-[#e6edf3] flex items-center justify-center font-black text-slate-200 text-xs shadow-inner">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-black text-slate-200 text-xs shadow-inner">
                   PII
                 </div>
                 <h4 className="font-bold text-slate-300">PII Isolation & Compliance</h4>
@@ -8746,7 +8746,7 @@ function CandidateDetail() {
              </p>
           </Card>
 
-          <Card className="p-8 border-dashed border-2 border-[#e6edf3]">
+          <Card className="p-8 border-dashed border-2 border-white/10">
              <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 glass-premium rounded-lg">
                    <Users className="w-5 h-5 text-white" />
@@ -8803,7 +8803,7 @@ function CandidateDetail() {
                   )}>
                     <div className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border",
-                      s.active ? "bg-brand border-brand-light" : "bg-[#30363d] border-white/10"
+                      s.active ? "bg-brand border-brand-light" : "bg-white/10 border-white/10"
                     )}>
                       {s.step}
                     </div>
@@ -8852,7 +8852,7 @@ function CandidateDetail() {
                     type="number"
                     value={offerSalary}
                     onChange={(e) => setOfferSalary(Number(e.target.value))}
-                    className="w-36 p-2 rounded-xl border border-[#e6edf3] text-xs font-black text-slate-850"
+                    className="w-36 p-2 rounded-xl border border-white/10 text-xs font-black text-slate-850"
                   />
                 </div>
               </div>
@@ -8863,7 +8863,7 @@ function CandidateDetail() {
                   <select 
                     value={offerCurrency} 
                     onChange={(e) => setOfferCurrency(e.target.value)}
-                    className="w-full p-3 rounded-xl border border-[#e6edf3] text-xs font-bold text-slate-300 glass-premium"
+                    className="w-full p-3 rounded-xl border border-white/10 text-xs font-bold text-slate-300 glass-premium"
                   >
                     <option value="INR">INR (₹) - Indian Rupee</option>
                     <option value="USD">USD ($) - US Dollar</option>
@@ -8879,7 +8879,7 @@ function CandidateDetail() {
                     type="date" 
                     value={offerStartDate} 
                     onChange={(e) => setOfferStartDate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-[#e6edf3] text-xs font-bold text-slate-705 glass-premium"
+                    className="w-full p-2.5 rounded-xl border border-white/10 text-xs font-bold text-slate-705 glass-premium"
                   />
                 </div>
               </div>
@@ -8890,7 +8890,7 @@ function CandidateDetail() {
                   rows={3}
                   value={offerBenefits} 
                   onChange={(e) => setOfferBenefits(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#e6edf3] text-xs text-slate-200 leading-relaxed font-sans focus:border-brand focus:outline-none"
+                  className="w-full p-3 rounded-xl border border-white/10 text-xs text-slate-200 leading-relaxed font-sans focus:border-brand focus:outline-none"
                   placeholder="Provide details on health insurance, stock units, equity, or work setups..."
                 />
               </div>
@@ -8902,7 +8902,7 @@ function CandidateDetail() {
                     <button 
                       key={type}
                       type="button"
-                      className="p-2.5 rounded-xl border border-[#e6edf3] text-center text-[10px] font-extrabold uppercase tracking-wider text-slate-650 hover:transparent"
+                      className="p-2.5 rounded-xl border border-white/10 text-center text-[10px] font-extrabold uppercase tracking-wider text-slate-650 hover:transparent"
                     >
                       {type}
                     </button>
@@ -8966,7 +8966,7 @@ function CandidateDetail() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-[#30363d]/80 p-1 rounded-xl border border-white/10/50">
+                <div className="flex items-center gap-1.5 bg-white/10/80 p-1 rounded-xl border border-white/10/50">
                   {['draft', 'sent', 'viewed', 'accepted'].map((st, idx) => (
                     <div key={st} className="flex items-center">
                       <span className={cn(
@@ -8975,7 +8975,7 @@ function CandidateDetail() {
                       )}>
                         {st}
                       </span>
-                      {idx < 3 && <div className="w-2 h-px bg-[#30363d]" />}
+                      {idx < 3 && <div className="w-2 h-px bg-white/10" />}
                     </div>
                   ))}
                 </div>
@@ -9153,7 +9153,7 @@ function CandidateDetail() {
                           "p-3 rounded-xl border flex items-center gap-2 text-left text-xs font-bold transition-all flex-1 min-w-[200px]",
                           campaignTemplate === temp.id 
                             ? "bg-emerald-50 border-emerald-300 text-emerald-700 shadow-sm" 
-                            : "glass-premium border-[#e6edf3] text-slate-550 hover:transparent"
+                            : "glass-premium border-white/10 text-slate-550 hover:transparent"
                         )}
                       >
                         <TIcon className="w-4 h-4 text-emerald-500" />
@@ -9250,7 +9250,7 @@ function CandidateDetail() {
               </div>
 
               {/* Chat header contact */}
-              <div className="bg-[#30363d] text-white px-5 py-3 flex items-center gap-3 shrink-0">
+              <div className="bg-white/10 text-white px-5 py-3 flex items-center gap-3 shrink-0">
                 <div className="w-7 h-7 bg-brand rounded-full text-[10px] font-black text-center flex items-center justify-center border-2 border-white shadow">
                   HF
                 </div>
@@ -9321,7 +9321,7 @@ function CandidateDetail() {
                     <div className="text-right">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest",
-                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-[#21262d] text-slate-200"
+                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-brand-light" : "bg-white/5 text-slate-200"
                       )}>
                         {log.status}
                       </span>
@@ -9467,7 +9467,7 @@ function CandidateDetail() {
                   {Math.max(0, 100 - (tabSwitchCountMock * 25) - (cameraAnomalyMock ? 50 : 0) - (gazeDeviationMock ? 15 : 0))}%
                 </div>
                 <div>
-                  <span className="text-[9px] font-black bg-[#21262d] text-slate-200 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
+                  <span className="text-[9px] font-black bg-white/5 text-slate-200 px-2 py-0.5 rounded uppercase tracking-wider block mb-1">Stability Gauge</span>
                   <p className="text-xs font-bold text-slate-300">
                     {(tabSwitchCountMock > 2 || cameraAnomalyMock) ? 'Severe Security Penalty Alert' : (tabSwitchCountMock > 0 || gazeDeviationMock) ? 'Anomalous Integrity' : 'Elite Verified Safe Profile'}
                   </p>
@@ -9554,7 +9554,7 @@ function CandidateDetail() {
 
             <div className="space-y-5">
               {/* Option 1: Send via Email */}
-              <div className="p-4 border border-[#e6edf3]/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-brand/10 text-brand-light rounded-xl mt-0.5">
                     <Mail className="w-4 h-4" />
@@ -9570,7 +9570,7 @@ function CandidateDetail() {
                     <label className="text-[9px] font-black uppercase text-slate-200 tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-[#e6edf3] rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-slate-300 transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
@@ -9609,7 +9609,7 @@ function CandidateDetail() {
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="p-4 border border-[#e6edf3]/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
@@ -9621,13 +9621,13 @@ function CandidateDetail() {
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-[#e6edf3]/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-[#e6edf3] text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-slate-200 hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -9646,7 +9646,7 @@ function CandidateDetail() {
               <Button
                 variant="outline"
                 type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-[#e6edf3] rounded-xl"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-slate-200 border-white/10 rounded-xl"
                 onClick={() => {
                   setShowInviteModal(false);
                   setActiveInviteCandidate(null);
@@ -10089,7 +10089,7 @@ function OrgAdminPanel() {
                   ))}
                 </select>
               ) : (
-                <div className="w-full bg-[#21262d]/50 border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-slate-200 select-none text-sm">
+                <div className="w-full bg-white/5/50 border-2 border-white/10 rounded-xl px-4 py-3 font-bold text-slate-200 select-none text-sm">
                   {organization?.name || 'My Organization'}
                 </div>
               )}
@@ -10160,7 +10160,7 @@ function OrgAdminPanel() {
       </div>
 
       {/* Sub-Tab Navigation Bar */}
-      <div className="flex gap-4 border-b border-[#e6edf3] pb-2">
+      <div className="flex gap-4 border-b border-white/10 pb-2">
         <button 
           onClick={() => setActivePanelTab('analytics')}
           className={cn(
@@ -10202,7 +10202,7 @@ function OrgAdminPanel() {
         <Button
           variant="outline"
           onClick={() => setFiltersOpen(true)}
-          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-[#e6edf3] text-slate-300 hover:transparent shrink-0 shadow-sm rounded-xl"
+          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-white/10 text-slate-300 hover:transparent shrink-0 shadow-sm rounded-xl"
         >
           <Filter className="w-4 h-4 text-slate-200" />
           Filters
@@ -10549,7 +10549,7 @@ function OrgAdminPanel() {
                       type="button"
                       disabled={isReadOnly}
                       onClick={() => setBotSpeakingPace(pace.value)}
-                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-white/10 text-slate-200 hover:border-[#e6edf3]'}`}
+                      className={`py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${botSpeakingPace === pace.value ? 'bg-brand/10 border-brand-dark text-brand-light' : 'transparent border-white/10 text-slate-200 hover:border-white/10'}`}
                     >
                       {pace.label}
                     </button>
@@ -10596,13 +10596,13 @@ function OrgAdminPanel() {
                 </div>
 
                 <div className="sm:col-span-3">
-                  <label className="flex items-center gap-3.5 p-3.5 transparent rounded-2xl border border-white/10 hover:border-[#e6edf3] cursor-pointer transition-all select-none disabled:opacity-60 w-full mb-0">
+                  <label className="flex items-center gap-3.5 p-3.5 transparent rounded-2xl border border-white/10 hover:border-white/10 cursor-pointer transition-all select-none disabled:opacity-60 w-full mb-0">
                     <input
                       type="checkbox"
                       disabled={isReadOnly}
                       checked={smtpSecure}
                       onChange={e => setSmtpSecure(e.target.checked)}
-                      className="w-4 h-4 rounded text-brand-light focus:ring-brand border-[#c9d1d9]"
+                      className="w-4 h-4 rounded text-brand-light focus:ring-brand border-white/20"
                     />
                     <div>
                       <p className="text-xs font-black text-slate-300 uppercase tracking-wide leading-none mb-0.5">Secure SSL/TLS Connection</p>
@@ -10668,7 +10668,7 @@ function OrgAdminPanel() {
                     type="email"
                     id="testSmtpEmailRecipient"
                     placeholder="Test recipient email (e.g. yours)"
-                    className="flex-1 glass-premium border border-[#e6edf3] rounded-xl px-4 py-2 font-semibold text-white focus:border-brand outline-none transition-all text-xs"
+                    className="flex-1 glass-premium border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:border-brand outline-none transition-all text-xs"
                   />
                   <Button
                     type="button"
@@ -11440,7 +11440,7 @@ function SuperAdminPanel() {
   if (!isSuperAdmin) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center p-12 text-center">
-        <ShieldCheck className="w-16 h-16 text-[#e6edf3] mb-6" />
+        <ShieldCheck className="w-16 h-16 text-white mb-6" />
         <h2 className="text-2xl font-black text-white uppercase">Access Restricted</h2>
         <p className="text-slate-200 mt-2">Only platform super-administrators can access this registry.</p>
         <Button variant="outline" className="mt-8" onClick={() => navigate('/')}>Return to Workspace</Button>
@@ -11743,7 +11743,7 @@ function SuperAdminPanel() {
         onClose={() => setOnboardModalOpen(false)} 
         title={bulkMode ? "Bulk Onboard Organizations" : "Onboard New Organization"}
       >
-        <div className="mb-6 flex p-1 bg-[#21262d] rounded-lg">
+        <div className="mb-6 flex p-1 bg-white/5 rounded-lg">
            <button 
              onClick={() => setBulkMode(false)}
              className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", !bulkMode ? "glass-premium shadow-sm text-brand-light" : "text-slate-200 hover:text-slate-300")}
@@ -11948,7 +11948,7 @@ function SuperAdminPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex gap-2 sm:gap-4 border-b border-[#e6edf3] overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
+          <div className="flex gap-2 sm:gap-4 border-b border-white/10 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
              <button 
                onClick={() => setTab('overview')}
                className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-brand-light" : "text-slate-200")}
@@ -12122,7 +12122,7 @@ function SuperAdminPanel() {
                     <div 
                       key={c.id} 
                       onClick={() => navigate(`/candidates/${c.id}`)}
-                      className="p-4 hover:transparent transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-[#21262d]"
+                      className="p-4 hover:transparent transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-white/5"
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -12292,7 +12292,7 @@ function SuperAdminPanel() {
                                 id={`credits-alloc-${org.id}`}
                                 defaultValue="50"
                                 placeholder="Credits" 
-                                className="w-24 glass-premium border border-[#e6edf3] rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none"
+                                className="w-24 glass-premium border border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none"
                               />
                               <Button
                                 onClick={async () => {
@@ -12330,8 +12330,8 @@ function SuperAdminPanel() {
                         </Card>
                       );
                     })() : (
-                      <Card className="p-8 border-dashed border-[#e6edf3] transparent/20 text-center flex flex-col items-center justify-center space-y-4">
-                        <Users className="w-12 h-12 text-[#e6edf3]" />
+                      <Card className="p-8 border-dashed border-white/10 transparent/20 text-center flex flex-col items-center justify-center space-y-4">
+                        <Users className="w-12 h-12 text-white" />
                         <h4 className="font-bold text-xs uppercase tracking-wider text-slate-200">Select an Organization</h4>
                         <p className="text-[10px] text-slate-200 max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
                       </Card>
@@ -12356,7 +12356,7 @@ function SuperAdminPanel() {
                            type="password" 
                            value={stripeSecretKey} 
                            onChange={e => setStripeSecretKey(e.target.value)} 
-                           className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                           className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
                          />
                        </div>
                        <div>
@@ -12365,7 +12365,7 @@ function SuperAdminPanel() {
                            type="text" 
                            value={stripePublishableKey} 
                            onChange={e => setStripePublishableKey(e.target.value)} 
-                           className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                           className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
                          />
                        </div>
                        <div>
@@ -12374,14 +12374,14 @@ function SuperAdminPanel() {
                            type="password" 
                            value={stripeWebhookSecret} 
                            onChange={e => setStripeWebhookSecret(e.target.value)} 
-                           className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-xs font-mono focus:outline-none min-h-[44px]"
+                           className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none min-h-[44px]"
                          />
                        </div>
                      </div>
 
                      <Button 
                        onClick={() => notify("Stripe gateway config saved successfully!", "success")}
-                       className="w-full py-2.5 glass-premium text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#30363d]"
+                       className="w-full py-2.5 glass-premium text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/10"
                      >
                        Save Stripe Credentials
                      </Button>
@@ -12511,7 +12511,7 @@ function SuperAdminPanel() {
                  </Card>
                </div>
 
-               <div className="p-4 transparent border border-[#e6edf3] text-slate-200 text-xs font-semibold rounded-2xl">
+               <div className="p-4 transparent border border-white/10 text-slate-200 text-xs font-semibold rounded-2xl">
                  <p className="font-mono text-[10px]">Last telemetry snapshot: {new Date().toLocaleString()} UTC • All metrics within normal operating thresholds.</p>
                </div>
              </div>
@@ -12535,7 +12535,7 @@ function SuperAdminPanel() {
                             setSystemPrompt(e.target.value);
                             localStorage.setItem('sa_system_prompt', e.target.value);
                           }} 
-                          className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-xs font-mono focus:outline-none resize-none leading-relaxed"
+                          className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs font-mono focus:outline-none resize-none leading-relaxed"
                         />
                       </div>
 
@@ -12545,7 +12545,7 @@ function SuperAdminPanel() {
                           <select 
                             value={selectedModel} 
                             onChange={e => setSelectedModel(e.target.value as any)} 
-                            className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
+                            className="mt-1 block w-full rounded-xl border border-white/10 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
                           >
                             <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
                             <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
@@ -12571,7 +12571,7 @@ function SuperAdminPanel() {
                           <select 
                             value={safetyFilter} 
                             onChange={e => setSafetyFilter(e.target.value as any)} 
-                            className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
+                            className="mt-1 block w-full rounded-xl border border-white/10 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
                           >
                             <option value="standard">Standard Blocks</option>
                             <option value="strict">Strict Blocks</option>
@@ -12611,7 +12611,7 @@ function SuperAdminPanel() {
                           type="text"
                           value={playgroundInput}
                           onChange={e => setPlaygroundInput(e.target.value)}
-                          className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-xs focus:outline-none min-h-[44px]"
+                          className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-xs focus:outline-none min-h-[44px]"
                         />
                       </div>
                       <Button
@@ -12626,7 +12626,7 @@ function SuperAdminPanel() {
                             setIsPlaygroundTesting(false);
                           }, 1200);
                         }}
-                        className="w-full glass-premium hover:bg-[#30363d] text-white py-2 rounded-xl text-xs font-bold uppercase tracking-widest"
+                        className="w-full glass-premium hover:bg-white/10 text-white py-2 rounded-xl text-xs font-bold uppercase tracking-widest"
                       >
                         {isPlaygroundTesting ? "Running Inference..." : "Run Test Inference"}
                       </Button>
@@ -12662,7 +12662,7 @@ function SuperAdminPanel() {
             </div>
           ) : activeTab === 'white-label' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-              <div className="flex justify-between items-center border-b border-[#e6edf3] pb-4">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
                 <div>
                   <h2 className="text-xl font-display font-light text-white">White-Label & Reseller Portal</h2>
                   <p className="text-slate-200 text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
@@ -12679,7 +12679,7 @@ function SuperAdminPanel() {
                         type="text" 
                         value={whiteLabelBrandingName} 
                         onChange={(e) => setWhiteLabelBrandingName(e.target.value)} 
-                        className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                     <div>
@@ -12688,7 +12688,7 @@ function SuperAdminPanel() {
                         type="text" 
                         value={whiteLabelLogoUrl} 
                         onChange={(e) => setWhiteLabelLogoUrl(e.target.value)} 
-                        className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
                   </div>
@@ -12712,7 +12712,7 @@ function SuperAdminPanel() {
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-slate-200 uppercase">Billing Currency</label>
-                      <select className="mt-1 block w-full rounded-xl border border-[#e6edf3] p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]">
+                      <select className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]">
                         <option>USD ($)</option>
                         <option>EUR (€)</option>
                         <option>GBP (£)</option>
@@ -12744,7 +12744,7 @@ function SuperAdminPanel() {
                   <Button
                     onClick={handleDownloadManual}
                     variant="outline"
-                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-300 border-white/10 hover:bg-[#30363d] hover:text-white flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-300 border-white/10 hover:bg-white/10 hover:text-white flex items-center gap-2 hover:scale-[1.02] transition-transform active:scale-[0.98]"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     Download HTML Manual
@@ -12755,7 +12755,7 @@ function SuperAdminPanel() {
                       window.print();
                     }}
                     variant="outline"
-                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-200 border-white/10 hover:bg-[#30363d] hover:text-white flex items-center gap-2"
+                    className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-200 border-white/10 hover:bg-white/10 hover:text-white flex items-center gap-2"
                   >
                     <Printer className="w-3.5 h-3.5" />
                     Print Layout
@@ -12905,7 +12905,7 @@ function SuperAdminPanel() {
 
                   <div className="pt-6 border-t border-white/10 space-y-4">
                      <h3 className="text-sm font-black uppercase tracking-widest text-slate-200">Global Tenant Policies</h3>
-                     <div className="flex items-center justify-between p-4 glass-premium border border-[#e6edf3] rounded-xl">
+                     <div className="flex items-center justify-between p-4 glass-premium border border-white/10 rounded-xl">
                         <div>
                            <p className="text-sm font-bold">Automatic Red-Flag Detection</p>
                            <p className="text-[10px] text-slate-200">Enable AI parsing of experience gaps and misalignment</p>
@@ -12914,7 +12914,7 @@ function SuperAdminPanel() {
                            <div className="absolute right-1 top-1 w-4 h-4 glass-premium rounded-full" />
                         </div>
                      </div>
-                     <div className="flex items-center justify-between p-4 glass-premium border border-[#e6edf3] rounded-xl">
+                     <div className="flex items-center justify-between p-4 glass-premium border border-white/10 rounded-xl">
                         <div>
                            <p className="text-sm font-bold">Candidate GDPR Consent</p>
                            <p className="text-[10px] text-slate-200">Require explicit recording consent in interview room</p>
@@ -12942,14 +12942,14 @@ function SuperAdminPanel() {
                 <span className="text-sm font-bold">System Health</span>
                 <span className="ml-auto text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded border border-green-500/30 font-black uppercase">Online</span>
               </div>
-              <div className="h-px bg-[#30363d]" />
+              <div className="h-px bg-white/10" />
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Storage & Compute</p>
                 <div className="flex justify-between text-xs">
                    <span className="text-slate-200">Database Instances</span>
                    <span className="font-bold">1/1</span>
                 </div>
-                <div className="w-full bg-[#30363d] h-1 rounded-full">
+                <div className="w-full bg-white/10 h-1 rounded-full">
                    <div className="w-full bg-brand h-full rounded-full" />
                 </div>
               </div>
@@ -13377,7 +13377,7 @@ function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen transparent text-slate-300 font-sans selection:bg-[#e6edf3] overflow-x-hidden relative">
+    <div className="min-h-screen transparent text-slate-300 font-sans selection:bg-white/10 overflow-x-hidden relative">
       
       {/* Background Canvas Layer */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -13392,7 +13392,7 @@ function LandingPage() {
       <div className="relative z-10 flex flex-col min-h-screen">
         
         {/* Header / Nav */}
-        <header className="sticky top-0 z-50 border-b border-[#e6edf3]/60 glass-premium/70 backdrop-blur-md">
+        <header className="sticky top-0 z-50 border-b border-white/10/60 glass-premium/70 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center shadow-sm">
@@ -13419,12 +13419,12 @@ function LandingPage() {
               </button>
               <button 
                 onClick={signIn} 
-                className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-[#30363d] transition-colors shadow-sm min-h-[44px]"
+                className="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors shadow-sm min-h-[44px]"
               >
                 Deploy Now
               </button>
               <button 
-                className="md:hidden p-2 text-slate-200 hover:bg-[#21262d] rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="md:hidden p-2 text-slate-200 hover:bg-white/5 rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle Menu"
               >
@@ -13441,13 +13441,13 @@ function LandingPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-b border-[#e6edf3]/60 glass-premium/95 backdrop-blur-md overflow-hidden sticky top-20 z-40"
+              className="md:hidden border-b border-white/10/60 glass-premium/95 backdrop-blur-md overflow-hidden sticky top-20 z-40"
             >
               <div className="px-6 py-6 space-y-4 flex flex-col">
                 <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Platform</a>
                 <a href="#simulation" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Simulation</a>
                 <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white font-display min-h-[44px] flex items-center">Pricing</a>
-                <div className="pt-4 border-t border-[#e6edf3]">
+                <div className="pt-4 border-t border-white/10">
                   <button 
                     onClick={() => { signIn(); setMobileMenuOpen(false); }} 
                     className="w-full py-3 rounded-full glass-premium text-white font-bold uppercase tracking-widest text-xs min-h-[44px] flex items-center justify-center"
@@ -13465,7 +13465,7 @@ function LandingPage() {
           
           {/* Hero Section */}
           <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-premium border border-[#e6edf3]/80 mb-10 shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-premium border border-white/10/80 mb-10 shadow-xs">
               <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></div>
               <span className="text-[10px] font-black uppercase tracking-wider text-white">Autonomous Talent Lobby Live</span>
             </div>
@@ -13482,7 +13482,7 @@ function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto px-4">
               <button 
                 onClick={signIn} 
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-[#30363d] transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors shadow-sm min-h-[44px] flex items-center justify-center"
               >
                 Start Free Trial
               </button>
@@ -13496,7 +13496,7 @@ function LandingPage() {
           </section>
 
           {/* Trusted By Brand Ticker */}
-          <section className="py-14 border-y border-[#e6edf3]/60 glass-premium/40 overflow-hidden backdrop-blur-xs">
+          <section className="py-14 border-y border-white/10/60 glass-premium/40 overflow-hidden backdrop-blur-xs">
             <p className="text-center text-[10px] font-black uppercase tracking-widest text-white mb-8">Trusted by Elite Engineering Teams</p>
             <div className="flex w-full overflow-hidden">
               <div className="flex animate-[marquee_35s_linear_infinite] min-w-full items-center justify-around gap-12 opacity-60">
@@ -13514,13 +13514,13 @@ function LandingPage() {
               <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed font-medium">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
             </div>
 
-            <div className="glass-premium rounded-2xl border border-[#e6edf3] shadow-sm overflow-hidden max-w-5xl mx-auto">
+            <div className="glass-premium rounded-2xl border border-white/10 shadow-sm overflow-hidden max-w-5xl mx-auto">
               {/* Console Header */}
-              <div className="h-12 border-b border-[#e6edf3] transparent/50 flex items-center px-4 justify-between">
+              <div className="h-12 border-b border-white/10 transparent/50 flex items-center px-4 justify-between">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#e6edf3]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#e6edf3]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#e6edf3]"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
                 </div>
                 <div className="text-[10px] font-mono text-slate-200 flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5" />
@@ -13531,7 +13531,7 @@ function LandingPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3">
                 {/* Controls Column */}
-                <div className="border-b lg:border-b-0 lg:border-r border-[#e6edf3] transparent/20 p-6 flex flex-col gap-4">
+                <div className="border-b lg:border-b-0 lg:border-r border-white/10 transparent/20 p-6 flex flex-col gap-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-200 mb-1">Target Role Profile</p>
                   
                   {(Object.keys(roleData) as Array<keyof typeof roleData>).map(role => (
@@ -13543,7 +13543,7 @@ function LandingPage() {
                         "flex flex-col text-left p-4 rounded-xl border transition-all text-ellipsis overflow-hidden min-h-[44px]",
                         activeRole === role 
                           ? "glass-premium border-[#161b22] text-white shadow-sm" 
-                          : "glass-premium border-[#e6edf3] text-slate-300 hover:transparent"
+                          : "glass-premium border-white/10 text-slate-300 hover:transparent"
                       )}
                     >
                       <span className="text-sm font-semibold mb-1">{roleData[role].title}</span>
@@ -13555,7 +13555,7 @@ function LandingPage() {
                      <button 
                       onClick={() => startSimulation(activeRole)} 
                       disabled={isSimulating}
-                      className="w-full glass-premium text-white hover:bg-[#30363d] disabled:opacity-50 text-xs font-bold uppercase tracking-widest rounded-full py-3 min-h-[44px] flex items-center justify-center gap-2"
+                      className="w-full glass-premium text-white hover:bg-white/10 disabled:opacity-50 text-xs font-bold uppercase tracking-widest rounded-full py-3 min-h-[44px] flex items-center justify-center gap-2"
                      >
                        {isSimulating ? (
                          <>
@@ -13581,7 +13581,7 @@ function LandingPage() {
                         className={cn(
                           "mb-3.5 leading-relaxed break-words",
                           isInterviewer && "text-cyan-400",
-                          isCandidate && "text-[#e6edf3] pl-3.5 border-l-2 border-white/10",
+                          isCandidate && "text-white pl-3.5 border-l-2 border-white/10",
                           isPass && "text-emerald-400",
                           (!isInterviewer && !isCandidate && !isPass) && "text-slate-200"
                         )}
@@ -13617,7 +13617,7 @@ function LandingPage() {
                         <div className="p-4 border border-emerald-500/20 bg-emerald-500/5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                            <div className="flex flex-col">
                               <span className="text-emerald-400 font-bold uppercase text-[9px] tracking-widest">Verification Complete</span>
-                              <span className="text-[#e6edf3] text-xs">Scorecard generated successfully. Ready for evaluation.</span>
+                              <span className="text-white text-xs">Scorecard generated successfully. Ready for evaluation.</span>
                            </div>
                            <button 
                              onClick={signIn} 
@@ -13642,8 +13642,8 @@ function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                {/* Feature 1: Multi-Agent Screening Pipelines */}
-               <div className="md:col-span-2 md:row-span-2 rounded-2xl glass-premium border border-[#e6edf3] p-10 flex flex-col relative overflow-hidden group">
-                 <div className="w-12 h-12 rounded-full bg-[#21262d] flex items-center justify-center mb-6 border border-[#e6edf3]/60">
+               <div className="md:col-span-2 md:row-span-2 rounded-2xl glass-premium border border-white/10 p-10 flex flex-col relative overflow-hidden group">
+                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10/60">
                    <GitBranch className="w-5 h-5 text-slate-300" />
                  </div>
                  <h3 className="text-2xl font-display font-light text-white mb-4">Multi-Agent Screening Pipelines</h3>
@@ -13666,8 +13666,8 @@ function LandingPage() {
                </div>
 
                {/* Feature 2: Anti-Cheating Identity Vetting */}
-               <div className="rounded-2xl glass-premium border border-[#e6edf3] p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-[#21262d] flex items-center justify-center mb-5 border border-[#e6edf3]/60">
+               <div className="rounded-2xl glass-premium border border-white/10 p-8 flex flex-col">
+                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-5 border border-white/10/60">
                    <ShieldCheck className="w-4 h-4 text-slate-300" />
                  </div>
                  <h3 className="text-lg font-display font-light text-white mb-3">Anti-Cheating Identity Vetting</h3>
@@ -13691,8 +13691,8 @@ function LandingPage() {
                </div>
 
                {/* Feature 3: AI Audio Processing Telemetry */}
-               <div className="rounded-2xl glass-premium border border-[#e6edf3] p-8 flex flex-col">
-                 <div className="w-10 h-10 rounded-full bg-[#21262d] flex items-center justify-center mb-5 border border-[#e6edf3]/60">
+               <div className="rounded-2xl glass-premium border border-white/10 p-8 flex flex-col">
+                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-5 border border-white/10/60">
                    <Volume2 className="w-4 h-4 text-slate-300" />
                  </div>
                  <h3 className="text-lg font-display font-light text-white mb-3">AI Audio Processing Telemetry</h3>
@@ -13715,9 +13715,9 @@ function LandingPage() {
                </div>
 
                {/* Feature 4: ATS Syncing */}
-               <div className="md:col-span-3 rounded-2xl glass-premium border border-[#e6edf3] p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+               <div className="md:col-span-3 rounded-2xl glass-premium border border-white/10 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
                  <div className="space-y-3">
-                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]">
+                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
                      <Database className="w-3 h-3 text-slate-200" />
                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-200">Integration Layer</span>
                    </div>
@@ -13726,15 +13726,15 @@ function LandingPage() {
                      Sync candidate data directly with systems like Greenhouse, Lever, or Workday. Automatically request interviews via webhooks and push scorecards back to your ATS of record.
                    </p>
                  </div>
-                 <button className="px-8 py-3 rounded-full transparent text-white font-bold uppercase tracking-widest text-xs hover:bg-[#30363d] transition-colors min-h-[44px] flex items-center justify-center shrink-0">
+                 <button className="px-8 py-3 rounded-full transparent text-white font-bold uppercase tracking-widest text-xs hover:bg-white/10 transition-colors min-h-[44px] flex items-center justify-center shrink-0">
                    View Integrations
                  </button>
                </div>
 
                {/* Feature 5: White-Label Candidate Lobby */}
-               <div className="md:col-span-3 rounded-2xl glass-premium border border-[#e6edf3] p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+               <div className="md:col-span-3 rounded-2xl glass-premium border border-white/10 p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
                  <div className="space-y-3">
-                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]">
+                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
                      <Globe className="w-3 h-3 text-slate-200" />
                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-200">Reseller & Tenant API</span>
                    </div>
@@ -13745,7 +13745,7 @@ function LandingPage() {
                  </div>
                  <button 
                    onClick={signIn} 
-                   className="px-8 py-3 rounded-full transparent text-white font-bold uppercase tracking-widest text-xs hover:bg-[#30363d] transition-colors min-h-[44px] flex items-center justify-center"
+                   className="px-8 py-3 rounded-full transparent text-white font-bold uppercase tracking-widest text-xs hover:bg-white/10 transition-colors min-h-[44px] flex items-center justify-center"
                  >
                    Explore API
                  </button>
@@ -13754,9 +13754,9 @@ function LandingPage() {
            </section>
 
           {/* Pricing Section */}
-          <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#e6edf3]/60">
+          <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10/60">
              <div className="text-center mb-20">
-               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]/80 mb-4">
+               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10/80 mb-4">
                  <CreditCard className="w-3.5 h-3.5 text-slate-200" />
                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Flexible Licensing</span>
                </div>
@@ -13766,7 +13766,7 @@ function LandingPage() {
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
                 {/* Starter Plan */}
-                <div className="rounded-3xl glass-premium border border-[#e6edf3]/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                <div className="rounded-3xl glass-premium border border-white/10/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
                   <h3 className="text-xl font-display text-white mb-2">Starter</h3>
                   <p className="text-slate-200 text-sm mb-8">Perfect for small boutique recruitment agencies.</p>
                   <div className="mb-8 flex items-baseline gap-1">
@@ -13808,14 +13808,14 @@ function LandingPage() {
                   </ul>
                   <button 
                     onClick={signIn} 
-                    className="w-full py-3.5 rounded-full transparent hover:bg-[#30363d] text-white text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
+                    className="w-full py-3.5 rounded-full transparent hover:bg-white/10 text-white text-xs font-bold uppercase tracking-widest transition-colors min-h-[44px] flex items-center justify-center shadow-md"
                   >
                     Deploy Pro Now
                   </button>
                 </div>
 
                 {/* Enterprise Plan */}
-                <div className="rounded-3xl glass-premium border border-[#e6edf3]/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
+                <div className="rounded-3xl glass-premium border border-white/10/80 p-10 flex flex-col hover:border-slate-350 hover:shadow-md transition-all duration-300">
                   <h3 className="text-xl font-display text-white mb-2">Enterprise</h3>
                   <p className="text-slate-200 text-sm mb-8">For global corporations needing high customizability.</p>
                   <div className="mb-8 flex items-baseline gap-1">
@@ -13838,9 +13838,9 @@ function LandingPage() {
            </section>
 
           {/* Testimonials Section */}
-          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#e6edf3]/60 glass-premium/10 backdrop-blur-xs">
+          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/10/60 glass-premium/10 backdrop-blur-xs">
             <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]/80 mb-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10/80 mb-4">
                 <Star className="w-3.5 h-3.5 text-slate-200" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Customer Success</span>
               </div>
@@ -13866,10 +13866,10 @@ function LandingPage() {
                   role: "Founder, Infinity Healthcare Corp"
                 }
               ].map((t, index) => (
-                <div key={index} className="glass-premium border border-[#e6edf3]/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
+                <div key={index} className="glass-premium border border-white/10/80 rounded-3xl p-10 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300">
                   <p className="text-slate-200 text-sm italic leading-relaxed mb-8">"{t.quote}"</p>
                   <div className="flex items-center gap-4 border-t border-white/10 pt-5">
-                    <div className="w-9 h-9 rounded-full bg-[#21262d] border border-[#e6edf3] flex items-center justify-center font-bold text-xs text-slate-300">
+                    <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-xs text-slate-300">
                       {t.author.charAt(0)}
                     </div>
                     <div>
@@ -13883,9 +13883,9 @@ function LandingPage() {
           </section>
 
           {/* FAQ Accordion Section */}
-          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-[#e6edf3]/60">
+          <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-white/10/60">
             <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#21262d] border border-[#e6edf3]/80 mb-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10/80 mb-4">
                 <Info className="w-3.5 h-3.5 text-slate-200" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Frequently Asked Questions</span>
               </div>
@@ -13912,7 +13912,7 @@ function LandingPage() {
                   a: "Conducting a single completed candidate interview consumes exactly 1 credit. System Admins can manage top-ups, Stripe payments, and allocate manual credits to different tenant organizations from the admin panel."
                 }
               ].map((faq, index) => (
-                <div key={index} className="glass-premium border border-[#e6edf3]/80 rounded-2xl overflow-hidden transition-all duration-300">
+                <div key={index} className="glass-premium border border-white/10/80 rounded-2xl overflow-hidden transition-all duration-300">
                   <button
                     onClick={() => setOpenFaq(openFaq === index ? null : index)}
                     className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-xs uppercase tracking-wider text-slate-300 hover:transparent/50 transition-colors"
@@ -13941,7 +13941,7 @@ function LandingPage() {
           </section>
 
           {/* Footer CTA */}
-          <section className="py-32 px-4 text-center border-t border-[#e6edf3] relative overflow-hidden bg-[#21262d]/40">
+          <section className="py-32 px-4 text-center border-t border-white/10 relative overflow-hidden bg-white/5/40">
             <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-6">
               Upgrade your screening process.
             </h2>
@@ -13950,7 +13950,7 @@ function LandingPage() {
             </p>
             <button 
               onClick={signIn} 
-              className="px-12 py-4 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-[#30363d] transition-colors shadow-xs min-h-[44px]"
+              className="px-12 py-4 rounded-full glass-premium text-white text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors shadow-xs min-h-[44px]"
             >
               Start Vetting Today
             </button>
@@ -13959,7 +13959,7 @@ function LandingPage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 border-t border-[#e6edf3] glass-premium text-center">
+        <footer className="py-12 border-t border-white/10 glass-premium text-center">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-200">
             © 2026 HireAI Inc. All rights reserved.
           </p>
