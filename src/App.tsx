@@ -13404,16 +13404,16 @@ function LandingPage() {
             </div>
             
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest">Platform</a>
-              <a href="#simulation" className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
-              <a href="#pricing" className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest">Pricing</a>
+              <a href="#features" className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest">Platform</a>
+              <a href="#simulation" className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest">Simulation</a>
+              <a href="#pricing" className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest">Pricing</a>
             </nav>
 
             <div className="flex items-center gap-3">
               
               <button 
                 onClick={signIn} 
-                className="text-xs font-black text-slate-200 hover:text-white transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
+                className="text-xs font-black text-white hover:text-white transition-colors uppercase tracking-widest min-h-[44px] px-3 flex items-center justify-center"
               >
                 Log In
               </button>
@@ -13467,15 +13467,15 @@ function LandingPage() {
           <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-premium border border-[#e6edf3]/80 mb-10 shadow-xs">
               <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">Autonomous Talent Lobby Live</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-white">Autonomous Talent Lobby Live</span>
             </div>
             
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black text-white tracking-tight leading-[1.15] mb-10 max-w-5xl mx-auto drop-shadow-lg">
               Scale your recruitment pipeline with <br className="hidden md:block"/>
-              <span className="text-brand-light">Autonomous AI Interviews.</span>
+              <span className="text-white">Autonomous AI Interviews.</span>
             </h1>
             
-            <p className="text-base sm:text-lg text-slate-200 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+            <p className="text-base sm:text-lg text-white max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
               Stop wasting builder and recruiter hours on initial screens. Deploy custom conversational AI agents to conduct rigorous, multi-dimensional screening interviews at absolute scale.
             </p>
             
@@ -13497,11 +13497,11 @@ function LandingPage() {
 
           {/* Trusted By Brand Ticker */}
           <section className="py-14 border-y border-[#e6edf3]/60 glass-premium/40 overflow-hidden backdrop-blur-xs">
-            <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-200 mb-8">Trusted by Elite Engineering Teams</p>
+            <p className="text-center text-[10px] font-black uppercase tracking-widest text-white mb-8">Trusted by Elite Engineering Teams</p>
             <div className="flex w-full overflow-hidden">
               <div className="flex animate-[marquee_35s_linear_infinite] min-w-full items-center justify-around gap-12 opacity-60">
                 {['Acme Corp', 'Zeta Labs', 'Stellar Tech', 'Infinity AI', 'Nexus Data', 'Quantum Systems', 'Apex Cloud', 'Vertex Dynamics'].map((company, i) => (
-                  <span key={i} className="text-lg md:text-xl font-display font-light uppercase tracking-tight whitespace-nowrap text-slate-300">{company}</span>
+                  <span key={i} className="text-lg md:text-xl font-display font-light uppercase tracking-tight whitespace-nowrap text-white">{company}</span>
                 ))}
               </div>
             </div>
@@ -13511,7 +13511,7 @@ function LandingPage() {
           <section id="simulation" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-display font-black text-white mb-4">See the AI in Action.</h2>
-              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed font-medium">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
+              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed font-medium">Experience how our agent evaluates senior talent through adaptive, unscripted technical dialogue.</p>
             </div>
 
             <div className="glass-premium rounded-2xl border border-[#e6edf3] shadow-sm overflow-hidden max-w-5xl mx-auto">
@@ -13637,7 +13637,7 @@ function LandingPage() {
           <section id="features" className="py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
              <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-display font-light text-white mb-4">Enterprise Vetting.</h2>
-              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
+              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Built to handle scale, accuracy, and full integration with your corporate hiring software.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -13761,7 +13761,7 @@ function LandingPage() {
                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Flexible Licensing</span>
                </div>
                <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Transparent Pricing.</h2>
-               <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
+               <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Empower your recruitment team with predictable plans tailored to your hiring volume.</p>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
@@ -13845,7 +13845,7 @@ function LandingPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Customer Success</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Endorsed by Top Builders.</h2>
-              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
+              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Read how elite engineering organizations are replacing manual screens with automated screening rooms.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -13890,7 +13890,7 @@ function LandingPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Frequently Asked Questions</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-display font-light text-white mb-4">Got Questions?</h2>
-              <p className="text-slate-200 max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
+              <p className="text-white max-w-2xl mx-auto text-sm leading-relaxed">Everything you need to know about the autonomous talent screening system.</p>
             </div>
 
             <div className="space-y-5">

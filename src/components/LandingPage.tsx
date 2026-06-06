@@ -87,9 +87,9 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               <span className="text-lg font-bold text-white tracking-tight">HireNow</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-slate-200 hover:text-white transition-colors font-medium">Features</a>
-              <a href="#stats" className="text-sm text-slate-200 hover:text-white transition-colors font-medium">Stats</a>
-              <a href="#testimonials" className="text-sm text-slate-200 hover:text-white transition-colors font-medium">Testimonials</a>
+              <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
+              <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
+              <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               <button onClick={onGetStarted} className="glass-premium text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-[#30363d] transition-all shadow-lg shadow-white/10">
                 Sign In
               </button>
@@ -102,7 +102,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/20 bg-brand/10 text-brand-light text-xs font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/20 bg-brand/10 text-white text-xs font-medium mb-8">
               <SparklesText sparklesCount={5} colors={{ first: "#818cf8", second: "#c084fc" }}>
                 <span className="text-xs">AI-Powered Talent Intelligence</span>
               </SparklesText>
@@ -120,10 +120,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.3} inView>
-            <p className="text-lg sm:text-xl text-slate-200 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+            <p className="text-lg sm:text-xl text-white max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
               Screen, interview, and evaluate candidates autonomously with advanced LLM analysis,
-              <span className="text-brand-light"> real-time proctoring</span>, and{" "}
-              <span className="text-brand-light">neural voice synthesis</span>.
+              <span className="text-white"> real-time proctoring</span>, and{" "}
+              <span className="text-white">neural voice synthesis</span>.
             </p>
           </BlurFade>
 
@@ -147,7 +147,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
           </BlurFade>
 
           <BlurFade delay={0.5} inView>
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-slate-200">
+            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-white">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span>No credit card</span>
@@ -182,7 +182,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                     <NumberTicker value={stat.value} className="text-white" />
                     {stat.suffix}
                   </div>
-                  <div className="text-sm text-slate-200 font-medium">{stat.label}</div>
+                  <div className="text-sm text-white font-medium">{stat.label}</div>
                 </div>
               </BlurFade>
             ))}
@@ -200,7 +200,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                 Hire Smarter
               </AnimatedGradientText>
             </h2>
-            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               From AI-powered screening to autonomous interviews, HireNow provides a complete talent intelligence platform.
             </p>
           </BlurFade>
@@ -214,7 +214,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                       <feature.icon className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-slate-200 text-sm leading-relaxed">{feature.description}</p>
+                    <p className="text-white text-sm leading-relaxed">{feature.description}</p>
                     <BorderBeam size={80} duration={8} delay={i * 2} colorFrom="#6366f1" colorTo="#a855f7" />
                   </div>
                 </div>
@@ -232,7 +232,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
               How It Works
             </h2>
-            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               Three simple steps to transform your hiring process.
             </p>
           </BlurFade>
@@ -250,7 +250,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                     <item.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-slate-200 text-sm leading-relaxed">{item.desc}</p>
+                  <p className="text-white text-sm leading-relaxed">{item.desc}</p>
                 </div>
               </BlurFade>
             ))}
@@ -268,7 +268,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                 Industry Leaders
               </AnimatedGradientText>
             </h2>
-            <p className="text-slate-200 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               See what hiring professionals are saying about HireNow.
             </p>
           </BlurFade>
@@ -284,10 +284,10 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white">{t.name}</div>
-                    <div className="text-xs text-slate-200">{t.role}</div>
+                    <div className="text-xs text-white">{t.role}</div>
                   </div>
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed">"{t.content}"</p>
+                <p className="text-sm text-white leading-relaxed">"{t.content}"</p>
                 <div className="flex gap-1 mt-3">
                   {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                 </div>
@@ -308,7 +308,7 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 leading-tight">
               Ready to Transform<br />Your Hiring Pipeline?
             </h2>
-            <p className="text-lg text-slate-200 mb-10 max-w-xl mx-auto">
+            <p className="text-lg text-white mb-10 max-w-xl mx-auto">
               Join 150+ forward-thinking companies that use HireNow to make smarter hiring decisions.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -318,13 +318,13 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               </RainbowButton>
               <button
                 onClick={onGetStarted}
-                className="px-10 py-4 rounded-xl border border-slate-700 text-slate-300 font-bold text-lg hover:bg-slate-800/50 transition-all"
+                className="px-10 py-4 rounded-xl border border-slate-700 text-white font-bold text-lg hover:bg-slate-800/50 transition-all"
               >
                 <Building2 className="w-5 h-5 inline mr-2" />
                 Book a Demo
               </button>
             </div>
-            <p className="text-sm text-slate-200 mt-6">No credit card required • Free credits included • Cancel anytime</p>
+            <p className="text-sm text-white mt-6">No credit card required • Free credits included • Cancel anytime</p>
           </BlurFade>
         </div>
       </section>
@@ -336,9 +336,9 @@ export function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center">
               <Search className="w-3 h-3 text-white" />
             </div>
-            <span className="text-sm font-bold text-slate-200">HireNow</span>
+            <span className="text-sm font-bold text-white">HireNow</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-slate-200">
+          <div className="flex items-center gap-6 text-xs text-white">
             <span>© 2026 HireNow. All rights reserved.</span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
