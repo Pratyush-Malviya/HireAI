@@ -93,7 +93,7 @@ export function LandingPage() {
               <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
               <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               <button onClick={() => navigate('/auth')} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
-                Sign In
+                Get Started
               </button>
             </div>
           </div>
