@@ -12157,11 +12157,11 @@ function SuperAdminPanel() {
                        { day: "Sat", screenings: 18 },
                        { day: "Sun", screenings: 12 }
                      ]}>
-                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-                       <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#a8a29e' }} />
-                       <YAxis tick={{ fontSize: 10, fill: '#a8a29e' }} />
-                       <Tooltip contentStyle={{ fontSize: 11 }} />
-                       <Bar dataKey="screenings" fill="#292524" radius={[4, 4, 0, 0]} />
+                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
+                       <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                       <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} />
+                       <Tooltip contentStyle={{ fontSize: 11, backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '8px' }} itemStyle={{ color: '#818cf8' }} />
+                       <Bar dataKey="screenings" fill="#818cf8" radius={[4, 4, 0, 0]} />
                      </BarChart>
                    </ResponsiveContainer>
                  </Card>
@@ -12585,11 +12585,11 @@ function SuperAdminPanel() {
                        { time: "00:00", latency: 790 }, { time: "04:00", latency: 812 }, { time: "08:00", latency: 845 },
                        { time: "12:00", latency: 921 }, { time: "16:00", latency: 878 }, { time: "20:00", latency: 832 }
                      ]}>
-                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#a8a29e' }} />
-                       <YAxis tick={{ fontSize: 9, fill: '#a8a29e' }} unit="ms" />
-                       <Tooltip contentStyle={{ fontSize: 11 }} />
-                       <Bar dataKey="latency" fill="#6366f1" radius={[3, 3, 0, 0]} />
+                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
+                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                       <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} unit="ms" />
+                       <Tooltip contentStyle={{ fontSize: 11, backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '8px' }} itemStyle={{ color: '#818cf8' }} />
+                       <Bar dataKey="latency" fill="#818cf8" radius={[4, 4, 0, 0]} />
                      </BarChart>
                    </ResponsiveContainer>
                  </Card>
@@ -12601,11 +12601,11 @@ function SuperAdminPanel() {
                        { time: "00:00", ops: 2100 }, { time: "04:00", ops: 1840 }, { time: "08:00", ops: 2450 },
                        { time: "12:00", ops: 3100 }, { time: "16:00", ops: 2890 }, { time: "20:00", ops: 2340 }
                      ]}>
-                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#a8a29e' }} />
-                       <YAxis tick={{ fontSize: 9, fill: '#a8a29e' }} />
-                       <Tooltip contentStyle={{ fontSize: 11 }} />
-                       <Bar dataKey="ops" fill="#10b981" radius={[3, 3, 0, 0]} />
+                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
+                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                       <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                       <Tooltip contentStyle={{ fontSize: 11, backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '8px' }} itemStyle={{ color: '#34d399' }} />
+                       <Bar dataKey="ops" fill="#34d399" radius={[4, 4, 0, 0]} />
                      </BarChart>
                    </ResponsiveContainer>
                  </Card>
@@ -12617,11 +12617,11 @@ function SuperAdminPanel() {
                        { time: "00:00", delay: 115 }, { time: "04:00", delay: 108 }, { time: "08:00", delay: 124 },
                        { time: "12:00", delay: 142 }, { time: "16:00", delay: 135 }, { time: "20:00", delay: 118 }
                      ]}>
-                       <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#a8a29e' }} />
-                       <YAxis tick={{ fontSize: 9, fill: '#a8a29e' }} unit="ms" />
-                       <Tooltip contentStyle={{ fontSize: 11 }} />
-                       <Bar dataKey="delay" fill="#06b6d4" radius={[3, 3, 0, 0]} />
+                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
+                       <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                       <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} unit="ms" />
+                       <Tooltip contentStyle={{ fontSize: 11, backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '8px' }} itemStyle={{ color: '#22d3ee' }} />
+                       <Bar dataKey="delay" fill="#22d3ee" radius={[4, 4, 0, 0]} />
                      </BarChart>
                    </ResponsiveContainer>
                  </Card>
@@ -12639,7 +12639,7 @@ function SuperAdminPanel() {
                          <Cell fill="#f59e0b" />
                          <Cell fill="#22c55e" />
                        </Pie>
-                       <Tooltip />
+                       <Tooltip contentStyle={{ fontSize: 11, backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc', borderRadius: '8px' }} itemStyle={{ color: '#f8fafc' }} />
                      </PieChart>
                    </ResponsiveContainer>
                  </Card>
