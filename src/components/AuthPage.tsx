@@ -44,10 +44,10 @@ export function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden font-sans">
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-dark/20 via-slate-950 to-[#030712] opacity-80 pointer-events-none" />
-      
+
       <div className="relative z-10 w-full max-w-md px-4 sm:px-0">
         <div className="glass-premium rounded-3xl p-8 sm:p-12 shadow-2xl border border-white/10 flex flex-col items-center relative overflow-hidden">
-          
+
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-gradient-to-tr from-brand-dark/20 via-transparent to-violet-600/20 blur-3xl rounded-full -z-10" />
 
           <Link to="/" className="w-16 h-16 rounded-2xl overflow-hidden bg-black flex items-center justify-center shadow-lg shadow-brand/20 mb-8 transition-transform hover:scale-105">
@@ -73,8 +73,8 @@ export function AuthPage() {
               <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Email</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -88,8 +88,8 @@ export function AuthPage() {
               <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Password</label>
               <div className="relative">
                 <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -99,8 +99,8 @@ export function AuthPage() {
               </div>
             </div>
 
-            <RainbowButton 
-              type="submit" 
+            <RainbowButton
+              type="submit"
               disabled={loading}
               className="w-full py-4 mt-6 font-bold"
             >
