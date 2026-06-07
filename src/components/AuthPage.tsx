@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Search, ArrowRight, ShieldCheck, Zap, Loader2, AlertCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { RainbowButton } from './magic-ui/rainbow-button';
 
@@ -38,6 +38,25 @@ export function AuthPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address first to reset your password.');
+      return;
+    }
+    setError(null);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setError('Password reset email sent! Please check your inbox.');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email.');
+      } else {
+        setError(err.message || 'Failed to send reset email. Please try again.');
+      }
     }
   };
 
@@ -85,7 +104,18 @@ export function AuthPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Password</label>
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Password</label>
+                {isLogin && (
+                  <button 
+                    type="button" 
+                    onClick={handleForgotPassword}
+                    className="text-[10px] font-bold text-brand hover:text-brand-light transition-colors uppercase tracking-widest pr-1"
+                  >
+                    Forgot Password?
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                 <input
