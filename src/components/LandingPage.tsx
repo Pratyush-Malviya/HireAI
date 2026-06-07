@@ -1,6 +1,5 @@
-"use client"
-
-import { ShieldCheck, Brain, Target, MessageSquare, Video, Clock, LayoutGrid, Zap, CheckCircle2, ChevronRight, BarChart3, Users, Star, ArrowRight, Search, Building2, Lightbulb, Shield, Globe, Cpu, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, Brain, Target, MessageSquare, Video, Clock, LayoutGrid, Zap, CheckCircle2, ChevronRight, BarChart3, Users, Star, ArrowRight, Search, Building2, Lightbulb, Shield, Globe, Cpu, FileText, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from "motion/react"
 import { Particles } from "./magic-ui/particles"
@@ -69,6 +68,7 @@ const testimonials = [
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
     <div className="relative min-h-screen bg-transparent overflow-hidden">
       {/* Hero Background Effects */}
@@ -94,12 +94,32 @@ export function LandingPage() {
                 <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
                 <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               </div>
-              <button onClick={() => navigate('/auth')} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
+              <button onClick={() => navigate('/auth')} className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
                 Get Started
+              </button>
+              <button 
+                className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-800/50 bg-[#030712]/95 backdrop-blur-xl absolute top-full left-0 w-full shadow-2xl">
+            <div className="px-4 py-6 flex flex-col gap-4">
+              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
+              <a href="#stats" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Stats</a>
+              <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Testimonials</a>
+              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/auth'); }} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all">
+                Get Started
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
