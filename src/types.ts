@@ -14,6 +14,7 @@ export interface Organization {
   tier?: 'starter' | 'pro' | 'enterprise';
   seatCount?: number;
   adminEmail?: string;
+  trialEndsAt?: any;
   emailSettings?: {
     smtpHost?: string;
     smtpPort?: string;

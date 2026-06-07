@@ -72,6 +72,26 @@ export function PaymentGateway() {
     }, 2500);
   };
 
+  const handleStartTrial = async () => {
+    setProcessingPayment(true);
+    try {
+      if (!orgId) return;
+      const trialEnds = new Date();
+      trialEnds.setDate(trialEnds.getDate() + 7);
+      
+      await updateDoc(doc(db, 'organizations', orgId), {
+        status: 'active',
+        trialEndsAt: trialEnds
+      });
+      setPaymentComplete(true);
+      setSuccessMsg('7-Day Free Trial activated! Please claim your workspace.');
+    } catch (err) {
+      setErrorMsg('Failed to start trial. Please try again.');
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
   const handleClaimWorkspace = async () => {
     try {
       setProcessingPayment(true);
@@ -174,21 +194,31 @@ export function PaymentGateway() {
                 <span className="text-4xl font-black text-white">${total}</span>
               </div>
 
-              <RainbowButton 
-                onClick={handlePay} 
-                disabled={processingPayment}
-                className="w-full py-4 mt-4 font-bold"
-              >
-                {processingPayment ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" /> Processing Payment...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Pay ${total} <ArrowRight className="w-4 h-4" />
-                  </span>
-                )}
-              </RainbowButton>
+              <div className="space-y-3 mt-4">
+                <RainbowButton 
+                  onClick={handlePay} 
+                  disabled={processingPayment}
+                  className="w-full py-4 font-bold"
+                >
+                  {processingPayment ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" /> Processing Payment...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      Pay ${total} <ArrowRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </RainbowButton>
+
+                <button
+                  onClick={handleStartTrial}
+                  disabled={processingPayment}
+                  className="w-full py-3.5 rounded-xl border-2 border-white/10 hover:border-white/30 hover:bg-white/5 text-white font-bold transition-all flex justify-center items-center gap-2 text-sm"
+                >
+                  Start 7-Day Free Trial
+                </button>
+              </div>
 
               <div className="flex items-center justify-center gap-2 text-[10px] text-white/40 uppercase font-black tracking-widest mt-4">
                 <ShieldCheck className="w-3.5 h-3.5" /> Secure 256-bit SSL Encryption
