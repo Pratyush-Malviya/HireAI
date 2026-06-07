@@ -4,7 +4,7 @@ import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, Che
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
 import { Job, Candidate, Organization, UserProfile } from './types';
@@ -455,8 +455,7 @@ function PlaceholderScoreCircle({ isProcessing }: { isProcessing: boolean }) {
 // --- Contexts ---
 const NotificationContext = createContext<{ 
   confirm: (msg: string) => Promise<boolean>,
-  notify: (msg: string, type?: 'success' | 'error' | 'info') => void,
-  signIn: () => Promise<void>
+  notify: (msg: string, type?: 'success' | 'error' | 'info') => void
 } | null>(null);
 
 const ProfileContext = createContext<{
@@ -2807,7 +2806,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
   const location = useLocation();
   const [clearing, setClearing] = useState(false);
   const navigate = useNavigate();
-  const { confirm, notify, signIn } = useNotification();
+  const { confirm, notify } = useNotification();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -13567,35 +13566,11 @@ export default function App() {
     </div>
   );
 
-  const handleSignIn = async () => {
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        process.env.NODE_ENV === 'development' && console.log('Sign-in popup closed by user.');
-        return;
-      }
-      if (error.code === 'auth/popup-blocked') {
-        notify('Sign-in popup was blocked by your browser. Please allow popups for this site and try again.', 'error');
-        return;
-      }
-      if (error.code === 'auth/cancelled-popup-request') {
-        // This often happens in iframe environments if multiple clicks occur or browser cancels
-        notify('Authentication was cancelled or blocked. Please ensure popups are enabled and try standard login.', 'info');
-        return;
-      }
-      if (error.code === 'auth/unauthorized-domain') {
-        notify(`Authorized Domain Missing: Please add "${window.location.hostname}" to your Authorized Domains in Firebase Console > Authentication > Settings.`, 'error');
-        return;
-      }
-      console.error('Sign-in error:', error);
-      notify('Failed to sign in. Please try again.', 'error');
-    }
-  };
+
 
   return (
     <Router>
-      <NotificationContext.Provider value={{ confirm, notify, signIn: handleSignIn }}>
+      <NotificationContext.Provider value={{ confirm, notify }}>
         <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, stripeModalOpen, setStripeModalOpen, theme, setTheme }}>
           <Layout user={user} isAdmin={isAdmin}>
             {user ? (
@@ -13626,7 +13601,7 @@ export default function App() {
                 <Routes>
                   <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
                   <Route path="/pay/:orgId" element={<PaymentGateway />} />
-                  <Route path="/auth" element={<AuthPage onSignIn={handleSignIn} />} />
+                  <Route path="/auth" element={<AuthPage />} />
                   <Route path="*" element={<LandingPage />} />
                 </Routes>
               </Suspense>
