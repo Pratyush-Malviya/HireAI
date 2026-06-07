@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Brain, Target, MessageSquare, Video, Clock, LayoutGrid, Zap, CheckCircle2, ChevronRight, BarChart3, Users, Star, ArrowRight, Search, Building2, Lightbulb, Shield, Globe, Cpu, FileText, Menu, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from "motion/react"
 import { Particles } from "./magic-ui/particles"
 import { BorderBeam } from "./magic-ui/border-beam"
@@ -94,9 +94,9 @@ export function LandingPage() {
                 <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
                 <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               </div>
-              <button onClick={() => navigate('/auth')} className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
+              <Link to="/auth" className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10 text-center">
                 Get Started
-              </button>
+              </Link>
               <button 
                 className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -114,9 +114,9 @@ export function LandingPage() {
               <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
               <a href="#stats" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Stats</a>
               <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Testimonials</a>
-              <button onClick={() => { setIsMobileMenuOpen(false); navigate('/auth'); }} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all">
+              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all block">
                 Get Started
-              </button>
+              </Link>
             </div>
           </div>
         )}
