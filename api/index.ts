@@ -215,13 +215,16 @@ app.post("/api/calendar/schedule", async (req, res) => {
 
   if (useComposio && composio && userId) {
     try {
-      const response = await composio.tools.execute(userId, "GOOGLECALENDAR_CREATE_EVENT", {
-        calendar_id: "primary",
-        summary: summary,
-        description: description,
-        start_datetime: startTime,
-        event_duration_minutes: Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / (60 * 1000)),
-        attendees: [candidateEmail]
+      const response = await composio.tools.execute("GOOGLECALENDAR_CREATE_EVENT", {
+        userId: userId,
+        arguments: {
+          calendar_id: "primary",
+          summary: summary,
+          description: description,
+          start_datetime: startTime,
+          event_duration_minutes: Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / (60 * 1000)),
+          attendees: [candidateEmail]
+        }
       });
       console.log("Composio GOOGLECALENDAR_CREATE_EVENT response:", response);
       return res.json(response.data || response);
@@ -276,11 +279,14 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       const subject = subjectOverride || `Interview Invitation: ${cleanTitle} with HireNow`;
       const body = emailBody || `Hi ${cleanName},\n\nYou are invited to complete an interview for the position of ${cleanTitle}.\n\nPlease join the interview room here: ${interviewLink}`;
       
-      const response = await composio.tools.execute(userId, "GMAIL_SEND_EMAIL", {
-        to: candidateEmail,
-        recipient: candidateEmail,
-        subject: subject,
-        body: body
+      const response = await composio.tools.execute("GMAIL_SEND_EMAIL", {
+        userId: userId,
+        arguments: {
+          to: candidateEmail,
+          recipient: candidateEmail,
+          subject: subject,
+          body: body
+        }
       });
       console.log("Composio GMAIL_SEND_EMAIL response:", response);
       return res.json({
@@ -2470,9 +2476,7 @@ Rules:
 // ==========================================
 // START MEETING BOT & COMPOSIO ROUTES
 // ==========================================
-import { Composio } from "@composio/core";
 import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
 import admin from "firebase-admin";
 
 // Initialize Firebase Admin for Storage access if credentials are provided
@@ -2634,9 +2638,9 @@ app.put("/api/files/upload/multipart/finalize/:teamId/:folderId/:fileId/:uploadI
     for (const file of files) {
       const filePath = path.join(chunkDir, file);
       const readStream = fs.createReadStream(filePath);
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         readStream.pipe(writeStream, { end: false });
-        readStream.on("end", resolve);
+        readStream.on("end", () => resolve());
         readStream.on("error", reject);
       });
     }
@@ -2714,9 +2718,9 @@ app.get("/api/composio/status", async (req, res) => {
   }
   try {
     const connections = await composio.connectedAccounts.list({
-      user_ids: [userId]
+      userIds: [userId]
     });
-    const googleConn = connections.find(c => c.app_name === 'google' || c.toolkit_name === 'google');
+    const googleConn = connections.items.find((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
     res.json({
       connected: !!googleConn,
       connectionId: googleConn?.id || null
@@ -2793,9 +2797,9 @@ app.post("/api/composio/disconnect", async (req, res) => {
   }
   try {
     const connections = await composio.connectedAccounts.list({
-      user_ids: [userId]
+      userIds: [userId]
     });
-    const googleConns = connections.filter(c => c.app_name === 'google' || c.toolkit_name === 'google');
+    const googleConns = connections.items.filter((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
     for (const conn of googleConns) {
       await composio.connectedAccounts.delete(conn.id);
     }
