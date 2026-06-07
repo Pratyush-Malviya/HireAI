@@ -10,7 +10,10 @@ export interface Organization {
   botSpeechRate?: number;
   createdAt: any;
   createdBy: string;
-  status: 'active' | 'suspended';
+  status: 'active' | 'suspended' | 'pending_payment';
+  tier?: 'starter' | 'pro' | 'enterprise';
+  seatCount?: number;
+  adminEmail?: string;
   emailSettings?: {
     smtpHost?: string;
     smtpPort?: string;

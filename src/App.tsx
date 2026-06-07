@@ -11843,14 +11843,14 @@ function SuperAdminPanel() {
              Single Entry
            </button>
            <button 
-             onClick={() => setBulkMode(true)}
-             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", bulkMode ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
+             onClick={() => setCreationMode('bulk')}
+             className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all", creationMode === 'bulk' ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
            >
              Bulk Upload
            </button>
         </div>
 
-        {!bulkMode ? (
+        {creationMode !== 'bulk' ? (
           <form onSubmit={handleCreateOrg} className="space-y-4">
              <div className="space-y-1">
                 <label className="text-[10px] font-black text-white uppercase tracking-widest">Company Name</label>

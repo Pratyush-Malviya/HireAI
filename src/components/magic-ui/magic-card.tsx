@@ -40,7 +40,7 @@ export function MagicCard({
       onPointerLeave={() => reset()}
       style={{
         background: useMotionTemplate`linear-gradient(var(--color-background) 0 0) padding-box, radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, ${gradientFrom}, ${gradientTo}, transparent 100%) border-box`,
-      } as React.CSSProperties}
+      } as any}
     >
       <div className="absolute inset-px z-20 rounded-[inherit] glass-premium dark:transparent" />
       <motion.div
@@ -48,7 +48,7 @@ export function MagicCard({
         style={{
           background: useMotionTemplate`radial-gradient(${gradientSize}px circle at ${mouseX}px ${mouseY}px, ${gradientColor}, transparent 100%)`,
           opacity: gradientOpacity,
-        } as React.CSSProperties}
+        } as any}
       />
       <div className="relative z-40">{children}</div>
     </motion.div>
