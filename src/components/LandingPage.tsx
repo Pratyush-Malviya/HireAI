@@ -101,7 +101,7 @@ export function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-32 pb-40 px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 pt-16 pb-40 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-brand/20 bg-brand/5 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-[0.2em] mb-12 shadow-2xl shadow-brand/10">
