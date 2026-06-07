@@ -13,6 +13,7 @@ export interface Organization {
   status: 'active' | 'suspended' | 'pending_payment';
   tier?: 'starter' | 'pro' | 'enterprise';
   seatCount?: number;
+  memberCount?: number;
   adminEmail?: string;
   trialEndsAt?: any;
   emailSettings?: {
@@ -30,22 +31,49 @@ export interface Organization {
       primaryColor?: string;
     }
   };
+  whiteLabel?: {
+    domain?: string;
+    primaryColor?: string;
+    logoUrl?: string;
+    customCss?: string;
+    faviconUrl?: string;
+  };
   workingHours?: {
     start: string;
     end: string;
     timezone: string;
   };
   botSpeakingPace?: number;
+  stripeCustomerId?: string;
+  subscriptionStatus?: string;
+  currentPeriodEnd?: string;
+  jobCount?: number;
+  candidateCount?: number;
 }
 
 export interface UserProfile {
   uid: string;
   email: string;
   organizationId: string;
-  role: 'owner' | 'admin' | 'recruiter';
+  role: 'owner' | 'admin' | 'recruiter' | 'hr_executive';
   fullName: string;
   credits?: number;
   createdAt: any;
+  status?: 'active' | 'invited' | 'disabled';
+  invitedBy?: string;
+  lastLoginAt?: any;
+}
+
+export interface TeamMember {
+  uid: string;
+  email: string;
+  fullName: string;
+  role: UserProfile['role'];
+  status: 'active' | 'invited' | 'disabled';
+  organizationId: string;
+  createdAt: any;
+  invitedBy?: string;
+  lastLoginAt?: any;
 }
 
 export interface JobRequirements {

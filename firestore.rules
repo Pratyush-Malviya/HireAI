@@ -6,47 +6,60 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Helper functions
+    // ── Helper Functions ──────────────────────────────────────
+
     function isSignedIn() {
       return request.auth != null;
     }
-    
+
     function isSuperAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email in ['malviya.pratyush26@gmail.com']
+      );
+    }
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
     function getUserData() {
-      let path = /databases/$(database)/documents/users/$(request.auth.uid);
-      return exists(path) ? get(path).data : null;
+      let userDoc = getUserDoc();
+      return userDoc.exists ? userDoc.data : null;
     }
 
-    function getUserOrg() {
+    function getUserOrgId() {
       let data = getUserData();
       return data != null && data.keys().hasAll(['organizationId']) ? data.organizationId : null;
     }
 
-    function isInOrg(orgId) {
-      return isSignedIn() && (isSuperAdmin() || getUserOrg() == orgId);
-    }
-
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    function isAdmin() {
+    function getUserRole() {
       let data = getUserData();
+      return data != null && data.keys().hasAll(['role']) ? data.role : null;
+    }
+
+    function getTokenRole() {
+      return request.auth.token.role;
+    }
+
+    function getTokenOrgId() {
+      return request.auth.token.orgId;
+    }
+
+    function isInOrg(orgId) {
       return isSignedIn() && (
         isSuperAdmin() ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        (data != null && data.keys().hasAll(['role']) && (data.role == "admin" || data.role == "owner"))
+        getUserOrgId() == orgId ||
+        getTokenOrgId() == orgId
+      );
+    }
+
+    function isOrgAdmin(orgId) {
+      let role = getUserRole();
+      let tokenRole = getTokenRole();
+      return isInOrg(orgId) && (
+        role in ['admin', 'owner'] ||
+        tokenRole in ['admin', 'owner']
       );
     }
 
@@ -54,75 +67,15 @@ service cloud.firestore {
       return data.keys().hasAll(['name', 'createdAt', 'createdBy', 'status'])
         && data.name is string && data.name.size() <= 200
         && data.createdBy == request.auth.uid
-        && data.status in ['active', 'suspended'];
+        && data.status in ['active', 'suspended', 'pending_payment'];
     }
 
-    // Organizations collection
-    match /organizations/{organizationId} {
-      // Allow get for any signed in user so they can see names when invited
-      allow get: if isSignedIn();
-      allow list: if isSignedIn() && (isSuperAdmin() || organizationId == getUserOrg());
-      allow create: if isSignedIn() && isValidOrganization(incoming());
-      allow update: if isSignedIn() && (isSuperAdmin() || (organizationId == getUserOrg() && isAdmin()));
-    }
-
-    // Users collection
-    match /users/{uid} {
-      allow read: if isSignedIn() && (isSuperAdmin() || uid == request.auth.uid || (existing().keys().hasAll(['organizationId']) && getUserOrg() == existing().organizationId));
-      allow create: if isSignedIn() && uid == request.auth.uid;
-      allow update: if isSignedIn() && (isSuperAdmin() || uid == request.auth.uid || (existing().keys().hasAll(['organizationId']) && getUserOrg() == existing().organizationId && isAdmin()));
-    }
-
-    // Admins collection
-    match /admins/{adminId} {
-      allow read: if isSignedIn();
-      allow write: if isSuperAdmin();
-    }
-
-    // Job rules
-    match /jobs/{jobId} {
-      allow read: if isSignedIn() && (isSuperAdmin() || existing().organizationId == getUserOrg());
-      allow create: if isSignedIn() && isInOrg(incoming().organizationId) && incoming().createdBy == request.auth.uid;
-      allow update, delete: if isSignedIn() && (isSuperAdmin() || (existing().organizationId == getUserOrg() && isAdmin()));
-    }
-
-    // Candidate rules
-    match /candidates/{candidateId} {
-      allow read: if isSignedIn() && (isSuperAdmin() || existing().organizationId == getUserOrg() || existing().email == request.auth.token.email);
-      allow create: if isSignedIn() && isInOrg(incoming().organizationId) && isValidCandidate(incoming());
-      allow update: if isSignedIn() && (
-        isSuperAdmin() || 
-        (existing().organizationId == getUserOrg() && isAdmin() && isValidCandidate(incoming())) ||
-        (existing().email == request.auth.token.email && (incoming().diff(existing()).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']) && isValidCandidate(incoming())))
-      );
-      allow delete: if isSignedIn() && (isSuperAdmin() || (existing().organizationId == getUserOrg() && isAdmin()));
-    }
-
-    // Screening cache (resume evaluation dedup cache)
-    // Any signed-in user can read and create entries; no mutation after creation
-    match /screening_cache/{cacheId} {
-      allow read, list: if isSignedIn();
-      allow create: if isSignedIn()
-        && incoming().keys().hasAll(['cacheHash', 'result', 'createdAt'])
-        && incoming().cacheHash is string;
-      allow update, delete: if false;
-    }
-
-    // Interview rules
-    match /interviews/{interviewId} {
-      allow read, list: if isSignedIn() && (
-        isSuperAdmin() || 
-        existing().organizationId == getUserOrg() ||
-        get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.email == request.auth.token.email
-      );
-      allow create: if isSignedIn() && isInOrg(incoming().organizationId) && isValidInterview(incoming());
-      allow update: if isSignedIn() && (
-        isSuperAdmin() || 
-        (existing().organizationId == getUserOrg() && isAdmin() && isValidInterview(incoming())) ||
-        (get(/databases/$(database)/documents/candidates/$(existing().candidateId)).data.email == request.auth.token.email && 
-         incoming().diff(existing()).affectedKeys().hasAny(['messages', 'completed', 'feedback', 'completedAt']) &&
-         isValidInterview(incoming()))
-      );
+    function isValidCandidate(data) {
+      return data.keys().hasAll(['jobId', 'fullName', 'createdAt', 'status'])
+        && data.jobId is string
+        && data.fullName is string && data.fullName.size() <= 200
+        && data.status in ['processed', 'shortlisted', 'rejected']
+        && (data.keys().hasAny(['scorecard']) ? data.scorecard is map : true);
     }
 
     function isValidInterview(data) {
@@ -132,12 +85,191 @@ service cloud.firestore {
         && data.messages is list;
     }
 
-    function isValidCandidate(data) {
-      return data.keys().hasAll(['jobId', 'fullName', 'createdAt', 'status'])
-        && data.jobId is string
-        && data.fullName is string && data.fullName.size() <= 200
-        && data.status in ['processed', 'shortlisted', 'rejected']
-        && (data.keys().hasAny(['scorecard']) ? data.scorecard is map : true);
+    // ── RBAC Enforcement ──────────────────────────────────────
+
+    // Candidates get NO read/write access to any application data
+    function isNotCandidate() {
+      let role = getUserRole();
+      let tokenRole = getTokenRole();
+      return role != 'candidate' && tokenRole != 'candidate';
+    }
+
+    function isHRStaff(orgId) {
+      return isOrgAdmin(orgId) || getUserRole() in ['recruiter', 'hr_executive'] || getTokenRole() in ['recruiter', 'hr_executive'];
+    }
+
+    // ── Collections ───────────────────────────────────────────
+
+    // Organizations
+    match /organizations/{organizationId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && isNotCandidate();
+      allow create: if isSignedIn() && isValidOrganization(incoming());
+      allow update: if isSignedIn() && (
+        isSuperAdmin() ||
+        (organizationId == getUserOrgId() && isOrgAdmin(organizationId))
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // Users (profiles)
+    match /users/{uid} {
+      allow read: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        uid == request.auth.uid ||
+        getUserOrgId() == get(/databases/$(database)/documents/users/$(uid)).data.organizationId
+      );
+      allow create: if isSignedIn() && uid == request.auth.uid;
+      allow update: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        uid == request.auth.uid ||
+        (getUserOrgId() == get(/databases/$(database)/documents/users/$(uid)).data.organizationId && isOrgAdmin(getUserOrgId()))
+      );
+    }
+
+    // Admins (super admin registry)
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin();
+    }
+
+    // Jobs
+    match /jobs/{jobId} {
+      allow read: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow create: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        isInOrg(incoming().organizationId)
+      ) && incoming().createdBy == request.auth.uid;
+      allow update, delete: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId()))
+      );
+    }
+
+    // Candidates
+    match /candidates/{candidateId} {
+      allow read: if isSignedIn() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId() ||
+        resource.data.email == request.auth.token.email
+      );
+      allow create: if isSignedIn() && (
+        isSuperAdmin() ||
+        (isInOrg(incoming().organizationId) && isNotCandidate())
+      );
+      allow update: if isSignedIn() && (
+        isSuperAdmin() ||
+        (resource.data.organizationId == getUserOrgId() && isHRStaff(getUserOrgId())) ||
+        // Allow candidates to update their own interview status
+        (resource.data.email == request.auth.token.email &&
+         incoming().diff(resource.data).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']))
+      );
+      allow delete: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId()))
+      );
+    }
+
+    // Screening cache
+    match /screening_cache/{cacheId} {
+      allow read, list: if isSignedIn();
+      allow create: if isSignedIn()
+        && incoming().keys().hasAll(['cacheHash', 'result', 'createdAt'])
+        && incoming().cacheHash is string;
+      allow update, delete: if false;
+    }
+
+    // Interviews
+    match /interviews/{interviewId} {
+      allow read, list: if isSignedIn() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId() ||
+        get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.email == request.auth.token.email
+      );
+      allow create: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        isInOrg(incoming().organizationId)
+      );
+      allow update: if isSignedIn() && (
+        isSuperAdmin() ||
+        (resource.data.organizationId == getUserOrgId() && isHRStaff(getUserOrgId())) ||
+        (get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.email == request.auth.token.email &&
+         incoming().diff(resource.data).affectedKeys().hasAny(['messages', 'completed', 'feedback', 'completedAt']) &&
+         isValidInterview(incoming()))
+      );
+    }
+
+    // Meetings (Google Meet links)
+    match /meetings/{meetingId} {
+      allow read: if isSignedIn() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow create: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        isInOrg(resource.data.organizationId)
+      );
+      allow update: if isSignedIn() && (
+        isSuperAdmin() ||
+        (resource.data.organizationId == getUserOrgId() && isHRStaff(getUserOrgId()))
+      );
+    }
+
+    // Meeting bot dispatches
+    match /meeting_bot_dispatches/{dispatchId} {
+      allow read: if isSignedIn() && isNotCandidate();
+      allow write: if false; // Only written by Cloud Functions
+    }
+
+    // Interview questions (AI-generated)
+    match /interview_questions/{questionId} {
+      allow read: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow write: if false; // Only written by Cloud Functions
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow update: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow create: if false; // Created by Cloud Functions
+    }
+
+    // Stripe events (webhook processing)
+    match /stripe_events/{eventId} {
+      allow read: if isSuperAdmin();
+      allow create: if false; // Created by webhook endpoint
+      allow write: if false;
+    }
+
+    // Stripe checkout requests
+    match /stripe_checkout_requests/{requestId} {
+      allow read: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow create: if isSignedIn() && isNotCandidate();
+      allow update: if false; // Updated by Cloud Function
+    }
+
+    // Interview completions
+    match /interview_completions/{completionId} {
+      allow read: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId()
+      );
+      allow write: if false; // Written by Cloud Functions
     }
   }
 }

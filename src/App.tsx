@@ -1,13 +1,13 @@
 import { LogOut, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
-import { Job, Candidate, Organization, UserProfile } from './types';
+import { Job, Candidate, Organization, UserProfile, TeamMember } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
@@ -2957,6 +2957,14 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 <Database className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">Resume Bank</span>}
              </Link>
+             <Link to="/screening-reports" className={cn("py-2.5 rounded-lg text-sm font-medium text-white hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                <BarChart3 className="w-5 h-5 shrink-0" /> 
+                {!isSidebarCollapsed && <span className="truncate">Screening Reports</span>}
+             </Link>
+             <Link to="/interview-reports" className={cn("py-2.5 rounded-lg text-sm font-medium text-white hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
+                <Radio className="w-5 h-5 shrink-0" /> 
+                {!isSidebarCollapsed && <span className="truncate">Interview Reports</span>}
+             </Link>
              <Link to="/org-admin" className={cn("py-2.5 rounded-lg text-sm font-medium text-white hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3", isSidebarCollapsed ? "px-0 justify-center" : "px-4")}>
                 <Settings className="w-5 h-5 shrink-0" /> 
                 {!isSidebarCollapsed && <span className="truncate">HR Admin</span>}
@@ -3037,6 +3045,8 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                     <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Dashboard</Link>
                     <Link to="/jobs/new" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Post Job</Link>
                     <Link to="/resume-bank" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Resume Bank</Link>
+                    <Link to="/screening-reports" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Screening Reports</Link>
+                    <Link to="/interview-reports" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Interview Reports</Link>
                     <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">HR Admin</Link>
                     {isUserAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">System Admin</Link>
@@ -9714,7 +9724,7 @@ function OrgAdminPanel() {
     }
   };
   // Custom states for Workspace settings editing
-  const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace'>('analytics');
+  const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace' | 'team'>('analytics');
 
   const [orgName, setOrgName] = useState('');
   const [orgDomain, setOrgDomain] = useState('');
@@ -10196,9 +10206,23 @@ function OrgAdminPanel() {
           <Settings className="w-4 h-4" />
           Workspace Configuration
         </button>
+        <button 
+          onClick={() => setActivePanelTab('team')}
+          className={cn(
+            "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
+            activePanelTab === 'team' 
+              ? "border-b-2 border-brand-dark text-white font-black pb-[11px]" 
+              : "border-transparent text-white hover:text-white"
+          )}
+        >
+          <Users className="w-4 h-4" />
+          Team Management
+        </button>
       </div>
 
-      {activePanelTab === 'analytics' ? (
+      {activePanelTab === 'team' ? (
+        <TeamManagementTab organization={organization} />
+      ) : activePanelTab === 'analytics' ? (
         <>
           {/* Sub Header for Metrics Panel */}
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/10 pb-6">
@@ -12444,6 +12468,100 @@ function SuperAdminPanel() {
                             </div>
                           </div>
 
+                          {/* Seat Allocation Override */}
+                          <div className="p-4 transparent rounded-2xl border border-white/10 space-y-3.5">
+                            <h4 className="text-[10px] font-black uppercase text-white tracking-widest">Seat Allocation Override</h4>
+                            <p className="text-[9px] text-white font-medium">Current seats: {org.seatCount || 0} | Members: {org.memberCount || 0}</p>
+                            <div className="flex gap-2">
+                              <input 
+                                type="number" 
+                                id={`seats-alloc-${org.id}`}
+                                defaultValue={org.seatCount || 5}
+                                min="1"
+                                max="999"
+                                placeholder="Seats" 
+                                className="w-24 glass-premium border border-white/10 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none"
+                              />
+                              <Button
+                                onClick={async () => {
+                                  const el = document.getElementById(`seats-alloc-${org.id}`) as HTMLInputElement;
+                                  const seats = parseInt(el?.value || '0');
+                                  if (seats <= 0) return;
+                                  const ok = await confirm(`Override seat limit to ${seats} for ${org.name}?`);
+                                  if (!ok) return;
+                                  try {
+                                    await updateDoc(doc(db, 'organizations', org.id), { seatCount: seats });
+                                    setOrganizations(prev => prev.map(x => x.id === org.id ? { ...x, seatCount: seats } : x));
+                                    notify(`Seat limit updated to ${seats} for ${org.name}!`, 'success');
+                                  } catch (err) {
+                                    console.error(err);
+                                    notify('Failed to update seat limit.', 'error');
+                                  }
+                                }}
+                                className="h-auto py-1.5 px-4 glass-premium text-white rounded-xl text-[10px] font-black uppercase tracking-widest"
+                              >
+                                Override
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Nuclear Reset */}
+                          <div className="p-4 transparent rounded-2xl border border-red-500/20 space-y-3.5">
+                            <h4 className="text-[10px] font-black uppercase text-white tracking-widest flex items-center gap-2 text-red-400">
+                              <AlertTriangle className="w-3.5 h-3.5" /> Nuclear Reset
+                            </h4>
+                            <p className="text-[9px] text-white font-medium">
+                              Permanently delete ALL jobs, candidates, and user associations for this organization. 
+                              Type the organization name to confirm.
+                            </p>
+                            <div className="flex gap-2">
+                              <input 
+                                type="text" 
+                                id={`nuclear-confirm-${org.id}`}
+                                placeholder={`Type "${org.name}" to confirm`}
+                                className="flex-1 glass-premium border border-red-500/30 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-red-500"
+                              />
+                              <Button
+                                onClick={async () => {
+                                  const el = document.getElementById(`nuclear-confirm-${org.id}`) as HTMLInputElement;
+                                  const confirmation = el?.value || '';
+                                  if (confirmation !== org.name) {
+                                    notify(`Type the exact organization name "${org.name}" to confirm.`, 'error');
+                                    return;
+                                  }
+                                  const ok = await confirm(`DANGER: This will permanently delete ALL data for ${org.name}. This cannot be undone. Continue?`);
+                                  if (!ok) return;
+                                  try {
+                                    await updateDoc(doc(db, 'organizations', org.id), {
+                                      status: 'suspended',
+                                      memberCount: 0,
+                                      jobCount: 0,
+                                      candidateCount: 0,
+                                      resetAt: new Date().toISOString(),
+                                      resetBy: auth.currentUser?.uid,
+                                    });
+                                    const batch = writeBatch(db);
+                                    const [jobsSnap, candidatesSnap] = await Promise.all([
+                                      getDocs(query(collection(db, 'jobs'), where('organizationId', '==', org.id))),
+                                      getDocs(query(collection(db, 'candidates'), where('organizationId', '==', org.id)))
+                                    ]);
+                                    jobsSnap.docs.forEach(d => batch.delete(d.ref));
+                                    candidatesSnap.docs.forEach(d => batch.delete(d.ref));
+                                    await batch.commit();
+                                    notify(`Nuclear reset complete for ${org.name}. All data purged.`, 'success');
+                                    setSelectedOrgId(null);
+                                  } catch (err) {
+                                    console.error(err);
+                                    notify('Nuclear reset failed.', 'error');
+                                  }
+                                }}
+                                className="h-auto py-1.5 px-4 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                              >
+                                <Ban className="w-3 h-3 mr-1" /> Execute Reset
+                              </Button>
+                            </div>
+                          </div>
+
                           <div className="space-y-3">
                             <h4 className="text-[10px] font-black uppercase text-white tracking-widest border-b border-white/10 pb-1.5">Simulated Tenant Users</h4>
                             <div className="space-y-2">
@@ -12799,11 +12917,32 @@ function SuperAdminPanel() {
               <div className="flex justify-between items-center border-b border-white/10 pb-4">
                 <div>
                   <h2 className="text-xl font-display font-light text-white">White-Label & Reseller Portal</h2>
-                  <p className="text-white text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups.</p>
+                  <p className="text-white text-xs mt-0.5">Customize workspace colors, branding parameters, and dynamic reseller price markups. Config is stored securely in Firestore.</p>
                 </div>
+                <Button
+                  onClick={async () => {
+                    try {
+                      await updateDoc(doc(db, 'settings', 'white_label'), {
+                        brandingName: whiteLabelBrandingName,
+                        logoUrl: whiteLabelLogoUrl,
+                        primaryColor,
+                        markupFactor: whiteLabelMarkupFactor,
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: auth.currentUser?.uid,
+                      });
+                      notify('White-label configuration saved to Firestore!', 'success');
+                    } catch (err) {
+                      console.error(err);
+                      notify('Failed to save configuration.', 'error');
+                    }
+                  }}
+                  className="h-10 px-6 text-[10px] font-black uppercase tracking-widest bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-white rounded-xl"
+                >
+                  <Globe className="w-3.5 h-3.5 mr-1.5" /> Save to Firestore
+                </Button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card className="p-6 space-y-4">
                   <h3 className="text-xs font-bold uppercase tracking-widest text-white">Portal Identity</h3>
                   <div className="space-y-3">
@@ -12822,6 +12961,39 @@ function SuperAdminPanel() {
                         type="text" 
                         value={whiteLabelLogoUrl} 
                         onChange={(e) => setWhiteLabelLogoUrl(e.target.value)} 
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white uppercase">Primary Color (Hex)</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="color" 
+                          value={primaryColor}
+                          onChange={(e) => setPrimaryColor(e.target.value)}
+                          className="w-12 h-12 rounded-xl border border-white/10 cursor-pointer"
+                        />
+                        <input 
+                          type="text" 
+                          value={primaryColor}
+                          onChange={(e) => setPrimaryColor(e.target.value)}
+                          className="flex-1 rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white uppercase">Favicon URL</label>
+                      <input 
+                        type="text"
+                        placeholder="https://yourdomain.com/favicon.ico"
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white uppercase">Custom Domain</label>
+                      <input 
+                        type="text"
+                        placeholder="app.yourcompany.com"
                         className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
                       />
                     </div>
@@ -12853,6 +13025,73 @@ function SuperAdminPanel() {
                         <option>INR (₹)</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="text-[10px] font-bold text-white uppercase">Reseller Model</label>
+                      <select 
+                        value={resellerModel}
+                        onChange={(e) => setResellerModel(e.target.value as 'per_seat' | 'per_interview')}
+                        className="mt-1 block w-full rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:ring-[#161b22] focus:outline-none min-h-[44px]"
+                      >
+                        <option value="per_seat">Per Seat</option>
+                        <option value="per_interview">Per Interview</option>
+                      </select>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-white">Client Tenants</h3>
+                  <div className="space-y-3">
+                    {clientTenants.map(ct => (
+                      <div key={ct.id} className="transparent/50 p-3 rounded-xl border border-white/10 space-y-1.5">
+                        {editingTenantId === ct.id ? (
+                          <>
+                            <input
+                              type="text"
+                              value={editingTenantName}
+                              onChange={(e) => setEditingTenantName(e.target.value)}
+                              className="w-full text-xs font-bold px-2 py-1 rounded border border-white/10"
+                              placeholder="Tenant name"
+                            />
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                step="0.05"
+                                value={editingTenantMarkup}
+                                onChange={(e) => setEditingTenantMarkup(parseFloat(e.target.value))}
+                                className="w-20 text-xs font-bold px-2 py-1 rounded border border-white/10"
+                              />
+                              <Button size="sm" variant="brand" className="text-[8px] px-2 py-1" onClick={() => {
+                                setClientTenants(prev => prev.map(t => t.id === ct.id ? { ...t, name: editingTenantName, markup: editingTenantMarkup } : t));
+                                setEditingTenantId(null);
+                              }}>Save</Button>
+                              <Button size="sm" variant="ghost" className="text-[8px] px-2 py-1" onClick={() => setEditingTenantId(null)}>Cancel</Button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-white">{ct.name}</span>
+                              <span className="text-[10px] font-black text-brand">{ct.markup}x</span>
+                            </div>
+                            <div className="flex justify-between text-[9px] text-white">
+                              <span>{ct.jobs} jobs • {ct.candidates} candidates</span>
+                              <span>${ct.billableAmt.toLocaleString()}</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setEditingTenantId(ct.id);
+                                setEditingTenantName(ct.name);
+                                setEditingTenantMarkup(ct.markup);
+                              }}
+                              className="text-[8px] font-black text-brand uppercase tracking-widest hover:underline"
+                            >
+                              Edit Markup
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </Card>
               </div>
@@ -13412,6 +13651,573 @@ function Onboarding() {
   );
 }
 
+// ── Team Management Tab (inside Org Admin) ─────────────────────
+
+function TeamManagementTab({ organization }: { organization: Organization | null }) {
+  const { profile } = useProfile();
+  const { confirm, notify } = useNotification();
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRole, setInviteRole] = useState<'recruiter' | 'hr_executive'>('hr_executive');
+  const [inviting, setInviting] = useState(false);
+
+  useEffect(() => {
+    if (!profile?.organizationId) return;
+    const q = query(
+      collection(db, 'users'),
+      where('organizationId', '==', profile.organizationId)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      const members = snap.docs.map(d => ({ uid: d.id, ...d.data() })) as TeamMember[];
+      setTeamMembers(members);
+      setLoading(false);
+    });
+    return unsub;
+  }, [profile?.organizationId]);
+
+  const seatLimit = organization?.seatCount || 5;
+  const currentMembers = organization?.memberCount || teamMembers.length;
+  const seatsAvailable = Math.max(0, seatLimit - currentMembers);
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim() || !inviteName.trim() || !profile?.organizationId) return;
+
+    if (currentMembers >= seatLimit) {
+      notify('Seat limit reached. Please upgrade your plan to add more team members.', 'error');
+      return;
+    }
+
+    setInviting(true);
+    try {
+      const existingQuery = query(
+        collection(db, 'users'),
+        where('email', '==', inviteEmail.trim().toLowerCase())
+      );
+      const existingSnap = await getDocs(existingQuery);
+
+      if (!existingSnap.empty) {
+        const existingUser = existingSnap.docs[0];
+        await updateDoc(doc(db, 'users', existingUser.id), {
+          organizationId: profile.organizationId,
+          role: inviteRole,
+          fullName: inviteName.trim(),
+          status: 'active',
+          invitedBy: auth.currentUser?.uid,
+        });
+        notify(`${inviteName.trim()} has been added to your team.`, 'success');
+      } else {
+        await addDoc(collection(db, 'users'), {
+          uid: `pending_${Date.now()}`,
+          email: inviteEmail.trim().toLowerCase(),
+          fullName: inviteName.trim(),
+          role: inviteRole,
+          organizationId: profile.organizationId,
+          status: 'invited',
+          createdAt: serverTimestamp(),
+          invitedBy: auth.currentUser?.uid,
+        });
+        notify(`Invitation sent to ${inviteEmail.trim()}.`, 'success');
+      }
+
+      setInviteEmail('');
+      setInviteName('');
+    } catch (err) {
+      console.error(err);
+      notify('Failed to invite team member.', 'error');
+    } finally {
+      setInviting(false);
+    }
+  };
+
+  const handleRemoveMember = async (member: TeamMember) => {
+    const ok = await confirm(`Remove ${member.fullName || member.email} from your organization?`);
+    if (!ok) return;
+
+    try {
+      await updateDoc(doc(db, 'users', member.uid), {
+        organizationId: null,
+        role: 'recruiter',
+        status: 'disabled',
+      });
+      notify('Team member removed.', 'success');
+    } catch (err) {
+      console.error(err);
+      notify('Failed to remove team member.', 'error');
+    }
+  };
+
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case 'owner': return { label: 'Owner', color: 'text-amber-600 bg-amber-50 border-amber-100' };
+      case 'admin': return { label: 'Admin', color: 'text-blue-600 bg-blue-50 border-blue-100' };
+      case 'hr_executive': return { label: 'HR Executive', color: 'text-purple-600 bg-purple-50 border-purple-100' };
+      default: return { label: 'Recruiter', color: 'text-slate-600 bg-slate-50 border-slate-100' };
+    }
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/10 pb-6">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight mb-1">Team Management</h2>
+          <p className="text-xs text-white font-medium">
+            {currentMembers} / {seatLimit} seats used ({seatsAvailable} available)
+          </p>
+        </div>
+      </div>
+
+      {/* Seat Usage Bar */}
+      <div className="glass-premium border border-white/10 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5 text-brand" />
+            <span className="text-sm font-black text-white uppercase tracking-widest">Seat Allocation</span>
+          </div>
+          <span className="text-xs font-black text-white bg-white/5 px-3 py-1 rounded-lg border border-white/10">
+            {currentMembers}/{seatLimit}
+          </span>
+        </div>
+        <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/10">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all duration-500",
+              currentMembers >= seatLimit ? "bg-red-500" : "bg-gradient-to-r from-brand to-brand-dark"
+            )}
+            style={{ width: `${Math.min(100, (currentMembers / Math.max(1, seatLimit)) * 100)}%` }}
+          />
+        </div>
+        {currentMembers >= seatLimit && (
+          <p className="text-[10px] text-red-400 font-black uppercase tracking-widest flex items-center gap-1.5">
+            <AlertTriangle className="w-3 h-3" /> Seat limit reached. Upgrade to add more members.
+          </p>
+        )}
+      </div>
+
+      {/* Invite Form */}
+      <Card className="p-6 border-white/10 space-y-5 rounded-2xl">
+        <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+          <UserPlus className="w-4 h-4 text-brand" /> Invite Team Member
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-[9px] font-black uppercase text-white tracking-wider block mb-1">Full Name</label>
+            <input
+              type="text"
+              value={inviteName}
+              onChange={(e) => setInviteName(e.target.value)}
+              placeholder="Jane Smith"
+              className="w-full px-3 py-2.5 text-xs font-bold transparent border border-white/10 rounded-xl focus:outline-none focus:border-brand text-white"
+            />
+          </div>
+          <div>
+            <label className="text-[9px] font-black uppercase text-white tracking-wider block mb-1">Email Address</label>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="jane@company.com"
+              className="w-full px-3 py-2.5 text-xs font-bold transparent border border-white/10 rounded-xl focus:outline-none focus:border-brand text-white"
+            />
+          </div>
+          <div>
+            <label className="text-[9px] font-black uppercase text-white tracking-wider block mb-1">Role</label>
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value as 'recruiter' | 'hr_executive')}
+              className="w-full px-3 py-2.5 text-xs font-bold transparent border border-white/10 rounded-xl focus:outline-none focus:border-brand text-white"
+            >
+              <option value="hr_executive">HR Executive</option>
+              <option value="recruiter">Recruiter</option>
+            </select>
+          </div>
+        </div>
+        <Button
+          variant="primary"
+          onClick={handleInvite}
+          disabled={inviting || !inviteEmail.trim() || !inviteName.trim() || currentMembers >= seatLimit}
+          className="h-11 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl"
+        >
+          {inviting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+          Send Invitation
+        </Button>
+      </Card>
+
+      {/* Team Members List */}
+      <Card className="overflow-hidden border-white/10 rounded-2xl">
+        {loading ? (
+          <div className="p-12 text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-brand mx-auto mb-3" />
+            <p className="text-xs text-white font-bold uppercase tracking-widest">Loading team...</p>
+          </div>
+        ) : teamMembers.length === 0 ? (
+          <div className="p-12 text-center">
+            <Users className="w-12 h-12 text-white mx-auto mb-3 opacity-40" />
+            <h4 className="text-sm font-black text-white uppercase tracking-widest mb-1">No Team Members</h4>
+            <p className="text-xs text-white">Invite your first team member to get started.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[600px]">
+              <thead className="transparent border-b border-white/10">
+                <tr>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Name</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Email</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Role</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {teamMembers.map((member) => {
+                  const badge = getRoleBadge(member.role);
+                  return (
+                    <tr key={member.uid} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center font-black text-white text-xs">
+                            {(member.fullName || member.email).charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-xs font-bold text-white">{member.fullName || 'Unnamed'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-white font-medium">{member.email}</td>
+                      <td className="px-6 py-4">
+                        <span className={cn("text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-wider", badge.color)}>
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={cn(
+                          "text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5",
+                          member.status === 'active' ? 'text-green-500' : member.status === 'invited' ? 'text-amber-500' : 'text-red-500'
+                        )}>
+                          <span className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            member.status === 'active' ? 'bg-green-500' : member.status === 'invited' ? 'bg-amber-500' : 'bg-red-500'
+                          )} />
+                          {member.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {member.role !== 'owner' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-500 hover:bg-red-500/10"
+                            onClick={() => handleRemoveMember(member)}
+                          >
+                            <UserMinus className="w-3 h-3 mr-1" /> Remove
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ── Screening Reports Page ─────────────────────────────────────
+
+function ScreeningReports() {
+  const { profile } = useProfile();
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!profile?.organizationId) return;
+
+    const unsubJobs = onSnapshot(
+      query(collection(db, 'jobs'), where('organizationId', '==', profile.organizationId)),
+      (snap) => setJobs(snap.docs.map(d => ({ id: d.id, ...d.data() })) as Job[])
+    );
+
+    const unsubCandidates = onSnapshot(
+      query(collection(db, 'candidates'), where('organizationId', '==', profile.organizationId)),
+      (snap) => {
+        setCandidates(snap.docs.map(d => ({ id: d.id, ...d.data() })) as Candidate[]);
+        setLoading(false);
+      }
+    );
+
+    return () => { unsubJobs(); unsubCandidates(); };
+  }, [profile?.organizationId]);
+
+  const stats = useMemo(() => {
+    const scores = candidates.map(c => c.scorecard?.compositeScore).filter(s => s !== undefined) as number[];
+    return {
+      total: candidates.length,
+      avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+      topScore: scores.length ? Math.max(...scores) : 0,
+      passed: scores.filter(s => s >= 80).length,
+      failed: scores.filter(s => s < 40).length,
+    };
+  }, [candidates]);
+
+  const jobMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    jobs.forEach(j => { map[j.id] = j.title; });
+    return map;
+  }, [jobs]);
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="border-b border-white/10 pb-6">
+        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Screening Reports</h1>
+        <p className="text-xs text-white font-medium">Resume match scores and AI assessment results across all job pipelines.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Total Screened', value: stats.total, color: 'text-brand' },
+          { label: 'Average Match', value: `${stats.avgScore}%`, color: 'text-blue-500' },
+          { label: 'Top Score', value: `${stats.topScore}%`, color: 'text-green-500' },
+          { label: 'Below Threshold', value: stats.failed, color: 'text-red-500' },
+        ].map(s => (
+          <Card key={s.label} className="p-6 border-white/10 rounded-2xl flex items-center gap-4">
+            <div>
+              <p className="text-2xl font-black mb-1">{s.value}</p>
+              <p className="text-[10px] font-black text-white uppercase tracking-widest">{s.label}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="overflow-hidden border-white/10 rounded-2xl">
+        {loading ? (
+          <div className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" /></div>
+        ) : candidates.length === 0 ? (
+          <div className="p-12 text-center">
+            <BarChart3 className="w-12 h-12 text-white mx-auto mb-3 opacity-40" />
+            <h3 className="text-sm font-black text-white uppercase tracking-widest">No Screening Data</h3>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[700px]">
+              <thead className="transparent border-b border-white/10">
+                <tr>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Candidate</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Job</th>
+                  <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Score</th>
+                  <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Report</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {candidates.sort((a, b) => (b.scorecard?.compositeScore || 0) - (a.scorecard?.compositeScore || 0)).map(c => (
+                  <tr key={c.id} className="hover:bg-white/5 transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${c.id}`)}>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center font-black text-white text-xs">
+                          {c.fullName.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">{c.fullName}</p>
+                          <p className="text-[10px] text-white">{c.currentRole}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-white font-medium">{jobMap[c.jobId] || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={cn(
+                        "text-xs font-black",
+                        (c.scorecard?.compositeScore || 0) >= 80 ? 'text-green-500' :
+                        (c.scorecard?.compositeScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'
+                      )}>
+                        {c.scorecard?.compositeScore || 0}%
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={cn(
+                        "text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider",
+                        c.status === 'processed' ? 'bg-green-50 text-green-600 border border-green-100' :
+                        c.status === 'shortlisted' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                        'bg-red-50 text-red-600 border border-red-100'
+                      )}>
+                        {c.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c.id}`); }}>
+                        <FileText className="w-3 h-3 mr-1" /> View
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+// ── Interview Reports Page ─────────────────────────────────────
+
+function InterviewReports() {
+  const { profile } = useProfile();
+  const [interviews, setInterviews] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!profile?.organizationId) return;
+
+    const unsubCandidates = onSnapshot(
+      query(collection(db, 'candidates'), where('organizationId', '==', profile.organizationId)),
+      (snap) => {
+        setCandidates(snap.docs.map(d => ({ id: d.id, ...d.data() })) as Candidate[]);
+        setLoading(false);
+      }
+    );
+
+    const unsubInterviews = onSnapshot(
+      query(collection(db, 'interviews'), where('organizationId', '==', profile.organizationId)),
+      (snap) => {
+        setInterviews(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      }
+    );
+
+    return () => { unsubCandidates(); unsubInterviews(); };
+  }, [profile?.organizationId]);
+
+  const candidateMap = useMemo(() => {
+    const map: Record<string, Candidate> = {};
+    candidates.forEach(c => { map[c.id] = c; });
+    return map;
+  }, [candidates]);
+
+  const completedInterviews = interviews.filter(i => i.completed);
+  const inProgressInterviews = interviews.filter(i => !i.completed);
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="border-b border-white/10 pb-6">
+        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Interview Reports</h1>
+        <p className="text-xs text-white font-medium">AI voice interview scorecards, transcripts, and completion status.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {[
+          { label: 'Total Interviews', value: interviews.length, color: 'text-brand' },
+          { label: 'Completed', value: completedInterviews.length, color: 'text-green-500' },
+          { label: 'In Progress', value: inProgressInterviews.length, color: 'text-amber-500' },
+        ].map(s => (
+          <Card key={s.label} className="p-6 border-white/10 rounded-2xl flex items-center gap-4">
+            <div>
+              <p className="text-2xl font-black mb-1">{s.value}</p>
+              <p className="text-[10px] font-black text-white uppercase tracking-widest">{s.label}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* In Progress */}
+      {inProgressInterviews.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-black text-white uppercase tracking-tight">In Progress</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {inProgressInterviews.map(iv => {
+              const cand = candidateMap[iv.candidateId];
+              return (
+                <Card key={iv.id} className="p-6 border-white/10 rounded-2xl space-y-3 cursor-pointer hover:border-brand/30 transition-all" onClick={() => cand && navigate(`/candidates/${cand.id}`)}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-black">
+                      {cand?.fullName?.charAt(0) || '?'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">{cand?.fullName || 'Unknown'}</p>
+                      <p className="text-[10px] text-white font-medium">{cand?.currentRole}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-amber-500 font-black uppercase tracking-widest">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Interview in Progress
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Completed */}
+      <Card className="overflow-hidden border-white/10 rounded-2xl">
+        {loading ? (
+          <div className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" /></div>
+        ) : completedInterviews.length === 0 ? (
+          <div className="p-12 text-center">
+            <Radio className="w-12 h-12 text-white mx-auto mb-3 opacity-40" />
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">No Completed Interviews</h3>
+            <p className="text-xs text-white">Interview reports will appear here once candidates complete their sessions.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[700px]">
+              <thead className="transparent border-b border-white/10">
+                <tr>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Candidate</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Job</th>
+                  <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Score</th>
+                  <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {completedInterviews.sort((a, b) => (b.completedAt?.seconds || 0) - (a.completedAt?.seconds || 0)).map(iv => {
+                  const cand = candidateMap[iv.candidateId];
+                  return (
+                    <tr key={iv.id} className="hover:bg-white/5 transition-colors cursor-pointer" onClick={() => cand && navigate(`/candidates/${cand.id}`)}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center font-black text-white text-xs">
+                            {cand?.fullName?.charAt(0) || '?'}
+                          </div>
+                          <span className="text-xs font-bold text-white">{cand?.fullName || 'Unknown'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-white font-medium">{cand?.currentRole || 'N/A'}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={cn(
+                          "text-xs font-black",
+                          (cand?.scorecard?.compositeScore || 0) >= 80 ? 'text-green-500' :
+                          (cand?.scorecard?.compositeScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'
+                        )}>
+                          {cand?.scorecard?.compositeScore || 0}%
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-green-50 text-green-600 border border-green-100 uppercase tracking-wider">
+                          Completed
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); cand && navigate(`/candidates/${cand.id}`); }}>
+                          <FileText className="w-3 h-3 mr-1" /> Scorecard
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 
 
 export default function App() {
@@ -13589,6 +14395,8 @@ export default function App() {
                       <Route path="/jobs/new" element={<NewJob />} />
                       <Route path="/jobs/:jobId" element={<JobDetail />} />
                       <Route path="/candidates/:candidateId" element={<CandidateDetail />} />
+                      <Route path="/screening-reports" element={<ScreeningReports />} />
+                      <Route path="/interview-reports" element={<InterviewReports />} />
                       <Route path="/org-admin" element={<OrgAdminPanel />} />
                       <Route path="/resume-bank" element={<ResumeBank />} />
                       <Route path="/admin" element={<SuperAdminPanel />} />
