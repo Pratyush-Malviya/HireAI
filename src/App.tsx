@@ -6407,11 +6407,11 @@ function JobDetail() {
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-black uppercase text-white tracking-wider">Candidate Profile</span>
                 {inviteEmailInput ? (
-                  <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Email Extracted
                   </span>
                 ) : (
-                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100/50">
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">
                     Missing Email
                   </span>
                 )}
@@ -6479,9 +6479,9 @@ function JobDetail() {
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="hidden p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
+              <div className="hidden p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-500/30 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
+                  <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
@@ -6491,7 +6491,7 @@ function JobDetail() {
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10 rounded-xl text-emerald-400 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
@@ -7571,19 +7571,19 @@ function CandidateDetail() {
 
       {/* AI Fallback Warning Banner */}
       {candidate.aiQuotaExceeded && (
-        <Card className="border-2 border-amber-300 bg-amber-50/50 mb-6 overflow-hidden animate-in slide-in-from-top-4 duration-500 shadow-sm">
-          <div className="bg-amber-500 px-6 py-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex items-center gap-3 text-white">
-              <AlertTriangle className="w-6 h-6 shrink-0" />
+        <Card className="border-2 border-amber-500/30 bg-amber-500/5 mb-6 overflow-hidden animate-in slide-in-from-top-4 duration-500 shadow-sm">
+          <div className="bg-amber-500/20 px-6 py-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-6 h-6 shrink-0 text-amber-400" />
               <div>
-                <h3 className="font-black uppercase tracking-widest text-sm">AI Screening Unavailable</h3>
-                <p className="text-amber-100 text-xs mt-0.5 font-medium">Due to capacity limits, this scorecard was generated using a basic fallback model.</p>
+                <h3 className="font-black uppercase tracking-widest text-sm text-amber-300">AI Screening Unavailable</h3>
+                <p className="text-amber-400/70 text-xs mt-0.5 font-medium">Due to capacity limits, this scorecard was generated using a basic fallback model.</p>
               </div>
             </div>
             <Button 
               onClick={handleRetryScreening}
               disabled={retryingScreening}
-              className="glass-premium text-amber-700 hover:bg-amber-50 font-black uppercase tracking-widest text-xs h-10 px-6 shadow-md transition-all active:scale-95 whitespace-nowrap shrink-0"
+              className="glass-premium text-amber-300 hover:bg-amber-500/10 font-black uppercase tracking-widest text-xs h-10 px-6 shadow-md transition-all active:scale-95 whitespace-nowrap shrink-0"
             >
               {retryingScreening ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {retryingScreening ? 'Retrying...' : 'Retry Screening'}
@@ -7594,19 +7594,19 @@ function CandidateDetail() {
 
       {/* Risk Signals & Red Flags Section */}
       {scorecard?.dimensions?.redFlags?.flags?.length > 0 && (
-        <Card className="border-2 border-red-100 bg-red-50/30 overflow-hidden animate-in slide-in-from-top-4 duration-500">
-           <div className="bg-red-600 px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-white">
-                 <AlertTriangle className="w-5 h-5" />
-                 <h3 className="font-black uppercase tracking-widest text-sm">Critical Risk Signals Detected</h3>
+        <Card className="border-2 border-red-500/20 bg-red-500/5 overflow-hidden animate-in slide-in-from-top-4 duration-500">
+           <div className="bg-red-500/20 px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                 <AlertTriangle className="w-5 h-5 text-red-400" />
+                 <h3 className="font-black uppercase tracking-widest text-sm text-red-300">Critical Risk Signals Detected</h3>
               </div>
-              <span className="text-[10px] font-black glass-premium/20 px-2 py-1 rounded uppercase tracking-widest text-white">
+              <span className="text-[10px] font-black glass-premium/20 px-2 py-1 rounded uppercase tracking-widest text-red-300">
                 D6 Integrity Check
               </span>
            </div>
            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {scorecard.dimensions.redFlags.flags.map((flag: any, idx: number) => (
-                <div key={idx} className="glass-premium p-4 rounded-xl border border-red-100 shadow-sm relative group overflow-hidden">
+                <div key={idx} className="glass-premium p-4 rounded-xl border border-white/10 shadow-sm relative group overflow-hidden">
                    <div className={cn(
                      "absolute top-0 left-0 w-1 h-full",
                      flag.severity === 'high' ? "bg-red-500" : "bg-amber-500"
@@ -7614,20 +7614,20 @@ function CandidateDetail() {
                    <div className="flex justify-between items-start mb-2">
                       <span className={cn(
                         "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full",
-                        flag.severity === 'high' ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
+                        flag.severity === 'high' ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"
                       )}>
                         {flag.severity} Severity
                       </span>
-                      <span className="text-[10px] font-black text-red-500">-{flag.penalty} pts</span>
+                      <span className="text-[10px] font-black text-red-400">-{flag.penalty} pts</span>
                    </div>
                    <h4 className="font-black text-white text-sm mb-1 uppercase tracking-tight">{flag.label}</h4>
-                   <p className="text-xs text-white leading-relaxed italic">{flag.rationale}</p>
+                   <p className="text-xs text-white/80 leading-relaxed italic">{flag.rationale}</p>
                 </div>
               ))}
            </div>
-           <div className="px-6 py-3 bg-red-50 border-t border-red-100 flex justify-between items-center">
-              <p className="text-[10px] font-bold text-red-600 uppercase italic">Multi-source OSINT verification confirmed these signals.</p>
-              <p className="text-[11px] font-black text-red-700 uppercase tracking-widest">
+           <div className="px-6 py-3 bg-red-500/10 border-t border-red-500/20 flex justify-between items-center">
+              <p className="text-[10px] font-bold text-red-400 uppercase italic">Multi-source OSINT verification confirmed these signals.</p>
+              <p className="text-[11px] font-black text-red-300 uppercase tracking-widest">
                 Aggregated Score Impact: <span className="text-base">-{scorecard.dimensions.redFlags.totalPenalty}</span>
               </p>
            </div>
@@ -7809,17 +7809,17 @@ function CandidateDetail() {
                   {/* Row 1: Section 7 - Confidence Meter Panel & Section 1: Verified Profiles */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* CONFIDENCE METER (Section 7) */}
-                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-rose-50/50 border-rose-200 shadow-rose-100/30' : 'transparent border-white/10/60 shadow-slate-100/30 shadow-md'}`}>
+                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-red-500/10 border-red-500/30' : 'transparent border-white/10'}`}>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-rose-500' : 'text-emerald-500'}`} />
+                          <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-red-400' : 'text-emerald-400'}`} />
                           <h4 className="text-xs font-black uppercase tracking-widest text-white">7. Confidence Meter</h4>
                         </div>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
-                          status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
-                          status === 'HIGH_CONFIDENCE' ? 'bg-blue-100 text-blue-800' :
-                          status === 'MEDIUM_CONFIDENCE' ? 'bg-amber-100 text-amber-800' :
-                          'bg-rose-100 text-rose-800'
+                          status === 'VERIFIED' ? 'bg-emerald-500/20 text-emerald-400' :
+                          status === 'HIGH_CONFIDENCE' ? 'bg-blue-500/20 text-blue-400' :
+                          status === 'MEDIUM_CONFIDENCE' ? 'bg-amber-500/20 text-amber-400' :
+                          'bg-red-500/20 text-red-400'
                         }`}>
                           {status.replace('_', ' ')}
                         </span>
@@ -7829,7 +7829,7 @@ function CandidateDetail() {
                         <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
                           {/* Svg Circle Progress Indicator */}
                           <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="32" cy="32" r="28" strokeWidth="6" stroke="#e2e8f0" fill="transparent" />
+                            <circle cx="32" cy="32" r="28" strokeWidth="6" stroke="rgba(255,255,255,0.1)" fill="transparent" />
                             <circle cx="32" cy="32" r="28" strokeWidth="6" 
                               stroke={isUnverified ? '#f43f5e' : '#10b981'} 
                               strokeDasharray={175} 
@@ -7853,7 +7853,7 @@ function CandidateDetail() {
                     </div>
 
                     {/* VERIFIED PROFILES (Section 1) */}
-                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-white/10/60 shadow-md shadow-slate-100/30 flex flex-col justify-between">
+                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-white/10 flex flex-col justify-between">
                       <div className="flex items-center gap-2 mb-4">
                         <Users className="w-5 h-5 text-brand" />
                         <h4 className="text-xs font-black uppercase tracking-widest text-white">1. Verified Profiles</h4>
@@ -7870,22 +7870,22 @@ function CandidateDetail() {
                               rel="noopener noreferrer"
                               className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                                 isVer 
-                                  ? 'bg-emerald-50/40 border-emerald-100 hover:border-emerald-300' 
-                                  : 'bg-transparent/50 border-white/10/40 hover:border-white/20'
+                                  ? 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/50' 
+                                  : 'bg-white/5 border-white/10 hover:border-white/20'
                               } ${!p.url || p.url === '#' ? 'pointer-events-none cursor-default' : ''}`}
                             >
                               <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${isVer ? 'bg-emerald-500' : 'bg-[#8b949e]'}`} />
+                                <span className={`w-2 h-2 rounded-full ${isVer ? 'bg-emerald-400' : 'bg-white/30'}`} />
                                 <span className="text-xs font-black text-white">{p.name}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-700' : 'text-white'}`}>
+                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-400' : 'text-white/50'}`}>
                                   {isVer ? 'Verified' : 'Unverified'}
                                 </span>
                                 {isVer ? (
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                                 ) : (
-                                  <AlertCircle className="w-3.5 h-3.5 text-white shrink-0" />
+                                  <AlertCircle className="w-3.5 h-3.5 text-white/50 shrink-0" />
                                 )}
                               </div>
                             </a>
@@ -7897,16 +7897,16 @@ function CandidateDetail() {
 
                   {isUnverified ? (
                     /* WARNING WARNING VIEW FOR UNVERIFIED PROFILES */
-                    <div className="p-8 bg-rose-50 border border-rose-100 rounded-3xl text-center space-y-4">
-                      <div className="mx-auto w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
-                        <AlertTriangle className="w-6 h-6 text-rose-600" />
+                    <div className="p-8 bg-red-500/10 border border-red-500/30 rounded-3xl text-center space-y-4">
+                      <div className="mx-auto w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <AlertTriangle className="w-6 h-6 text-red-400" />
                       </div>
-                      <h4 className="text-base font-black text-rose-950 uppercase tracking-wide">Sensitive Insights Hidden</h4>
-                      <p className="text-sm text-rose-800 max-w-xl mx-auto leading-relaxed">
+                      <h4 className="text-base font-black text-red-300 uppercase tracking-wide">Sensitive Insights Hidden</h4>
+                      <p className="text-sm text-red-300/70 max-w-xl mx-auto leading-relaxed">
                         To maintain compliance and high intelligence precision, HireAI security rules dictate that sensitive background analysis metrics (technical scores, risk intelligence, leadership analytics, and performance narratives) are hidden when identity confidence falls under the <strong>85%</strong> threshold.
                       </p>
                       <div className="pt-2">
-                        <p className="text-xs text-rose-600 font-bold uppercase tracking-wider">
+                        <p className="text-xs text-red-400 font-bold uppercase tracking-wider">
                           👉 Please ask the recruiter to perform a manual verification audit.
                         </p>
                       </div>
@@ -8004,10 +8004,10 @@ function CandidateDetail() {
                               <h4 className="text-xs font-black uppercase tracking-widest text-white">5. Leadership & Communication</h4>
                             </div>
           
-                              <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded tracking-wider">
+                              <span className="text-[10px] font-black bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded tracking-wider">
                                 L: {leadershipScore}%
                               </span>
-                              <span className="text-[10px] font-black bg-purple-100 text-purple-800 px-2 py-0.5 rounded tracking-wider">
+                              <span className="text-[10px] font-black bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded tracking-wider">
                                 C: {communicationScore}%
                               </span>
                             </div>
@@ -8029,31 +8029,32 @@ function CandidateDetail() {
 
                       
                       {/* Row 4: Risk Signals (Section 6) */}
-<div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-rose-50/50 border-rose-200' : 'bg-emerald-50/20 border-emerald-100'}`}>
-                          <div className="flex items-center gap-2">
-                            <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-rose-500' : 'text-emerald-500'}`} />
-                            <h4 className="text-xs font-black uppercase tracking-widest text-white">6. Risk Signals</h4>
+<div id="risk-signals-card" className={`p-6 border rounded-2xl transition-all ${riskScore > 20 ? 'bg-red-500/10 border-red-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Shield className={`w-5 h-5 ${riskScore > 20 ? 'text-red-400' : 'text-emerald-400'}`} />
+                              <h4 className="text-xs font-black uppercase tracking-widest text-white">6. Risk Signals</h4>
+                            </div>
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                              riskScore > 40 ? 'bg-red-500/20 text-red-400' :
+                              riskScore > 15 ? 'bg-amber-500/20 text-amber-400' :
+                              'bg-emerald-500/20 text-emerald-400'
+                            }`}>
+                              {riskScore > 40 ? 'High Risk' : riskScore > 15 ? 'Medium Risk' : 'Low Risk'}
+                            </span>
                           </div>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
-                            riskScore > 40 ? 'bg-rose-100 text-rose-800' :
-                            riskScore > 15 ? 'bg-amber-100 text-amber-800' :
-                            'bg-emerald-100 text-emerald-800'
-                          }`}>
-                            {riskScore > 40 ? 'High Risk' : riskScore > 15 ? 'Medium Risk' : 'Low Risk'}
-                          </span>
-                        
-                        
-      
-                          <div className={`mt-0.5 p-2 rounded-lg ${riskScore > 20 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                            {riskScore > 20 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-white">
-                              {riskScore > 20 ? 'Potential inconsistencies detected:' : 'No potential inconsistencies detected.'}
-                            </p>
-                            <p className="text-xs text-white mt-1 leading-relaxed">
-                              {riskSignals}
-                            </p>
+                          <div className="flex items-start gap-3">
+                            <div className={`mt-0.5 p-2 rounded-lg shrink-0 ${riskScore > 20 ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                              {riskScore > 20 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-white">
+                                {riskScore > 20 ? 'Potential inconsistencies detected:' : 'No potential inconsistencies detected.'}
+                              </p>
+                              <p className="text-xs text-white/70 mt-1 leading-relaxed">
+                                {riskSignals}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -8131,7 +8132,7 @@ function CandidateDetail() {
                 Perform a deep web research to uncover the candidate's professional presence across LinkedIn, GitHub, industry registries, and public portfolios.
               </p>
               <Button 
-                className="bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] h-12 px-8 font-black uppercase tracking-widest text-xs shadow-lg shadow-brand/20"
+                className="bg-brand/20 border border-brand/30 hover:bg-brand/30 h-12 px-8 font-black uppercase tracking-widest text-xs text-white"
                 onClick={handleDeepResearch}
               >
                 <Search className="w-4 h-4 mr-2" /> Trigger Deep Research Sequence
@@ -8179,9 +8180,9 @@ function CandidateDetail() {
 
               {/* Dimensional Performance Ledger */}
               {d6Sections.performanceLedger && (
-                <Card id="d6-performance-ledger" className="p-6 border-l-4 border-l-blue-500 glass-premium shadow-md shadow-blue-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                <Card id="d6-performance-ledger" className="p-6 border-l-4 border-l-blue-500 glass-premium shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
                   <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shrink-0">
+                    <div className="p-2 bg-blue-500/20 text-blue-400 rounded-lg shrink-0">
                       <BarChart3 className="w-5 h-5" />
                     </div>
                     <div>
@@ -8197,9 +8198,9 @@ function CandidateDetail() {
 
               {/* D6 Auditing, Penalties & Anomalies */}
               {d6Sections.auditingAnomalies && (
-                <Card id="d6-auditing-anomalies" className="p-6 border-l-4 border-l-amber-500 glass-premium shadow-md shadow-amber-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                <Card id="d6-auditing-anomalies" className="p-6 border-l-4 border-l-amber-500 glass-premium shadow-md shadow-amber-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
                   <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
-                    <div className="p-2 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                    <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg shrink-0">
                       <Shield className="w-5 h-5" />
                     </div>
                     <div>
@@ -8215,9 +8216,9 @@ function CandidateDetail() {
 
               {/* Hiring Recommendation & Interview Strategy */}
               {d6Sections.interviewStrategy && (
-                <Card id="d6-interview-strategy" className="p-6 border-l-4 border-l-emerald-500 glass-premium shadow-md shadow-emerald-50/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                <Card id="d6-interview-strategy" className="p-6 border-l-4 border-l-emerald-500 glass-premium shadow-md shadow-emerald-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
                   <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
-                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+                    <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg shrink-0">
                       <Lightbulb className="w-5 h-5" />
                     </div>
                     <div>
@@ -8245,14 +8246,14 @@ function CandidateDetail() {
                  <p className="text-sm font-bold text-white">{candidate.currentRole}</p>
                  <p className="text-xs text-white">@{candidate.currentCompany}</p>
                </div>
-               <div className="flex justify-between items-center py-3 border-y border-slate-50">
-                 <span className="text-sm text-white">Exp. Years</span>
-                 <span className="font-bold text-white">{candidate.totalExperience}Y</span>
-               </div>
-               <div className="flex justify-between items-center pb-3 border-b border-slate-50">
-                 <span className="text-sm text-white">Location</span>
-                 <span className="font-bold">{candidate.location}</span>
-               </div>
+                <div className="flex justify-between items-center py-3 border-y border-white/10">
+                  <span className="text-sm text-white">Exp. Years</span>
+                  <span className="font-bold text-white">{candidate.totalExperience}Y</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                  <span className="text-sm text-white">Location</span>
+                  <span className="font-bold">{candidate.location}</span>
+                </div>
                <div className="flex justify-between items-center pt-1">
                  <span className="text-sm text-white">Screened On</span>
                  <span className="text-sm font-bold text-white">{formatDateTime(candidate.createdAt)}</span>
@@ -8284,7 +8285,7 @@ function CandidateDetail() {
                )}
                <div className="pt-2 flex justify-between items-center text-xs font-black uppercase border-t border-white/10 mt-2">
                  <span>Total Penalty</span>
-                 <span className="text-red-600">-{scorecard?.dimensions?.redFlags?.totalPenalty || 0} Points</span>
+                  <span className="text-red-400">-{scorecard?.dimensions?.redFlags?.totalPenalty || 0} Points</span>
                </div>
              </div>
           </Card>
@@ -8293,7 +8294,7 @@ function CandidateDetail() {
               <h3 className="text-xs font-black text-white uppercase tracking-widest mb-4">Confirmed Skill Tags</h3>
               <div className="flex flex-wrap gap-1.5">
                 {scorecard?.skillsAnalysis?.confirmed?.map((s, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-black rounded uppercase tracking-tighter border border-green-100 italic">
+                  <span key={idx} className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded uppercase tracking-tighter border border-emerald-500/30 italic">
                     {s}
                   </span>
                 ))}
@@ -8301,7 +8302,7 @@ function CandidateDetail() {
            </Card>
 
            {/* AI Meeting Recorder Bot Card */}
-           <Card className="p-6 glass-premium border border-slate-150 rounded-2xl shadow-sm space-y-4">
+           <Card className="p-6 glass-premium border border-white/10 rounded-2xl shadow-sm space-y-4">
               <div className="flex items-center gap-3">
                  <div className="w-8 h-8 rounded-full glass-premium flex items-center justify-center text-white text-xs shadow-inner">
                    <Video className="w-4 h-4 text-white" />
@@ -8313,7 +8314,7 @@ function CandidateDetail() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 transparent border border-slate-150 rounded-xl">
+                <div className="flex items-center justify-between p-3 transparent border border-white/10 rounded-xl">
                   <span className="text-[10px] font-black uppercase text-white tracking-wider">Bot Status</span>
                   <div className="flex items-center gap-2">
                     <span className={cn(
@@ -8411,7 +8412,7 @@ function CandidateDetail() {
                 <span className="text-xs font-bold text-white">Integrity Score:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
-                  (candidate.scorecard.integrityScore || 100) >= 90 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
+                  (candidate.scorecard.integrityScore || 100) >= 90 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
                 )}>
                   {candidate.scorecard.integrityScore || 100}/100
                 </span>
@@ -8420,7 +8421,7 @@ function CandidateDetail() {
                 <span className="text-xs font-bold text-white">Signal Density:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
-                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-white" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-transparent text-white" : "bg-red-100 text-red-700"
+                  (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 80 ? "bg-brand/10 text-white" : (candidate.scorecard.dimensions?.signalDensity?.score || 0) >= 40 ? "bg-transparent text-white" : "bg-red-500/20 text-red-400"
                 )}>
                   {candidate.scorecard.dimensions?.signalDensity?.score || '--'}/100
                 </span>
@@ -8503,28 +8504,28 @@ function CandidateDetail() {
                 // Static colors map to ensure compilation in Tailwind CSS v4 without dynamic class name construction
                 const staticColorsMap: Record<string, { bg: string; text: string; bgActive: string; textActive: string; border: string }> = {
                   indigo: { bg: 'bg-brand/10', text: 'text-white', bgActive: 'bg-brand/10', textActive: 'text-white', border: 'border-brand/10' },
-                  blue: { bg: 'bg-blue-50/10', text: 'text-blue-400', bgActive: 'bg-blue-50', textActive: 'text-blue-600', border: 'border-blue-100' },
-                  emerald: { bg: 'bg-emerald-50/10', text: 'text-emerald-400', bgActive: 'bg-emerald-50', textActive: 'text-emerald-600', border: 'border-emerald-100' },
-                  amber: { bg: 'bg-amber-50/10', text: 'text-amber-400', bgActive: 'bg-amber-50', textActive: 'text-amber-600', border: 'border-amber-100' },
-                  rose: { bg: 'bg-rose-50/10', text: 'text-rose-400', bgActive: 'bg-rose-50', textActive: 'text-rose-600', border: 'border-rose-100' },
+                  blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', bgActive: 'bg-blue-500/10', textActive: 'text-blue-400', border: 'border-blue-500/30' },
+                  emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', bgActive: 'bg-emerald-500/10', textActive: 'text-emerald-400', border: 'border-emerald-500/30' },
+                  amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', bgActive: 'bg-amber-500/10', textActive: 'text-amber-400', border: 'border-amber-500/30' },
+                  rose: { bg: 'bg-red-500/10', text: 'text-red-400', bgActive: 'bg-red-500/10', textActive: 'text-red-400', border: 'border-red-500/30' },
                 };
-                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-white', bgActive: 'bg-transparent', textActive: 'text-white', border: 'border-slate-150' };
+                const colors = staticColorsMap[dimInfo.color] || { bg: 'transparent', text: 'text-white', bgActive: 'bg-transparent', textActive: 'text-white', border: 'border-white/10' };
 
                 return (
                   <Card key={dimInfo.id} className={cn(
                     "p-0 overflow-visible border-2 transition-all group/dim",
-                    dim ? (dim.score >= 80 ? "border-green-150 hover:border-green-300" : dim.score >= 50 ? "border-amber-150 hover:border-amber-300" : "border-red-150 hover:border-red-300") : "border-white/10 opacity-70"
+                    dim ? (dim.score >= 80 ? "border-emerald-500/30 hover:border-emerald-500/50" : dim.score >= 50 ? "border-amber-500/30 hover:border-amber-500/50" : "border-red-500/30 hover:border-red-500/50") : "border-white/10 opacity-70"
                   )}>
                     <div className="flex flex-col md:flex-row">
                       {/* Score Indicator Sidebar */}
                       <div className={cn(
                         "w-full md:w-32 p-6 flex md:flex-col items-center justify-center gap-2 shrink-0 transition-colors rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl",
-                        dim ? (dim.score >= 80 ? "bg-green-50" : dim.score >= 50 ? "bg-amber-50" : "bg-red-50") : "transparent"
+                        dim ? (dim.score >= 80 ? "bg-emerald-500/10" : dim.score >= 50 ? "bg-amber-500/10" : "bg-red-500/10") : "transparent"
                       )}>
                         <div className="relative">
                           <div className={cn(
                             "w-16 h-16 rounded-2xl flex flex-col items-center justify-center border-2 shadow-sm relative z-10",
-                            dim ? (dim.score >= 80 ? "glass-premium border-green-200 text-green-600" : dim.score >= 50 ? "glass-premium border-amber-200 text-amber-600" : "glass-premium border-red-200 text-red-600") : "glass-premium border-white/10 text-white"
+                            dim ? (dim.score >= 80 ? "glass-premium border-emerald-500/30 text-emerald-400" : dim.score >= 50 ? "glass-premium border-amber-500/30 text-amber-400" : "glass-premium border-red-500/30 text-red-400") : "glass-premium border-white/10 text-white"
                           )}>
                             <span className="text-2xl font-black">{dim ? dim.score : '--'}</span>
                             <span className="text-[8px] font-black uppercase tracking-tighter opacity-60">Score</span>
@@ -8542,7 +8543,7 @@ function CandidateDetail() {
                            <span className="text-[10px] font-black text-white uppercase tracking-widest">{dimInfo.id}</span>
                            <div className={cn(
                              "w-1 h-8 rounded-full my-2 hidden md:block",
-                             dim ? (dim.score >= 80 ? "bg-green-200" : dim.score >= 50 ? "bg-amber-200" : "bg-red-200") : "bg-transparent"
+                              dim ? (dim.score >= 80 ? "bg-emerald-500/30" : dim.score >= 50 ? "bg-amber-500/30" : "bg-red-500/30") : "bg-transparent"
                            )} />
                         </div>
                       </div>
@@ -8584,8 +8585,8 @@ function CandidateDetail() {
                             <div className="flex items-center gap-2">
                                <div className={cn(
                                  "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest transition-all",
-                                 dim.confidence === 'HIGH' ? "text-green-600 border-green-200 bg-green-50" :
-                                 dim.confidence === 'MED' ? "text-amber-600 border-amber-200 bg-amber-50" : "text-red-600 border-red-200 bg-red-50"
+                                  dim.confidence === 'HIGH' ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" :
+                                  dim.confidence === 'MED' ? "text-amber-400 border-amber-500/30 bg-amber-500/10" : "text-red-400 border-red-500/30 bg-red-500/10"
                                )}>
                                  <div className={cn(
                                    "w-2 h-2 rounded-full",
@@ -8679,16 +8680,16 @@ function CandidateDetail() {
              <div className="space-y-3">
                 {(candidate.scorecard.proctoringEvents || []).length > 0 ? (
                   candidate.scorecard.proctoringEvents.map((event, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-xl">
+                    <div key={idx} className="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-xs font-black text-red-700 uppercase">{event.type.replace('_', ' ')}</span>
+                        <span className="text-xs font-black text-red-400 uppercase">{event.type.replace('_', ' ')}</span>
                       </div>
-                      <span className="text-[10px] font-bold text-red-400">{event.details}</span>
+                      <span className="text-[10px] font-bold text-red-300">{event.details}</span>
                     </div>
                   ))
                 ) : (
-                  <div className="p-8 text-center bg-green-50 border border-green-100 rounded-2xl">
+                  <div className="p-8 text-center bg-emerald-500/10 border border-emerald-500/30 rounded-2xl">
                     <p className="text-xs font-black text-green-700 uppercase tracking-widest">Integrity Verified</p>
                     <p className="text-[10px] text-green-600 mt-1">No proctoring anomalies detected during session.</p>
                   </div>
@@ -8772,7 +8773,7 @@ function CandidateDetail() {
                     type="number"
                     value={offerSalary}
                     onChange={(e) => setOfferSalary(Number(e.target.value))}
-                    className="w-36 p-2 rounded-xl border border-white/10 text-xs font-black text-slate-850"
+                    className="w-36 p-2 rounded-xl border border-white/10 text-xs font-black text-white"
                   />
                 </div>
               </div>
@@ -8799,7 +8800,7 @@ function CandidateDetail() {
                     type="date" 
                     value={offerStartDate} 
                     onChange={(e) => setOfferStartDate(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-white/10 text-xs font-bold text-slate-705 glass-premium"
+                    className="w-full p-2.5 rounded-xl border border-white/10 text-xs font-bold text-white glass-premium"
                   />
                 </div>
               </div>
@@ -8822,7 +8823,7 @@ function CandidateDetail() {
                     <button 
                       key={type}
                       type="button"
-                      className="p-2.5 rounded-xl border border-white/10 text-center text-[10px] font-extrabold uppercase tracking-wider text-slate-650 hover:transparent"
+                      className="p-2.5 rounded-xl border border-white/10 text-center text-[10px] font-extrabold uppercase tracking-wider text-white/70 hover:transparent"
                     >
                       {type}
                     </button>
@@ -8851,7 +8852,7 @@ function CandidateDetail() {
                   ]);
                 }}
                 disabled={offerState !== 'draft'}
-                className="flex-1 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-xs font-black uppercase tracking-wider h-11"
+                className="flex-1 bg-brand/20 border border-brand/30 hover:bg-brand/30 text-xs font-black uppercase tracking-wider h-11"
               >
                 <Send className="w-4 h-4 mr-2" />
                 {offerState === 'draft' ? 'Release & Dispatch Offer' : 'Offer Already Dispatched'}
@@ -8865,7 +8866,7 @@ function CandidateDetail() {
                   setOfferState('draft');
                   notify('Offer contract draft cleared.', 'info');
                 }}
-                className="sm:w-32 border-slate-250 text-white text-xs font-black uppercase tracking-wider h-11"
+                className="sm:w-32 border-white/10 text-white text-xs font-black uppercase tracking-wider h-11"
               >
                 Reset Draft
               </Button>
@@ -8919,7 +8920,7 @@ function CandidateDetail() {
               </div>
 
               {/* Main Page Sheet Content */}
-              <div className="p-8 sm:p-12 space-y-6 flex-1 text-slate-750 text-xs sm:text-sm leading-relaxed font-sans max-h-[550px] overflow-y-auto custom-scrollbar">
+              <div className="p-8 sm:p-12 space-y-6 flex-1 text-white/80 text-xs sm:text-sm leading-relaxed font-sans max-h-[550px] overflow-y-auto custom-scrollbar">
                 <div className="space-y-1">
                   <p className="font-extrabold text-white text-left">Dear {candidate.fullName},</p>
                   <p className="text-left">Applied Email: <span className="font-mono text-white font-semibold">{candidate.email}</span></p>
@@ -9045,7 +9046,7 @@ function CandidateDetail() {
           {/* Email/WhatsApp form configuration */}
           <Card className="p-8 space-y-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+              <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
                 <Send className="w-5 h-5" />
               </div>
               <div>
@@ -9071,9 +9072,9 @@ function CandidateDetail() {
                         onClick={() => setCampaignTemplate(temp.id as any)}
                         className={cn(
                           "p-3 rounded-xl border flex items-center gap-2 text-left text-xs font-bold transition-all flex-1 min-w-[200px]",
-                          campaignTemplate === temp.id 
-                            ? "bg-emerald-50 border-emerald-300 text-emerald-700 shadow-sm" 
-                            : "glass-premium border-white/10 text-slate-550 hover:transparent"
+                            campaignTemplate === temp.id 
+                              ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" 
+                              : "glass-premium border-white/10 text-white/60 hover:transparent"
                         )}
                       >
                         <TIcon className="w-4 h-4 text-emerald-500" />
@@ -9087,7 +9088,7 @@ function CandidateDetail() {
               <div>
                 <label className="text-[10px] font-black text-white uppercase tracking-widest block mb-1.5">WhatsApp / SMS Dynamic Template Text</label>
                 <div className="transparent rounded-xl p-4 border border-white/10 font-mono text-xs text-white leading-relaxed text-left relative pl-10">
-                  <div className="absolute top-4 left-4 bg-emerald-100 p-1 rounded-full text-emerald-650">
+                  <div className="absolute top-4 left-4 bg-emerald-500/20 p-1 rounded-full text-emerald-400">
                     <Send className="w-3 h-3" />
                   </div>
                   {campaignTemplate === 'invite' && (
@@ -9108,9 +9109,9 @@ function CandidateDetail() {
                 </div>
               </div>
 
-              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex items-center justify-between">
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between">
                 <div className="text-left">
-                  <h4 className="text-[10px] font-black text-emerald-950 uppercase tracking-widest block mb-0.5">Campaign Outbound Targets</h4>
+                  <h4 className="text-[10px] font-black text-emerald-300 uppercase tracking-widest block mb-0.5">Campaign Outbound Targets</h4>
                   <p className="text-xs text-white leading-normal font-sans">
                     Email address: <span className="font-semibold text-white">{candidate.email}</span> • Mobile: <span className="font-semibold text-white">Registered</span>
                   </p>
@@ -9148,7 +9149,7 @@ function CandidateDetail() {
                 }, 1000);
               }}
               disabled={sendingOutbound}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 font-black uppercase tracking-widest text-xs h-11"
+              className="w-full bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 font-black uppercase tracking-widest text-xs h-11"
             >
               {sendingOutbound ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
               Dispatch Campaign Trigger
@@ -9158,7 +9159,7 @@ function CandidateDetail() {
           {/* Interactive Mobile Whatsapp Device Mock & logs */}
           <div className="space-y-6">
             {/* WhatsApp Mock Mobile Frame */}
-            <div className="border-[12px] border-[#0d1117] rounded-[40px] bg-slate-905 w-full max-w-[340px] mx-auto overflow-hidden shadow-2xl relative min-h-[460px] flex flex-col justify-between">
+            <div className="border-[12px] border-[#0d1117] rounded-[40px] bg-gray-900 w-full max-w-[340px] mx-auto overflow-hidden shadow-2xl relative min-h-[460px] flex flex-col justify-between">
               {/* Top notch bar */}
               <div className="transparent text-white py-1 px-8 text-[9px] font-bold font-mono tracking-widest flex justify-between items-center shrink-0">
                 <span>9:41</span>
@@ -9181,10 +9182,10 @@ function CandidateDetail() {
               </div>
 
               {/* Chat background layout wrapper with dots pattern */}
-              <div className="flex-1 bg-teal-50/50 px-4 py-6 overflow-y-auto space-y-4 max-h-[300px] text-left">
+              <div className="flex-1 bg-teal-500/5 px-4 py-6 overflow-y-auto space-y-4 max-h-[300px] text-left">
                 {/* Outgoing template WhatsApp bubble */}
-                <div className="glass-premium p-3.5 rounded-2xl border border-teal-100 shadow-sm max-w-[90%] relative">
-                  <div className="text-slate-650 text-[11px] leading-relaxed font-sans pr-2">
+                <div className="glass-premium p-3.5 rounded-2xl border border-teal-500/20 shadow-sm max-w-[90%] relative">
+                  <div className="text-white/70 text-[11px] leading-relaxed font-sans pr-2">
                     {campaignTemplate === 'invite' && (
                       <p>
                         Hello <strong>{candidate.fullName}</strong>, we are excited to invite you to complete our automated AI Voice Assessment for <strong>{job?.title}</strong> with <strong>{organization?.name || 'our company'}</strong>. Access your secure lobby via this link: {window.location.origin}/interview/{candidateId}
@@ -9228,7 +9229,7 @@ function CandidateDetail() {
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         "p-2 rounded-lg shrink-0",
-                        log.channel === 'whatsapp' ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
+                        log.channel === 'whatsapp' ? "bg-emerald-500/20 text-emerald-400" : "bg-blue-500/20 text-blue-400"
                       )}>
                         <MessageSquare className="w-4 h-4" />
                       </div>
@@ -9266,7 +9267,7 @@ function CandidateDetail() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117]/80 via-transparent to-[#0d1117]/30 font-sans pointer-events-none" />
               
               {/* Canvas Simulation */}
-              <div className="absolute inset-x-8 inset-y-16 flex items-center justify-center border-4 border-dashed border-brand/20 rounded-2xl bg-slate-905/30 backdrop-blur-sm z-10 transition-all duration-300">
+              <div className="absolute inset-x-8 inset-y-16 flex items-center justify-center border-4 border-dashed border-brand/20 rounded-2xl bg-gray-900/30 backdrop-blur-sm z-10 transition-all duration-300">
                 {activeCameraTest ? (
                   <div className="text-center space-y-4 font-sans">
                     {cameraAnomalyMock ? (
@@ -9322,7 +9323,7 @@ function CandidateDetail() {
                     setTabSwitchCountMock(0);
                     setGazeDeviationMock(false);
                   }}
-                  className="bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] font-black text-xs uppercase tracking-widest h-10 px-5"
+                  className="bg-brand/20 border border-brand/30 hover:bg-brand/30 font-black text-xs uppercase tracking-widest h-10 px-5"
                 >
                   {activeCameraTest ? 'STANDBY SYSTEM' : 'BOOT CAM TESTER'}
                 </Button>
@@ -9344,7 +9345,7 @@ function CandidateDetail() {
                     notify('Simulated Candidate switched browser tab!', 'error');
                   }}
                   variant="outline"
-                  className="border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
+                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
                 >
                   Simulate Tab Switch
                 </Button>
@@ -9355,7 +9356,7 @@ function CandidateDetail() {
                     notify('Simulated Candidate looking offscreen!', 'error');
                   }}
                   variant="outline"
-                  className="border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
+                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
                 >
                   Simulate Left-Gaze Bias
                 </Button>
@@ -9366,7 +9367,7 @@ function CandidateDetail() {
                     notify('Simulated secondary face inside feed!', 'error');
                   }}
                   variant="outline"
-                  className="border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
+                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-[10px] font-black uppercase tracking-widest py-3 h-auto"
                 >
                   Simulate Joint Presence
                 </Button>
@@ -9382,7 +9383,7 @@ function CandidateDetail() {
               <div className="flex gap-3 items-center py-2 text-left">
                 <div className={cn(
                   "w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black text-xl border shadow-inner",
-                  (tabSwitchCountMock > 2 || cameraAnomalyMock) ? "bg-red-50 border-red-200 text-red-600 animate-pulse" : (tabSwitchCountMock > 0 || gazeDeviationMock) ? "bg-amber-100 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+                  (tabSwitchCountMock > 2 || cameraAnomalyMock) ? "bg-red-500/20 border-red-500/30 text-red-400 animate-pulse" : (tabSwitchCountMock > 0 || gazeDeviationMock) ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
                 )}>
                   {Math.max(0, 100 - (tabSwitchCountMock * 25) - (cameraAnomalyMock ? 50 : 0) - (gazeDeviationMock ? 15 : 0))}%
                 </div>
@@ -9414,21 +9415,21 @@ function CandidateDetail() {
               <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Adversarial Violation Ledger</h4>
               <div className="space-y-3">
                 {tabSwitchCountMock > 0 && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs flex justify-between items-center font-sans text-left">
-                    <span className="text-red-700 font-extrabold uppercase">Tab Switched ({tabSwitchCountMock}x)</span>
-                    <span className="text-red-400 font-mono">Just now</span>
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs flex justify-between items-center font-sans text-left">
+                    <span className="text-red-400 font-extrabold uppercase">Tab Switched ({tabSwitchCountMock}x)</span>
+                    <span className="text-red-300 font-mono">Just now</span>
                   </div>
                 )}
                 {gazeDeviationMock && (
-                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs flex justify-between items-center font-sans text-left">
-                    <span className="text-amber-700 font-extrabold uppercase">Gaze Bias Detected</span>
-                    <span className="text-amber-400 font-mono">Active</span>
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs flex justify-between items-center font-sans text-left">
+                    <span className="text-amber-400 font-extrabold uppercase">Gaze Bias Detected</span>
+                    <span className="text-amber-300 font-mono">Active</span>
                   </div>
                 )}
                 {cameraAnomalyMock && (
-                  <div className="p-3 bg-red-100 border border-red-200 rounded-xl text-xs flex justify-between items-center font-sans text-left">
-                    <span className="text-red-800 font-black uppercase">Multi-face Warning</span>
-                    <span className="text-red-500 font-mono">Triggered</span>
+                  <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-xs flex justify-between items-center font-sans text-left">
+                    <span className="text-red-300 font-black uppercase">Multi-face Warning</span>
+                    <span className="text-red-400 font-mono">Triggered</span>
                   </div>
                 )}
                 {!cameraAnomalyMock && !gazeDeviationMock && tabSwitchCountMock === 0 && (
@@ -9457,11 +9458,11 @@ function CandidateDetail() {
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-black uppercase text-white tracking-wider">Candidate Profile</span>
                 {inviteEmailInput ? (
-                  <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100/50 flex items-center gap-1">
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 flex items-center gap-1">
                     <Check className="w-2.5 h-2.5" /> Email Extracted
                   </span>
                 ) : (
-                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100/50">
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">
                     Missing Email
                   </span>
                 )}
@@ -9506,7 +9507,7 @@ function CandidateDetail() {
                 <Button
                   variant="primary"
                   type="button"
-                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
+                  className="w-full h-11 bg-brand/20 border border-brand/30 hover:bg-brand/30 text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
                   disabled={!inviteEmailInput.trim() || sendingInvite}
                   onClick={() => {
                     if (activeInviteCandidate) {
@@ -9529,9 +9530,9 @@ function CandidateDetail() {
               </div>
 
               {/* Option 2: Copy Invite Link */}
-              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-emerald-100/80 transition-all shadow-sm glass-premium">
+              <div className="p-4 border border-white/10 rounded-2xl text-left space-y-4 hover:border-emerald-500/30 transition-all shadow-sm glass-premium">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
+                  <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl mt-0.5">
                     <ExternalLink className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
@@ -9541,7 +9542,7 @@ function CandidateDetail() {
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10/60 rounded-xl text-emerald-700 truncate select-all flex items-center">
+                  <div className="flex-1 text-[10px] font-mono font-bold px-3.5 py-3 transparent border border-white/10 rounded-xl text-emerald-400 truncate select-all flex items-center">
                     {`${window.location.origin}/interview/${activeInviteCandidate.id}`}
                   </div>
                   <Button
