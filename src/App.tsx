@@ -11,6 +11,7 @@ import { Job, Candidate, Organization, UserProfile } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
+const PricingPage = lazy(() => import('./components/PricingPage').then(m => ({ default: m.PricingPage })));
 const PricingStep = lazy(() => import('./components/PricingStep').then(m => ({ default: m.PricingStep })));
 const PaymentGateway = lazy(() => import('./components/PaymentGateway').then(m => ({ default: m.PaymentGateway })));
 
@@ -13591,6 +13592,7 @@ export default function App() {
                       <Route path="/org-admin" element={<OrgAdminPanel />} />
                       <Route path="/resume-bank" element={<ResumeBank />} />
                       <Route path="/admin" element={<SuperAdminPanel />} />
+                      <Route path="/pricing" element={<PricingPage />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </>
                   )}
@@ -13602,6 +13604,7 @@ export default function App() {
                   <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
                   <Route path="/pay/:orgId" element={<PaymentGateway />} />
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
                   <Route path="*" element={<LandingPage />} />
                 </Routes>
               </Suspense>

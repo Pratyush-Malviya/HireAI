@@ -91,7 +91,7 @@ export function LandingPage() {
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-8 mr-4">
                 <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
-                <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
+                <Link to="/pricing" className="text-sm text-white hover:text-white transition-colors font-medium">Pricing</Link>
                 <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               </div>
               <Link to="/auth" className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10 text-center">
@@ -112,7 +112,7 @@ export function LandingPage() {
           <div className="md:hidden border-t border-slate-800/50 bg-[#030712]/95 backdrop-blur-xl absolute top-full left-0 w-full shadow-2xl">
             <div className="px-4 py-6 flex flex-col gap-4">
               <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
-              <a href="#stats" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Stats</a>
+              <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Pricing</Link>
               <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Testimonials</a>
               <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all block">
                 Get Started
