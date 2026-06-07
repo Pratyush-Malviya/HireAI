@@ -101,10 +101,10 @@ export function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-16 pb-40 px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 pt-4 pb-40 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
-            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-brand/20 bg-brand/5 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-[0.2em] mb-12 shadow-2xl shadow-brand/10">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-brand/20 bg-brand/5 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-[0.2em] mb-6 shadow-2xl shadow-brand/10">
               <SparklesText sparklesCount={5} colors={{ first: "#818cf8", second: "#c084fc" }}>
                 <span className="text-[10px]">AI-Powered Talent Intelligence</span>
               </SparklesText>
