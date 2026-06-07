@@ -7402,109 +7402,94 @@ function CandidateDetail() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-20">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="flex items-center justify-between lg:justify-start gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" className="-ml-2 px-2" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
-              <ChevronRight className="w-4 h-4 rotate-180" /> <span className="hidden sm:inline">Pipeline</span>
-            </Button>
-            <div className="w-px h-6 bg-white/5" />
-            <Button 
-              variant="ghost" 
-              className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[8px] sm:text-[10px]" 
-              onClick={deleteCandidate}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" className="-ml-2 px-2" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
+            <ChevronRight className="w-4 h-4 rotate-180" /> <span className="hidden sm:inline">Pipeline</span>
+          </Button>
+          <div className="w-px h-6 bg-white/5" />
+          <Button
+            variant="ghost"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[8px] sm:text-[10px]"
+            onClick={deleteCandidate}
+          >
+            <Trash2 className="w-3.5 h-3.5 sm:mr-2" /> <span className="hidden sm:inline">Delete Report</span>
+          </Button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <Button
+            variant="outline"
+            className="text-white border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
+            onClick={handleDeepResearch}
+            disabled={researching}
+          >
+            {researching ? (
+              <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" /><span className="truncate">Scan...</span></>
+            ) : (
+              <><Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" /><span className="truncate">{candidate.research ? 'Sync' : 'Deep Research'}</span></>
+            )}
+          </Button>
+          <Button variant="outline" className="text-white text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
+            <Database className="w-3.5 h-3.5 mr-1 sm:mr-2" /> PDF
+          </Button>
+          <Button
+            variant="outline"
+            className="text-white border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
+            onClick={handleRetryScreening}
+            disabled={retryingScreening}
+          >
+            {retryingScreening ? (
+              <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" /><span className="truncate">Rescreening...</span></>
+            ) : (
+              <><RotateCcw className="w-3.5 h-3.5 mr-1 sm:mr-2" /><span className="truncate">Rescreen</span></>
+            )}
+          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {candidate.interviewStatus === 'completed' ? (
+              <Button
+                variant="secondary"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg text-xs py-2 h-10 px-4"
+                onClick={() => navigate(`/interview/${candidate.id}`)}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
+                Review
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-xs py-2 h-10 px-4"
+                disabled={sendingInvite}
+                onClick={() => {
+                  setActiveInviteCandidate(candidate);
+                  const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
+                  setInviteEmailInput(emailVal);
+                  setShowInviteModal(true);
+                }}
+              >
+                {sendingInvite ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />
+                ) : (
+                  <Send className="w-3.5 h-3.5 mr-2" />
+                )}
+                {sendingInvite ? 'Sending...' : 'Re-Invite'}
+              </Button>
+            )}
+            <Button
+              variant="secondary"
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg text-xs py-2 h-10 px-4"
+              onClick={async () => {
+                try {
+                  await updateDoc(doc(db, 'candidates', candidate.id), { status: 'shortlisted' });
+                  notify('Shortlisted!', 'success');
+                } catch (error) {
+                  handleFirestoreError(error, OperationType.UPDATE, `candidates/${candidate.id}`);
+                }
+              }}
             >
-              <Trash2 className="w-3.5 h-3.5 sm:mr-2" /> <span className="hidden sm:inline">Delete Report</span>
+              <Star className="w-3.5 h-3.5 mr-2" />
+              Shortlist
             </Button>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
-           <Button 
-            variant="outline" 
-            className="text-white border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
-            onClick={handleDeepResearch} 
-            disabled={researching}
-           >
-            {researching ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" />
-                 <span className="truncate">Scan...</span>
-              </>
-            ) : (
-              <>
-                <Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" />
-                <span className="truncate">{candidate.research ? 'Sync' : 'Deep Research'}</span>
-              </>
-            )}
-           </Button>
-           <Button variant="outline" className="text-white text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
-             <Database className="w-3.5 h-3.5 mr-1 sm:mr-2" /> PDF
-           </Button>
-           <Button
-             variant="outline"
-             className="text-white border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4 flex items-center gap-1.5"
-             onClick={fetchAvailability}
-           >
-             <Calendar className="w-3.5 h-3.5" />
-             Schedule
-           </Button>
-           
-           <Button variant="outline" className="text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={() => {
-             const url = `${window.location.origin}/interview/${candidate.id}`;
-             navigator.clipboard.writeText(url);
-             notify('Interview link copied!', 'success');
-           }}>
-             <ExternalLink className="w-3.5 h-3.5 mr-1 sm:mr-2" />
-             Link
-           </Button>
-
-            <Button variant="outline" className="text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 border-emerald-100" onClick={() => {
-              const url = `${window.location.origin}/shared/${candidate.id}`;
-              navigator.clipboard.writeText(url);
-              notify('Shareable candidate profile link copied!', 'success');
-            }}>
-              <Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" />
-              Share Profile
-            </Button>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:flex gap-2">
-             {candidate.interviewStatus === 'completed' ? (
-               <Button variant="secondary" className="flex-1 bg-green-600 hover:bg-green-700 text-xs py-2 h-auto" onClick={() => navigate(`/interview/${candidate.id}`)}>
-                 <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
-                 Review
-               </Button>
-             ) : (
-               <Button
-                 variant="secondary"
-                 className="flex-1 lg:flex-none text-xs py-2 h-auto"
-                 disabled={sendingInvite}
-                 onClick={() => {
-                   setActiveInviteCandidate(candidate);
-                   const emailVal = candidate.email || candidate.parsedData?.email || candidate.parsedData?.contactInfo?.email || extractEmailFromText(candidate.resumeText || '') || '';
-                   setInviteEmailInput(emailVal);
-                   setShowInviteModal(true);
-                 }}
-               >
-                 {sendingInvite ? (
-                   <Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" />
-                 ) : (
-                   <Video className="w-3.5 h-3.5 mr-1 sm:mr-2" />
-                 )}
-                 {sendingInvite ? 'Inviting...' : 'Invite'}
-               </Button>
-             )}
-
-             <Button variant="secondary" className="flex-1 lg:flex-none text-xs py-2 h-auto" onClick={async () => {
-               try {
-                 await updateDoc(doc(db, 'candidates', candidate.id), { status: 'shortlisted' });
-                 notify('Shortlisted!', 'success');
-               } catch (error) {
-                 handleFirestoreError(error, OperationType.UPDATE, `candidates/${candidate.id}`);
-               }
-             }}>
-              Shortlist
-             </Button>
-           </div>
         </div>
       </div>
 
