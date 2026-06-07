@@ -7410,7 +7410,7 @@ function CandidateDetail() {
           <div className="w-px h-6 bg-white/5" />
           <Button
             variant="ghost"
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[8px] sm:text-[10px]"
+            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 font-black uppercase tracking-widest text-[8px] sm:text-[10px]"
             onClick={deleteCandidate}
           >
             <Trash2 className="w-3.5 h-3.5 sm:mr-2" /> <span className="hidden sm:inline">Delete Report</span>
@@ -7447,8 +7447,8 @@ function CandidateDetail() {
           <div className="flex flex-wrap items-center gap-2">
             {candidate.interviewStatus === 'completed' ? (
               <Button
-                variant="secondary"
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg text-xs py-2 h-10 px-4"
+                variant="ghost"
+                className="border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10 text-xs py-2 h-10 px-4"
                 onClick={() => navigate(`/interview/${candidate.id}`)}
               >
                 <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
@@ -7456,8 +7456,8 @@ function CandidateDetail() {
               </Button>
             ) : (
               <Button
-                variant="secondary"
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg text-xs py-2 h-10 px-4"
+                variant="ghost"
+                className="border border-brand/30 bg-brand/10 hover:bg-brand/20 text-white shadow-lg shadow-brand/10 text-xs py-2 h-10 px-4"
                 disabled={sendingInvite}
                 onClick={() => {
                   setActiveInviteCandidate(candidate);
@@ -7475,8 +7475,8 @@ function CandidateDetail() {
               </Button>
             )}
             <Button
-              variant="secondary"
-              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg text-xs py-2 h-10 px-4"
+              variant="ghost"
+              className="border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 shadow-lg shadow-amber-500/10 text-xs py-2 h-10 px-4"
               onClick={async () => {
                 try {
                   await updateDoc(doc(db, 'candidates', candidate.id), { status: 'shortlisted' });
@@ -9578,6 +9578,20 @@ function CandidateDetail() {
           </div>
         )}
       </Modal>
+
+      <footer className="border-t border-white/5 pt-6 mt-12 text-center">
+        <p className="text-[10px] text-white/40 font-medium tracking-wide">
+          Developed by{' '}
+          <a
+            href="https://www.linkedin.com/in/pratyushmalviy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand hover:text-white transition-colors"
+          >
+            Pratyush Malviya
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
