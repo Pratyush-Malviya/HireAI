@@ -8416,7 +8416,7 @@ function CandidateDetail() {
                 <span className="text-xs font-bold text-white">Integrity Score:</span>
                 <span className={cn(
                   "text-sm font-black px-2 py-1 rounded-lg",
-                  (candidate.scorecard.integrityScore || 100) >= 90 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  (candidate.scorecard.integrityScore || 100) >= 90 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
                 )}>
                   {candidate.scorecard.integrityScore || 100}/100
                 </span>
@@ -9246,7 +9246,7 @@ function CandidateDetail() {
                     <div className="text-right">
                       <span className={cn(
                         "text-[9px] font-black uppercase px-2 py-0.5 rounded tracking-widest",
-                        log.status === 'delivered' ? "bg-green-100 text-green-800" : log.status === 'clicked' ? "bg-brand/10 text-white" : "bg-transparent text-white"
+                        log.status === 'delivered' ? "bg-green-500/10 text-green-400" : log.status === 'clicked' ? "bg-brand/10 text-brand" : "bg-transparent text-white"
                       )}>
                         {log.status}
                       </span>
@@ -12047,13 +12047,13 @@ function SuperAdminPanel() {
         <div className="flex items-center gap-3 shrink-0">
           <Button 
              variant="outline" 
-             className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-[10px] font-black uppercase tracking-widest py-2 h-auto"
+             className="text-red-400 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/30 text-[10px] font-black uppercase tracking-widest py-2 h-auto"
              onClick={handleGlobalClear}
              disabled={clearing}
           >
              <Trash2 className="w-3.5 h-3.5 mr-2" /> {clearing ? 'Clearing...' : 'Clear Platform'}
           </Button>
-          <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 font-black uppercase tracking-widest text-[10px] h-auto p-2" onClick={clearEverything}>
+          <Button variant="ghost" className="text-red-400 hover:text-red-300 hover:bg-red-500/10 font-black uppercase tracking-widest text-[10px] h-auto p-2" onClick={clearEverything}>
             <Trash2 className="w-3 h-3 mr-2" /> <span className="hidden sm:inline">Nuclear Reset</span>
           </Button>
         </div>
@@ -12061,10 +12061,10 @@ function SuperAdminPanel() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {[
-          { label: 'Platform Jobs', val: stats.jobs, icon: Briefcase, color: 'text-white bg-brand/10' },
-          { label: 'Total Candidates', val: stats.candidates, icon: Users, color: 'text-green-600 bg-green-50' },
-          { label: 'Organizations', val: stats.organizations, icon: Globe, color: 'text-purple-600 bg-purple-50' },
-          { label: 'Active Users', val: stats.users, icon: Database, color: 'text-amber-600 bg-amber-50' },
+          { label: 'Platform Jobs', val: stats.jobs, icon: Briefcase, color: 'text-brand bg-brand/10' },
+          { label: 'Total Candidates', val: stats.candidates, icon: Users, color: 'text-green-400 bg-green-500/10' },
+          { label: 'Organizations', val: stats.organizations, icon: Globe, color: 'text-purple-400 bg-purple-500/10' },
+          { label: 'Active Users', val: stats.users, icon: Database, color: 'text-amber-400 bg-amber-500/10' },
         ].map(s => (
           <Card key={s.label} className="p-6">
             <div className="flex items-center gap-4">
@@ -12085,43 +12085,43 @@ function SuperAdminPanel() {
           <div className="flex gap-2 sm:gap-4 border-b border-white/10 overflow-x-auto whitespace-nowrap scrollbar-none pb-1">
              <button 
                onClick={() => setTab('overview')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'overview' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                Overview
              </button>
              <button 
                onClick={() => setTab('organizations')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'organizations' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                Organizations
              </button>
              <button 
                onClick={() => setTab('payments')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'payments' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                Payments
              </button>
              <button 
                onClick={() => setTab('health')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'health' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                System Health
              </button>
              <button 
                onClick={() => setTab('llm')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'llm' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                LLM Playground
              </button>
              <button 
                onClick={() => setTab('white-label')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'white-label' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                White-Label
              </button>
              <button 
                onClick={() => setTab('manual')}
-               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand-dark text-white" : "text-white")}
+               className={cn("pb-2 px-2 sm:px-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0", activeTab === 'manual' ? "border-b-2 border-brand text-brand" : "text-white/60 hover:text-white")}
              >
                User Manual
              </button>
@@ -12354,8 +12354,8 @@ function SuperAdminPanel() {
                                 </td>
                                 <td className="px-4 py-3">
                                   <span className={cn(
-                                    "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest",
-                                    org.status === 'active' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                                    "text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-widest border",
+                                    org.status === 'active' ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
                                   )}>{org.status}</span>
                                 </td>
                                 <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
@@ -12389,8 +12389,8 @@ function SuperAdminPanel() {
                                         }
                                       }}
                                       className={cn(
-                                        "h-7 text-[9px] font-black uppercase tracking-widest px-2.5",
-                                        org.status === 'active' ? "text-red-600 hover:bg-red-50 border-red-200" : "text-green-600 hover:bg-green-50 border-green-200"
+                                        "h-7 text-[9px] font-black uppercase tracking-widest px-2.5 transition-colors",
+                                        org.status === 'active' ? "text-red-400 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40" : "text-green-400 hover:bg-green-500/10 border border-green-500/20 hover:border-green-500/40"
                                       )}
                                     >
                                       {org.status === 'active' ? 'Suspend' : 'Activate'}

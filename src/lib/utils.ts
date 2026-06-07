@@ -28,7 +28,7 @@ export function formatDateTime(date: any) {
 }
 
 export function getScoreColor(score: number) {
-  if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-  if (score >= 60) return 'text-amber-600 bg-amber-50 border-amber-200';
-  return 'text-red-600 bg-red-50 border-red-200';
+  if (score >= 80) return 'text-green-400 bg-green-500/10 border-green-500/20';
+  if (score >= 60) return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+  return 'text-red-400 bg-red-500/10 border-red-500/20';
 }
