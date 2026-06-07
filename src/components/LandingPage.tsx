@@ -88,10 +88,12 @@ export function LandingPage() {
               </div>
               <span className="text-lg font-bold text-white tracking-tight">HireNow</span>
             </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
-              <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
-              <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-8 mr-4">
+                <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
+                <a href="#stats" className="text-sm text-white hover:text-white transition-colors font-medium">Stats</a>
+                <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
+              </div>
               <button onClick={() => navigate('/auth')} className="glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10">
                 Get Started
               </button>

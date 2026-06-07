@@ -137,8 +137,12 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
 
         <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
           <div className="text-right">
+            <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-1 flex items-center justify-end gap-1">
+              <Zap className="w-3 h-3" /> Includes 7-Day Free Trial
+            </p>
             <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Total Due Today</p>
-            <p className="text-3xl font-black text-white">${total}</p>
+            <p className="text-3xl font-black text-white">$0</p>
+            <p className="text-[10px] text-white/40 mt-1">${total}/mo after 7 days</p>
           </div>
           
           <RainbowButton 
@@ -151,7 +155,7 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                 <Loader2 className="w-5 h-5 animate-spin" /> Processing...
               </span>
             ) : (
-              'Checkout'
+              'Start Free Trial'
             )}
           </RainbowButton>
         </div>
