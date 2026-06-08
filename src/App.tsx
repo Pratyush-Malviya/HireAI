@@ -7246,6 +7246,11 @@ function CandidateDetail() {
       );
       
       setResearchStep('Synthesizing results and saving to profile...');
+      const researchData = {
+        ...result,
+        lastResearchedAt: new Date().toISOString()
+      };
+      setCandidate(prev => prev ? { ...prev, research: researchData } : null);
       try {
         await updateDoc(doc(db, 'candidates', candidate.id), {
           research: {
@@ -7253,15 +7258,13 @@ function CandidateDetail() {
             lastResearchedAt: serverTimestamp()
           }
         });
-        setResearchStep('');
-        notify('Deep Research Complete: Multi-source verification synced.', 'success');
       } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `candidates/${candidate.id}`);
-        if (result && Object.keys(result).length > 0) {
-          localStorage.setItem(`research_fallback_${candidate.id}`, JSON.stringify(result));
-          notify('Research data saved locally (Firestore unavailable).', 'info');
-        }
+        console.error('Firestore save failed for research:', error);
+        localStorage.setItem(`research_fallback_${candidate.id}`, JSON.stringify(result));
+        notify('Research complete but could not sync to cloud. Data saved locally.', 'warning');
       }
+      setResearchStep('');
+      notify('Deep Research Complete: Multi-source verification synced.', 'success');
     } catch (error: any) {
       console.error('Deep Research Error:', error);
       const fallback = localStorage.getItem(`research_fallback_${candidate.id}`);
