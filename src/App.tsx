@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook, Eye } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
@@ -14729,9 +14729,45 @@ function ScreeningReports() {
                       </Button>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c.id}`); }}>
-                        <FileText className="w-3 h-3 mr-1" /> View
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[9px] font-black uppercase tracking-widest border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-white"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              await updateDoc(doc(db, 'candidates', c.id), { status: 'shortlisted' });
+                              notify('Shortlisted!', 'success');
+                            } catch (err) {
+                              handleFirestoreError(err, OperationType.UPDATE, `candidates/${c.id}`);
+                            }
+                          }}
+                        >
+                          <Star className="w-3 h-3 mr-1" /> Shortlist
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[9px] font-black uppercase tracking-widest bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const ok = await confirm(`Delete screening report for ${c.fullName}?`);
+                            if (!ok) return;
+                            try {
+                              await deleteDoc(doc(db, 'candidates', c.id));
+                              notify('Report deleted.', 'success');
+                            } catch (err) {
+                              handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" /> Delete
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c.id}`); }}>
+                          <FileText className="w-3 h-3 mr-1" /> View
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
