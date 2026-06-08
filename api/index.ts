@@ -2778,7 +2778,7 @@ app.get("/api/composio/debug", async (req, res) => {
     // Wait, there is an integrations API or apps API but it's not well typed.
     // Let's just use raw fetch to the composio API using the key!
     const apiKey = process.env.COMPOSIO_API_KEY;
-    const composioRes = await axios.get("https://backend.composio.dev/api/v3/apps", {
+    const composioRes = await axios.get("https://backend.composio.dev/api/v3/toolkits", {
       headers: { "x-api-key": apiKey }
     });
     res.json({ apps: composioRes.data });
