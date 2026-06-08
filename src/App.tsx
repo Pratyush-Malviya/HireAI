@@ -7,7 +7,7 @@ import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, get
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
-import { Job, Candidate, Organization, UserProfile, TeamMember } from './types';
+import { Job, Candidate, Organization, UserProfile, TeamMember, InterviewEvaluation } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
@@ -25,7 +25,7 @@ function GlobalLoader() {
 }
 import { Particles } from './components/magic-ui/particles';
 import { Meteors } from './components/magic-ui/meteors';
-import { generateInterviewResponse, summarizeInterview } from './services/interviewService';
+import { generateInterviewResponse, summarizeInterview, localEvaluateInterview } from './services/interviewService';
 import { extractTextFromFile } from './services/fileService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -1591,23 +1591,47 @@ function InterviewRoom() {
           }, 1000);
         });
 
-        const feedback = await summarizeInterview(finalMessages.map(m => ({ role: m.role, text: m.text })));
+        const [feedback, localEval] = await Promise.all([
+          summarizeInterview(finalMessages.map(m => ({ role: m.role, text: m.text }))),
+          (async () => {
+            const skills = candidate.parsedData?.skills || [];
+            const jdSkills = job.requirements?.must_have_skills || [];
+            return localEvaluateInterview(
+              finalMessages.map(m => ({ role: m.role, text: m.text })),
+              candidate.fullName,
+              job.title,
+              skills,
+              jdSkills
+            );
+          })()
+        ]);
+
+        const escalationFlagged = localEval.recommendation === 'FURTHER_REVIEW' || localEval.recommendation === 'NO_HIRE';
+
         try {
           await updateDoc(doc(db, 'interviews', currentSessionId), { 
             messages: finalMessages, 
             completed: true, 
             feedback,
+            evaluation: localEval,
+            escalationFlagged,
             completedAt: serverTimestamp() 
           });
           const meetLink = `https://meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
           await updateDoc(doc(db, 'candidates', candidate.id), { 
             interviewStatus: 'completed',
-            meetLink
+            meetLink,
+            ...(escalationFlagged ? { escalationReason: localEval.escalationReason || 'Flagged for review' } : {})
           });
         } catch (error) {
           handleFirestoreError(error, OperationType.UPDATE, `interviews/${currentSessionId} or candidates/${candidate.id}`);
         }
-        notify('Interview completed and success summary generated!', 'success');
+        notify(localEval.recommendation === 'HIRE' 
+          ? 'Interview completed! Candidate recommended for hire.' 
+          : localEval.recommendation === 'NO_HIRE'
+          ? 'Interview completed. Candidate not recommended.'
+          : 'Interview completed. Flagged for human review.', 
+        'success');
       } else {
         speak(aiResponse);
         try {
@@ -7405,13 +7429,18 @@ function CandidateDetail() {
       doc.setFont('helvetica', 'bold');
       doc.text('4. AI Interview Evaluation', 20, currentY);
       
-      const interviewScore = interview.feedback.rating || interview.feedback.score || 0;
+      const ev = (interview as any).evaluation as InterviewEvaluation | undefined;
+      const interviewScore = ev?.overallScore ?? interview.feedback.rating ?? interview.feedback.score ?? 0;
+      const recommendation = ev?.recommendation ?? 'FURTHER_REVIEW';
       
       autoTable(doc, {
         startY: currentY + 5,
         head: [['Metric', 'Result']],
         body: [
           ['Interview Performance Score', `${interviewScore}/100`],
+          ['Recommendation', recommendation],
+          ['Confidence', ev?.confidence || 'MEDIUM'],
+          ['Pre-Interview Fit Score', ev ? `${ev.preInterviewFitScore}%` : 'N/A'],
           ['Executive Summary', interview.feedback.summary],
         ],
         headStyles: { fillColor: [5, 150, 105] },
@@ -7420,21 +7449,95 @@ function CandidateDetail() {
       
       currentY = (doc as any).lastAutoTable.finalY + 10;
       
-      if (interview.feedback.keyInsights || interview.feedback.strengths) {
-        doc.setFontSize(11);
+      // Competency breakdown
+      if (ev) {
+        currentY += 2;
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
-        doc.text('Key Observations:', 20, currentY);
+        doc.text('Competency Breakdown:', 20, currentY);
         currentY += 5;
         
-        const insights = interview.feedback.keyInsights || [...(interview.feedback.strengths || []), ...(interview.feedback.weaknesses || [])];
-        insights.forEach((insight: string) => {
-           doc.setFontSize(9);
-           doc.setFont('helvetica', 'normal');
-           const text = doc.splitTextToSize(`• ${insight}`, pageWidth - 40);
-           doc.text(text, 20, currentY);
-           currentY += (text.length * 4) + 2;
-           if (currentY > 270) { doc.addPage(); currentY = 20; }
+        autoTable(doc, {
+          startY: currentY,
+          head: [['Competency', 'Score']],
+          body: [
+            ['Technical Skills', `${ev.competencies.technicalSkills}%`],
+            ['Communication', `${ev.competencies.communication}%`],
+            ['Problem Solving', `${ev.competencies.problemSolving}%`],
+            ['Leadership / Teamwork', `${ev.competencies.leadershipTeamwork}%`],
+            ['Cultural Fit', `${ev.competencies.culturalFit}%`],
+          ],
+          headStyles: { fillColor: [5, 150, 105] },
+          columnStyles: { 0: { cellWidth: 80 }, 1: { cellWidth: 30 } }
         });
+        currentY = (doc as any).lastAutoTable.finalY + 10;
+        
+        // Skill match
+        if (ev.skillMatch.length > 0) {
+          autoTable(doc, {
+            startY: currentY,
+            head: [['Skill', 'Proficiency']],
+            body: ev.skillMatch.map((s: any) => [s.skill, s.proficiency]),
+            headStyles: { fillColor: [5, 150, 105] },
+            columnStyles: { 0: { cellWidth: 80 }, 1: { cellWidth: 30 } }
+          });
+          currentY = (doc as any).lastAutoTable.finalY + 10;
+        }
+        
+        // Strengths & Weaknesses
+        if (ev.strengths.length > 0 || ev.weaknesses.length > 0) {
+          if (currentY > 230) { doc.addPage(); currentY = 20; }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Key Observations:', 20, currentY);
+          currentY += 5;
+          const allObservations = [...ev.strengths.map((s: string) => `+ ${s}`), ...ev.weaknesses.map((w: string) => `- ${w}`)];
+          allObservations.forEach((obs: string) => {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            const text = doc.splitTextToSize(`• ${obs}`, pageWidth - 40);
+            doc.text(text, 20, currentY);
+            currentY += (text.length * 3.5) + 1.5;
+            if (currentY > 270) { doc.addPage(); currentY = 20; }
+          });
+          currentY += 10;
+        }
+        
+        // Follow-up questions
+        if (ev.followUpQuestions.length > 0) {
+          if (currentY > 230) { doc.addPage(); currentY = 20; }
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Suggested Follow-up for Next Round:', 20, currentY);
+          currentY += 5;
+          ev.followUpQuestions.forEach((q: string) => {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            const text = doc.splitTextToSize(`• ${q}`, pageWidth - 40);
+            doc.text(text, 20, currentY);
+            currentY += (text.length * 3.5) + 1.5;
+            if (currentY > 270) { doc.addPage(); currentY = 20; }
+          });
+          currentY += 10;
+        }
+      } else {
+        // Fallback to old feedback format
+        if (interview.feedback.keyInsights || interview.feedback.strengths) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Key Observations:', 20, currentY);
+          currentY += 5;
+          
+          const insights = interview.feedback.keyInsights || [...(interview.feedback.strengths || []), ...(interview.feedback.weaknesses || [])];
+          insights.forEach((insight: string) => {
+             doc.setFontSize(9);
+             doc.setFont('helvetica', 'normal');
+             const text = doc.splitTextToSize(`• ${insight}`, pageWidth - 40);
+             doc.text(text, 20, currentY);
+             currentY += (text.length * 4) + 2;
+             if (currentY > 270) { doc.addPage(); currentY = 20; }
+          });
+        }
       }
       currentY += 15;
     }
@@ -8304,6 +8407,204 @@ function CandidateDetail() {
               )}
             </div>
           </div>
+        );
+      })()}
+
+      {/* AI Interview Evaluation Section */}
+      {interview && interview.completed && (() => {
+        const ev = (interview as any).evaluation as InterviewEvaluation | undefined;
+        if (!ev) return null;
+        const scoreColor = ev.overallScore >= 75 ? 'text-emerald-400' : ev.overallScore >= 50 ? 'text-amber-400' : 'text-red-400';
+        const bgGradient = ev.recommendation === 'HIRE' ? 'from-emerald-500/10 via-emerald-500/5 to-transparent' :
+          ev.recommendation === 'NO_HIRE' ? 'from-red-500/10 via-red-500/5 to-transparent' :
+          'from-amber-500/10 via-amber-500/5 to-transparent';
+        return (
+          <Card className="p-6 border-l-4 border-l-brand overflow-hidden relative">
+            <div className={`absolute inset-0 bg-gradient-to-r ${bgGradient} pointer-events-none`} />
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-brand rounded-lg">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-white text-sm uppercase tracking-wider">AI Interview Evaluation</h3>
+                    <p className="text-[10px] text-white font-bold uppercase tracking-tight">STRUCTURED VOICE INTERVIEW REPORT</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`text-3xl font-black ${scoreColor}`}>{ev.overallScore}</span>
+                  <span className="text-[9px] text-white font-black uppercase tracking-wider">/100</span>
+                  <span className={cn(
+                    "text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider",
+                    ev.recommendation === 'HIRE' ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" :
+                    ev.recommendation === 'NO_HIRE' ? "bg-red-500/20 text-red-400 border border-red-500/30" :
+                    "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                  )}>
+                    {ev.recommendation === 'FURTHER_REVIEW' ? 'REVIEW' : ev.recommendation}
+                  </span>
+                </div>
+              </div>
+
+              {/* Pre-Interview Fit */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="glass-premium p-3 rounded-xl border border-white/10">
+                  <p className="text-[9px] text-white font-black uppercase tracking-wider">Pre-Interview Fit</p>
+                  <p className="text-xl font-black text-white mt-1">{ev.preInterviewFitScore}%</p>
+                </div>
+                <div className="glass-premium p-3 rounded-xl border border-white/10">
+                  <p className="text-[9px] text-white font-black uppercase tracking-wider">Questions</p>
+                  <p className="text-xl font-black text-white mt-1">{ev.questions.length}</p>
+                </div>
+                <div className="glass-premium p-3 rounded-xl border border-white/10">
+                  <p className="text-[9px] text-white font-black uppercase tracking-wider">Confidence</p>
+                  <p className="text-xl font-black text-white mt-1">{ev.confidence}</p>
+                </div>
+                <div className="glass-premium p-3 rounded-xl border border-white/10">
+                  <p className="text-[9px] text-white font-black uppercase tracking-wider">Escalated</p>
+                  <p className={`text-xl font-black mt-1 ${ev.escalationReason ? 'text-red-400' : 'text-emerald-400'}`}>
+                    {ev.escalationReason ? 'Yes' : 'No'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Competency Radar */}
+              <div className="glass-premium p-4 rounded-xl border border-white/10">
+                <p className="text-[10px] font-black text-white uppercase tracking-wider mb-3">Competency Breakdown</p>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {[
+                    { label: 'Technical', value: ev.competencies.technicalSkills, color: 'bg-indigo-500' },
+                    { label: 'Communication', value: ev.competencies.communication, color: 'bg-blue-500' },
+                    { label: 'Problem Solving', value: ev.competencies.problemSolving, color: 'bg-emerald-500' },
+                    { label: 'Leadership', value: ev.competencies.leadershipTeamwork, color: 'bg-amber-500' },
+                    { label: 'Culture Fit', value: ev.competencies.culturalFit, color: 'bg-rose-500' },
+                  ].map((comp) => (
+                    <div key={comp.label} className="text-center">
+                      <div className="relative w-full h-2 bg-white/10 rounded-full overflow-hidden mb-1">
+                        <div className={`h-full ${comp.color} rounded-full transition-all duration-1000`} style={{ width: `${comp.value}%` }} />
+                      </div>
+                      <p className="text-[8px] text-white font-black uppercase tracking-tight">{comp.label}</p>
+                      <p className="text-xs font-black text-white">{comp.value}%</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Escalation */}
+              {ev.escalationReason && (
+                <div className="glass-premium p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                    <p className="text-xs font-bold text-amber-400">Escalation: {ev.escalationReason}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Question Table */}
+              {ev.questions.length > 0 && (
+                <div className="overflow-x-auto">
+                  <p className="text-[10px] font-black text-white uppercase tracking-wider mb-2">Question-by-Question Breakdown</p>
+                  <table className="w-full text-[11px] border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left text-[9px] font-black text-white uppercase tracking-wider p-2">#</th>
+                        <th className="text-left text-[9px] font-black text-white uppercase tracking-wider p-2">Category</th>
+                        <th className="text-left text-[9px] font-black text-white uppercase tracking-wider p-2">Score</th>
+                        <th className="text-left text-[9px] font-black text-white uppercase tracking-wider p-2">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ev.questions.map((q, idx) => (
+                        <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <td className="p-2 text-white font-bold">{idx + 1}</td>
+                          <td className="p-2">
+                            <span className={cn(
+                              "text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider",
+                              q.category === 'technical' ? "bg-indigo-500/20 text-indigo-400" :
+                              q.category === 'behavioural' ? "bg-blue-500/20 text-blue-400" :
+                              q.category === 'situational' ? "bg-amber-500/20 text-amber-400" :
+                              "bg-rose-500/20 text-rose-400"
+                            )}>{q.category.replace('_', ' ')}</span>
+                          </td>
+                          <td className="p-2">
+                            <span className={cn(
+                              "font-black",
+                              q.score >= 4 ? "text-emerald-400" : q.score >= 3 ? "text-amber-400" : "text-red-400"
+                            )}>{q.score}/5</span>
+                          </td>
+                          <td className="p-2 text-white/70 text-[10px]">{q.notes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Skill Match Grid */}
+              {ev.skillMatch.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-black text-white uppercase tracking-wider mb-2">Skill-by-Skill Match</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ev.skillMatch.map((s, idx) => (
+                      <span key={idx} className={cn(
+                        "px-2 py-1 text-[10px] font-black rounded uppercase tracking-tighter border",
+                        s.proficiency === 'high' ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
+                        s.proficiency === 'medium' ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
+                        "bg-red-500/20 text-red-400 border-red-500/30"
+                      )}>
+                        {s.skill}: {s.proficiency}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Strengths & Weaknesses */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {ev.strengths.length > 0 && (
+                  <div className="glass-premium p-4 rounded-xl border border-emerald-500/20">
+                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-wider mb-2">Strengths</p>
+                    <ul className="space-y-1">
+                      {ev.strengths.map((s, idx) => (
+                        <li key={idx} className="text-[11px] text-white flex items-start gap-1.5">
+                          <span className="text-emerald-400 mt-0.5">+</span> {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {ev.weaknesses.length > 0 && (
+                  <div className="glass-premium p-4 rounded-xl border border-red-500/20">
+                    <p className="text-[10px] font-black text-red-400 uppercase tracking-wider mb-2">Development Areas</p>
+                    <ul className="space-y-1">
+                      {ev.weaknesses.map((w, idx) => (
+                        <li key={idx} className="text-[11px] text-white flex items-start gap-1.5">
+                          <span className="text-red-400 mt-0.5">-</span> {w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Follow-up Questions */}
+              {ev.followUpQuestions.length > 0 && (
+                <div className="glass-premium p-4 rounded-xl border border-brand/20">
+                  <p className="text-[10px] font-black text-white uppercase tracking-wider mb-2">Suggested Follow-up for Next Round</p>
+                  <ul className="space-y-1">
+                    {ev.followUpQuestions.map((q, idx) => (
+                      <li key={idx} className="text-[11px] text-white flex items-start gap-1.5">
+                        <ArrowRight className="w-3 h-3 text-brand shrink-0 mt-0.5" /> {q}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Summary */}
+              <p className="text-[11px] text-white/70 italic border-t border-white/10 pt-3">{ev.summary}</p>
+            </div>
+          </Card>
         );
       })()}
 

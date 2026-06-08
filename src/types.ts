@@ -232,3 +232,38 @@ export interface AdminUser {
   role: 'admin';
   createdAt: any;
 }
+
+// ── SARVAX-style Interview Evaluation Types ──
+
+export type QuestionCategory = 'technical' | 'behavioural' | 'situational' | 'cultural_fit';
+
+export interface QuestionEvaluation {
+  question: string;
+  response: string;
+  category: QuestionCategory;
+  score: number; // 1-5
+  notes: string;
+}
+
+export interface CompetencyScores {
+  technicalSkills: number;
+  communication: number;
+  problemSolving: number;
+  leadershipTeamwork: number;
+  culturalFit: number;
+}
+
+export interface InterviewEvaluation {
+  preInterviewFitScore: number;
+  overallScore: number;
+  recommendation: 'HIRE' | 'NO_HIRE' | 'FURTHER_REVIEW';
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  questions: QuestionEvaluation[];
+  competencies: CompetencyScores;
+  strengths: string[];
+  weaknesses: string[];
+  skillMatch: { skill: string; required: boolean; proficiency: 'high' | 'medium' | 'low' | 'missing' }[];
+  followUpQuestions: string[];
+  escalationReason?: string;
+  summary: string;
+}
