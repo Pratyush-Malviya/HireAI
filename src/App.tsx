@@ -14506,7 +14506,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
               <AlertCircle className="w-6 h-6 text-amber-500 shrink-0" />
-              <p className="text-sm font-bold text-white leading-relaxed">
+              <p className="text-sm font-bold text-amber-900 leading-relaxed">
                 {confirmState?.msg}
               </p>
             </div>
@@ -14532,8 +14532,8 @@ export default function App() {
                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                 className={cn(
                   "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
-                  n.type === 'success' ? "glass-premium border-green-100 text-green-700" :
-                  n.type === 'error' ? "glass-premium border-red-100 text-red-700" : "glass-premium border-white/10 text-white"
+                  n.type === 'success' ? "glass-premium border-green-500/30 text-green-300" :
+                  n.type === 'error' ? "glass-premium border-red-500/30 text-red-300" : "glass-premium border-white/10 text-white"
                 )}
               >
                 {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
