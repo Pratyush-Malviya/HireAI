@@ -7446,16 +7446,7 @@ function CandidateDetail() {
             )}
           </Button>
           <div className="flex flex-wrap items-center gap-2">
-            {candidate.interviewStatus === 'completed' ? (
-              <Button
-                variant="ghost"
-                className="border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/10 text-xs py-2 h-10 px-4"
-                onClick={() => navigate(`/interview/${candidate.id}`)}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 mr-2" />
-                Review
-              </Button>
-            ) : (
+            {candidate.interviewStatus !== 'completed' && (
               <Button
                 variant="ghost"
                 className="border border-brand/30 bg-brand/10 hover:bg-brand/20 text-white shadow-lg shadow-brand/10 text-xs py-2 h-10 px-4"
