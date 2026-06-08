@@ -94,6 +94,9 @@ export function LandingPage() {
                 <Link to="/pricing" className="text-sm text-white hover:text-white transition-colors font-medium">Pricing</Link>
                 <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               </div>
+              <Link to="/auth" className="hidden sm:block text-sm text-white/70 hover:text-white transition-colors font-medium">
+                Sign In
+              </Link>
               <Link to="/pricing" className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10 text-center">
                 Get Started
               </Link>
@@ -114,7 +117,10 @@ export function LandingPage() {
               <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
               <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Pricing</Link>
               <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Testimonials</a>
-              <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all block">
+              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white/70 hover:text-white font-medium p-2 rounded-lg transition-colors">
+                Sign In
+              </Link>
+              <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="w-full glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all block">
                 Get Started
               </Link>
             </div>
