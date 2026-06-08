@@ -46,7 +46,7 @@ function extractEmailFromText(text: string | undefined | null): string {
   return match ? match[0] : '';
 }
 
-function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) {
+function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any, resumeText?: string) {
   if (!screeningResult) {
     screeningResult = {};
   }
@@ -137,6 +137,46 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
     recommendationStatus = 'potential';
   }
 
+  // --- SARVAX-style enhancements ---
+
+  // Pre-interview fit score (resume skills vs JD must-haves)
+  const resumeSkills = screeningResult.parsedData?.skills || screeningResult.scorecard?.skillsAnalysis?.confirmed || [];
+  const mustHaves = jobRequirements?.must_have_skills || [];
+  const preInterviewFitScore = mustHaves.length > 0
+    ? Math.round((mustHaves.filter((s: string) =>
+        resumeSkills.some((rs: string) => rs.toLowerCase().includes(s.toLowerCase()))
+      ).length / mustHaves.length) * 100)
+    : 50;
+
+  // Overqualification detection
+  const totalExperience = screeningResult.totalExperience || 0;
+  const minExp = jobRequirements?.min_experience_years || 0;
+  const isOverqualified = minExp > 0 && totalExperience >= minExp * 2;
+  const isUnderqualified = minExp > 0 && totalExperience < minExp * 0.6;
+
+  // Employment gap detection (from resume text)
+  let employmentGaps: { label: string; months: number }[] = [];
+  if (resumeText || screeningResult.resumeText) {
+    const text = (resumeText || screeningResult.resumeText || '').toLowerCase();
+    const datePatterns = text.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4}\s*[-–to]+\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{4}|(20\d{2})\s*[-–to]+\s*(20\d{2})/gi);
+    if (datePatterns && datePatterns.length > 0) {
+      // Simple heuristic: if we see jumps of 2+ years without overlapping ranges, flag it
+      const years = datePatterns.flatMap(d => {
+        const nums = d.match(/20\d{2}/g);
+        return nums ? nums.map(Number) : [];
+      }).filter(Boolean).sort();
+      for (let i = 0; i < years.length - 1; i++) {
+        if (years[i + 1] - years[i] >= 2) {
+          employmentGaps.push({ label: `Possible gap between ${years[i]}-${years[i + 1]}`, months: (years[i + 1] - years[i]) * 12 });
+        }
+      }
+    }
+  }
+
+  // Build structured candidate profile
+  const projects = screeningResult.projects || [];
+  const certifications = screeningResult.certifications || [];
+
   return {
     ...screeningResult,
     scorecard: {
@@ -156,7 +196,14 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any) 
       },
       integrityScore: screeningResult.scorecard.integrityScore || 100,
       proctoringEvents: screeningResult.scorecard.proctoringEvents || []
-    }
+    },
+    // SARVAX-style enriched fields
+    preInterviewFitScore,
+    isOverqualified,
+    isUnderqualified,
+    employmentGaps,
+    projects,
+    certifications
   };
 }
 
@@ -3470,7 +3517,7 @@ function ResumeBank() {
 
         try {
           const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText, targetJob.requirements || '', true);
-          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, targetJob.requirements);
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, targetJob.requirements, candidate.resumeText);
 
           await addDoc(collection(db, 'candidates'), {
             ...screeningResult,
@@ -4516,7 +4563,7 @@ function JobDetail() {
       for (const candidate of targetCandidates) {
         try {
           const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText || '', job?.requirements || '', true);
-          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job?.requirements);
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job?.requirements, candidate.resumeText);
           
           await updateDoc(doc(db, 'candidates', candidate.id), {
             ...screeningResult,
@@ -4585,7 +4632,7 @@ function JobDetail() {
 
         try {
           const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText, job.requirements || '');
-          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
+          const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements, candidate.resumeText);
 
           await addDoc(collection(db, 'candidates'), {
             ...screeningResult,
@@ -4772,7 +4819,7 @@ function JobDetail() {
             }
 
             const rawScreeningResult = await getScreeningResultWithCache(text, currentJob.requirements);
-            const screeningResult = calculateEnhancedScorecard(rawScreeningResult, currentJob.requirements);
+            const screeningResult = calculateEnhancedScorecard(rawScreeningResult, currentJob.requirements, text);
             
             await addDoc(collection(db, 'candidates'), {
               ...screeningResult,
@@ -7095,7 +7142,7 @@ function CandidateDetail() {
     setRetryingScreening(true);
     try {
       const rawScreeningResult = await getScreeningResultWithCache(candidate.resumeText || '', job.requirements, true);
-      const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements);
+      const screeningResult = calculateEnhancedScorecard(rawScreeningResult, job.requirements, candidate.resumeText);
       
       await updateDoc(doc(db, 'candidates', candidate.id), {
         ...screeningResult,
@@ -7844,6 +7891,67 @@ function CandidateDetail() {
             </div>
           </div>
         </div>
+      </Card>
+
+      {/* SARVAX-style Pre-Screening Profile Metrics */}
+      <Card className="p-4 border border-brand/10 shadow-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
+            <p className="text-[9px] font-black text-white uppercase tracking-wider">Pre-Interview Fit</p>
+            <p className={cn(
+              "text-xl font-black mt-1",
+              (candidate as any).preInterviewFitScore >= 75 ? "text-emerald-400" :
+              (candidate as any).preInterviewFitScore >= 50 ? "text-amber-400" : "text-red-400"
+            )}>{candidate.preInterviewFitScore ?? (candidate as any).preInterviewFitScore ?? 50}%</p>
+          </div>
+          <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
+            <p className="text-[9px] font-black text-white uppercase tracking-wider">Qualification</p>
+            <p className={cn(
+              "text-xs font-black mt-1 uppercase tracking-wider",
+              (candidate as any).isOverqualified ? "text-amber-400" :
+              (candidate as any).isUnderqualified ? "text-red-400" : "text-emerald-400"
+            )}>
+              {(candidate as any).isOverqualified ? 'Overqualified' :
+               (candidate as any).isUnderqualified ? 'Underqualified' : 'Good Fit'}
+            </p>
+          </div>
+          <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
+            <p className="text-[9px] font-black text-white uppercase tracking-wider">Gaps Detected</p>
+            <p className={cn(
+              "text-xl font-black mt-1",
+              (candidate as any).employmentGaps?.length > 0 ? "text-amber-400" : "text-emerald-400"
+            )}>{(candidate as any).employmentGaps?.length || 0}</p>
+          </div>
+          <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
+            <p className="text-[9px] font-black text-white uppercase tracking-wider">Experience</p>
+            <p className="text-xl font-black text-white mt-1">{candidate.totalExperience || 0}Y</p>
+          </div>
+          <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
+            <p className="text-[9px] font-black text-white uppercase tracking-wider">Composite</p>
+            <p className={cn(
+              "text-xl font-black mt-1",
+              (scorecard?.compositeScore || 0) >= 75 ? "text-emerald-400" :
+              (scorecard?.compositeScore || 0) >= 50 ? "text-amber-400" : "text-red-400"
+            )}>{scorecard?.compositeScore || 0}</p>
+          </div>
+          <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
+            <p className="text-[9px] font-black text-white uppercase tracking-wider">Integrity</p>
+            <p className={cn(
+              "text-xl font-black mt-1",
+              (scorecard?.integrityScore || 100) >= 90 ? "text-emerald-400" : "text-red-400"
+            )}>{scorecard?.integrityScore || 100}%</p>
+          </div>
+        </div>
+        {(candidate as any).employmentGaps?.length > 0 && (
+          <div className="mt-3 space-y-1">
+            {(candidate as any).employmentGaps.map((g: any, i: number) => (
+              <div key={i} className="flex items-center gap-2 text-[10px] text-amber-400 font-bold">
+                <AlertTriangle className="w-3 h-3 shrink-0" />
+                {g.label} (~{g.months}mo gap)
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* State-of-the-art Sub-Tab Navigation Bar */}
