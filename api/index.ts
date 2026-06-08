@@ -227,7 +227,42 @@ app.post("/api/calendar/schedule", async (req, res) => {
         }
       });
       console.log("Composio GOOGLECALENDAR_CREATE_EVENT response:", response);
-      return res.json(response.data || response);
+      const eventData = response.data || response;
+
+      // Generate Google Meet link if tokens are available (Composio may not return one)
+      let meetLink = eventData.hangoutLink || eventData.htmlLink || '';
+      if (!meetLink && tokensRaw) {
+        try {
+          const tokens = JSON.parse(tokensRaw);
+          const oauth2Client = getOAuthClient();
+          oauth2Client.setCredentials(tokens);
+          const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+          const meetEvent = await calendar.events.insert({
+            calendarId: "primary",
+            conferenceDataVersion: 1,
+            requestBody: {
+              summary: `${summary} (Meet Link)`,
+              start: { dateTime: startTime },
+              end: { dateTime: endTime },
+              conferenceData: {
+                createRequest: {
+                  requestId: `meet-${Date.now()}`,
+                  conferenceSolutionKey: { type: "hangoutsMeet" }
+                }
+              }
+            }
+          });
+          meetLink = meetEvent.data.hangoutLink || '';
+          // Clean up the temporary event
+          if (meetEvent.data.id) {
+            calendar.events.delete({ calendarId: "primary", eventId: meetEvent.data.id }).catch(() => {});
+          }
+        } catch (meetErr) {
+          console.error("Failed to generate Meet link via tokens:", meetErr);
+        }
+      }
+
+      return res.json({ ...eventData, hangoutLink: meetLink });
     } catch (err: any) {
       console.error("Composio scheduling failed:", err.message);
       return res.status(500).json({ error: "Composio scheduling failed: " + err.message });

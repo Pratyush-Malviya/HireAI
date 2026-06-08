@@ -4919,7 +4919,7 @@ function JobDetail() {
 
   const handleSendInviteForCandidate = async (candidate: Candidate, emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     setInvitingCandidateId(candidate.id);
-    const link = `${window.location.origin}/interview/${candidate.id}`;
+    const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
     try {
       // 1. Update status and email in db
@@ -4984,7 +4984,7 @@ function JobDetail() {
       const candidate = candidates.find(c => c.id === cId);
       if (!candidate) continue;
 
-      const link = `${window.location.origin}/interview/${candidate.id}`;
+      const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
       try {
         try {
           await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
@@ -6869,7 +6869,7 @@ function CandidateDetail() {
   const handleSendInvite = async (emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     if (!candidate) return;
     setSendingInvite(true);
-    const link = `${window.location.origin}/interview/${candidate.id}`;
+    const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
     try {
       // 1. Update status and email in db
