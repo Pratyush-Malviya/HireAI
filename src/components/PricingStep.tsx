@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Building2, Shield, Mail } from 'lucide-react';
+import { Check, Zap, Shield, Mail, Sparkles } from 'lucide-react';
 import { RainbowButton } from './magic-ui/rainbow-button';
 import { BorderBeam } from './magic-ui/border-beam';
 
@@ -10,24 +10,16 @@ interface PricingStepProps {
 
 export function PricingStep({ onPaymentComplete }: PricingStepProps) {
   const [seats, setSeats] = useState<number>(1);
-  const [selectedPlan, setSelectedPlan] = useState<string>('pro');
+  const [selectedPlan, setSelectedPlan] = useState<string>('free');
 
   const plans = [
     {
-      id: 'starter',
-      name: 'Starter',
-      price: 49,
+      id: 'free',
+      name: 'Free',
+      price: 0,
       icon: <Zap className="w-5 h-5 text-blue-400" />,
-      features: ['Up to 5 seats', 'Basic AI Screening', 'Standard Support'],
-      maxSeats: 5
-    },
-    {
-      id: 'pro',
-      name: 'Professional',
-      price: 99,
-      icon: <Building2 className="w-5 h-5 text-purple-400" />,
-      features: ['Up to 50 seats', 'Advanced AI Voice Interviews', 'Priority Support', 'Custom Branding'],
-      maxSeats: 50,
+      features: ['1 seat included', 'Basic AI Screening', 'Standard Support', '7-day free trial of Pro'],
+      maxSeats: 1,
       popular: true
     },
     {
@@ -40,15 +32,8 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
     }
   ];
 
-  const currentPlanDetails = plans.find(p => p.id === selectedPlan) || plans[1];
+  const currentPlanDetails = plans.find(p => p.id === selectedPlan) || plans[0];
   const isEnterprise = selectedPlan === 'enterprise';
-  const total = isEnterprise ? 0 : seats * (currentPlanDetails.price || 0);
-
-  useEffect(() => {
-    if (!isEnterprise && seats > currentPlanDetails.maxSeats) {
-      setSeats(currentPlanDetails.maxSeats);
-    }
-  }, [selectedPlan, seats, currentPlanDetails.maxSeats, isEnterprise]);
 
   const handleCheckout = () => {
     onPaymentComplete(selectedPlan, seats);
@@ -59,13 +44,13 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4">
+    <div className="w-full max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4">
       <div className="text-center space-y-3">
         <h2 className="text-4xl font-black text-white tracking-tight">Choose Your Plan</h2>
-        <p className="text-white/60 text-base">Start with a free trial. No credit card required.</p>
+        <p className="text-white/60 text-base">Start free and scale as you grow.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {plans.map((plan) => {
           const isSelected = selectedPlan === plan.id;
           const isEnt = plan.id === 'enterprise';
@@ -95,7 +80,7 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${
                     isSelected ? 'bg-brand/20 border-brand/30' : 'bg-white/5 border-white/10'
                   }`}>
-                    {plan.icon}
+                    {isEnt ? <Shield className="w-5 h-5 text-emerald-400" /> : <Zap className="w-5 h-5 text-blue-400" />}
                   </div>
                   <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                 </div>
@@ -108,8 +93,8 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black text-white">${plan.price}</span>
-                      <span className="text-white/50 text-sm">/ seat / month</span>
+                      <span className="text-4xl font-black text-white">$0</span>
+                      <span className="text-white/50 text-sm">/ month</span>
                     </div>
                   )}
                 </div>
@@ -117,7 +102,7 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                 {!isEnt && (
                   <div className="mb-5">
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                      <Zap className="w-3 h-3" /> 7-Day Free Trial
+                      <Sparkles className="w-3 h-3" /> No credit card required
                     </span>
                   </div>
                 )}
@@ -144,7 +129,7 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                       onClick={(e) => { e.stopPropagation(); handleCheckout(); }}
                       className="w-full py-3.5 font-bold text-sm"
                     >
-                      Start Free Trial
+                      Get Started Free
                     </RainbowButton>
                   )}
                 </div>
@@ -158,7 +143,7 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
         <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 w-full md:w-auto">
-              <label className="text-[10px] font-black text-white/50 uppercase tracking-widest">Number of Seats</label>
+              <label className="text-[10px] font-black text-white/50 uppercase tracking-widest">Seats</label>
               <div className="flex items-center gap-4">
                 <input
                   type="range"
@@ -178,20 +163,16 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                 />
               </div>
               <p className="text-[10px] text-brand/80 font-bold uppercase">
-                Max {currentPlanDetails.maxSeats} seats on this plan
+                {currentPlanDetails.maxSeats} seat included
               </p>
             </div>
 
             <div className="text-right space-y-1">
               <p className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center justify-end gap-1.5">
-                <Zap className="w-3.5 h-3.5" /> Includes 7-Day Free Trial
+                <Sparkles className="w-3.5 h-3.5" /> Free Forever
               </p>
               <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Total Due Today</p>
               <p className="text-3xl font-black text-white">$0</p>
-              <p className="text-[10px] text-white/40 mt-1">${total}/mo after 7 days</p>
-              <p className="text-[10px] text-emerald-400/60 font-bold uppercase tracking-widest mt-2">
-                No credit card required
-              </p>
             </div>
           </div>
         </div>
