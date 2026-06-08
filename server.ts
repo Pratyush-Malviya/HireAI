@@ -1546,6 +1546,8 @@ app.post("/api/ai/parse-job", async (req, res) => {
 
 app.post("/api/ai/screen-candidate", async (req, res) => {
   const { resumeText, jobRequirements } = req.body;
+  const currentDate = new Date().toISOString().split('T')[0];
+  const currentYear = new Date().getFullYear();
 
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -1568,6 +1570,8 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const auditorResponse = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: `You are an Adversarial Talent Auditor. Your task is to audit the candidate's resume for any red flags, gaps, anomalies, or stability concerns.
+      CURRENT DATE: ${currentDate} (Year: ${currentYear}).
+      Use this as your reference date when evaluating employment timelines. Do NOT flag dates in the current year as "future-dated" — they are valid.
       Compare the candidate's claimed history with the job requirements and check for:
       - Tenure instability, job-hopping (average tenure under 1.5 years per job).
       - Employment gaps exceeding 12 months.
@@ -1589,6 +1593,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const technicalResponse = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: `You are a Technical and Stack Screener. Your task is to perform an objective evaluation of the candidate's technical skills, tool stack, and experience depth against the job requirements.
+      CURRENT DATE: ${currentDate} (Year: ${currentYear}). Use this as reference for evaluating experience timelines.
       Assess:
       - Overlap with must-have and nice-to-have skills.
       - Proximity of their titles and roles to the target role.
@@ -1651,6 +1656,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
     const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: `You are a Principal Talent Solutions Architect. Your mission is to perform a forensic, high-fidelity compilation of the candidate's screening report by synthesizing detailed evaluations from an Adversarial Auditor and a Technical Screener.
+      CURRENT DATE: ${currentDate} (Year: ${currentYear}). Use this as reference for all date-related evaluations.
       
       ${scoringProtocol}
   
@@ -1789,7 +1795,10 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     }
 
     // Stage 1: Query Planner & Rewriter
+    const currentDate = new Date().toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
     const plannerPrompt = `You are a professional Query Rewriting and Search Optimization agent.
+    CURRENT DATE: ${currentDate} (Year: ${currentYear}).
     Given candidate name, role, company, skills, and background details, expand and rewrite this context into exactly 3 optimized search queries targeting public professional profiles (LinkedIn, GitHub, StackOverflow), tech blogs (Medium, Dev.to), patents, open-source work, or news.
     
     CANDIDATE: ${candidateName}
