@@ -94,7 +94,7 @@ export function LandingPage() {
                 <Link to="/pricing" className="text-sm text-white hover:text-white transition-colors font-medium">Pricing</Link>
                 <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
               </div>
-              <Link to="/auth" className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10 text-center">
+              <Link to="/pricing" className="hidden sm:block glass-premium text-brand px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/5 transition-all shadow-lg shadow-white/10 text-center">
                 Get Started
               </Link>
               <button 
@@ -114,7 +114,7 @@ export function LandingPage() {
               <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
               <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Pricing</Link>
               <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Testimonials</a>
-              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all block">
+              <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="w-full mt-4 glass-premium text-brand px-5 py-3 rounded-xl text-center text-lg font-bold hover:bg-white/5 transition-all block">
                 Get Started
               </Link>
             </div>
@@ -337,12 +337,12 @@ export function LandingPage() {
               Join 150+ forward-thinking companies that use HireNow to make smarter, autonomous hiring decisions.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <RainbowButton onClick={() => navigate('/auth')} className="px-12 py-5 text-xl font-bold rounded-2xl">
+              <RainbowButton onClick={() => navigate('/pricing')} className="px-12 py-5 text-xl font-bold rounded-2xl">
                 <Zap className="w-6 h-6" />
                 Get Started Free
               </RainbowButton>
               <button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/pricing')}
                 className="px-12 py-5 rounded-2xl border-2 border-white/10 text-white font-bold text-xl hover:bg-white/5 hover:border-white/20 transition-all backdrop-blur-sm"
               >
                 <Building2 className="w-6 h-6 inline mr-2" />
