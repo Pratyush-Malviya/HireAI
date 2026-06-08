@@ -13339,6 +13339,9 @@ function Onboarding() {
   const { profile, refreshProfile } = useProfile();
   const { notify } = useNotification();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const urlPlan = searchParams.get('plan');
+  const urlSeats = searchParams.get('seats');
   const [orgName, setOrgName] = useState('');
   const [orgIndustry, setOrgIndustry] = useState('Technology');
   const [orgCompanySize, setOrgCompanySize] = useState('11-50');
@@ -13349,7 +13352,9 @@ function Onboarding() {
   const [invitedOrg, setInvitedOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingInvite, setCheckingInvite] = useState(!!orgId);
-  const [step, setStep] = useState<'pricing' | 'setup'>('pricing');
+  const [step, setStep] = useState<'pricing' | 'setup'>(urlPlan && urlSeats ? 'setup' : 'pricing');
+  const [selectedTier, setSelectedTier] = useState<string>(urlPlan || 'pro');
+  const [selectedSeats, setSelectedSeats] = useState<number>(urlSeats ? parseInt(urlSeats) : 1);
 
   useEffect(() => {
     if (profile?.organizationId && !orgId) {
@@ -13425,7 +13430,10 @@ function Onboarding() {
         description: orgDescription.trim(),
         createdAt: serverTimestamp(),
         createdBy: auth.currentUser.uid,
-        status: 'active'
+        status: 'active',
+        tier: selectedTier,
+        seatCount: selectedSeats,
+        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       }).catch(err => handleFirestoreError(err, OperationType.CREATE, 'organizations'));
 
       if (!orgRef) throw new Error('Failed to create organization reference');
@@ -13462,7 +13470,11 @@ function Onboarding() {
   if (!invitedOrg && step === 'pricing') {
     return (
       <div className="min-h-screen transparent flex flex-col items-center justify-center p-6">
-        <PricingStep onPaymentComplete={() => setStep('setup')} />
+        <PricingStep onPaymentComplete={(tier, seats) => {
+          setSelectedTier(tier);
+          setSelectedSeats(seats);
+          setStep('setup');
+        }} />
       </div>
     );
   }

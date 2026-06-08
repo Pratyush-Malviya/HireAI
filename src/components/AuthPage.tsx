@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Search, ArrowRight, ShieldCheck, Zap, Loader2, AlertCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { RainbowButton } from './magic-ui/rainbow-button';
@@ -12,6 +12,7 @@ export function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,13 @@ export function AuthPage() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
-      navigate('/');
+      const plan = searchParams.get('plan');
+      const seats = searchParams.get('seats');
+      if (plan && seats) {
+        navigate(`/?plan=${plan}&seats=${seats}`);
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       console.error('Auth error:', err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {

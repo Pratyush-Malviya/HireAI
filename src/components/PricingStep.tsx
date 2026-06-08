@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Building2, Shield, Loader2 } from 'lucide-react';
+import { Check, Zap, Building2, Shield } from 'lucide-react';
 import { RainbowButton } from './magic-ui/rainbow-button';
 import { BorderBeam } from './magic-ui/border-beam';
 
@@ -11,7 +11,6 @@ interface PricingStepProps {
 export function PricingStep({ onPaymentComplete }: PricingStepProps) {
   const [seats, setSeats] = useState<number>(1);
   const [selectedPlan, setSelectedPlan] = useState<string>('pro');
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const plans = [
     {
@@ -51,11 +50,7 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
   }, [selectedPlan, seats, currentPlanDetails.maxSeats]);
 
   const handleCheckout = () => {
-    setIsProcessing(true);
-    // Simulate checkout process
-    setTimeout(() => {
-      onPaymentComplete(selectedPlan, seats);
-    }, 2500);
+    onPaymentComplete(selectedPlan, seats);
   };
 
   return (
@@ -147,16 +142,9 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
           
           <RainbowButton 
             onClick={handleCheckout} 
-            disabled={isProcessing}
             className="px-8 py-4 font-bold min-w-[200px]"
           >
-            {isProcessing ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-              </span>
-            ) : (
-              'Start Free Trial'
-            )}
+            Start Free Trial
           </RainbowButton>
         </div>
       </div>
