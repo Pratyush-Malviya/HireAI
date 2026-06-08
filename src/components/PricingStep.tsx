@@ -1,16 +1,33 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Shield, Mail, Sparkles } from 'lucide-react';
+import { Check, Zap, Shield, Mail, Sparkles, Loader2, Eye, EyeOff } from 'lucide-react';
 import { RainbowButton } from './magic-ui/rainbow-button';
 import { BorderBeam } from './magic-ui/border-beam';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../lib/firebase';
+import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 interface PricingStepProps {
-  onPaymentComplete: (tier: string, seats: number) => void;
+  onPaymentComplete?: (tier: string, seats: number) => void;
 }
 
 export function PricingStep({ onPaymentComplete }: PricingStepProps) {
+  const navigate = useNavigate();
+  const [step, setStep] = useState<'plans' | 'register'>('plans');
   const [seats, setSeats] = useState<number>(1);
   const [selectedPlan, setSelectedPlan] = useState<string>('free');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [orgName, setOrgName] = useState('');
+  const [orgDomain, setOrgDomain] = useState('');
+  const [orgIndustry, setOrgIndustry] = useState('Technology');
+  const [orgCompanySize, setOrgCompanySize] = useState('11-50');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const plans = [
     {
@@ -32,16 +49,212 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
     }
   ];
 
-  const currentPlanDetails = plans.find(p => p.id === selectedPlan) || plans[0];
   const isEnterprise = selectedPlan === 'enterprise';
 
-  const handleCheckout = () => {
-    onPaymentComplete(selectedPlan, seats);
+  const handleGetStarted = () => {
+    setStep('register');
   };
 
   const handleContactSales = () => {
     window.location.href = 'mailto:sales@hirenow.ai?subject=Enterprise%20Plan%20Inquiry';
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (!orgName.trim()) {
+      setError('Organization name is required.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      const orgRef = await addDoc(collection(db, 'organizations'), {
+        name: orgName.trim(),
+        domain: orgDomain.trim() || null,
+        industry: orgIndustry,
+        companySize: orgCompanySize,
+        createdAt: serverTimestamp(),
+        createdBy: cred.user.uid,
+        status: 'active',
+        tier: selectedPlan,
+        seatCount: seats,
+        ...(selectedPlan === 'free' && {
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        })
+      });
+
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        uid: cred.user.uid,
+        email: cred.user.email,
+        organizationId: orgRef.id,
+        role: 'owner',
+        fullName: '',
+        createdAt: serverTimestamp()
+      });
+
+      navigate('/');
+    } catch (err: any) {
+      console.error('Registration failed:', err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Invalid email address.');
+      } else {
+        setError(err.message || 'Registration failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (step === 'register') {
+    return (
+      <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+        <div className="text-center space-y-3 mb-10">
+          <h2 className="text-3xl font-black text-white tracking-tight">Create Your Account</h2>
+          <p className="text-white/60 text-base">
+            Setting up your <span className="text-brand font-bold">{selectedPlan === 'free' ? 'Free' : 'Enterprise'}</span> workspace
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 text-sm font-bold text-red-200">
+              {error}
+            </div>
+          )}
+
+          <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
+            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Organization Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Organization Name</label>
+                <input
+                  type="text" required value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
+                  placeholder="e.g. Acme Corp"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Email Domain (optional)</label>
+                <input
+                  type="text" value={orgDomain}
+                  onChange={(e) => setOrgDomain(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
+                  placeholder="e.g. acme.com"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Industry</label>
+                <select value={orgIndustry} onChange={(e) => setOrgIndustry(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white text-sm bg-transparent"
+                >
+                  <option value="Technology">Technology</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Education">Education</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Company Size</label>
+                <select value={orgCompanySize} onChange={(e) => setOrgCompanySize(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white text-sm bg-transparent"
+                >
+                  <option value="1-10">1-10 employees</option>
+                  <option value="11-50">11-50 employees</option>
+                  <option value="51-200">51-200 employees</option>
+                  <option value="201-500">201-500 employees</option>
+                  <option value="501-1000">501-1000 employees</option>
+                  <option value="1000+">1000+ employees</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
+            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Account Details</h3>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Email</label>
+              <input
+                type="email" required value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
+                placeholder="name@company.com"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'} required value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent pr-10"
+                    placeholder="Min 6 characters"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Confirm Password</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent pr-10"
+                    placeholder="Confirm your password"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={() => setStep('plans')}
+              className="px-6 py-3.5 rounded-2xl border-2 border-white/20 text-white font-bold text-sm hover:bg-white/10 transition-all"
+            >
+              Back
+            </button>
+            <RainbowButton type="submit" disabled={loading} className="flex-1 py-3.5 font-bold text-sm">
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" /> Creating Account...
+                </span>
+              ) : (
+                'Create Account & Sign In'
+              )}
+            </RainbowButton>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4">
@@ -125,8 +338,8 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                       <Mail className="w-4 h-4" /> Talk to Sales
                     </button>
                   ) : (
-                    <RainbowButton 
-                      onClick={(e) => { e.stopPropagation(); handleCheckout(); }}
+                    <RainbowButton
+                      onClick={(e) => { e.stopPropagation(); handleGetStarted(); }}
                       className="w-full py-3.5 font-bold text-sm"
                     >
                       Get Started Free
@@ -141,39 +354,11 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
 
       {!isEnterprise && (
         <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 w-full md:w-auto">
-              <label className="text-[10px] font-black text-white/50 uppercase tracking-widest">Seats</label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="1"
-                  max={currentPlanDetails.maxSeats}
-                  value={seats}
-                  onChange={(e) => setSeats(parseInt(e.target.value))}
-                  className="w-full md:w-48 accent-brand"
-                />
-                <input
-                  type="number"
-                  min="1"
-                  max={currentPlanDetails.maxSeats}
-                  value={seats}
-                  onChange={(e) => setSeats(parseInt(e.target.value))}
-                  className="w-16 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-center focus:outline-none focus:border-brand"
-                />
-              </div>
-              <p className="text-[10px] text-brand/80 font-bold uppercase">
-                {currentPlanDetails.maxSeats} seat included
-              </p>
-            </div>
-
-            <div className="text-right space-y-1">
-              <p className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center justify-end gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Free Forever
-              </p>
-              <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Total Due Today</p>
-              <p className="text-3xl font-black text-white">$0</p>
-            </div>
+          <div className="text-center">
+            <p className="text-xs font-black text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1.5 mb-1">
+              <Sparkles className="w-3.5 h-3.5" /> Free Forever
+            </p>
+            <p className="text-[10px] text-white/50 font-bold">1 seat included. No credit card needed.</p>
           </div>
         </div>
       )}

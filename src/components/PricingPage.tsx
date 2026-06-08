@@ -55,7 +55,7 @@ export function PricingPage() {
       </nav>
 
       <main className="relative z-10 pt-16 pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <PricingStep onPaymentComplete={(tier, seats) => navigate(`/auth?plan=${tier}&seats=${seats}`)} />
+        <PricingStep />
       </main>
     </div>
   );
