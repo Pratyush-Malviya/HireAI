@@ -1692,7 +1692,11 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 });
 
 app.post("/api/ai/research-candidate", async (req, res) => {
-  const { candidateName, role, company, details } = req.body;
+  const { candidateName, role, company, details, resumeText, skills, jobTitle } = req.body;
+
+  const resumeSnippet = resumeText ? resumeText.substring(0, 4000) : 'Not provided';
+  const skillsList = skills || 'Not provided';
+  const targetTitle = jobTitle || role;
 
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -1701,11 +1705,16 @@ app.post("/api/ai/research-candidate", async (req, res) => {
 
     // Stage 1: Query Planner & Rewriter
     const plannerPrompt = `You are a professional Query Rewriting and Search Optimization agent.
-    Given candidate name, role, company, and background details, expand and rewrite this context into exactly 3 optimized search queries targeting public professional profiles (LinkedIn, GitHub, StackOverflow), tech blogs (Medium, Dev.to), patents, open-source work, or news.
+    Given candidate name, role, company, skills, and background details, expand and rewrite this context into exactly 3 optimized search queries targeting public professional profiles (LinkedIn, GitHub, StackOverflow), tech blogs (Medium, Dev.to), patents, open-source work, or news.
     
     CANDIDATE: ${candidateName}
     CURRENT ROLE: ${role} at ${company}
+    TARGET JOB: ${targetTitle}
+    SKILLS: ${skillsList}
     DETAILS: ${details}
+    RESUME SNIPPET: ${resumeSnippet}
+    
+    Generate queries that combine the candidate's name with their specific skills, technologies, and claimed accomplishments to find actual evidence. Avoid generic queries.
     
     Output exactly 3 plain text queries, one per line. Do not include numbering, formatting, or introduction.`;
 
@@ -1723,18 +1732,22 @@ app.post("/api/ai/research-candidate", async (req, res) => {
 
     // Stage 2: OSINT Collector with Google Search Grounding
     const collectorPrompt = `You are an OSINT Intelligence Agent specializing in professional background scans.
-    Your mission is to perform active search verification for the candidate: ${candidateName} who claims to be a ${role} at ${company}.
+    Your mission is to perform active search verification for the candidate: ${candidateName} who claims to be a ${role} at ${company} applying for ${targetTitle}.
+    
+    Candidate's listed skills: ${skillsList}
+    Resume context: ${resumeSnippet}
     
     Perform search scans sequentially using each of the following queries:
     ${searchQueries.map((q, idx) => `${idx + 1}. "${q}"`).join("\n")}
     
     For each query, compile a dossier of:
     - Found profile URLs (LinkedIn, GitHub, StackOverflow, Kaggle, Medium, personal sites)
-    - Project contributions, open-source work, public accomplishments
+    - Project contributions, open-source work, public accomplishments matching their listed skills
     - Employment history validation signs
     - Location and title alignment
+    - Any evidence that confirms or contradicts specific claims from their resume
     
-    Write a detailed, source-cited factual report of your findings.`;
+    Write a detailed, source-cited factual report of your findings. Be thorough — look for specific projects, contributions, publications, and professional footprint matching their claimed skills.`;
 
     let collectorResponse;
     try {
@@ -1765,7 +1778,10 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     Name: ${candidateName}
     Role: ${role}
     Company: ${company}
+    Target Job: ${targetTitle}
+    Listed Skills: ${skillsList}
     Known Details: ${details}
+    Resume Snippet: ${resumeSnippet}
     
     OSINT DOSSIER:
     ${osintDossier}
@@ -1781,8 +1797,9 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     2. Verification Audit & Risk Signals:
        - Assess risk score (0-100) detailing if they have inflated credentials, short tenures, or contradictory timelines.
        - Highlight any timeline discrepancies or stable employment gaps.
+       - Cross-check each claimed skill against evidence found in the OSINT dossier.
        
-    Output a verification report detailing your logical audits.`;
+    Output a verification report detailing your logical audits. Be specific about which skills could be verified and which could not.`;
 
     const auditResponse = await generateContentWithRetry({
       model: "gemini-3.5-flash",
@@ -1797,7 +1814,10 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     
     MISSION: Conduct a comprehensive, multi-source professional audit of the candidate: ${candidateName}.
     CURRENT TARGET: ${role} at ${company}.
+    APPLYING FOR: ${targetTitle}
+    LISTED SKILLS: ${skillsList}
     KNOWN CONTEXT: ${details}
+    RESUME: ${resumeSnippet}
     
     OSINT COLLECTOR DOSSIER:
     ${osintDossier}
@@ -1815,7 +1835,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     If < 65%: Mark status as "LOW_CONFIDENCE".
     
     RESEARCH CATEGORIES & METRICS TO SCORE (0-100):
-    1. Technical Intelligence: seniority_estimate ("Junior" | "Mid-level" | "Senior" | "Lead" | "Principal"), engineering_depth_score, problem_solving_score, languages used, contribution frequency.
+    1. Technical Intelligence: seniority_estimate ("Junior" | "Mid-level" | "Senior" | "Lead" | "Principal"), engineering_depth_score, problem_solving_score, languages used, contribution frequency. Cross-reference against their claimed skills.
     2. Professional Intelligence: Actual work experience validation, promotion patterns, company transitions, leadership roles, team management. Score leadership_score, stability_score (0-100), and growth_trajectory.
     3. Reputation Intelligence: Community recognition, public endorsements, conference mentions, awards, publications. Score reputation_score (0-100), industry_visibility_score (0-100).
     4. Risk Intelligence: Check for fake/inflated experience, inconsistent timelines, skill inflation, AI-generated resume patterns, empty GitHub, contradicting history. Flag and score risk_score (0-100). (If risk found, politely summarize. Highlight risk as High/Medium/Low, but use the phrase "Potential inconsistencies detected." inside risk_signals).
@@ -1840,13 +1860,13 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       "reputation_score": 0-100 score,
       "risk_score": 0-100 score,
       "overall_recommendation": "STRONG_MATCH" | "GOOD_MATCH" | "POTENTIAL_MATCH" | "NOT_RECOMMENDED",
-      "summary": "Professional summary in clean markdown...",
-      "career_narrative": "Detailed career narrative validation...",
-      "technical_depth": "Analysis of technical depth...",
-      "leadership_potential": "Analysis of leadership and team management...",
-      "communication_quality": "Analysis of communication quality...",
-      "hiring_recommendation": "Detailed hiring recommendation...",
-      "risk_signals": "Potential inconsistencies detected description or 'No potential inconsistencies detected.'...",
+      "summary": "Professional summary in clean markdown with specific findings...",
+      "career_narrative": "Detailed career narrative validation against public records...",
+      "technical_depth": "Specific analysis of technical depth matching their claimed skills...",
+      "leadership_potential": "Analysis of leadership and team management based on evidence...",
+      "communication_quality": "Analysis of communication quality from public sources...",
+      "hiring_recommendation": "Specific hiring recommendation based on verified vs unverified claims...",
+      "risk_signals": "Specific inconsistencies detected or 'No potential inconsistencies detected.'...",
       "seniority_estimate": "Junior" | "Mid-level" | "Senior" | "Lead" | "Principal",
       "engineering_depth_score": 0-100,
       "problem_solving_score": 0-100,

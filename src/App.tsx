@@ -7258,12 +7258,16 @@ function CandidateDetail() {
     notify('Starting Deep Research: Verified footprints scan initiated...', 'info');
     try {
       const skills = candidate.parsedData?.skills?.join(', ') || candidate.profileTags?.join(', ') || '';
+      const details = [
+        candidate.oneLineSummary,
+        candidate.resumeText ? candidate.resumeText.substring(0, 2000) : ''
+      ].filter(Boolean).join('\n\n').substring(0, 3000);
       setResearchStep('Searching professional networks and registries...');
       const result = await researchCandidate(
         candidate.fullName,
         candidate.currentRole,
         candidate.currentCompany,
-        candidate.oneLineSummary,
+        details,
         candidate.resumeText,
         skills,
         job?.title || ''
