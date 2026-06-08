@@ -1,6 +1,6 @@
 import { LogOut, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook } from 'lucide-react';
+import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook, Eye } from 'lucide-react';
 import { useEffect, useState, createContext, useContext, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork } from 'firebase/firestore';
@@ -6820,6 +6820,7 @@ function CandidateDetail() {
   const [loading, setLoading] = useState(true);
   const [researching, setResearching] = useState(false);
   const [researchStep, setResearchStep] = useState('');
+  const [showUnverified, setShowUnverified] = useState(false);
   const [retryingScreening, setRetryingScreening] = useState(false);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
@@ -7841,7 +7842,7 @@ function CandidateDetail() {
           ) : candidate.research ? (
             (() => {
               const res = (candidate.research || {}) as any;
-              const confidence = res.identity_confidence ?? 85;
+              const confidence = (res.identity_confidence ?? 85) || 85;
               const status = res.status || 'HIGH_CONFIDENCE';
               const seniority = res.seniority_estimate || 'Senior';
               const techScore = res.technical_score ?? 80;
@@ -7864,7 +7865,7 @@ function CandidateDetail() {
               ];
               const summaryText = res.summary || '';
               const sources = res.sources || [];
-              const isUnverified = confidence < 85;
+              const isUnverified = confidence < 85 && !showUnverified;
 
               return (
                 <div className="space-y-8 font-sans">
@@ -7967,15 +7968,36 @@ function CandidateDetail() {
                       <p className="text-sm text-red-300/70 max-w-xl mx-auto leading-relaxed">
                         To maintain compliance and high intelligence precision, HireAI security rules dictate that sensitive background analysis metrics (technical scores, risk intelligence, leadership analytics, and performance narratives) are hidden when identity confidence falls under the <strong>85%</strong> threshold.
                       </p>
-                      <div className="pt-2">
+                      <div className="pt-2 space-y-3">
                         <p className="text-xs text-red-400 font-bold uppercase tracking-wider">
                           👉 Please ask the recruiter to perform a manual verification audit.
                         </p>
+                        <Button
+                          variant="outline"
+                          className="border-red-500/30 text-red-300 hover:bg-red-500/20 text-[10px] font-black uppercase tracking-widest"
+                          onClick={() => setShowUnverified(true)}
+                        >
+                          <Eye className="w-3.5 h-3.5 mr-2" /> Reveal Insights Anyway
+                        </Button>
                       </div>
-                    </div>
                   ) : (
                     /* DEEP INSIGHTS DISPLAY */
                     <div className="space-y-6">
+                      {showUnverified && (
+                        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-between">
+                          <p className="text-[10px] font-bold text-amber-300 uppercase tracking-wide">
+                            ⚠ Showing insights below 85% confidence threshold
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-amber-300 hover:bg-amber-500/20 text-[9px] font-black uppercase tracking-widest h-7 px-3"
+                            onClick={() => setShowUnverified(false)}
+                          >
+                            Re-hide
+                          </Button>
+                        </div>
+                      )}
                       {/* Row 2: DeepResearch Summary (Section 2) & Career Narrative (Section 3) */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* DEEP RESEARCH SUMMARY (Section 2) */}
