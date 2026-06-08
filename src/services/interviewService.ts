@@ -42,6 +42,15 @@ export async function summarizeInterview(history: { role: 'user' | 'model'; text
 }
 
 function categorizeQuestion(text: string): QuestionCategory {
+  // First, check for explicit [CATEGORY: ...] tag from the AI
+  const tagMatch = text.match(/\[CATEGORY:\s*(\w+)\]/i);
+  if (tagMatch) {
+    const tag = tagMatch[1].toLowerCase();
+    if (tag === 'technical' || tag === 'behavioural' || tag === 'situational' || tag === 'cultural_fit') {
+      return tag;
+    }
+  }
+  // Fallback to heuristic
   const lower = text.toLowerCase();
   if (lower.includes('technical') || lower.includes('code') || lower.includes('system') ||
       lower.includes('architecture') || lower.includes('technology') || lower.includes('tool') ||
@@ -60,47 +69,81 @@ function categorizeQuestion(text: string): QuestionCategory {
   return 'behavioural';
 }
 
-function scoreResponse(question: string, response: string): { score: number; notes: string } {
+// Gemini-powered scoring with heuristic fallback
+async function geminiScoreResponse(
+  question: string,
+  response: string
+): Promise<{ overallScore: number; scores: { relevance: number; depth: number; exampleQuality: number; communication: number; problemSolving: number }; notes: string }> {
+  try {
+    const result = await fetch('/api/ai/evaluate-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        history: [
+          { role: 'model', text: question },
+          { role: 'user', text: response }
+        ]
+      })
+    });
+    const data = await result.json();
+    if (data.evaluations && data.evaluations.length > 0) {
+      const ev = data.evaluations[0];
+      return {
+        overallScore: ev.overallScore || 3,
+        scores: ev.scores || { relevance: 3, depth: 3, exampleQuality: 3, communication: 3, problemSolving: 3 },
+        notes: ev.notes || 'Evaluated by AI'
+      };
+    }
+  } catch (e) {
+    // fall through to heuristic
+  }
+  return heuristicScoreResponse(question, response);
+}
+
+function heuristicScoreResponse(question: string, response: string): { overallScore: number; scores: { relevance: number; depth: number; exampleQuality: number; communication: number; problemSolving: number }; notes: string } {
   const wordCount = response.split(/\s+/).length;
   const sentences = response.split(/[.!?]+/).filter(Boolean).length;
   const hasStructure = /(first|second|third|finally|in conclusion|specifically|for example|for instance|because|therefore)/i.test(response);
   const hasQuantified = /\d+/.test(response);
-  const isDetailed = wordCount > 30;
 
-  let score = 3;
+  let overallScore = 3;
   const notes: string[] = [];
 
   if (wordCount < 10) {
-    score = 1;
+    overallScore = 1;
     notes.push('Response too brief, lacks substance');
   } else if (wordCount < 25) {
-    score = 2;
+    overallScore = 2;
     notes.push('Response could use more detail');
-  } else if (wordCount >= 30 && hasStructure && isDetailed) {
-    score = 4;
+  } else if (wordCount >= 30 && hasStructure) {
+    overallScore = 4;
     notes.push('Well-structured response');
     if (hasQuantified) {
-      score = 5;
+      overallScore = 5;
       notes.push('Strong evidence with specific examples');
     }
   } else if (wordCount >= 50 && hasStructure && hasQuantified) {
-    score = 5;
+    overallScore = 5;
     notes.push('Excellent detailed response with concrete examples');
   }
 
   if (sentences < 2) notes.push('Limited elaboration');
   if (!hasStructure) notes.push('Could improve response structure (e.g., STAR format)');
 
-  return { score, notes: notes.join('; ') || 'Adequate response' };
+  return {
+    overallScore,
+    scores: { relevance: overallScore, depth: overallScore, exampleQuality: overallScore, communication: overallScore, problemSolving: overallScore },
+    notes: notes.join('; ') || 'Adequate response'
+  };
 }
 
-export function localEvaluateInterview(
+export async function localEvaluateInterview(
   history: { role: 'user' | 'model'; text: string }[],
   candidateName: string,
   jobTitle: string,
   resumeSkills?: string[],
   jdSkills?: string[]
-): InterviewEvaluation {
+): Promise<InterviewEvaluation> {
   // Extract question-answer pairs (model messages = questions, user messages = responses)
   const pairs: { question: string; response: string }[] = [];
   for (let i = 0; i < history.length - 1; i++) {
@@ -109,11 +152,11 @@ export function localEvaluateInterview(
     }
   }
 
-  const questionEvals: QuestionEvaluation[] = pairs.map(p => {
+  const questionEvals: QuestionEvaluation[] = await Promise.all(pairs.map(async p => {
     const category = categorizeQuestion(p.question);
-    const { score, notes } = scoreResponse(p.question, p.response);
-    return { question: p.question, response: p.response, category, score, notes };
-  });
+    const { overallScore, notes } = await geminiScoreResponse(p.question, p.response);
+    return { question: p.question, response: p.response, category, score: overallScore, notes };
+  }));
 
   // Compute competency scores
   const byCategory: Record<QuestionCategory, number[]> = {

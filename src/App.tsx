@@ -803,6 +803,17 @@ function InterviewRoom() {
 
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
+  // Strip [CATEGORY:...], [FOLLOWUP] tags from text for clean display/speech
+  const stripInterviewTags = (text: string) =>
+    text.replace(/\[(CATEGORY|DIFFICULTY):\s*\w+\]\s*/gi, '').replace(/\[FOLLOWUP\]\s*/gi, '').trim();
+
+  // Parse [CATEGORY:...], [FOLLOWUP] tags from AI response text
+  const parseInterviewTags = (text: string) => {
+    const categoryMatch = text.match(/\[CATEGORY:\s*(\w+)\]/i);
+    const isFollowup = /\[FOLLOWUP\]/i.test(text);
+    return { category: categoryMatch?.[1]?.toLowerCase() || null, isFollowup, cleanText: stripInterviewTags(text) };
+  };
+
   const formatTime = (ms: number | null) => {
     if (ms === null) return null;
     const totalSeconds = Math.floor(ms / 1000);
@@ -1640,7 +1651,7 @@ function InterviewRoom() {
         const thankYouMessage = aiResponse.toLowerCase().includes('thank') 
           ? aiResponse 
           : `${aiResponse} Thank you.`;
-        speak(thankYouMessage, () => {
+        speak(stripInterviewTags(thankYouMessage), () => {
           setTimeout(() => {
             window.close();
           }, 1000);
@@ -1688,7 +1699,7 @@ function InterviewRoom() {
           : 'Interview completed. Flagged for human review.', 
         'success');
       } else {
-        speak(aiResponse);
+        speak(stripInterviewTags(aiResponse));
         try {
           await updateDoc(doc(db, 'interviews', currentSessionId), { messages: finalMessages });
         } catch (error) {
@@ -2042,7 +2053,9 @@ function InterviewRoom() {
               /* Real-time Transcription Log Tab */
               <div className="flex flex-col h-full min-h-[350px] relative">
                 <div className="flex-1 space-y-4 overflow-y-auto pr-1">
-                  {messages.map((m, i) => (
+                  {messages.map((m, i) => {
+                    const tags = m.role === 'model' ? parseInterviewTags(m.text) : null;
+                    return (
                     <div key={i} className="animate-in fade-in duration-300">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
@@ -2051,13 +2064,24 @@ function InterviewRoom() {
                         )}>
                           {m.role === 'model' ? 'AI' : 'You'}
                         </span>
+                        {tags?.category && (
+                          <span className="text-[7px] font-black uppercase tracking-widest px-1 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            {tags.category === 'technical' ? 'Tech' : tags.category === 'behavioural' ? 'Behavior' : tags.category === 'situational' ? 'Scenario' : tags.category === 'cultural_fit' ? 'Culture' : tags.category}
+                          </span>
+                        )}
+                        {tags?.isFollowup && (
+                          <span className="text-[7px] font-black uppercase tracking-widest px-1 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                            Follow-up
+                          </span>
+                        )}
                         <span className="text-[8px] font-medium text-white">{formatDateTime(new Date(m.timestamp))}</span>
                       </div>
                       <p className="text-xs text-slate-303 leading-relaxed pl-1">
-                        {m.text}
+                        {(tags ? tags.cleanText : m.text)}
                       </p>
                     </div>
-                  ))}
+                    );
+                  })}
                   
                   {input && !concluded && (
                      <div className="animate-in fade-in duration-200 opacity-60">

@@ -2057,13 +2057,35 @@ app.post("/api/ai/research-candidate", async (req, res) => {
 app.post("/api/ai/chat", async (req, res) => {
   const { candidateName, role, company, jd, resume, history } = req.body;
 
+  // Extract seniority for difficulty calibration
+  const seniorityMatch = (resume || '').match(/(senior|lead|principal|staff|junior|mid|fresher|intern)/i);
+  const seniorityLevel = seniorityMatch ? seniorityMatch[1].toLowerCase() : 'mid';
+  const diffLevel = seniorityLevel === 'junior' || seniorityLevel === 'intern' ? 'moderate' :
+                    seniorityLevel === 'senior' || seniorityLevel === 'lead' || seniorityLevel === 'principal' || seniorityLevel === 'staff' ? 'hard' : 'moderate';
+
   try {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("AI Key missing");
     }
 
-    const systemInstruction = `You are "Alex from HireNow", a warm and attentive professional interviewer. 
-You are conducting a structured professional screening interview with ${candidateName} for the position of ${role} at ${company}.
+    const systemInstruction = `You are "Alex from HireNow", a warm and attentive professional interviewer conducting a structured screening interview with ${candidateName} for ${role} at ${company}. Today's date is ${new Date().toISOString().split('T')[0]}.
+
+DIFFICULTY CALIBRATION: This candidate's seniority appears to be "${seniorityLevel}". Calibrate your question difficulty to "${diffLevel}" level:
+- ${diffLevel === 'hard' ? 'Ask about trade-offs, architectural decisions, leadership impact, mentoring, and strategic thinking. Expect deep technical or strategic depth.' : diffLevel === 'moderate' ? 'Ask about implementation details, team collaboration, problem-solving approaches, and independent contribution.' : 'Ask about fundamentals, learning ability, team fit, and growth potential. Be supportive and encouraging.'}
+
+QUESTION CATEGORIZATION — Tag each question with one of these categories in your response using the format [CATEGORY: technical], [CATEGORY: behavioural], [CATEGORY: situational], or [CATEGORY: cultural_fit]:
+- [CATEGORY: technical] — Skill-based, technology, coding, architecture, tools, systems, algorithms, databases, APIs, methodologies
+- [CATEGORY: behavioural] — Past experience, STAR format, teamwork, leadership, conflict, achievements, failures
+- [CATEGORY: situational] — Hypothetical scenarios, "what would you do if", problem-solving judgment
+- [CATEGORY: cultural_fit] — Work style, values, team culture, mission alignment, communication preferences
+
+EVALUATION PROTOCOL — For each response, silently evaluate (do NOT speak this aloud):
+- Relevance: Does the answer address the question directly? (1-5)
+- Depth: Does the answer show deep understanding or is it surface-level? (1-5)
+- Example Quality: Does the answer include specific, concrete examples? (1-5)
+- Communication: Is the answer clear, structured, and well-articulated? (1-5)
+- Problem-Solving: Does the answer demonstrate analytical thinking? (1-5)
+Track these scores internally. Use them to decide when to probe deeper vs move on.
 
 JOB DESCRIPTION:
 ${jd}
@@ -2088,32 +2110,34 @@ COGNITIVE Speaking Guidelines (ENFORCE RIGIDLY):
 
 3. ACTIVE LISTENING & MIRRORING:
 - Reference specific words the candidate used in your follow-ups (e.g. "You said X — tell me more about that").
-- Use the mirror technique at least once per session: repeat their last 2-3 words as a soft question to prompt elaboration (e.g., if they say "...so we decided to migrate", respond with: "Decided to migrate?").
+- Use the mirror technique at least once per session: repeat their last 2-3 words as a soft question to prompt elaboration.
 - Never ask a follow-up that ignores what was just said.
 
 4. DIALOGUE STRUCTURE & FOLLOW-UPS:
-- Ask ONE question at a time.
-- If an answer is vague, probe: 'Could you give me a specific example of that?'
-- If an answer is too short, probe: 'Tell me a bit more about that.' or 'What happened next?'
+- Ask ONE question at a time with its [CATEGORY: ...] tag at the start.
+- If you are asking a follow-up probe (2nd+ question on the same topic), prepend [FOLLOWUP] before the [CATEGORY: ...] tag like this: [FOLLOWUP] [CATEGORY: behavioural]
+- If an answer is vague (Relevance < 3), probe: 'Could you give me a specific example of that?'
+- If an answer is too short (Depth < 3), probe: 'Tell me a bit more about that.' or 'What happened next?'
+- If an answer lacks examples (Example Quality < 3), probe: 'Can you walk me through a specific instance where you did that?'
 - Probe missing STAR layers (Situation, Task, Action, Result) naturally.
 - Max 2 follow-ups per question before moving on to a new topic.
 - Keep the total session to 5-8 questions.
+- Cover at least 3 different question categories during the interview.
 
 5. EMPATHY & EMOTIONAL AWARENESS:
 - If nervous: 'No pressure — take your time, there are no trick questions.'
-- If they share a failure/setback: acknowledge briefly ('That sounds like a tough situation.') before probing.
-- NEVER use generic filler praise ('Great!', 'Wonderful!', 'Excellent!') reflexively. Use specific praise only: 'I liked that you quantified the outcome — that's exactly the kind of detail that helps.' Specific praise feels real.
+- If they share a failure/setback: acknowledge briefly before probing.
+- NEVER use generic filler praise reflexively. Use specific praise only.
 
 6. TECHNICAL vs NON-TECHNICAL ADAPTATION:
-- If this is a Technical role: use correct terminology, probe for specifics and trade-offs, explore system design trade-offs.
-- If this is a Non-Technical role: lead with outcomes and stories, not methods and jargon.
+- If Technical role: use correct terminology, probe for specifics and trade-offs.
+- If Non-Technical role: lead with outcomes and stories, not methods and jargon.
 - Mirror their register - match their vocabulary level.
 
 7. INTERVIEW FLOW:
-- GREETING & CONSENT: The first message must welcome the candidate, introduce yourself, and ask if they are ready to begin in a quiet room (this is pre-populated in the session).
-- CLOSING PROTOCOL: When you are ready to wrap up (after 5-8 questions), use the Closing Script:
-  "That's everything on my end — really helpful conversation. Before I let you go, do you have any questions for me about the role, the team, or anything else?"
-  After they reply to this, say: "Great. Thanks again for your time — I really enjoyed learning about your background. We'll be in touch about next steps soon. Take care." and wrap up.`;
+- GREETING & CONSENT: The first message must welcome the candidate, introduce yourself, and ask if they are ready.
+- CLOSING PROTOCOL: After 5-8 questions: "That's everything on my end — really helpful conversation. Before I let you go, do you have any questions for me about the role, the team, or anything else?"
+  After they reply: "Great. Thanks again for your time — I really enjoyed learning about your background. We'll be in touch about next steps soon. Take care." and wrap up.`;
 
     // Map conversation history, prepending a simulated user start message if the first message is a model greeting.
     // This is required because Gemini's multi-turn chat API mandates that the conversation begins with a 'user' turn,
@@ -2201,6 +2225,62 @@ app.post("/api/ai/summarize", async (req, res) => {
     } catch (fallbackError) {
       res.status(500).json({ error: "Summarization failed" });
     }
+  }
+});
+
+app.post("/api/ai/evaluate-interview", async (req, res) => {
+  const { history } = req.body;
+
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("AI Key missing");
+    }
+
+    // Extract Q&A pairs from history
+    const pairs: { question: string; response: string }[] = [];
+    for (let i = 0; i < history.length - 1; i++) {
+      if (history[i].role === 'model' && history[i + 1].role === 'user') {
+        pairs.push({ question: history[i].text, response: history[i + 1].text });
+      }
+    }
+
+    if (pairs.length === 0) {
+      return res.json({ evaluations: [] });
+    }
+
+    const evaluationPrompt = `You are a senior interview evaluator. For each Q&A pair below, score the candidate's response across 5 dimensions on a scale of 1-5.
+
+Scoring criteria:
+- Relevance (1-5): Does the answer directly address the question?
+- Depth (1-5): Does the answer show deep understanding vs surface-level?
+- Example Quality (1-5): Are specific, concrete examples provided?
+- Communication (1-5): Is the answer clear, structured, well-articulated?
+- Problem-Solving (1-5): Does the answer demonstrate analytical thinking?
+
+Return a JSON object with an "evaluations" array where each element has:
+{
+  "questionIndex": number,
+  "scores": { "relevance": 1-5, "depth": 1-5, "exampleQuality": 1-5, "communication": 1-5, "problemSolving": 1-5 },
+  "overallScore": 1-5 (average of the 5 scores),
+  "notes": "brief evaluation note"
+}
+
+Q&A pairs:
+${JSON.stringify(pairs.map((p, i) => ({ index: i, question: p.question, answer: p.response })))}
+
+Return ONLY valid JSON.`;
+
+    const response = await generateContentWithRetry({
+      model: "gemini-3.5-flash",
+      contents: evaluationPrompt,
+      config: { responseMimeType: "application/json" }
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    res.json(result);
+  } catch (error: any) {
+    console.warn("AI evaluation failed, falling back:", error);
+    res.json({ evaluations: [] });
   }
 });
 
