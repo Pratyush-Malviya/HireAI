@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Zap, Shield, Mail, Sparkles, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Check, Zap, Shield, Mail, Sparkles, Loader2, Eye, EyeOff, User, Building2, Globe, MapPin, Phone, Lock, ArrowLeft } from 'lucide-react';
 import { RainbowButton } from './magic-ui/rainbow-button';
 import { BorderBeam } from './magic-ui/border-beam';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -138,69 +138,132 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
   if (step === 'register') {
     return (
       <div className="w-full max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+        <button
+          onClick={() => setStep('plans')}
+          className="flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors mb-8 group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-xs font-bold uppercase tracking-widest">Back to Plans</span>
+        </button>
+
         <div className="text-center space-y-3 mb-10">
-          <h2 className="text-3xl font-black text-white tracking-tight">Create Your Account</h2>
-          <p className="text-white/60 text-base">
-            Setting up your <span className="text-brand font-bold">{selectedPlan === 'free' ? 'Free' : 'Enterprise'}</span> workspace
-          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] font-black uppercase tracking-widest mb-2">
+            <Zap className="w-3 h-3" />
+            {selectedPlan === 'free' ? 'Free Plan' : 'Enterprise Plan'}
+          </div>
+          <h2 className="text-4xl font-black text-white tracking-tight">Create Your Account</h2>
+          <p className="text-white/50 text-base">Fill in the details below to set up your workspace.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 text-sm font-bold text-red-200">
-              {error}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-sm font-bold text-red-300 flex items-start gap-3"
+            >
+              <Shield className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </motion.div>
           )}
 
-          <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
-            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Personal Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Full Name</label>
-                <input
-                  type="text" required value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
-                  placeholder="e.g. John Doe"
-                />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-transparent overflow-hidden"
+          >
+            <div className="px-6 pt-5 pb-1">
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-blue-400" />
+                </div>
+                <h3 className="text-xs font-black text-white/70 uppercase tracking-widest">Personal Information</h3>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Phone Number</label>
-                <input
-                  type="tel" required value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
-                  placeholder="e.g. +1 (555) 123-4567"
-                />
+              <p className="text-[10px] text-white/30 font-medium ml-[38px]">Who is the primary contact for this account?</p>
+            </div>
+            <div className="px-6 pt-4 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  <User className="w-3 h-3" /> Full Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                  <input
+                    type="text" required value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                    placeholder="John Doe"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  <Phone className="w-3 h-3" /> Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                  <input
+                    type="tel" required value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
-            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Organization Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Organization Name</label>
-                <input
-                  type="text" required value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
-                  placeholder="e.g. Acme Corp"
-                />
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-transparent overflow-hidden"
+          >
+            <div className="px-6 pt-5 pb-1">
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+                <h3 className="text-xs font-black text-white/70 uppercase tracking-widest">Organization Details</h3>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Email Domain (optional)</label>
-                <input
-                  type="text" value={orgDomain}
-                  onChange={(e) => setOrgDomain(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
-                  placeholder="e.g. acme.com"
-                />
+              <p className="text-[10px] text-white/30 font-medium ml-[38px]">Tell us about your company.</p>
+            </div>
+            <div className="px-6 pt-4 pb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  <Building2 className="w-3 h-3" /> Organization Name
+                </label>
+                <div className="relative">
+                  <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                  <input
+                    type="text" required value={orgName}
+                    onChange={(e) => setOrgName(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                    placeholder="Acme Corp"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Industry</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  <Globe className="w-3 h-3" /> Email Domain
+                </label>
+                <div className="relative">
+                  <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                  <input
+                    type="text" value={orgDomain}
+                    onChange={(e) => setOrgDomain(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                    placeholder="acme.com (optional)"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  Industry
+                </label>
                 <select value={orgIndustry} onChange={(e) => setOrgIndustry(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white text-sm bg-transparent"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white text-sm bg-white/[0.03] font-medium outline-none"
                 >
                   <option value="Technology">Technology</option>
                   <option value="Finance">Finance</option>
@@ -210,10 +273,12 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Company Size</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  Company Size
+                </label>
                 <select value={orgCompanySize} onChange={(e) => setOrgCompanySize(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white text-sm bg-transparent"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white text-sm bg-white/[0.03] font-medium outline-none"
                 >
                   <option value="1-10">1-10 employees</option>
                   <option value="11-50">11-50 employees</option>
@@ -223,70 +288,106 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                   <option value="1000+">1000+ employees</option>
                 </select>
               </div>
-              <div className="space-y-1 md:col-span-2">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Headquarters Location</label>
-                <input
-                  type="text" value={orgLocation}
-                  onChange={(e) => setOrgLocation(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
-                  placeholder="e.g. San Francisco, CA"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
-            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Account Credentials</h3>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Email Address</label>
-              <input
-                type="email" required value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
-                placeholder="name@company.com"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Password</label>
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> Headquarters Location
+                </label>
                 <div className="relative">
+                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                   <input
-                    type={showPassword ? 'text' : 'password'} required value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent pr-10"
-                    placeholder="Min 6 characters"
+                    type="text" value={orgLocation}
+                    onChange={(e) => setOrgLocation(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                    placeholder="San Francisco, CA"
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Confirm Password</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent pr-10"
-                    placeholder="Confirm your password"
-                  />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="flex items-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-transparent overflow-hidden"
+          >
+            <div className="px-6 pt-5 pb-1">
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                  <Lock className="w-3.5 h-3.5 text-purple-400" />
+                </div>
+                <h3 className="text-xs font-black text-white/70 uppercase tracking-widest">Account Credentials</h3>
+              </div>
+              <p className="text-[10px] text-white/30 font-medium ml-[38px]">Secure your account with a strong password.</p>
+            </div>
+            <div className="px-6 pt-4 pb-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                  <Mail className="w-3 h-3" /> Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                  <input
+                    type="email" required value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                    placeholder="name@company.com"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                    <input
+                      type={showPassword ? 'text' : 'password'} required value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                      placeholder="Min 6 characters"
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-white/60 uppercase tracking-widest px-1 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Confirm Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'} required value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-white/10 focus:border-brand focus:ring-1 focus:ring-brand/30 transition-all text-white placeholder:text-white/20 text-sm bg-white/[0.03] font-medium outline-none"
+                      placeholder="Confirm your password"
+                    />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2"
+          >
             <button type="button" onClick={() => setStep('plans')}
-              className="px-6 py-3.5 rounded-2xl border-2 border-white/20 text-white font-bold text-sm hover:bg-white/10 transition-all"
+              className="px-6 py-3.5 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 font-bold text-sm transition-all flex items-center justify-center gap-2"
             >
-              Back
+              <ArrowLeft className="w-4 h-4" /> Back
             </button>
             <RainbowButton type="submit" disabled={loading} className="flex-1 py-3.5 font-bold text-sm">
               {loading ? (
@@ -294,10 +395,12 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                   <Loader2 className="w-5 h-5 animate-spin" /> Creating Account...
                 </span>
               ) : (
-                'Create Account & Sign In'
+                <span className="flex items-center justify-center gap-2">
+                  Create Account <Check className="w-4 h-4" />
+                </span>
               )}
             </RainbowButton>
-          </div>
+          </motion.div>
         </form>
       </div>
     );
