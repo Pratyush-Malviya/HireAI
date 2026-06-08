@@ -4798,14 +4798,17 @@ function JobDetail() {
     });
   };
 
-  const handleResearchAll = async () => {
-    const candidatesToResearch = candidates.filter(c => !c.research);
+  const handleResearchAll = async (forceRefresh = false) => {
+    const candidatesToResearch = forceRefresh
+      ? candidates.filter(c => c.resumeText)
+      : candidates.filter(c => !c.research && c.resumeText);
     if (candidatesToResearch.length === 0) {
-      notify('All candidates already have research reports.', 'info');
+      notify(forceRefresh ? 'No candidates with resumes to re-research.' : 'All candidates already have research reports.', 'info');
       return;
     }
     
-    const ok = await confirm(`Trigger deep research for ${candidatesToResearch.length} candidates? This will scan the web for each professional footprint.`);
+    const label = forceRefresh ? 'Re-research' : 'Research';
+    const ok = await confirm(`Trigger ${label.toLowerCase()} for ${candidatesToResearch.length} candidates? This will scan the web for each professional footprint.`);
     if (!ok) return;
     
     setResearchingAll(true);
@@ -4818,14 +4821,38 @@ function JobDetail() {
       files: candidatesToResearch.map(c => ({ name: c.fullName, status: 'queued' })) 
     });
 
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const researchWithRetry = async (c: Candidate, attempt = 1): Promise<any> => {
+      try {
+        const skills = c.parsedData?.skills?.join(', ') || c.profileTags?.join(', ') || '';
+        const result = await researchCandidate(
+          c.fullName,
+          c.currentRole,
+          c.currentCompany || '',
+          c.oneLineSummary || '',
+          c.resumeText || '',
+          skills,
+          job?.title || ''
+        );
+        return result;
+      } catch (err: any) {
+        if (attempt < 3 && (err.message?.includes('429') || err.message?.includes('rate') || err.message?.includes('timeout'))) {
+          const backoff = Math.pow(2, attempt) * 3000;
+          await delay(backoff);
+          return researchWithRetry(c, attempt + 1);
+        }
+        throw err;
+      }
+    };
+
     try {
-      const BATCH_SIZE = 1; // Research is more intensive, process one by one
+      const BATCH_SIZE = 1;
       for (let i = 0; i < candidatesToResearch.length; i += BATCH_SIZE) {
         const currentBatch = candidatesToResearch.slice(i, i + BATCH_SIZE);
         
         if (i > 0) {
-          // Extra long delay for research because it uses Search tools which have tighter limits
-          await new Promise(resolve => setTimeout(resolve, 6000));
+          await delay(6000);
         }
 
         await Promise.all(currentBatch.map(async (c, batchIdx) => {
@@ -4837,7 +4864,7 @@ function JobDetail() {
           }) : null);
 
           try {
-            const result = await researchCandidate(c.fullName, c.currentRole, c.currentCompany || '', c.oneLineSummary);
+            const result = await researchWithRetry(c);
             await updateDoc(doc(db, 'candidates', c.id), {
               research: {
                 ...result,
@@ -5604,16 +5631,28 @@ function JobDetail() {
                 </Button>
               )}
               {candidates.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-brand/10 text-white border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9"
-                  onClick={handleResearchAll}
-                  disabled={researchingAll || uploading}
-                >
-                  {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Globe className="w-3 h-3 mr-2" />}
-                  Research Pipeline
-                </Button>
+                <>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-brand/10 text-white border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9"
+                    onClick={() => handleResearchAll(false)}
+                    disabled={researchingAll || uploading}
+                  >
+                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Globe className="w-3 h-3 mr-2" />}
+                    Research Pipeline
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-white border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 font-black uppercase tracking-widest text-[10px] h-9"
+                    onClick={() => handleResearchAll(true)}
+                    disabled={researchingAll || uploading}
+                  >
+                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <RotateCcw className="w-3 h-3 mr-2" />}
+                    Refresh All
+                  </Button>
+                </>
               )}
               <div className="flex flex-wrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10">
                 <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
@@ -6780,6 +6819,7 @@ function CandidateDetail() {
   const [interview, setInterview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [researching, setResearching] = useState(false);
+  const [researchStep, setResearchStep] = useState('');
   const [retryingScreening, setRetryingScreening] = useState(false);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
@@ -7190,15 +7230,22 @@ function CandidateDetail() {
   const handleDeepResearch = async () => {
     if (!candidate) return;
     setResearching(true);
+    setResearchStep('Initializing research pipeline...');
     notify('Starting Deep Research: Verified footprints scan initiated...', 'info');
     try {
+      const skills = candidate.parsedData?.skills?.join(', ') || candidate.profileTags?.join(', ') || '';
+      setResearchStep('Searching professional networks and registries...');
       const result = await researchCandidate(
         candidate.fullName,
         candidate.currentRole,
         candidate.currentCompany,
-        candidate.oneLineSummary
+        candidate.oneLineSummary,
+        candidate.resumeText,
+        skills,
+        job?.title || ''
       );
       
+      setResearchStep('Synthesizing results and saving to profile...');
       try {
         await updateDoc(doc(db, 'candidates', candidate.id), {
           research: {
@@ -7206,15 +7253,30 @@ function CandidateDetail() {
             lastResearchedAt: serverTimestamp()
           }
         });
+        setResearchStep('');
+        notify('Deep Research Complete: Multi-source verification synced.', 'success');
       } catch (error) {
         handleFirestoreError(error, OperationType.UPDATE, `candidates/${candidate.id}`);
+        if (result && Object.keys(result).length > 0) {
+          localStorage.setItem(`research_fallback_${candidate.id}`, JSON.stringify(result));
+          notify('Research data saved locally (Firestore unavailable).', 'info');
+        }
       }
-      notify('Deep Research Complete: Multi-source verification synced.', 'success');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Deep Research Error:', error);
-      notify('Failed to perform deep research. Please try again.', 'error');
+      const fallback = localStorage.getItem(`research_fallback_${candidate.id}`);
+      if (fallback) {
+        try {
+          const parsed = JSON.parse(fallback);
+          setCandidate(prev => prev ? { ...prev, research: { ...parsed, lastResearchedAt: new Date().toISOString() } } : null);
+          notify(`Backend unavailable. Restored last known research from local cache. (${error.message})`, 'info');
+        } catch { /* ignore corrupt cache */ }
+      } else {
+        notify(error.message || 'Failed to perform deep research. Please try again.', 'error');
+      }
     } finally {
       setResearching(false);
+      setResearchStep('');
     }
   };
 
@@ -7429,7 +7491,7 @@ function CandidateDetail() {
             {researching ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1 sm:mr-2" /><span className="truncate">Scan...</span></>
             ) : (
-              <><Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" /><span className="truncate">{candidate.research ? 'Sync' : 'Deep Research'}</span></>
+              <>              <Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" /><span className="truncate">{candidate.research ? 'Re-Research' : 'Deep Research'}</span></>
             )}
           </Button>
           <Button variant="outline" className="text-white text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
@@ -7768,6 +7830,12 @@ function CandidateDetail() {
                 <div className="h-2 bg-transparent rounded-full w-5/6 animate-pulse mx-auto" />
                 <div className="h-2 bg-transparent rounded-full w-4/6 animate-pulse mx-auto" />
               </div>
+              {researchStep && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <Loader2 className="w-4 h-4 animate-spin text-brand shrink-0" />
+                  <p className="text-xs text-white font-semibold">{researchStep}</p>
+                </div>
+              )}
               <p className="text-xs text-white mt-4 italic font-medium">"Cross-referencing LinkedIn, GitHub, and professional registries..."</p>
             </div>
           ) : candidate.research ? (
@@ -8064,27 +8132,60 @@ function CandidateDetail() {
                         <h4 className="text-xs font-black uppercase tracking-widest text-white">8. Evidence Sources / Reference Grounding Links</h4>
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {sources.map((source: any, sidx: number) => (
-                          <a 
-                            key={sidx}
-                            href={source.uri && source.uri !== '#' ? source.uri : undefined}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`block p-3 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-transparent/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-[11px] font-bold text-white line-clamp-1 group-hover:text-white italic">
-                                {source.title || source.uri}
-                              </span>
-                              {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-white group-hover:text-white shrink-0" />}
-                            </div>
-                          </a>
-                        ))}
-                        {sources.length === 0 && (
+                      {(() => {
+                        const grouped: Record<string, typeof sources> = {};
+                        const domainLabel = (uri: string) => {
+                          try {
+                            const host = new URL(uri).hostname.replace('www.', '');
+                            if (host.includes('linkedin')) return 'LinkedIn';
+                            if (host.includes('github')) return 'GitHub';
+                            if (host.includes('stackoverflow') || host.includes('stackexchange')) return 'Stack Overflow';
+                            if (host.includes('twitter') || host.includes('x.com')) return 'Twitter/X';
+                            if (host.includes('medium')) return 'Medium';
+                            if (host.includes('dev.to')) return 'Dev.to';
+                            if (host.includes('youtube') || host.includes('youtu.be')) return 'YouTube';
+                            return host;
+                          } catch { return 'Other'; }
+                        };
+                        sources.forEach((s: any) => {
+                          const key = domainLabel(s.uri || '');
+                          if (!grouped[key]) grouped[key] = [];
+                          grouped[key].push(s);
+                        });
+                        return Object.entries(grouped).length > 0 ? (
+                          <div className="space-y-4">
+                            {Object.entries(grouped).map(([domain, domainSources]) => (
+                              <div key={domain}>
+                                <h5 className="text-[10px] font-black uppercase tracking-widest text-white mb-2 flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+                                  {domain}
+                                  <span className="text-white/50 font-mono">({domainSources.length})</span>
+                                </h5>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {domainSources.map((source: any, sidx: number) => (
+                                    <a 
+                                      key={sidx}
+                                      href={source.uri && source.uri !== '#' ? source.uri : undefined}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`block p-2.5 glass-premium border border-white/10 rounded-xl hover:border-brand/20 hover:bg-transparent/50 transition-all group ${!source.uri || source.uri === '#' ? 'pointer-events-none cursor-default' : ''}`}
+                                    >
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className="text-[11px] font-bold text-white line-clamp-1 group-hover:text-white italic">
+                                          {source.title || source.uri}
+                                        </span>
+                                        {source.uri && source.uri !== '#' && <ExternalLink className="w-3 h-3 text-white group-hover:text-white shrink-0" />}
+                                      </div>
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
                           <p className="text-xs text-white italic">No public references compiled.</p>
-                        )}
-                      </div>
+                        );
+                      })()}
                     </div>
 
                     {/* REFRESH ACTION AND AUDIT SUMMARY PANEL */}
