@@ -2720,15 +2720,16 @@ app.get("/api/composio/status", async (req, res) => {
     const connections = await composio.connectedAccounts.list({
       userIds: [userId]
     });
-    const googleConn = connections.items.find((c: any) => {
+    const googleConns = connections.items.filter((c: any) => {
       const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
       return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
     });
+    const activeGoogleConn = googleConns.find((c: any) => c.status === 'ACTIVE');
     res.json({
-      connected: !!googleConn,
-      connectionId: googleConn?.id || null,
-      accountEmail: googleConn?.state?.val?.email || googleConn?.email || null,
-      lastSynced: googleConn?.updatedAt || googleConn?.updated_at || null
+      connected: !!activeGoogleConn,
+      connectionId: activeGoogleConn?.id || null,
+      accountEmail: activeGoogleConn?.state?.val?.email || activeGoogleConn?.email || null,
+      lastSynced: activeGoogleConn?.updatedAt || activeGoogleConn?.updated_at || null
     });
   } catch (err: any) {
     console.error("Composio status check error:", err.message);
@@ -2748,17 +2749,18 @@ app.get("/api/integrations/google-calendar/status", async (req, res) => {
     const connections = await composio.connectedAccounts.list({
       userIds: [userId]
     });
-    const googleConn = connections.items.find((c: any) => {
+    const googleConns = connections.items.filter((c: any) => {
       const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
       return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
     });
+    const activeGoogleConn = googleConns.find((c: any) => c.status === 'ACTIVE');
     res.json({
-      connected: !!googleConn,
+      connected: !!activeGoogleConn,
       configured: true,
-      connectionId: googleConn?.id || null,
-      accountEmail: googleConn?.state?.val?.email || googleConn?.email || null,
-      lastSynced: googleConn?.updatedAt || googleConn?.updated_at || null,
-      status: googleConn?.status || null
+      connectionId: activeGoogleConn?.id || null,
+      accountEmail: activeGoogleConn?.state?.val?.email || activeGoogleConn?.email || null,
+      lastSynced: activeGoogleConn?.updatedAt || activeGoogleConn?.updated_at || null,
+      status: activeGoogleConn?.status || null
     });
   } catch (err: any) {
     console.error("Google Calendar integration status error:", err.message);
