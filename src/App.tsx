@@ -7640,7 +7640,7 @@ function CandidateDetail() {
           <div className="w-px h-6 bg-white/5" />
           <Button
             variant="ghost"
-            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 font-black uppercase tracking-widest text-[8px] sm:text-[10px]"
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-black uppercase tracking-widest text-[8px] sm:text-[10px] border border-red-500/20"
             onClick={deleteCandidate}
           >
             <Trash2 className="w-3.5 h-3.5 sm:mr-2" /> <span className="hidden sm:inline">Delete Report</span>
@@ -7697,7 +7697,7 @@ function CandidateDetail() {
             )}
             <Button
               variant="ghost"
-              className="border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 shadow-lg shadow-amber-500/10 text-xs py-2 h-10 px-4"
+              className="border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-white shadow-lg shadow-amber-500/10 text-xs py-2 h-10 px-4"
               onClick={async () => {
                 try {
                   await updateDoc(doc(db, 'candidates', candidate.id), { status: 'shortlisted' });
