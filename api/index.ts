@@ -2720,7 +2720,10 @@ app.get("/api/composio/status", async (req, res) => {
     const connections = await composio.connectedAccounts.list({
       userIds: [userId]
     });
-    const googleConn = connections.items.find((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
+    const googleConn = connections.items.find((c: any) => {
+      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
+      return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
+    });
     res.json({
       connected: !!googleConn,
       connectionId: googleConn?.id || null,
@@ -2745,7 +2748,10 @@ app.get("/api/integrations/google-calendar/status", async (req, res) => {
     const connections = await composio.connectedAccounts.list({
       userIds: [userId]
     });
-    const googleConn = connections.items.find((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
+    const googleConn = connections.items.find((c: any) => {
+      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
+      return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
+    });
     res.json({
       connected: !!googleConn,
       configured: true,
@@ -2823,7 +2829,10 @@ app.post("/api/composio/disconnect", async (req, res) => {
     const connections = await composio.connectedAccounts.list({
       userIds: [userId]
     });
-    const googleConns = connections.items.filter((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
+    const googleConns = connections.items.filter((c: any) => {
+      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
+      return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
+    });
     for (const conn of googleConns) {
       await composio.connectedAccounts.delete(conn.id);
     }

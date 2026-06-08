@@ -9688,19 +9688,20 @@ function OrgAdminPanel() {
       const data = await response.json();
 
       if (data.redirectUrl) {
-        const authWindow = window.open(data.redirectUrl, 'composio_auth', 'width=600,height=700');
+        window.open(data.redirectUrl, 'composio_auth', 'width=600,height=700');
 
         const handleOAuthMessage = (event: MessageEvent) => {
           if (event.data?.type === 'COMPOSIO_OAUTH_SUCCESS') {
             cleanupComposioFlow();
+            window.removeEventListener('message', handleOAuthMessage);
             setComposioConnected(true);
             setComposioAccountEmail(event.data.accountEmail || null);
             setComposioLastSynced(new Date().toISOString());
             setComposioLoading(false);
-            authWindow?.close();
             notify('Google Calendar connected successfully!', 'success');
           } else if (event.data?.type === 'COMPOSIO_OAUTH_ERROR') {
             cleanupComposioFlow();
+            window.removeEventListener('message', handleOAuthMessage);
             setComposioError(event.data.error || 'Authorization failed');
             setComposioLoading(false);
             notify(event.data.error || 'Connection failed. Please try again.', 'error');
@@ -9710,10 +9711,7 @@ function OrgAdminPanel() {
 
         composioTimeoutRef.current = setTimeout(() => {
           window.removeEventListener('message', handleOAuthMessage);
-          if (composioPollRef.current) {
-            clearInterval(composioPollRef.current);
-            composioPollRef.current = null;
-          }
+          cleanupComposioFlow();
           if (!composioConnected) {
             setComposioError('Connection timed out. Please try again.');
             setComposioLoading(false);
@@ -9722,39 +9720,19 @@ function OrgAdminPanel() {
         }, 30000);
 
         composioPollRef.current = setInterval(() => {
-          if (authWindow?.closed) {
-            cleanupComposioFlow();
-            window.removeEventListener('message', handleOAuthMessage);
-            fetch(`/api/composio/status?userId=${profile.uid}`)
-              .then(r => r.json())
-              .then(statusData => {
-                if (statusData.connected) {
-                  setComposioConnected(true);
-                  setComposioAccountEmail(statusData.accountEmail || null);
-                  setComposioLastSynced(statusData.lastSynced || null);
-                  setComposioLoading(false);
-                  notify('Google Calendar connected successfully!', 'success');
-                } else {
-                  setComposioError('Connection cancelled');
-                  setComposioLoading(false);
-                }
-              }).catch(() => {});
-          } else {
-            fetch(`/api/composio/status?userId=${profile.uid}`)
-              .then(r => r.json())
-              .then(statusData => {
-                if (statusData.connected) {
-                  cleanupComposioFlow();
-                  window.removeEventListener('message', handleOAuthMessage);
-                  authWindow?.close();
-                  setComposioConnected(true);
-                  setComposioAccountEmail(statusData.accountEmail || null);
-                  setComposioLastSynced(statusData.lastSynced || null);
-                  setComposioLoading(false);
-                  notify('Google Calendar connected successfully!', 'success');
-                }
-              }).catch(() => {});
-          }
+          fetch(`/api/composio/status?userId=${profile.uid}`)
+            .then(r => r.json())
+            .then(statusData => {
+              if (statusData.connected) {
+                cleanupComposioFlow();
+                window.removeEventListener('message', handleOAuthMessage);
+                setComposioConnected(true);
+                setComposioAccountEmail(statusData.accountEmail || null);
+                setComposioLastSynced(statusData.lastSynced || null);
+                setComposioLoading(false);
+                notify('Google Calendar connected successfully!', 'success');
+              }
+            }).catch(() => {});
         }, 3000);
       } else {
         notify(data.error || 'Failed to get connection link from Composio.', 'error');
