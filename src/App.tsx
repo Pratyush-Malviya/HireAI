@@ -11,6 +11,7 @@ import { Job, Candidate, Organization, UserProfile, TeamMember } from './types';
 import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
 const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
+const ComposioCallback = lazy(() => import('./components/ComposioCallback').then(m => ({ default: m.ComposioCallback })));
 const PricingPage = lazy(() => import('./components/PricingPage').then(m => ({ default: m.PricingPage })));
 const PricingStep = lazy(() => import('./components/PricingStep').then(m => ({ default: m.PricingStep })));
 const PaymentGateway = lazy(() => import('./components/PaymentGateway').then(m => ({ default: m.PaymentGateway })));
@@ -9639,6 +9640,11 @@ function OrgAdminPanel() {
 
   const [composioConnected, setComposioConnected] = useState(false);
   const [composioLoading, setComposioLoading] = useState(false);
+  const [composioAccountEmail, setComposioAccountEmail] = useState<string | null>(null);
+  const [composioLastSynced, setComposioLastSynced] = useState<string | null>(null);
+  const [composioError, setComposioError] = useState<string | null>(null);
+  const composioTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const composioPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (profile?.uid) {
@@ -9646,39 +9652,91 @@ function OrgAdminPanel() {
         .then(r => r.json())
         .then(data => {
           setComposioConnected(!!data.connected);
+          if (data.connected) {
+            setComposioAccountEmail(data.accountEmail || null);
+            setComposioLastSynced(data.lastSynced || null);
+          }
         })
         .catch(console.error);
     }
   }, [profile]);
 
+  const cleanupComposioFlow = () => {
+    if (composioPollRef.current) {
+      clearInterval(composioPollRef.current);
+      composioPollRef.current = null;
+    }
+    if (composioTimeoutRef.current) {
+      clearTimeout(composioTimeoutRef.current);
+      composioTimeoutRef.current = null;
+    }
+  };
+
   const handleConnectComposio = async () => {
     if (!profile?.uid) return;
     setComposioLoading(true);
+    setComposioError(null);
     try {
       const response = await fetch('/api/composio/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: profile.uid,
-          callbackUrl: window.location.origin + '/org-admin' // Ensure valid callback
+          callbackUrl: window.location.origin + '/auth/composio-callback'
         })
       });
       const data = await response.json();
-      
+
       if (data.redirectUrl) {
         const authWindow = window.open(data.redirectUrl, 'composio_auth', 'width=600,height=700');
-        
-        // Poll for connection status while popup is open
-        const pollInterval = setInterval(() => {
-          if (authWindow?.closed) {
-            clearInterval(pollInterval);
+
+        const handleOAuthMessage = (event: MessageEvent) => {
+          if (event.data?.type === 'COMPOSIO_OAUTH_SUCCESS') {
+            cleanupComposioFlow();
+            setComposioConnected(true);
+            setComposioAccountEmail(event.data.accountEmail || null);
+            setComposioLastSynced(new Date().toISOString());
             setComposioLoading(false);
-            // Final check just in case
+            authWindow?.close();
+            notify('Google Calendar connected successfully!', 'success');
+          } else if (event.data?.type === 'COMPOSIO_OAUTH_ERROR') {
+            cleanupComposioFlow();
+            setComposioError(event.data.error || 'Authorization failed');
+            setComposioLoading(false);
+            notify(event.data.error || 'Connection failed. Please try again.', 'error');
+          }
+        };
+        window.addEventListener('message', handleOAuthMessage);
+
+        composioTimeoutRef.current = setTimeout(() => {
+          window.removeEventListener('message', handleOAuthMessage);
+          if (composioPollRef.current) {
+            clearInterval(composioPollRef.current);
+            composioPollRef.current = null;
+          }
+          if (!composioConnected) {
+            setComposioError('Connection timed out. Please try again.');
+            setComposioLoading(false);
+            notify('Connection timed out. Please try again.', 'error');
+          }
+        }, 30000);
+
+        composioPollRef.current = setInterval(() => {
+          if (authWindow?.closed) {
+            cleanupComposioFlow();
+            window.removeEventListener('message', handleOAuthMessage);
             fetch(`/api/composio/status?userId=${profile.uid}`)
               .then(r => r.json())
               .then(statusData => {
                 if (statusData.connected) {
                   setComposioConnected(true);
+                  setComposioAccountEmail(statusData.accountEmail || null);
+                  setComposioLastSynced(statusData.lastSynced || null);
+                  setComposioLoading(false);
+                  notify('Google Calendar connected successfully!', 'success');
+                } else {
+                  setComposioError('Connection cancelled');
+                  setComposioLoading(false);
                 }
               }).catch(() => {});
           } else {
@@ -9686,15 +9744,18 @@ function OrgAdminPanel() {
               .then(r => r.json())
               .then(statusData => {
                 if (statusData.connected) {
-                  clearInterval(pollInterval);
+                  cleanupComposioFlow();
+                  window.removeEventListener('message', handleOAuthMessage);
                   authWindow?.close();
                   setComposioConnected(true);
+                  setComposioAccountEmail(statusData.accountEmail || null);
+                  setComposioLastSynced(statusData.lastSynced || null);
                   setComposioLoading(false);
                   notify('Google Calendar connected successfully!', 'success');
                 }
               }).catch(() => {});
           }
-        }, 2000);
+        }, 3000);
       } else {
         notify(data.error || 'Failed to get connection link from Composio.', 'error');
         setComposioLoading(false);
@@ -9716,13 +9777,19 @@ function OrgAdminPanel() {
       });
       if (response.ok) {
         setComposioConnected(false);
-        notify('Google accounts disconnected from Composio.', 'success');
+        setComposioAccountEmail(null);
+        setComposioLastSynced(null);
+        notify('Google Calendar disconnected.', 'success');
       }
     } catch (err) {
       console.error(err);
       notify('Failed to disconnect Composio.', 'error');
     }
   };
+
+  useEffect(() => {
+    return () => cleanupComposioFlow();
+  }, []);
   // Custom states for Workspace settings editing
   const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace' | 'team'>('analytics');
 
@@ -10595,7 +10662,7 @@ function OrgAdminPanel() {
 
 
             {/* Composio Integrations Card */}
-            <Card className="p-8 glass-premium border border-white/10 shadow-sm rounded-3xl space-y-6">
+            <Card className={`p-8 glass-premium border shadow-sm rounded-3xl space-y-6 ${composioConnected ? 'border-green-500/30' : composioError ? 'border-red-500/30' : 'border-white/10'}`}>
                <div className="flex items-center gap-3 border-b border-white/10 pb-4">
                   <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-inner">
                     <Zap className="w-5 h-5 text-white" />
@@ -10604,6 +10671,12 @@ function OrgAdminPanel() {
                     <h3 className="font-black text-white uppercase text-sm tracking-wide">Calendar Integrations</h3>
                     <p className="text-[10px] text-white font-bold uppercase tracking-widest font-mono">Google Workspace</p>
                   </div>
+                  {composioConnected && (
+                    <div className="ml-auto flex items-center gap-1.5 text-green-400">
+                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-[9px] uppercase font-black tracking-widest">Connected</span>
+                    </div>
+                  )}
                </div>
                
                {composioConnected ? (
@@ -10611,7 +10684,14 @@ function OrgAdminPanel() {
                    <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
                      <div className="flex items-center gap-2 text-green-400 font-bold">
                        <CheckCircle2 className="w-5 h-5 text-green-400" />
-                       <span className="uppercase tracking-widest text-[10px]">Google Calendar Connected</span>
+                       <div>
+                         <span className="uppercase tracking-widest text-[10px] block">Google Calendar Connected</span>
+                         {composioAccountEmail && (
+                           <span className="text-[9px] text-green-300/80 font-normal tracking-normal mt-0.5 block">
+                             {composioAccountEmail}
+                           </span>
+                         )}
+                       </div>
                      </div>
                      <button
                        type="button"
@@ -10620,6 +10700,10 @@ function OrgAdminPanel() {
                      >
                        Disconnect
                      </button>
+                   </div>
+                   <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium">
+                     <Clock className="w-3 h-3" />
+                     <span>Last synced: {composioLastSynced ? new Date(composioLastSynced).toLocaleString() : 'Just now'}</span>
                    </div>
                    <p className="text-[10px] text-white/70 leading-relaxed italic">
                      Your Google Calendar is successfully connected. Automated interview invites and meeting links will route securely through this integration.
@@ -10630,6 +10714,11 @@ function OrgAdminPanel() {
                    <p className="text-[10px] text-white/70 leading-relaxed">
                      Link your Google Workspace to empower AI agents to send calendar invitations and track meeting schedules automatically.
                    </p>
+                   {composioError && (
+                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                       <p className="text-[10px] text-red-400 font-bold text-center">{composioError}</p>
+                     </div>
+                   )}
                    <Button
                      type="button"
                      variant="brand"
@@ -10642,7 +10731,13 @@ function OrgAdminPanel() {
                      ) : (
                        <Sparkles className="w-4 h-4 mr-2" />
                      )}
-                     {composioLoading ? 'Connecting...' : 'Connect Google Calendar'}
+                     {composioLoading ? (
+                       <span>Waiting for Google authorization...</span>
+                     ) : composioError ? (
+                       <span>Retry Connection</span>
+                     ) : (
+                       <span>Connect Google Calendar</span>
+                     )}
                    </Button>
                  </div>
                )}
@@ -14423,9 +14518,10 @@ export default function App() {
                 <Routes>
                   <Route path="/shared/:candidateId" element={<PublicSharedScorecard />} />
                   <Route path="/pay/:orgId" element={<PaymentGateway />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="*" element={<LandingPage />} />
+                   <Route path="/auth" element={<AuthPage />} />
+                   <Route path="/auth/composio-callback" element={<ComposioCallback />} />
+                   <Route path="/pricing" element={<PricingPage />} />
+                   <Route path="*" element={<LandingPage />} />
                 </Routes>
               </Suspense>
             )}

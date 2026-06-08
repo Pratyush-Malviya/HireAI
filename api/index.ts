@@ -2723,11 +2723,40 @@ app.get("/api/composio/status", async (req, res) => {
     const googleConn = connections.items.find((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
     res.json({
       connected: !!googleConn,
-      connectionId: googleConn?.id || null
+      connectionId: googleConn?.id || null,
+      accountEmail: googleConn?.state?.val?.email || googleConn?.email || null,
+      lastSynced: googleConn?.updatedAt || googleConn?.updated_at || null
     });
   } catch (err: any) {
     console.error("Composio status check error:", err.message);
     res.json({ connected: false, error: err.message });
+  }
+});
+
+app.get("/api/integrations/google-calendar/status", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId || typeof userId !== "string") {
+    return res.status(400).json({ error: "userId query parameter is required" });
+  }
+  if (!composio) {
+    return res.json({ connected: false, configured: false, error: "Composio is not configured" });
+  }
+  try {
+    const connections = await composio.connectedAccounts.list({
+      userIds: [userId]
+    });
+    const googleConn = connections.items.find((c: any) => c.appName === 'google' || c.toolkitName === 'google' || c.app_name === 'google' || c.toolkit_name === 'google');
+    res.json({
+      connected: !!googleConn,
+      configured: true,
+      connectionId: googleConn?.id || null,
+      accountEmail: googleConn?.state?.val?.email || googleConn?.email || null,
+      lastSynced: googleConn?.updatedAt || googleConn?.updated_at || null,
+      status: googleConn?.status || null
+    });
+  } catch (err: any) {
+    console.error("Google Calendar integration status error:", err.message);
+    res.json({ connected: false, configured: true, error: err.message });
   }
 });
 
@@ -2748,12 +2777,10 @@ app.post("/api/composio/connect", async (req, res) => {
       return res.status(500).json({ error: "Google Calendar integration not found in Composio dashboard." });
     }
 
-    // Bypass deprecated composio.connectedAccounts.initiate method
-    // Use the v3 link endpoint directly for managed OAuth configs
     const response = await axios.post("https://backend.composio.dev/api/v3/connected_accounts/link", {
       auth_config_id: googleCalendarConfig.id,
       user_id: userId,
-      redirect_uri: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/`
+      redirect_uri: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/auth/composio-callback`
     }, {
       headers: {
         "x-api-key": process.env.COMPOSIO_API_KEY,
