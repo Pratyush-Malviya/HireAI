@@ -2774,11 +2774,8 @@ app.get("/api/composio/debug", async (req, res) => {
       return res.json({ error: "Composio not initialized. Missing API key." });
     }
     
-    // We will try to fetch the list of connected accounts or active apps
-    // Wait, there is an integrations API or apps API but it's not well typed.
-    // Let's just use raw fetch to the composio API using the key!
     const apiKey = process.env.COMPOSIO_API_KEY;
-    const composioRes = await axios.get("https://backend.composio.dev/api/v3/toolkits", {
+    const composioRes = await axios.get("https://backend.composio.dev/api/v3.1/toolkits", {
       headers: { "x-api-key": apiKey }
     });
     res.json({ apps: composioRes.data });
