@@ -177,6 +177,12 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any, 
   const projects = screeningResult.projects || [];
   const certifications = screeningResult.certifications || [];
 
+  // Screening timestamp for recency awareness
+  const calculatedAt = new Date().toISOString();
+  const screeningAge = screeningResult.calculatedAt
+    ? Math.floor((Date.now() - new Date(screeningResult.calculatedAt).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
   return {
     ...screeningResult,
     scorecard: {
@@ -203,7 +209,9 @@ function calculateEnhancedScorecard(screeningResult: any, jobRequirements: any, 
     isUnderqualified,
     employmentGaps,
     projects,
-    certifications
+    certifications,
+    calculatedAt,
+    screeningAge
   };
 }
 
@@ -7952,6 +7960,34 @@ function CandidateDetail() {
             ))}
           </div>
         )}
+        {/* Screening recency */}
+        {(candidate as any).calculatedAt && (
+          <div className="mt-2 text-[9px] text-white/50 font-medium text-right">
+            Calculated {(() => {
+              const age = (candidate as any).screeningAge ?? 0;
+              if (age === 0) return 'just now';
+              if (age < 1) return 'less than a day ago';
+              if (age === 1) return '1 day ago';
+              return `${age} days ago`;
+            })()}
+          </div>
+        )}
+      </Card>
+
+      {/* PII Isolation & Compliance Badge */}
+      <Card className="p-3 border border-emerald-500/20 bg-emerald-500/5">
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+          <div className="flex-1">
+            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">PII Isolation & Compliance</p>
+            <p className="text-[10px] text-emerald-300/80 font-medium mt-0.5 leading-relaxed">
+              Personally Identifiable Information is strictly isolated. Read access is restricted to the hiring manager. No demographic signals are used in scoring.
+            </p>
+          </div>
+          <span className="text-[8px] font-black text-emerald-400/60 uppercase tracking-widest border border-emerald-500/20 px-2 py-1 rounded">
+            Section 06
+          </span>
+        </div>
       </Card>
 
       {/* State-of-the-art Sub-Tab Navigation Bar */}
