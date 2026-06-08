@@ -21,10 +21,13 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fullName, setFullName] = useState('');
   const [orgName, setOrgName] = useState('');
   const [orgDomain, setOrgDomain] = useState('');
   const [orgIndustry, setOrgIndustry] = useState('Technology');
   const [orgCompanySize, setOrgCompanySize] = useState('11-50');
+  const [orgLocation, setOrgLocation] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -63,16 +66,24 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
     e.preventDefault();
     setError(null);
 
+    if (!fullName.trim()) {
+      setError('Full name is required.');
+      return;
+    }
+    if (!orgName.trim()) {
+      setError('Organization name is required.');
+      return;
+    }
+    if (!phone.trim()) {
+      setError('Phone number is required.');
+      return;
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
-      return;
-    }
-    if (!orgName.trim()) {
-      setError('Organization name is required.');
       return;
     }
 
@@ -85,6 +96,8 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
         domain: orgDomain.trim() || null,
         industry: orgIndustry,
         companySize: orgCompanySize,
+        location: orgLocation.trim() || null,
+        phone: phone.trim() || null,
         createdAt: serverTimestamp(),
         createdBy: cred.user.uid,
         status: 'active',
@@ -100,7 +113,8 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
         email: cred.user.email,
         organizationId: orgRef.id,
         role: 'owner',
-        fullName: '',
+        fullName: fullName.trim(),
+        phone: phone.trim() || null,
         createdAt: serverTimestamp()
       });
 
@@ -137,6 +151,30 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
               {error}
             </div>
           )}
+
+          <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
+            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Full Name</label>
+                <input
+                  type="text" required value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
+                  placeholder="e.g. John Doe"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Phone Number</label>
+                <input
+                  type="tel" required value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
+                  placeholder="e.g. +1 (555) 123-4567"
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
             <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Organization Details</h3>
@@ -185,13 +223,22 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                   <option value="1000+">1000+ employees</option>
                 </select>
               </div>
+              <div className="space-y-1 md:col-span-2">
+                <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Headquarters Location</label>
+                <input
+                  type="text" value={orgLocation}
+                  onChange={(e) => setOrgLocation(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-white/10 focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm bg-transparent"
+                  placeholder="e.g. San Francisco, CA"
+                />
+              </div>
             </div>
           </div>
 
           <div className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] space-y-5">
-            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Account Details</h3>
+            <h3 className="text-xs font-black text-white/50 uppercase tracking-widest">Account Credentials</h3>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Email</label>
+              <label className="text-[10px] font-black text-white uppercase tracking-widest px-1">Email Address</label>
               <input
                 type="email" required value={email}
                 onChange={(e) => setEmail(e.target.value)}
