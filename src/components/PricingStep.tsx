@@ -89,6 +89,11 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
                   <span className="text-3xl font-black text-white">${plan.price}</span>
                   <span className="text-white/50 text-sm">/ seat / month</span>
                 </div>
+                <div className="mt-2">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest">
+                    <Zap className="w-2.5 h-2.5" /> 7-Day Free Trial
+                  </span>
+                </div>
               </div>
 
               <div className="pt-4 border-t border-white/10 space-y-3">
@@ -132,8 +137,8 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
 
         <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
           <div className="text-right">
-            <p className="text-[10px] font-black text-brand uppercase tracking-widest mb-1 flex items-center justify-end gap-1">
-              <Zap className="w-3 h-3" /> Includes 7-Day Free Trial
+            <p className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center justify-end gap-1.5">
+              <Zap className="w-3.5 h-3.5" /> Includes 7-Day Free Trial
             </p>
             <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Total Due Today</p>
             <p className="text-3xl font-black text-white">$0</p>
@@ -146,6 +151,9 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
           >
             Start Free Trial
           </RainbowButton>
+          <p className="text-[10px] text-emerald-400/60 text-center font-bold uppercase tracking-widest mt-1">
+            No credit card required
+          </p>
         </div>
       </div>
     </div>
