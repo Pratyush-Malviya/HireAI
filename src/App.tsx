@@ -6820,7 +6820,6 @@ function CandidateDetail() {
   const [loading, setLoading] = useState(true);
   const [researching, setResearching] = useState(false);
   const [researchStep, setResearchStep] = useState('');
-  const [showUnverified, setShowUnverified] = useState(false);
   const [retryingScreening, setRetryingScreening] = useState(false);
   const navigate = useNavigate();
   const { confirm, notify } = useNotification();
@@ -7865,17 +7864,16 @@ function CandidateDetail() {
               ];
               const summaryText = res.summary || '';
               const sources = res.sources || [];
-              const isUnverified = confidence < 85 && !showUnverified;
 
               return (
                 <div className="space-y-8 font-sans">
                   {/* Row 1: Section 7 - Confidence Meter Panel & Section 1: Verified Profiles */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* CONFIDENCE METER (Section 7) */}
-                    <div id="confidence-meter-card" className={`p-6 rounded-2xl border transition-all ${isUnverified ? 'bg-red-500/10 border-red-500/30' : 'transparent border-white/10'}`}>
+                    <div id="confidence-meter-card" className="p-6 rounded-2xl border transition-all transparent border-white/10">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck className={`w-5 h-5 ${isUnverified ? 'text-red-400' : 'text-emerald-400'}`} />
+                          <ShieldCheck className="w-5 h-5 text-emerald-400" />
                           <h4 className="text-xs font-black uppercase tracking-widest text-white">7. Confidence Meter</h4>
                         </div>
                         <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
@@ -7890,11 +7888,10 @@ function CandidateDetail() {
                       
                       <div className="flex items-center gap-4 py-3">
                         <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
-                          {/* Svg Circle Progress Indicator */}
                           <svg className="w-full h-full transform -rotate-90">
                             <circle cx="32" cy="32" r="28" strokeWidth="6" stroke="rgba(255,255,255,0.1)" fill="transparent" />
                             <circle cx="32" cy="32" r="28" strokeWidth="6" 
-                              stroke={isUnverified ? '#f43f5e' : '#10b981'} 
+                              stroke="#10b981" 
                               strokeDasharray={175} 
                               strokeDashoffset={175 - (175 * confidence) / 100}
                               strokeLinecap="round" fill="transparent" />
@@ -7902,14 +7899,9 @@ function CandidateDetail() {
                           <span className="absolute text-sm font-black text-white">{confidence}%</span>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-white">
-                            {isUnverified ? 'Unverified Audit Profile' : 'Verified Identity Level'}
-                          </p>
+                          <p className="text-xs font-bold text-white">Verified Identity Level</p>
                           <p className="text-[11px] text-white mt-1">
-                            {isUnverified 
-                              ? 'Profile falls below the 85% confidence threshold. Sensitive insights are hidden.' 
-                              : `Excellent identity resolution from verified professional social registries.`
-                            }
+                            Identity resolution from verified professional social registries.
                           </p>
                         </div>
                       </div>
@@ -7924,7 +7916,7 @@ function CandidateDetail() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {verifiedProfiles.map((p: any, idx: number) => {
-                          const isVer = p.status === 'Verified' && !isUnverified;
+                          const isVer = p.status === 'Verified';
                           return (
                             <a 
                               key={idx}
@@ -7958,46 +7950,7 @@ function CandidateDetail() {
                     </div>
                   </div>
 
-                  {isUnverified ? (
-                    /* WARNING WARNING VIEW FOR UNVERIFIED PROFILES */
-                    <div className="p-8 bg-red-500/10 border border-red-500/30 rounded-3xl text-center space-y-4">
-                      <div className="mx-auto w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                        <AlertTriangle className="w-6 h-6 text-red-400" />
-                      </div>
-                      <h4 className="text-base font-black text-red-300 uppercase tracking-wide">Sensitive Insights Hidden</h4>
-                      <p className="text-sm text-red-300/70 max-w-xl mx-auto leading-relaxed">
-                        To maintain compliance and high intelligence precision, HireAI security rules dictate that sensitive background analysis metrics (technical scores, risk intelligence, leadership analytics, and performance narratives) are hidden when identity confidence falls under the <strong>85%</strong> threshold.
-                      </p>
-                      <div className="pt-2 space-y-3">
-                        <p className="text-xs text-red-400 font-bold uppercase tracking-wider">
-                          👉 Please ask the recruiter to perform a manual verification audit.
-                        </p>
-                        <Button
-                          variant="outline"
-                          className="border-red-500/30 text-red-300 hover:bg-red-500/20 text-[10px] font-black uppercase tracking-widest"
-                          onClick={() => setShowUnverified(true)}
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-2" /> Reveal Insights Anyway
-                        </Button>
-                      </div>
-                  ) : (
-                    /* DEEP INSIGHTS DISPLAY */
-                    <div className="space-y-6">
-                      {showUnverified && (
-                        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-between">
-                          <p className="text-[10px] font-bold text-amber-300 uppercase tracking-wide">
-                            ⚠ Showing insights below 85% confidence threshold
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-amber-300 hover:bg-amber-500/20 text-[9px] font-black uppercase tracking-widest h-7 px-3"
-                            onClick={() => setShowUnverified(false)}
-                          >
-                            Re-hide
-                          </Button>
-                        </div>
-                      )}
+                  {/* DEEP INSIGHTS DISPLAY */}
                       {/* Row 2: DeepResearch Summary (Section 2) & Career Narrative (Section 3) */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* DEEP RESEARCH SUMMARY (Section 2) */}
@@ -8231,8 +8184,6 @@ function CandidateDetail() {
                       </Button>
                     </div>
                   </div>
-                    </div>
-                  )}
                 </div>
               )})()
 
