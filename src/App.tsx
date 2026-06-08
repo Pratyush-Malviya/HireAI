@@ -14003,11 +14003,16 @@ function TeamManagementTab({ organization }: { organization: Organization | null
 // ── Screening Reports Page ─────────────────────────────────────
 
 function ScreeningReports() {
-  const { profile } = useProfile();
+  const { profile, organization } = useProfile();
+  const { notify } = useNotification();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [activeInviteCandidate, setActiveInviteCandidate] = useState<Candidate | null>(null);
+  const [inviteEmailInput, setInviteEmailInput] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   useEffect(() => {
     if (!profile?.organizationId) return;
@@ -14044,6 +14049,56 @@ function ScreeningReports() {
     jobs.forEach(j => { map[j.id] = j.title; });
     return map;
   }, [jobs]);
+
+  const handleSendInvite = async (emailOverride?: string) => {
+    if (!activeInviteCandidate) return;
+    const c = activeInviteCandidate;
+    setSendingInvite(true);
+    const link = c.meetLink || `${window.location.origin}/interview/${c.id}`;
+    const targetEmail = emailOverride || c.email;
+    try {
+      const updates: any = { interviewStatus: 'invited' };
+      if (emailOverride && emailOverride !== c.email) {
+        updates.email = emailOverride;
+      }
+      await updateDoc(doc(db, 'candidates', c.id), updates);
+      const res = await fetch('/api/candidate/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateEmail: targetEmail,
+          candidateName: c.fullName,
+          interviewLink: link,
+          jobTitle: jobMap[c.jobId] || 'Applied Position',
+          customSmtp: organization?.emailSettings || null,
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (data.previewUrl) {
+          notify(`Invite sent to ${c.fullName}! Test URL: ${data.previewUrl}`, 'success');
+        } else {
+          notify(data.message || `Email interview invitation sent to ${c.fullName}!`, 'success');
+        }
+      } else {
+        if (data.reason === 'NOT_AUTHENTICATED') {
+          navigator.clipboard.writeText(link);
+          notify('Invite created! Google account not connected - copied link to clipboard.', 'info');
+        } else {
+          navigator.clipboard.writeText(link);
+          notify(`Invite created! Copied link to clipboard. (Email error: ${data.error || 'unknown'})`, 'info');
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      navigator.clipboard.writeText(link);
+      notify('Invite created! Copied link to clipboard.', 'info');
+    } finally {
+      setSendingInvite(false);
+      setShowInviteModal(false);
+      setActiveInviteCandidate(null);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -14085,6 +14140,7 @@ function ScreeningReports() {
                   <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Job</th>
                   <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Score</th>
                   <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Invite</th>
                   <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Report</th>
                 </tr>
               </thead>
@@ -14123,6 +14179,28 @@ function ScreeningReports() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-[9px] font-black uppercase tracking-widest border border-brand/30 bg-brand/10 hover:bg-brand/20"
+                        disabled={sendingInvite}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveInviteCandidate(c);
+                          const emailVal = c.email || c.parsedData?.email || c.parsedData?.contactInfo?.email || extractEmailFromText(c.resumeText || '') || '';
+                          setInviteEmailInput(emailVal);
+                          setShowInviteModal(true);
+                        }}
+                      >
+                        {sendingInvite && activeInviteCandidate?.id === c.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        ) : (
+                          <Send className="w-3 h-3 mr-1" />
+                        )}
+                        {sendingInvite && activeInviteCandidate?.id === c.id ? 'Sending...' : 'Re-Invite'}
+                      </Button>
+                    </td>
+                    <td className="px-6 py-4 text-right">
                       <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c.id}`); }}>
                         <FileText className="w-3 h-3 mr-1" /> View
                       </Button>
@@ -14134,6 +14212,99 @@ function ScreeningReports() {
           </div>
         )}
       </Card>
+
+      <Modal
+        isOpen={showInviteModal}
+        onClose={() => {
+          setShowInviteModal(false);
+          setActiveInviteCandidate(null);
+        }}
+        title="Candidate Interview Invitation"
+      >
+        {activeInviteCandidate && (
+          <div className="space-y-6">
+            <div className="p-4 transparent border border-white/10 rounded-2xl text-left space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase text-white tracking-wider">Candidate Profile</span>
+                {inviteEmailInput ? (
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5" /> Email Extracted
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">
+                    Missing Email
+                  </span>
+                )}
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-extrabold text-white">{activeInviteCandidate.fullName}</h4>
+                <p className="text-xs text-white font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-brand/10 text-white rounded-xl mt-0.5">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <h5 className="text-xs font-black text-white uppercase tracking-wider">Option 1: Send Email Invite</h5>
+                    <p className="text-[11px] text-white font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase text-white tracking-wider block">Recipient Email Address</label>
+                    <input
+                      type="email"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
+                      placeholder="Enter candidate email address"
+                      value={inviteEmailInput}
+                      onChange={(e) => setInviteEmailInput(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  type="button"
+                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
+                  disabled={!inviteEmailInput.trim() || sendingInvite}
+                  onClick={() => handleSendInvite(inviteEmailInput)}
+                >
+                  {sendingInvite ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending Invitation...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      Send Invite via Email
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/10 flex justify-end">
+              <Button
+                variant="outline"
+                type="button"
+                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-white border-white/10 rounded-xl"
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setActiveInviteCandidate(null);
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
