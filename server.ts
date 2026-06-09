@@ -2844,7 +2844,7 @@ app.post("/api/meeting/join", async (req, res) => {
 
 // Composio Integration Routes
 app.get("/api/composio/status", async (req, res) => {
-  const { userId } = req.query;
+    const { userId } = req.query;
   if (!userId || typeof userId !== "string") {
     return res.status(400).json({ error: "userId query parameter is required" });
   }
@@ -2856,7 +2856,7 @@ app.get("/api/composio/status", async (req, res) => {
       userIds: [userId]
     });
     const googleConns = connections.items.filter((c: any) => {
-      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
+      const slug = (c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '').toLowerCase();
       return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
     });
     const activeGoogleConn = googleConns.find((c: any) => c.status === 'ACTIVE');
@@ -2885,7 +2885,7 @@ app.get("/api/integrations/google-calendar/status", async (req, res) => {
       userIds: [userId]
     });
     const googleConns = connections.items.filter((c: any) => {
-      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
+      const slug = (c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '').toLowerCase();
       return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
     });
     const activeGoogleConn = googleConns.find((c: any) => c.status === 'ACTIVE');
@@ -2951,8 +2951,8 @@ app.post("/api/composio/disconnect", async (req, res) => {
       userIds: [userId]
     });
     const googleConns = connections.items.filter((c: any) => {
-      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
-      return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail';
+      const slug = (c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '').toLowerCase();
+      return slug === 'googlecalendar' || slug === 'google' || slug === 'gmail' || slug === 'googlemeet';
     });
     for (const conn of googleConns) {
       await composio.connectedAccounts.delete(conn.id);
@@ -2980,8 +2980,8 @@ app.get("/api/composio/meet/status", async (req, res) => {
       userIds: [userId]
     });
     const meetConns = connections.items.filter((c: any) => {
-      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
-      return slug === 'googlemeet' || slug === 'googlemeet';
+      const slug = (c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '').toLowerCase();
+      return slug === 'googlemeet';
     });
     const activeMeetConn = meetConns.find((c: any) => c.status === 'ACTIVE');
     res.json({
@@ -3006,7 +3006,7 @@ app.post("/api/composio/meet/connect", async (req, res) => {
   }
   try {
     const authConfigs = await composio.authConfigs.list();
-    const googleMeetConfig = authConfigs.items.find((i: any) => i.toolkit?.slug === 'googlemeet');
+    const googleMeetConfig = authConfigs.items.find((i: any) => (i.toolkit?.slug || i.appName || '').toLowerCase() === 'googlemeet');
 
     if (!googleMeetConfig) {
       return res.status(500).json({ error: "Google Meet integration not found in Composio dashboard. Please add the Google Meet toolkit in your Composio dashboard." });
