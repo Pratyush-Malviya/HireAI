@@ -5047,7 +5047,7 @@ function JobDetail() {
 
   const handleSendInviteForCandidate = async (candidate: Candidate, emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     setInvitingCandidateId(candidate.id);
-    const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
+    const link = `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
     try {
       // 1. Update status and email in db
@@ -5065,11 +5065,12 @@ function JobDetail() {
           candidateEmail: targetEmail,
           candidateName: candidate.fullName,
           interviewLink: link,
-          meetLink: link?.includes('meet.google.com') ? link : undefined,
           jobTitle: job?.title || 'Applied Position',
           customSmtp: organization?.emailSettings || null,
           subject: subjectOverride,
-          emailBody: bodyOverride
+          emailBody: bodyOverride,
+          useComposio: composioConnected,
+          userId: profile?.uid
         })
       });
 
@@ -5116,7 +5117,7 @@ function JobDetail() {
       const candidate = candidates.find(c => c.id === cId);
       if (!candidate) continue;
 
-      const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
+      const link = `${window.location.origin}/interview/${candidate.id}`;
       try {
         try {
           await updateDoc(doc(db, 'candidates', candidate.id), { interviewStatus: 'invited' });
@@ -5131,9 +5132,10 @@ function JobDetail() {
             candidateEmail: candidate.email,
             candidateName: candidate.fullName,
             interviewLink: link,
-            meetLink: link?.includes('meet.google.com') ? link : undefined,
             jobTitle: job?.title || 'Applied Position',
-            customSmtp: organization?.emailSettings || null
+            customSmtp: organization?.emailSettings || null,
+            useComposio: composioConnected,
+            userId: profile?.uid
           })
         });
 
@@ -7018,7 +7020,7 @@ function CandidateDetail() {
   const handleSendInvite = async (emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     if (!candidate) return;
     setSendingInvite(true);
-    const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
+    const link = `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
     try {
       // 1. Update status and email in db
@@ -7036,11 +7038,12 @@ function CandidateDetail() {
           candidateEmail: targetEmail,
           candidateName: candidate.fullName,
           interviewLink: link,
-          meetLink: link?.includes('meet.google.com') ? link : undefined,
           jobTitle: job?.title || 'Applied Position',
           customSmtp: organization?.emailSettings || null,
           subject: subjectOverride,
-          emailBody: bodyOverride
+          emailBody: bodyOverride,
+          useComposio: composioConnected,
+          userId: profile?.uid
         })
       });
 
@@ -14825,7 +14828,7 @@ function ScreeningReports() {
     if (!activeInviteCandidate) return;
     const c = activeInviteCandidate;
     setSendingInvite(true);
-    const link = c.meetLink || `${window.location.origin}/interview/${c.id}`;
+    const link = `${window.location.origin}/interview/${c.id}`;
     const targetEmail = emailOverride || c.email;
     try {
       const updates: any = { interviewStatus: 'invited' };
@@ -14841,8 +14844,9 @@ function ScreeningReports() {
           candidateName: c.fullName,
           interviewLink: link,
           jobTitle: jobMap[c.jobId] || 'Applied Position',
-          meetLink: link?.includes('meet.google.com') ? link : undefined,
           customSmtp: organization?.emailSettings || null,
+          useComposio: composioConnected,
+          userId: profile?.uid,
         })
       });
       const data = await res.json();

@@ -375,7 +375,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       const cleanName = safeSanitize(candidateName || "Candidate").substring(0, 100);
       const cleanTitle = safeSanitize(jobTitle || "Applied Position").substring(0, 150);
       const subject = subjectOverride || `Interview Invitation: ${cleanTitle} with HireNow`;
-      const body = emailBody || `Hi ${cleanName},\n\nYou are invited to complete an interview for the position of ${cleanTitle}.\n\nGoogle Meet Link: ${inviteMeetLink}\n\nPlease join the interview room here: ${interviewLink}`;
+      const body = emailBody || `Hi ${cleanName},\n\nYou are invited to complete an interview for the position of ${cleanTitle}.\n\n${inviteMeetLink ? `Google Meet Link: ${inviteMeetLink}\n\n` : ''}Please join the interview room here: ${interviewLink}`;
       
       const response = await composio.tools.execute("GMAIL_SEND_EMAIL", {
         userId: userId,
