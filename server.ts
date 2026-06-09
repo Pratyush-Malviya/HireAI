@@ -10,6 +10,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { maybeCompressContents, createHeadroomNvidiaClient } from "./src/lib/headroom.js";
 
 
 dotenv.config({ path: ".env" });
@@ -344,7 +345,6 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       }
     } catch (meetErr) {
       console.warn("Meet link generation failed:", meetErr);
-    }
     }
   }
 
@@ -1017,6 +1017,10 @@ async function generateContentWithRetry(params: any, maxRetries = 5, initialDela
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Sending API request using model: ${currentModel} (attempt ${attempt + 1}/${maxRetries + 1})`);
+        const compressed = await maybeCompressContents(modelParams.contents, currentModel);
+        if (compressed.compressed) {
+          modelParams.contents = compressed.contents;
+        }
         return await ai.models.generateContent(modelParams);
       } catch (error: any) {
         lastError = error;
@@ -2458,13 +2462,16 @@ function getNvidiaClient(): OpenAI {
   if (!_nvidiaClient) {
     const apiKey = process.env.NVIDIA_API_KEY;
     if (!apiKey) throw new Error("NVIDIA_API_KEY is not configured in .env.local");
-    _nvidiaClient = new OpenAI({
-      apiKey,
-      baseURL: "https://integrate.api.nvidia.com/v1",
-    });
+    try {
+      _nvidiaClient = createHeadroomNvidiaClient(apiKey, "https://integrate.api.nvidia.com/v1");
+    } catch {
+      _nvidiaClient = new OpenAI({ apiKey, baseURL: "https://integrate.api.nvidia.com/v1" });
+    }
   }
   return _nvidiaClient;
 }
+
+
 
 const NVIDIA_MODELS = {
   resumeScreening: "deepseek-ai/deepseek-r1",
