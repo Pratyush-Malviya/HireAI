@@ -10323,6 +10323,167 @@ function OrgAdminPanel() {
   useEffect(() => {
     return () => cleanupComposioFlow();
   }, []);
+
+  // Google Meet Composio Integration
+  const [meetConnected, setMeetConnected] = useState(false);
+  const [meetLoading, setMeetLoading] = useState(false);
+  const [meetAccountEmail, setMeetAccountEmail] = useState<string | null>(null);
+  const [meetLastSynced, setMeetLastSynced] = useState<string | null>(null);
+  const [meetError, setMeetError] = useState<string | null>(null);
+  const [meetLinkResult, setMeetLinkResult] = useState<string | null>(null);
+  const [meetLinkCreating, setMeetLinkCreating] = useState(false);
+  const meetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const meetPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (profile?.uid) {
+      fetch(`/api/composio/meet/status?userId=${profile.uid}`)
+        .then(r => r.json())
+        .then(data => {
+          setMeetConnected(!!data.connected);
+          if (data.connected) {
+            setMeetAccountEmail(data.accountEmail || null);
+            setMeetLastSynced(data.lastSynced || null);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [profile]);
+
+  const cleanupMeetFlow = () => {
+    if (meetPollRef.current) {
+      clearInterval(meetPollRef.current);
+      meetPollRef.current = null;
+    }
+    if (meetTimeoutRef.current) {
+      clearTimeout(meetTimeoutRef.current);
+      meetTimeoutRef.current = null;
+    }
+  };
+
+  const handleConnectMeet = async () => {
+    if (!profile?.uid) return;
+    setMeetLoading(true);
+    setMeetError(null);
+    try {
+      const response = await fetch('/api/composio/meet/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.uid,
+          callbackUrl: window.location.origin + '/auth/composio-callback'
+        })
+      });
+      const data = await response.json();
+
+      if (data.redirectUrl) {
+        window.open(data.redirectUrl, 'composio_meet_auth', 'width=600,height=700');
+
+        const handleMeetOAuthMessage = (event: MessageEvent) => {
+          if (event.data?.type === 'COMPOSIO_OAUTH_SUCCESS') {
+            cleanupMeetFlow();
+            window.removeEventListener('message', handleMeetOAuthMessage);
+            setMeetConnected(true);
+            setMeetAccountEmail(event.data.accountEmail || null);
+            setMeetLastSynced(new Date().toISOString());
+            setMeetLoading(false);
+            notify('Google Meet connected successfully!', 'success');
+          } else if (event.data?.type === 'COMPOSIO_OAUTH_ERROR') {
+            cleanupMeetFlow();
+            window.removeEventListener('message', handleMeetOAuthMessage);
+            setMeetError(event.data.error || 'Authorization failed');
+            setMeetLoading(false);
+            notify(event.data.error || 'Connection failed. Please try again.', 'error');
+          }
+        };
+        window.addEventListener('message', handleMeetOAuthMessage);
+
+        meetTimeoutRef.current = setTimeout(() => {
+          window.removeEventListener('message', handleMeetOAuthMessage);
+          cleanupMeetFlow();
+          if (!meetConnected) {
+            setMeetError('Connection timed out. Please try again.');
+            setMeetLoading(false);
+            notify('Connection timed out. Please try again.', 'error');
+          }
+        }, 30000);
+
+        meetPollRef.current = setInterval(() => {
+          fetch(`/api/composio/meet/status?userId=${profile.uid}`)
+            .then(r => r.json())
+            .then(statusData => {
+              if (statusData.connected) {
+                cleanupMeetFlow();
+                window.removeEventListener('message', handleMeetOAuthMessage);
+                setMeetConnected(true);
+                setMeetAccountEmail(statusData.accountEmail || null);
+                setMeetLastSynced(statusData.lastSynced || null);
+                setMeetLoading(false);
+                notify('Google Meet connected successfully!', 'success');
+              }
+            }).catch(() => {});
+        }, 3000);
+      } else {
+        notify(data.error || 'Failed to get connection link from Composio.', 'error');
+        setMeetLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error initiating Google Meet connection.', 'error');
+      setMeetLoading(false);
+    }
+  };
+
+  const handleDisconnectMeet = async () => {
+    if (!profile?.uid) return;
+    try {
+      const response = await fetch('/api/composio/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.uid })
+      });
+      if (response.ok) {
+        setMeetConnected(false);
+        setMeetAccountEmail(null);
+        setMeetLastSynced(null);
+        setMeetLinkResult(null);
+        notify('Google Meet disconnected.', 'success');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Failed to disconnect Google Meet.', 'error');
+    }
+  };
+
+  const handleCreateMeetLink = async () => {
+    if (!profile?.uid) return;
+    setMeetLinkCreating(true);
+    setMeetLinkResult(null);
+    try {
+      const response = await fetch('/api/composio/meet/create-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.uid,
+          displayName: `HireNow Interview - ${new Date().toLocaleDateString()}`
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.meetLink) {
+        setMeetLinkResult(data.meetLink);
+        navigator.clipboard.writeText(data.meetLink);
+        notify('Google Meet link created and copied to clipboard!', 'success');
+      } else {
+        notify(data.error || 'Failed to create Meet link.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error creating Meet link.', 'error');
+    } finally {
+      setMeetLinkCreating(false);
+    }
+  };
+
   // Custom states for Workspace settings editing
   const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace' | 'team'>('analytics');
 
@@ -11270,6 +11431,118 @@ function OrgAdminPanel() {
                        <span>Retry Connection</span>
                      ) : (
                        <span>Connect Google Calendar</span>
+                     )}
+                   </Button>
+                 </div>
+               )}
+            </Card>
+
+            {/* Google Meet Integration Card */}
+            <Card className={`p-8 glass-premium border shadow-sm rounded-3xl space-y-6 ${meetConnected ? 'border-green-500/30' : meetError ? 'border-red-500/30' : 'border-white/10'}`}>
+               <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                  <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-inner">
+                    <Video className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-white uppercase text-sm tracking-wide">Google Meet Integration</h3>
+                    <p className="text-[10px] text-white font-bold uppercase tracking-widest font-mono">Video Conferencing</p>
+                  </div>
+                  {meetConnected && (
+                    <div className="ml-auto flex items-center gap-1.5 text-green-400">
+                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-[9px] uppercase font-black tracking-widest">Connected</span>
+                    </div>
+                  )}
+               </div>
+               
+               {meetConnected ? (
+                 <div className="space-y-4">
+                   <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
+                     <div className="flex items-center gap-2 text-green-400 font-bold">
+                       <CheckCircle2 className="w-5 h-5 text-green-400" />
+                       <div>
+                         <span className="uppercase tracking-widest text-[10px] block">Google Meet Connected</span>
+                         {meetAccountEmail && (
+                           <span className="text-[9px] text-green-300/80 font-normal tracking-normal mt-0.5 block">
+                             {meetAccountEmail}
+                           </span>
+                         )}
+                       </div>
+                     </div>
+                     <button
+                       type="button"
+                       onClick={handleDisconnectMeet}
+                       className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
+                     >
+                       Disconnect
+                     </button>
+                   </div>
+                   <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium">
+                     <Clock className="w-3 h-3" />
+                     <span>Last synced: {meetLastSynced ? new Date(meetLastSynced).toLocaleString() : 'Just now'}</span>
+                   </div>
+
+                   {/* Create Meet Link */}
+                   <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-3">
+                     <div className="flex items-center gap-2">
+                       <Video className="w-4 h-4 text-indigo-400" />
+                       <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Generate Meeting Link</span>
+                     </div>
+                     <p className="text-[10px] text-white/70 leading-relaxed">
+                       Create a new Google Meet link that can be used for candidate interviews. The link will be copied to your clipboard.
+                     </p>
+                     <Button
+                       type="button"
+                       variant="brand"
+                       className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white"
+                       onClick={handleCreateMeetLink}
+                       disabled={meetLinkCreating || isReadOnly}
+                     >
+                       {meetLinkCreating ? (
+                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                       ) : (
+                         <Video className="w-4 h-4 mr-2" />
+                       )}
+                       {meetLinkCreating ? 'Creating...' : 'Create Google Meet Link'}
+                     </Button>
+                     {meetLinkResult && (
+                       <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
+                         <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                         <a href={meetLinkResult} target="_blank" rel="noopener noreferrer" className="text-[10px] text-green-400 font-bold underline truncate">
+                           {meetLinkResult}
+                         </a>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+               ) : (
+                 <div className="space-y-4">
+                   <p className="text-[10px] text-white/70 leading-relaxed">
+                     Connect your Google Meet to enable AI-powered video conference creation for interviews. Meeting links can be generated and automatically embedded in candidate invitations.
+                   </p>
+                   {meetError && (
+                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                       <p className="text-[10px] text-red-400 font-bold text-center">{meetError}</p>
+                     </div>
+                   )}
+                   <Button
+                     type="button"
+                     variant="brand"
+                     className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white"
+                     onClick={handleConnectMeet}
+                     disabled={meetLoading || isReadOnly}
+                   >
+                     {meetLoading ? (
+                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                     ) : (
+                       <Video className="w-4 h-4 mr-2" />
+                     )}
+                     {meetLoading ? (
+                       <span>Waiting for Google authorization...</span>
+                     ) : meetError ? (
+                       <span>Retry Connection</span>
+                     ) : (
+                       <span>Connect Google Meet</span>
                      )}
                    </Button>
                  </div>

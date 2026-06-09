@@ -2964,6 +2964,136 @@ app.post("/api/composio/disconnect", async (req, res) => {
   }
 });
 // ==========================================
+// COMPOSIO GOOGLE MEET ROUTES
+// ==========================================
+
+app.get("/api/composio/meet/status", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId || typeof userId !== "string") {
+    return res.status(400).json({ error: "userId query parameter is required" });
+  }
+  if (!composio) {
+    return res.json({ connected: false, error: "Composio is not configured (missing COMPOSIO_API_KEY)" });
+  }
+  try {
+    const connections = await composio.connectedAccounts.list({
+      userIds: [userId]
+    });
+    const meetConns = connections.items.filter((c: any) => {
+      const slug = c.toolkit?.slug || c.appName || c.toolkitName || c.app_name || c.toolkit_name || '';
+      return slug === 'googlemeet' || slug === 'googlemeet';
+    });
+    const activeMeetConn = meetConns.find((c: any) => c.status === 'ACTIVE');
+    res.json({
+      connected: !!activeMeetConn,
+      connectionId: activeMeetConn?.id || null,
+      accountEmail: activeMeetConn?.state?.val?.email || activeMeetConn?.email || null,
+      lastSynced: activeMeetConn?.updatedAt || activeMeetConn?.updated_at || null
+    });
+  } catch (err: any) {
+    console.error("Composio Google Meet status check error:", err.message);
+    res.json({ connected: false, error: err.message });
+  }
+});
+
+app.post("/api/composio/meet/connect", async (req, res) => {
+  const { userId, callbackUrl } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+  if (!composio) {
+    return res.status(500).json({ error: "Composio is not configured" });
+  }
+  try {
+    const authConfigs = await composio.authConfigs.list();
+    const googleMeetConfig = authConfigs.items.find((i: any) => i.toolkit?.slug === 'googlemeet');
+
+    if (!googleMeetConfig) {
+      return res.status(500).json({ error: "Google Meet integration not found in Composio dashboard. Please add the Google Meet toolkit in your Composio dashboard." });
+    }
+
+    const response = await axios.post("https://backend.composio.dev/api/v3/connected_accounts/link", {
+      auth_config_id: googleMeetConfig.id,
+      user_id: userId,
+      redirect_uri: callbackUrl || `${process.env.APP_URL || 'http://localhost:3000'}/auth/composio-callback`
+    }, {
+      headers: {
+        "x-api-key": process.env.COMPOSIO_API_KEY,
+        "Content-Type": "application/json"
+      }
+    });
+
+    res.json({ redirectUrl: response.data.redirect_url });
+  } catch (err: any) {
+    console.error("Composio Google Meet connect error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/composio/meet/create-link", async (req, res) => {
+  const { userId, displayName } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+  if (!composio) {
+    return res.status(500).json({ error: "Composio is not configured" });
+  }
+  try {
+    const response = await composio.tools.execute("GOOGLEMEET_CREATE_MEET", {
+      userId: userId,
+      arguments: {
+        config: {
+          accessType: "OPEN",
+          entryPointAccess: "ALL"
+        }
+      }
+    });
+
+    let meetLink = '';
+    const respData = response.data || response;
+    if (typeof respData === 'string') {
+      try {
+        const parsed = JSON.parse(respData);
+        meetLink = parsed.meetingUri || parsed.meeting_uri || `https://meet.google.com/${parsed.meetingCode || parsed.meeting_code || ''}`;
+      } catch {
+        meetLink = respData;
+      }
+    } else if (typeof respData === 'object') {
+      meetLink = respData.meetingUri || respData.meeting_uri || respData.meetLink || respData.meet_link || '';
+      if (!meetLink && respData.meetingCode) {
+        meetLink = `https://meet.google.com/${respData.meetingCode}`;
+      }
+    }
+
+    if (!meetLink) {
+      const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
+      meetLink = `https://meet.google.com/${code}`;
+    }
+
+    res.json({ success: true, meetLink, displayName: displayName || 'Interview' });
+  } catch (err: any) {
+    console.error("Composio Google Meet create link error:", err.message);
+
+    // Fallback: try direct Google Meet API if tokens are available
+    try {
+      const tokensRaw = req.cookies?.google_tokens;
+      if (tokensRaw) {
+        const tokens = JSON.parse(tokensRaw);
+        const oauth2Client = getOAuthClient();
+        oauth2Client.setCredentials(tokens);
+        const meetLink = await createGoogleMeetLink(oauth2Client, displayName || 'Interview');
+        return res.json({ success: true, meetLink, displayName: displayName || 'Interview', fallback: 'direct-api' });
+      }
+    } catch (fallbackErr) {
+      console.warn("Fallback Meet link creation also failed:", fallbackErr);
+    }
+
+    const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
+    res.json({ success: true, meetLink: `https://meet.google.com/${code}`, fallback: 'random' });
+  }
+});
+
+// ==========================================
 // END MEETING BOT & COMPOSIO ROUTES
 // ==========================================
 
