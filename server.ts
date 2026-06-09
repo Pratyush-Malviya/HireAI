@@ -334,17 +334,27 @@ app.post("/api/candidate/send-invite", async (req, res) => {
   let { candidateEmail, candidateName, interviewLink, meetLink: inviteMeetLink, jobTitle, customSmtp, emailBody, subject: subjectOverride, useComposio, userId } = req.body;
   console.log('🔎 send-invite request body:', req.body);
 
-  // Auto-generate a Google Meet link if none provided
-  if (!inviteMeetLink) {
+  // Auto-generate a fresh Google Meet link (overrides any stale stored link)
+  if (tokensRaw) {
     try {
-      if (tokensRaw) {
-        const tokens = JSON.parse(tokensRaw);
-        const oauth2Client = getOAuthClient();
-        oauth2Client.setCredentials(tokens);
-        inviteMeetLink = await createGoogleMeetLink(oauth2Client, `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`);
-      }
+      const tokens = JSON.parse(tokensRaw);
+      const oauth2Client = getOAuthClient();
+      oauth2Client.setCredentials(tokens);
+      const newLink = await createGoogleMeetLink(oauth2Client, `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`);
+      if (newLink) inviteMeetLink = newLink;
     } catch (meetErr) {
       console.warn("Meet link generation failed:", meetErr);
+    }
+  }
+  // Fallback: try Composio Meet if direct API failed and we have a userId
+  if (!inviteMeetLink && composio && userId) {
+    try {
+      const compResp = await composio.tools.execute("GOOGLEMEET_CREATE_MEET", { userId, arguments: { config: { accessType: "OPEN", entryPointAccess: "ALL" } } });
+      const rd = compResp.data || compResp;
+      const cl = rd.meetingUri || rd.meeting_uri || rd.meetLink || rd.meet_link || '';
+      if (cl) inviteMeetLink = cl;
+    } catch (compErr) {
+      console.warn("Composio Meet link fallback failed:", compErr);
     }
   }
 
