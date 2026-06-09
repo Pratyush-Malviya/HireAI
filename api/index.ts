@@ -101,6 +101,24 @@ const getOAuthClient = () => {
   );
 };
 
+async function createGoogleMeetLink(oauth2Client: any, displayName: string): Promise<string> {
+  try {
+    const meet = google.meet({ version: 'v2', auth: oauth2Client });
+    const response = await meet.spaces.create({
+      requestBody: {
+        displayName: displayName,
+      } as any,
+    });
+    const space = response.data as any;
+    const meetingUri = space.meetingUri;
+    const meetingCode = space.meetingCode;
+    return meetingUri || `https://meet.google.com/${meetingCode}`;
+  } catch (meetErr: any) {
+    console.warn('Google Meet API v2 spaces.create failed:', meetErr?.message || meetErr);
+    throw meetErr;
+  }
+}
+
 // Auth Routes
 app.get("/api/debug", (req, res) => {
   res.status(200).json({
@@ -123,7 +141,8 @@ app.get("/api/auth/google/url", (req, res) => {
       "https://www.googleapis.com/auth/calendar.readonly",
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/gmail.send"
+      "https://www.googleapis.com/auth/gmail.send",
+      "https://www.googleapis.com/auth/meetings.space.created"
     ],
     prompt: "consent"
   });
@@ -312,31 +331,9 @@ app.post("/api/meet/create-link", async (req, res) => {
       const tokens = JSON.parse(tokensRaw);
       const oauth2Client = getOAuthClient();
       oauth2Client.setCredentials(tokens);
-      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-      const now = new Date();
-      const startTime = new Date(now.getTime() + 60000).toISOString();
-      const endTime = new Date(now.getTime() + 120000).toISOString();
-      const meetEvent = await calendar.events.insert({
-        calendarId: "primary",
-        conferenceDataVersion: 1,
-        requestBody: {
-          summary: `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`,
-          start: { dateTime: startTime },
-          end: { dateTime: endTime },
-          conferenceData: {
-            createRequest: {
-              requestId: `meet-${Date.now()}`,
-              conferenceSolutionKey: { type: "hangoutsMeet" }
-            }
-          }
-        }
-      });
-      meetLink = meetEvent.data.hangoutLink || meetEvent.data.htmlLink || '';
-      if (meetEvent.data.id) {
-        calendar.events.delete({ calendarId: "primary", eventId: meetEvent.data.id }).catch(() => {});
-      }
+      meetLink = await createGoogleMeetLink(oauth2Client, `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`);
     } catch (meetErr) {
-      console.warn("Meet link creation via Calendar API failed:", meetErr);
+      console.warn("Meet link creation via Meet API failed:", meetErr);
     }
   }
 
@@ -360,29 +357,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
         const tokens = JSON.parse(tokensRaw);
         const oauth2Client = getOAuthClient();
         oauth2Client.setCredentials(tokens);
-        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-        const now = new Date();
-        const startTime = new Date(now.getTime() + 60000).toISOString();
-        const endTime = new Date(now.getTime() + 120000).toISOString();
-        const meetEvent = await calendar.events.insert({
-          calendarId: "primary",
-          conferenceDataVersion: 1,
-          requestBody: {
-            summary: `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`,
-            start: { dateTime: startTime },
-            end: { dateTime: endTime },
-            conferenceData: {
-              createRequest: {
-                requestId: `meet-${Date.now()}`,
-                conferenceSolutionKey: { type: "hangoutsMeet" }
-              }
-            }
-          }
-        });
-        inviteMeetLink = meetEvent.data.hangoutLink || meetEvent.data.htmlLink || '';
-        if (meetEvent.data.id) {
-          calendar.events.delete({ calendarId: "primary", eventId: meetEvent.data.id }).catch(() => {});
-        }
+        inviteMeetLink = await createGoogleMeetLink(oauth2Client, `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`);
       }
     } catch (meetErr) {
       console.warn("Meet link generation failed:", meetErr);
