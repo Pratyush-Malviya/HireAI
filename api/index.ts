@@ -302,9 +302,55 @@ app.post("/api/calendar/schedule", async (req, res) => {
   }
 });
 
+app.post("/api/meet/create-link", async (req, res) => {
+  const tokensRaw = req.cookies.google_tokens;
+  const { candidateName, jobTitle } = req.body;
+  let meetLink = '';
+
+  if (tokensRaw) {
+    try {
+      const tokens = JSON.parse(tokensRaw);
+      const oauth2Client = getOAuthClient();
+      oauth2Client.setCredentials(tokens);
+      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 60000).toISOString();
+      const endTime = new Date(now.getTime() + 120000).toISOString();
+      const meetEvent = await calendar.events.insert({
+        calendarId: "primary",
+        conferenceDataVersion: 1,
+        requestBody: {
+          summary: `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`,
+          start: { dateTime: startTime },
+          end: { dateTime: endTime },
+          conferenceData: {
+            createRequest: {
+              requestId: `meet-${Date.now()}`,
+              conferenceSolutionKey: { type: "hangoutsMeet" }
+            }
+          }
+        }
+      });
+      meetLink = meetEvent.data.hangoutLink || meetEvent.data.htmlLink || '';
+      if (meetEvent.data.id) {
+        calendar.events.delete({ calendarId: "primary", eventId: meetEvent.data.id }).catch(() => {});
+      }
+    } catch (meetErr) {
+      console.warn("Meet link creation via Calendar API failed:", meetErr);
+    }
+  }
+
+  if (!meetLink) {
+    const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
+    meetLink = `https://meet.google.com/${code}`;
+  }
+
+  res.json({ meetLink });
+});
+
 app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
-  const { candidateEmail, candidateName, interviewLink, jobTitle, customSmtp, emailBody, subject: subjectOverride, useComposio, userId } = req.body;
+  const { candidateEmail, candidateName, interviewLink, meetLink: inviteMeetLink, jobTitle, customSmtp, emailBody, subject: subjectOverride, useComposio, userId } = req.body;
   console.log('🔎 send-invite request body:', req.body);
 
   if (useComposio && composio && userId) {
@@ -394,6 +440,18 @@ app.post("/api/candidate/send-invite", async (req, res) => {
               <div style="font-size: 14px; color: #475569; font-weight: 500; line-height: 1.7; text-align: left;">
                 ${safeBody}
               </div>
+
+              ${inviteMeetLink ? `
+              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; border: 1px solid #bbf7d0; border-left: 4px solid #22c55e; margin-bottom: 24px; text-align: left;">
+                <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 12px; color: #16a34a; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;">Google Meet Link</h3>
+                <p style="margin: 0; font-size: 14px; color: #166534; font-weight: 500;">Click the button below to join the video meeting:</p>
+                <div style="text-align: center; margin-top: 16px;">
+                  <a href="${inviteMeetLink}" target="_blank" style="background-color: #22c55e; color: #ffffff; padding: 12px 28px; font-weight: 700; text-decoration: none; border-radius: 10px; display: inline-block; font-size: 14px;">
+                    Join Google Meet
+                  </a>
+                </div>
+              </div>
+              ` : ''}
               
               <div style="text-align: center; margin: 36px 0;">
                 <a href="${cleanLink}" target="_blank" class="email-button" style="background-color: #4f46e5; color: #ffffff; padding: 14px 32px; font-weight: 700; text-decoration: none; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); font-size: 15px; transition: all 0.2s;">
@@ -458,6 +516,19 @@ app.post("/api/candidate/send-invite", async (req, res) => {
                 <p style="margin: 6px 0 0 0; font-size: 14px; color: #334155;"><strong style="color: #475569;">Requirements:</strong> Please ensure you are in a quiet room with a working microphone and camera.</p>
               </div>
   
+              ${inviteMeetLink ? `
+              <div style="background-color: #f0fdf4; border-radius: 12px; padding: 20px; border: 1px solid #bbf7d0; border-left: 4px solid #22c55e; margin-bottom: 24px; text-align: left;">
+                <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 12px; color: #16a34a; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;">Google Meet Link</h3>
+                <p style="margin: 0; font-size: 14px; color: #166534; font-weight: 500;">Your interview will be conducted via Google Meet. Click below to join at the scheduled time:</p>
+                <div style="text-align: center; margin-top: 16px;">
+                  <a href="${inviteMeetLink}" target="_blank" style="background-color: #22c55e; color: #ffffff; padding: 12px 28px; font-weight: 700; text-decoration: none; border-radius: 10px; display: inline-block; font-size: 14px;">
+                    Join Google Meet
+                  </a>
+                </div>
+                <p style="margin: 12px 0 0 0; font-size: 12px; color: #166534; word-break: break-all;">Or copy this link: <a href="${inviteMeetLink}" style="color: #16a34a;">${inviteMeetLink}</a></p>
+              </div>
+              ` : ''}
+
               <div style="background-color: #fffbeb; border-radius: 12px; padding: 20px; border: 1px solid #fef3c7; border-left: 4px solid #d97706; margin-bottom: 28px; text-align: left;">
                 <h3 style="margin-top: 0; margin-bottom: 12px; font-size: 12px; color: #d97706; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800;">⚠️ Critical Proctoring Rules</h3>
                 <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #78350f; font-weight: 500; line-height: 1.6;">
