@@ -1683,10 +1683,8 @@ function InterviewRoom() {
             escalationFlagged,
             completedAt: serverTimestamp() 
           });
-          const meetLink = `https://meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
           await updateDoc(doc(db, 'candidates', candidate.id), { 
             interviewStatus: 'completed',
-            meetLink,
             ...(escalationFlagged ? { escalationReason: localEval.escalationReason || 'Flagged for review' } : {})
           });
         } catch (error) {
@@ -1742,10 +1740,8 @@ function InterviewRoom() {
         completedAt: serverTimestamp() 
       });
       
-      const meetLink = `https://meet.google.com/${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
       await updateDoc(doc(db, 'candidates', candidate.id), { 
-        interviewStatus: 'completed',
-        meetLink
+        interviewStatus: 'completed'
       });
       
       notify('Interview session forcibly concluded.', 'success');

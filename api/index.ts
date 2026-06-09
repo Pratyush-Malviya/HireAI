@@ -337,11 +337,6 @@ app.post("/api/meet/create-link", async (req, res) => {
     }
   }
 
-  if (!meetLink) {
-    const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
-    meetLink = `https://meet.google.com/${code}`;
-  }
-
   res.json({ meetLink });
 });
 
@@ -362,9 +357,6 @@ app.post("/api/candidate/send-invite", async (req, res) => {
     } catch (meetErr) {
       console.warn("Meet link generation failed:", meetErr);
     }
-    if (!inviteMeetLink) {
-      const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
-      inviteMeetLink = `https://meet.google.com/${code}`;
     }
   }
 
@@ -3179,11 +3171,6 @@ app.post("/api/composio/meet/create-link", async (req, res) => {
       }
     }
 
-    if (!meetLink) {
-      const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
-      meetLink = `https://meet.google.com/${code}`;
-    }
-
     res.json({ success: true, meetLink, displayName: displayName || 'Interview' });
   } catch (err: any) {
     console.error("Composio Google Meet create link error:", err.message);
@@ -3202,8 +3189,7 @@ app.post("/api/composio/meet/create-link", async (req, res) => {
       console.warn("Fallback Meet link creation also failed:", fallbackErr);
     }
 
-    const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
-    res.json({ success: true, meetLink: `https://meet.google.com/${code}`, fallback: 'random' });
+    res.status(500).json({ success: false, error: 'Failed to create Google Meet link via Composio and fallback.' });
   }
 });
 
