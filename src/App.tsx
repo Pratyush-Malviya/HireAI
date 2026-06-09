@@ -10484,6 +10484,73 @@ function OrgAdminPanel() {
     }
   };
 
+  // Calendar Options State
+  const [calendarAvailability, setCalendarAvailability] = useState<any[] | null>(null);
+  const [calendarLoading, setCalendarLoading] = useState(false);
+  const [calendarTestCreating, setCalendarTestCreating] = useState(false);
+  const [calendarTestResult, setCalendarTestResult] = useState<string | null>(null);
+
+  const handleCheckCalendarAvailability = async () => {
+    setCalendarLoading(true);
+    setCalendarAvailability(null);
+    try {
+      const res = await fetch('/api/calendar/free-busy');
+      if (!res.ok) throw new Error('Failed to fetch availability');
+      const data = await res.json();
+      const busySlots = data?.calendars?.primary?.busy || [];
+      if (busySlots.length === 0) {
+        setCalendarAvailability([]);
+        notify('Calendar is clear for today — no busy slots found.', 'success');
+      } else {
+        setCalendarAvailability(busySlots);
+        notify(`Found ${busySlots.length} busy slot(s) today.`, 'info');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Failed to check calendar availability. Ensure Google Calendar is connected via OAuth.', 'error');
+    } finally {
+      setCalendarLoading(false);
+    }
+  };
+
+  const handleCreateTestCalendarEvent = async () => {
+    if (!profile?.uid) return;
+    setCalendarTestCreating(true);
+    setCalendarTestResult(null);
+    try {
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 5 * 60000).toISOString();
+      const endTime = new Date(now.getTime() + 20 * 60000).toISOString();
+      const res = await fetch('/api/calendar/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateEmail: profile.email || profile.uid,
+          startTime,
+          endTime,
+          summary: `HireNow Test Event - ${now.toLocaleDateString()}`,
+          description: 'Test event generated from HR Admin Dashboard to verify Google Calendar integration.',
+          useComposio: true,
+          userId: profile.uid
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const link = data.hangoutLink || data.htmlLink || '';
+        setCalendarTestResult(link || 'Event created (no Meet link)');
+        if (link) navigator.clipboard.writeText(link);
+        notify('Test calendar event created successfully!', 'success');
+      } else {
+        notify(data.error || 'Failed to create test event.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      notify('Error creating test calendar event.', 'error');
+    } finally {
+      setCalendarTestCreating(false);
+    }
+  };
+
   // Custom states for Workspace settings editing
   const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace' | 'team'>('analytics');
 
@@ -11373,37 +11440,107 @@ function OrgAdminPanel() {
                   )}
                </div>
                
-               {composioConnected ? (
-                 <div className="space-y-4">
-                   <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
-                     <div className="flex items-center gap-2 text-green-400 font-bold">
-                       <CheckCircle2 className="w-5 h-5 text-green-400" />
-                       <div>
-                         <span className="uppercase tracking-widest text-[10px] block">Google Calendar Connected</span>
-                         {composioAccountEmail && (
-                           <span className="text-[9px] text-green-300/80 font-normal tracking-normal mt-0.5 block">
-                             {composioAccountEmail}
-                           </span>
-                         )}
-                       </div>
-                     </div>
-                     <button
-                       type="button"
-                       onClick={handleDisconnectComposio}
-                       className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
-                     >
-                       Disconnect
-                     </button>
-                   </div>
-                   <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium">
-                     <Clock className="w-3 h-3" />
-                     <span>Last synced: {composioLastSynced ? new Date(composioLastSynced).toLocaleString() : 'Just now'}</span>
-                   </div>
-                   <p className="text-[10px] text-white/70 leading-relaxed italic">
-                     Your Google Calendar is successfully connected. Automated interview invites and meeting links will route securely through this integration.
-                   </p>
-                 </div>
-               ) : (
+                {composioConnected ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-green-400 font-bold">
+                        <CheckCircle2 className="w-5 h-5 text-green-400" />
+                        <div>
+                          <span className="uppercase tracking-widest text-[10px] block">Google Calendar Connected</span>
+                          {composioAccountEmail && (
+                            <span className="text-[9px] text-green-300/80 font-normal tracking-normal mt-0.5 block">
+                              {composioAccountEmail}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleDisconnectComposio}
+                        className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Disconnect
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium">
+                      <Clock className="w-3 h-3" />
+                      <span>Last synced: {composioLastSynced ? new Date(composioLastSynced).toLocaleString() : 'Just now'}</span>
+                    </div>
+
+                    {/* Calendar Options */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Check Availability */}
+                      <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-indigo-400" />
+                          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Check Availability</span>
+                        </div>
+                        <p className="text-[10px] text-white/70 leading-relaxed">
+                          View your calendar's busy slots for today to find available interview windows.
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-9 text-[10px] uppercase font-black tracking-widest border-white/20 text-white hover:bg-white/5 rounded-xl"
+                          onClick={handleCheckCalendarAvailability}
+                          disabled={calendarLoading}
+                        >
+                          {calendarLoading ? (
+                            <Loader2 className="w-3 h-3 animate-spin mr-2" />
+                          ) : (
+                            <Calendar className="w-3 h-3 mr-2" />
+                          )}
+                          {calendarLoading ? 'Checking...' : 'View Today\'s Slots'}
+                        </Button>
+                        {calendarAvailability !== null && (
+                          <div className="p-2.5 bg-white/5 rounded-lg max-h-24 overflow-y-auto">
+                            {calendarAvailability.length === 0 ? (
+                              <p className="text-[9px] text-green-400 font-bold text-center">No busy slots — all clear!</p>
+                            ) : (
+                              calendarAvailability.map((slot: any, i: number) => (
+                                <p key={i} className="text-[9px] text-white/70 font-mono">
+                                  {new Date(slot.start).toLocaleTimeString()} - {new Date(slot.end).toLocaleTimeString()}
+                                </p>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Create Test Event */}
+                      <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-indigo-400" />
+                          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Create Test Event</span>
+                        </div>
+                        <p className="text-[10px] text-white/70 leading-relaxed">
+                          Create a test calendar event with Google Meet link to verify the integration works end-to-end.
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-9 text-[10px] uppercase font-black tracking-widest border-white/20 text-white hover:bg-white/5 rounded-xl"
+                          onClick={handleCreateTestCalendarEvent}
+                          disabled={calendarTestCreating}
+                        >
+                          {calendarTestCreating ? (
+                            <Loader2 className="w-3 h-3 animate-spin mr-2" />
+                          ) : (
+                            <Calendar className="w-3 h-3 mr-2" />
+                          )}
+                          {calendarTestCreating ? 'Creating...' : 'Create Test Event'}
+                        </Button>
+                        {calendarTestResult && (
+                          <div className="p-2.5 bg-green-500/10 border border-green-500/20 rounded-lg">
+                            <a href={calendarTestResult} target="_blank" rel="noopener noreferrer" className="text-[9px] text-green-400 font-bold underline break-all">
+                              {calendarTestResult}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
                  <div className="space-y-4">
                    <p className="text-[10px] text-white/70 leading-relaxed">
                      Link your Google Workspace to empower AI agents to send calendar invitations and track meeting schedules automatically.
