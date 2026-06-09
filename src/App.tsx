@@ -5079,6 +5079,9 @@ function JobDetail() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.meetLink) {
+          await updateDoc(doc(db, 'candidates', candidate.id), { meetLink: data.meetLink }).catch(() => {});
+        }
         if (data.previewUrl) {
           notify(`Invite sent to ${candidate.fullName}! Test URL: ${data.previewUrl}`, 'success');
         } else {
@@ -5140,6 +5143,9 @@ function JobDetail() {
 
         const data = await res.json();
         if (res.ok && data.success) {
+          if (data.meetLink) {
+            await updateDoc(doc(db, 'candidates', candidate.id), { meetLink: data.meetLink }).catch(() => {});
+          }
           successCount++;
         } else {
           clipboardCount++;
@@ -7044,6 +7050,9 @@ function CandidateDetail() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.meetLink) {
+          await updateDoc(doc(db, 'candidates', candidate.id), { meetLink: data.meetLink }).catch(() => {});
+        }
         if (data.previewUrl) {
           notify(`Invite sent to ${candidate.fullName}! Test URL: ${data.previewUrl}`, 'success');
         } else {
@@ -14631,6 +14640,9 @@ function ScreeningReports() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.meetLink) {
+          await updateDoc(doc(db, 'candidates', c.id), { meetLink: data.meetLink }).catch(() => {});
+        }
         if (data.previewUrl) {
           notify(`Invite sent to ${c.fullName}! Test URL: ${data.previewUrl}`, 'success');
         } else {

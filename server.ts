@@ -402,7 +402,8 @@ app.post("/api/candidate/send-invite", async (req, res) => {
       console.log("Composio GMAIL_SEND_EMAIL response:", response);
       return res.json({
         success: true,
-        message: "Interview invitation email sent successfully via Composio Gmail."
+        message: "Interview invitation email sent successfully via Composio Gmail.",
+        meetLink: inviteMeetLink || ''
       });
     } catch (err: any) {
       console.error("Composio Gmail send failed:", err.message);
@@ -732,14 +733,16 @@ app.post("/api/candidate/send-invite", async (req, res) => {
     return res.json({ 
       success: true, 
       message: fallbackInfo ? `Interview invitation email sent successfully via ${fallbackInfo}.` : "Interview invitation email sent successfully via Gmail.",
-      previewUrl
+      previewUrl,
+      meetLink: inviteMeetLink || ''
     });
   } else {
     // Ultimate local simulated success as absolute failure protection
     return res.json({
       success: true,
       message: "Interview invitation generated (Local delivery mode success).",
-      previewUrl: `https://ethereal.email/messages`
+      previewUrl: `https://ethereal.email/messages`,
+      meetLink: inviteMeetLink || ''
     });
   }
 });
