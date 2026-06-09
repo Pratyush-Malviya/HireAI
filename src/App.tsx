@@ -11469,18 +11469,6 @@ function OrgAdminPanel() {
                         <Clock className="w-2.5 h-2.5" />
                         <span>Last synced: {meetLastSynced ? new Date(meetLastSynced).toLocaleString() : 'Just now'}</span>
                       </div>
-                      <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-2">
-                        <Button type="button" variant="brand" className="w-full h-9 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[9px] uppercase font-black tracking-widest text-white" onClick={handleCreateMeetLink} disabled={meetLinkCreating || isReadOnly}>
-                          {meetLinkCreating ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Video className="w-3 h-3 mr-1.5" />}
-                          {meetLinkCreating ? 'Creating...' : 'Create Google Meet Link'}
-                        </Button>
-                        {meetLinkResult && (
-                          <div className="p-2.5 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
-                            <a href={meetLinkResult} target="_blank" rel="noopener noreferrer" className="text-[9px] text-green-400 font-bold underline truncate">{meetLinkResult}</a>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   ) : (
                     <div className="space-y-3">
