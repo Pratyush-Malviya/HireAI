@@ -11434,120 +11434,70 @@ function OrgAdminPanel() {
                      )}
                    </Button>
                  </div>
-               )}
-            </Card>
+                )}
 
-            {/* Google Meet Integration Card */}
-            <Card className={`p-8 glass-premium border shadow-sm rounded-3xl space-y-6 ${meetConnected ? 'border-green-500/30' : meetError ? 'border-red-500/30' : 'border-white/10'}`}>
-               <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                  <div className="w-10 h-10 bg-brand/10 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-inner">
-                    <Video className="w-5 h-5 text-white" />
+                {/* Google Meet */}
+                <div className="border-t border-white/10 pt-6 space-y-4">
+                  <div className="flex items-center gap-3 pb-1">
+                    <div className="w-8 h-8 bg-brand/10 rounded-lg flex items-center justify-center">
+                      <Video className="w-4 h-4 text-white" />
+                    </div>
+                    <h4 className="font-black text-white uppercase text-xs tracking-wide">Google Meet</h4>
+                    {meetConnected && (
+                      <div className="ml-auto flex items-center gap-1.5 text-green-400">
+                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                        <span className="text-[9px] uppercase font-black tracking-widest">Connected</span>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="font-black text-white uppercase text-sm tracking-wide">Google Meet Integration</h3>
-                    <p className="text-[10px] text-white font-bold uppercase tracking-widest font-mono">Video Conferencing</p>
-                  </div>
-                  {meetConnected && (
-                    <div className="ml-auto flex items-center gap-1.5 text-green-400">
-                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                      <span className="text-[9px] uppercase font-black tracking-widest">Connected</span>
+
+                  {meetConnected ? (
+                    <div className="space-y-3">
+                      <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-green-400 font-bold text-xs">
+                          <CheckCircle2 className="w-4 h-4 text-green-400" />
+                          <div>
+                            <span className="uppercase tracking-widest text-[9px] block">Connected</span>
+                            {meetAccountEmail && (
+                              <span className="text-[8px] text-green-300/80 font-normal tracking-normal mt-0.5 block">{meetAccountEmail}</span>
+                            )}
+                          </div>
+                        </div>
+                        <button type="button" onClick={handleDisconnectMeet} className="text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors">Disconnect</button>
+                      </div>
+                      <div className="flex items-center gap-2 text-[8px] text-white/50 font-medium">
+                        <Clock className="w-2.5 h-2.5" />
+                        <span>Last synced: {meetLastSynced ? new Date(meetLastSynced).toLocaleString() : 'Just now'}</span>
+                      </div>
+                      <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-2">
+                        <Button type="button" variant="brand" className="w-full h-9 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[9px] uppercase font-black tracking-widest text-white" onClick={handleCreateMeetLink} disabled={meetLinkCreating || isReadOnly}>
+                          {meetLinkCreating ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Video className="w-3 h-3 mr-1.5" />}
+                          {meetLinkCreating ? 'Creating...' : 'Create Google Meet Link'}
+                        </Button>
+                        {meetLinkResult && (
+                          <div className="p-2.5 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                            <a href={meetLinkResult} target="_blank" rel="noopener noreferrer" className="text-[9px] text-green-400 font-bold underline truncate">{meetLinkResult}</a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-[9px] text-white/70 leading-relaxed">Connect Google Meet to create video conferences for interviews.</p>
+                      {meetError && (
+                        <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl">
+                          <p className="text-[9px] text-red-400 font-bold text-center">{meetError}</p>
+                        </div>
+                      )}
+                      <Button type="button" variant="brand" className="w-full h-9 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[9px] uppercase font-black tracking-widest text-white" onClick={handleConnectMeet} disabled={meetLoading || isReadOnly}>
+                        {meetLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1.5" /> : <Video className="w-3 h-3 mr-1.5" />}
+                        {meetLoading ? 'Waiting for authorization...' : meetError ? 'Retry Connection' : 'Connect Google Meet'}
+                      </Button>
                     </div>
                   )}
-               </div>
-               
-               {meetConnected ? (
-                 <div className="space-y-4">
-                   <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between">
-                     <div className="flex items-center gap-2 text-green-400 font-bold">
-                       <CheckCircle2 className="w-5 h-5 text-green-400" />
-                       <div>
-                         <span className="uppercase tracking-widest text-[10px] block">Google Meet Connected</span>
-                         {meetAccountEmail && (
-                           <span className="text-[9px] text-green-300/80 font-normal tracking-normal mt-0.5 block">
-                             {meetAccountEmail}
-                           </span>
-                         )}
-                       </div>
-                     </div>
-                     <button
-                       type="button"
-                       onClick={handleDisconnectMeet}
-                       className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-300 transition-colors"
-                     >
-                       Disconnect
-                     </button>
-                   </div>
-                   <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium">
-                     <Clock className="w-3 h-3" />
-                     <span>Last synced: {meetLastSynced ? new Date(meetLastSynced).toLocaleString() : 'Just now'}</span>
-                   </div>
-
-                   {/* Create Meet Link */}
-                   <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl space-y-3">
-                     <div className="flex items-center gap-2">
-                       <Video className="w-4 h-4 text-indigo-400" />
-                       <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Generate Meeting Link</span>
-                     </div>
-                     <p className="text-[10px] text-white/70 leading-relaxed">
-                       Create a new Google Meet link that can be used for candidate interviews. The link will be copied to your clipboard.
-                     </p>
-                     <Button
-                       type="button"
-                       variant="brand"
-                       className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white"
-                       onClick={handleCreateMeetLink}
-                       disabled={meetLinkCreating || isReadOnly}
-                     >
-                       {meetLinkCreating ? (
-                         <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                       ) : (
-                         <Video className="w-4 h-4 mr-2" />
-                       )}
-                       {meetLinkCreating ? 'Creating...' : 'Create Google Meet Link'}
-                     </Button>
-                     {meetLinkResult && (
-                       <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
-                         <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
-                         <a href={meetLinkResult} target="_blank" rel="noopener noreferrer" className="text-[10px] text-green-400 font-bold underline truncate">
-                           {meetLinkResult}
-                         </a>
-                       </div>
-                     )}
-                   </div>
-                 </div>
-               ) : (
-                 <div className="space-y-4">
-                   <p className="text-[10px] text-white/70 leading-relaxed">
-                     Connect your Google Meet to enable AI-powered video conference creation for interviews. Meeting links can be generated and automatically embedded in candidate invitations.
-                   </p>
-                   {meetError && (
-                     <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
-                       <p className="text-[10px] text-red-400 font-bold text-center">{meetError}</p>
-                     </div>
-                   )}
-                   <Button
-                     type="button"
-                     variant="brand"
-                     className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white"
-                     onClick={handleConnectMeet}
-                     disabled={meetLoading || isReadOnly}
-                   >
-                     {meetLoading ? (
-                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                     ) : (
-                       <Video className="w-4 h-4 mr-2" />
-                     )}
-                     {meetLoading ? (
-                       <span>Waiting for Google authorization...</span>
-                     ) : meetError ? (
-                       <span>Retry Connection</span>
-                     ) : (
-                       <span>Connect Google Meet</span>
-                     )}
-                   </Button>
-                 </div>
-               )}
-            </Card>
+                </div>
+             </Card>
 
             {/* Mail Server Controls (SMTP) */}
             <Card className="p-8 space-y-6 glass-premium border border-white/10 shadow-sm rounded-3xl">
