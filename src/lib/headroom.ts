@@ -1,11 +1,11 @@
-import { compress, simulate } from 'headroom-ai';
-import { withHeadroom } from 'headroom-ai/openai';
 import OpenAI from 'openai';
 
 const HEADROOM_BASE_URL = process.env.HEADROOM_BASE_URL || 'http://localhost:8787';
+const IS_VERCEL = !!process.env.VERCEL;
+const HEADROOM_AVAILABLE = !IS_VERCEL && (!!process.env.HEADROOM_BASE_URL || !!process.env.HEADROOM_API_KEY);
 
 export function createHeadroomNvidiaClient(apiKey: string, baseURL: string): OpenAI {
-  return withHeadroom(new OpenAI({ apiKey, baseURL }));
+  return new OpenAI({ apiKey, baseURL });
 }
 
 type GeminiContent = { role: string; parts: { text: string }[] };
@@ -34,17 +34,19 @@ export async function maybeCompressContents(
   contents: any,
   model: string
 ): Promise<{ contents: any; compressed: boolean; tokensSaved?: number }> {
+  if (!HEADROOM_AVAILABLE) return { contents, compressed: false };
   if (!contents || (typeof contents === 'string' && contents.length < 500) || (Array.isArray(contents) && contents.length < 3)) {
     return { contents, compressed: false };
   }
 
   try {
+    const { compress } = require('headroom-ai');
     const messages = geminiContentsToMessages(contents);
     const result = await compress(messages, {
       model,
       baseUrl: HEADROOM_BASE_URL,
       fallback: true,
-      timeout: 5000,
+      timeout: 3000,
     });
 
     if (result?.messages?.length) {
