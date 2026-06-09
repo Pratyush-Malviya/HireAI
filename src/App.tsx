@@ -5051,22 +5051,7 @@ function JobDetail() {
 
   const handleSendInviteForCandidate = async (candidate: Candidate, emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     setInvitingCandidateId(candidate.id);
-    let link = candidate.meetLink;
-    if (!link) {
-      try {
-        const meetRes = await fetch('/api/meet/create-link', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ candidateName: candidate.fullName, jobTitle: job?.title })
-        });
-        const meetData = await meetRes.json();
-        if (meetData.meetLink) {
-          link = meetData.meetLink;
-          await updateDoc(doc(db, 'candidates', candidate.id), { meetLink: link });
-        }
-      } catch (e) { console.warn('Failed to create meet link:', e); }
-    }
-    if (!link) link = `${window.location.origin}/interview/${candidate.id}`;
+    const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
     try {
       // 1. Update status and email in db
@@ -7031,23 +7016,7 @@ function CandidateDetail() {
   const handleSendInvite = async (emailOverride?: string, subjectOverride?: string, bodyOverride?: string) => {
     if (!candidate) return;
     setSendingInvite(true);
-    let link = candidate.meetLink;
-    if (!link) {
-      try {
-        const meetRes = await fetch('/api/meet/create-link', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ candidateName: candidate.fullName, jobTitle: job?.title })
-        });
-        const meetData = await meetRes.json();
-        if (meetData.meetLink) {
-          link = meetData.meetLink;
-          await updateDoc(doc(db, 'candidates', candidate.id), { meetLink: link });
-          setCandidate(prev => prev ? { ...prev, meetLink: link } : null);
-        }
-      } catch (e) { console.warn('Failed to create meet link:', e); }
-    }
-    if (!link) link = `${window.location.origin}/interview/${candidate.id}`;
+    const link = candidate.meetLink || `${window.location.origin}/interview/${candidate.id}`;
     const targetEmail = emailOverride || candidate.email;
     try {
       // 1. Update status and email in db
@@ -14640,23 +14609,7 @@ function ScreeningReports() {
     if (!activeInviteCandidate) return;
     const c = activeInviteCandidate;
     setSendingInvite(true);
-    let link = c.meetLink;
-    if (!link) {
-      try {
-        const meetRes = await fetch('/api/meet/create-link', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ candidateName: c.fullName, jobTitle: jobMap[c.jobId] || 'Applied Position' })
-        });
-        const meetData = await meetRes.json();
-        if (meetData.meetLink) {
-          link = meetData.meetLink;
-          await updateDoc(doc(db, 'candidates', c.id), { meetLink: link });
-          setCandidates(prev => prev.map(cn => cn.id === c.id ? { ...cn, meetLink: link } : cn));
-        }
-      } catch (e) { console.warn('Failed to create meet link:', e); }
-    }
-    if (!link) link = `${window.location.origin}/interview/${c.id}`;
+    const link = c.meetLink || `${window.location.origin}/interview/${c.id}`;
     const targetEmail = emailOverride || c.email;
     try {
       const updates: any = { interviewStatus: 'invited' };

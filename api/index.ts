@@ -350,15 +350,55 @@ app.post("/api/meet/create-link", async (req, res) => {
 
 app.post("/api/candidate/send-invite", async (req, res) => {
   const tokensRaw = req.cookies.google_tokens;
-  const { candidateEmail, candidateName, interviewLink, meetLink: inviteMeetLink, jobTitle, customSmtp, emailBody, subject: subjectOverride, useComposio, userId } = req.body;
+  let { candidateEmail, candidateName, interviewLink, meetLink: inviteMeetLink, jobTitle, customSmtp, emailBody, subject: subjectOverride, useComposio, userId } = req.body;
   console.log('🔎 send-invite request body:', req.body);
+
+  // Auto-generate a Google Meet link if none provided
+  if (!inviteMeetLink) {
+    try {
+      if (tokensRaw) {
+        const tokens = JSON.parse(tokensRaw);
+        const oauth2Client = getOAuthClient();
+        oauth2Client.setCredentials(tokens);
+        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+        const now = new Date();
+        const startTime = new Date(now.getTime() + 60000).toISOString();
+        const endTime = new Date(now.getTime() + 120000).toISOString();
+        const meetEvent = await calendar.events.insert({
+          calendarId: "primary",
+          conferenceDataVersion: 1,
+          requestBody: {
+            summary: `${jobTitle || 'Interview'} - ${candidateName || 'Candidate'}`,
+            start: { dateTime: startTime },
+            end: { dateTime: endTime },
+            conferenceData: {
+              createRequest: {
+                requestId: `meet-${Date.now()}`,
+                conferenceSolutionKey: { type: "hangoutsMeet" }
+              }
+            }
+          }
+        });
+        inviteMeetLink = meetEvent.data.hangoutLink || meetEvent.data.htmlLink || '';
+        if (meetEvent.data.id) {
+          calendar.events.delete({ calendarId: "primary", eventId: meetEvent.data.id }).catch(() => {});
+        }
+      }
+    } catch (meetErr) {
+      console.warn("Meet link generation failed:", meetErr);
+    }
+    if (!inviteMeetLink) {
+      const code = `${Math.random().toString(36).substring(2, 5)}-${Math.random().toString(36).substring(2, 8)}-${Math.random().toString(36).substring(2, 5)}`;
+      inviteMeetLink = `https://meet.google.com/${code}`;
+    }
+  }
 
   if (useComposio && composio && userId) {
     try {
       const cleanName = safeSanitize(candidateName || "Candidate").substring(0, 100);
       const cleanTitle = safeSanitize(jobTitle || "Applied Position").substring(0, 150);
       const subject = subjectOverride || `Interview Invitation: ${cleanTitle} with HireNow`;
-      const body = emailBody || `Hi ${cleanName},\n\nYou are invited to complete an interview for the position of ${cleanTitle}.\n\nPlease join the interview room here: ${interviewLink}`;
+      const body = emailBody || `Hi ${cleanName},\n\nYou are invited to complete an interview for the position of ${cleanTitle}.\n\nGoogle Meet Link: ${inviteMeetLink}\n\nPlease join the interview room here: ${interviewLink}`;
       
       const response = await composio.tools.execute("GMAIL_SEND_EMAIL", {
         userId: userId,
