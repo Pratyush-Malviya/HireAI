@@ -1,6 +1,0 @@
-{
-  "name": "HireFlow OS",
-  "description": "Comprehensive HR Agency automation platform for resume screening, AI voice interviews, proctoring, deep web research, email/WhatsApp automation, ATS integrations, and multi-tenant reseller configurations.",
-  "requestFramePermissions": ["microphone", "camera"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
