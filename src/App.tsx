@@ -7768,13 +7768,13 @@ function CandidateDetail() {
     <div className="max-w-6xl mx-auto space-y-8 pb-20">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" className="-ml-2 px-2" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
+          <Button variant="ghost" className="-ml-2 px-2 text-white/70 hover:text-white" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
             <ChevronRight className="w-4 h-4 rotate-180" /> <span className="hidden sm:inline">Pipeline</span>
           </Button>
           <div className="w-px h-6 bg-white/5" />
           <Button
             variant="ghost"
-            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-black uppercase tracking-widest text-[8px] sm:text-[10px] border border-red-500/20"
+            className="bg-red-600/80 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[8px] sm:text-[10px] border border-red-400/30 shadow-sm shadow-red-600/20"
             onClick={deleteCandidate}
           >
             <Trash2 className="w-3.5 h-3.5 sm:mr-2" /> <span className="hidden sm:inline">Delete Report</span>
@@ -7783,7 +7783,7 @@ function CandidateDetail() {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Button
             variant="outline"
-            className="text-white border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
+            className="text-white bg-blue-600/80 hover:bg-blue-600 border-blue-400/30 shadow-sm shadow-blue-600/20 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
             onClick={handleDeepResearch}
             disabled={researching}
           >
@@ -7793,12 +7793,12 @@ function CandidateDetail() {
               <>              <Globe className="w-3.5 h-3.5 mr-1 sm:mr-2" /><span className="truncate">{candidate.research ? 'Re-Research' : 'Deep Research'}</span></>
             )}
           </Button>
-          <Button variant="outline" className="text-white text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
+          <Button variant="outline" className="text-white bg-slate-700/80 hover:bg-slate-700 border-slate-500/30 shadow-sm shadow-slate-700/20 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4" onClick={handleDownloadPDF}>
             <Database className="w-3.5 h-3.5 mr-1 sm:mr-2" /> PDF
           </Button>
           <Button
             variant="outline"
-            className="text-white border-brand/20 hover:bg-brand/10 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
+            className="text-white bg-cyan-600/80 hover:bg-cyan-600 border-cyan-400/30 shadow-sm shadow-cyan-600/20 text-[10px] sm:text-xs py-2 h-10 px-2 sm:px-4"
             onClick={handleRetryScreening}
             disabled={retryingScreening}
           >
@@ -7812,7 +7812,7 @@ function CandidateDetail() {
             {candidate.interviewStatus !== 'completed' && (
               <Button
                 variant="ghost"
-                className="border border-brand/30 bg-brand/10 hover:bg-brand/20 text-white shadow-lg shadow-brand/10 text-xs py-2 h-10 px-4"
+                className="border border-violet-500/30 bg-violet-600/80 hover:bg-violet-600 text-white shadow-sm shadow-violet-600/20 text-xs py-2 h-10 px-4"
                 disabled={sendingInvite}
                 onClick={() => {
                   setActiveInviteCandidate(candidate);
@@ -7831,7 +7831,7 @@ function CandidateDetail() {
             )}
             <Button
               variant="ghost"
-              className="border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-white shadow-lg shadow-amber-500/10 text-xs py-2 h-10 px-4"
+              className="border border-amber-400/30 bg-amber-600/80 hover:bg-amber-600 text-white shadow-sm shadow-amber-600/20 text-xs py-2 h-10 px-4"
               onClick={async () => {
                 try {
                   await updateDoc(doc(db, 'candidates', candidate.id), { status: 'shortlisted' });
@@ -7938,7 +7938,7 @@ function CandidateDetail() {
             <Button 
               onClick={handleRetryScreening}
               disabled={retryingScreening}
-              className="glass-premium text-amber-300 hover:bg-amber-500/10 font-black uppercase tracking-widest text-xs h-10 px-6 shadow-md transition-all active:scale-95 whitespace-nowrap shrink-0"
+               className="bg-amber-600/80 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-xs h-10 px-6 shadow-sm shadow-amber-600/20 transition-all active:scale-95 whitespace-nowrap shrink-0 border border-amber-400/30"
             >
               {retryingScreening ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               {retryingScreening ? 'Retrying...' : 'Retry Screening'}
@@ -7953,9 +7953,9 @@ function CandidateDetail() {
            <div className="bg-red-500/20 px-6 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                  <AlertTriangle className="w-5 h-5 text-red-400" />
-                 <h3 className="font-black uppercase tracking-widest text-sm text-red-300">Critical Risk Signals Detected</h3>
+                 <h3 className="font-black uppercase tracking-widest text-sm text-white">Critical Risk Signals Detected</h3>
               </div>
-              <span className="text-[10px] font-black glass-premium/20 px-2 py-1 rounded uppercase tracking-widest text-red-300">
+              <span className="text-[10px] font-black bg-red-500/20 px-2 py-1 rounded uppercase tracking-widest text-white">
                 D6 Integrity Check
               </span>
            </div>
@@ -15119,7 +15119,7 @@ function ScreeningReports() {
                             <FileText className="w-2.5 h-2.5" /> View
                           </button>
                           <button
-                            className="h-7 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-[7px] font-black uppercase tracking-wider text-rose-400 transition-all flex items-center gap-1"
+                            className="h-7 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-[7px] font-black uppercase tracking-wider text-white transition-all flex items-center gap-1"
                             onClick={async (e) => {
                               e.stopPropagation();
                               const ok = await confirm(`Delete screening report for ${c.fullName}?`);
