@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Check, Zap, Shield, Mail, Sparkles, Loader2, Eye, EyeOff, User, Building2, Globe, MapPin, Phone, Lock, ArrowLeft } from 'lucide-react';
 import { RainbowButton } from './magic-ui/rainbow-button';
 import { BorderBeam } from './magic-ui/border-beam';

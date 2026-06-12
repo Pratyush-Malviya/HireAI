@@ -1,7 +1,7 @@
 import { LogOut, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook, Eye } from 'lucide-react';
-import { useEffect, useState, createContext, useContext, useRef, Component, useMemo, lazy, Suspense } from 'react';
+import { useEffect, useState, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -31,6 +31,20 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  NotificationContext,
+  ProfileContext,
+  useNotification,
+  useProfile,
+} from './lib/appContext';
+import { SuperAdminLayout } from './components/superadmin/SuperAdminLayout';
+import { SAOverviewPage } from './components/superadmin/SAOverviewPage';
+import { SAOrganizationsPage } from './components/superadmin/SAOrganizationsPage';
+import { SAPaymentsPage } from './components/superadmin/SAPaymentsPage';
+import { SAHealthPage } from './components/superadmin/SAHealthPage';
+import { SALLMPage } from './components/superadmin/SALLMPage';
+import { SAWhiteLabelPage } from './components/superadmin/SAWhiteLabelPage';
+import { SAManualPage } from './components/superadmin/SAManualPage';
 
 const ROLE_WEIGHTS = {
   'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
@@ -509,41 +523,6 @@ function PlaceholderScoreCircle({ isProcessing }: { isProcessing: boolean }) {
       </div>
     </div>
   );
-}
-
-// --- Contexts ---
-const NotificationContext = createContext<{ 
-  confirm: (msg: string) => Promise<boolean>,
-  notify: (msg: string, type?: 'success' | 'error' | 'info') => void
-} | null>(null);
-
-const ProfileContext = createContext<{
-  profile: UserProfile | null;
-  organization: Organization | null;
-  isAdmin: boolean;
-  refreshProfile: () => Promise<void>;
-  whiteLabelBrandingName: string;
-  setWhiteLabelBrandingName: (name: string) => void;
-  whiteLabelMarkupFactor: number;
-  setWhiteLabelMarkupFactor: (factor: number) => void;
-  whiteLabelLogoUrl: string;
-  setWhiteLabelLogoUrl: (url: string) => void;
-  stripeModalOpen: boolean;
-  setStripeModalOpen: (open: boolean) => void;
-  theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
-} | null>(null);
-
-function useNotification() {
-  const context = useContext(NotificationContext);
-  if (!context) throw new Error('useNotification must be used within a NotificationProvider');
-  return context;
-}
-
-function useProfile() {
-  const context = useContext(ProfileContext);
-  if (!context) throw new Error('useProfile must be used within a ProfileProvider');
-  return context;
 }
 
 // --- Shared Components ---
@@ -15700,7 +15679,17 @@ export default function App() {
                       <Route path="/interview-reports" element={<InterviewReports />} />
                       <Route path="/org-admin" element={<OrgAdminPanel />} />
                       <Route path="/resume-bank" element={<ResumeBank />} />
-                      <Route path="/admin" element={<SuperAdminPanel />} />
+                      {/* Super Admin — nested routes with shared layout */}
+                      <Route path="/admin" element={<SuperAdminLayout />}>
+                        <Route index element={<Navigate to="/admin/overview" replace />} />
+                        <Route path="overview" element={<SAOverviewPage />} />
+                        <Route path="organizations" element={<SAOrganizationsPage />} />
+                        <Route path="payments" element={<SAPaymentsPage />} />
+                        <Route path="health" element={<SAHealthPage />} />
+                        <Route path="llm" element={<SALLMPage />} />
+                        <Route path="white-label" element={<SAWhiteLabelPage />} />
+                        <Route path="manual" element={<SAManualPage />} />
+                      </Route>
                       <Route path="/pricing" element={<PricingPage />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </>
