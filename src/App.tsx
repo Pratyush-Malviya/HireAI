@@ -7055,6 +7055,12 @@ function CandidateDetail() {
 
   // HireAI Enhanced Feature States
   const [activeDetailTab, setActiveDetailTab] = useState<'core' | 'offer' | 'campaign' | 'proctoring'>('core');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackDecision, setFeedbackDecision] = useState<'selected' | 'rejected'>('selected');
+  const [feedbackText, setFeedbackText] = useState('');
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+  const [schedulingZoom, setSchedulingZoom] = useState(false);
+  const [zoomResult, setZoomResult] = useState<{joinUrl: string; password: string} | null>(null);
 
   // Offer Letter Generation OS States
   const [offerSalary, setOfferSalary] = useState(1200000);
@@ -7851,6 +7857,51 @@ function CandidateDetail() {
             >
               <Star className="w-3.5 h-3.5 mr-2" />
               Shortlist
+            </Button>
+            <Button
+              variant="ghost"
+              className="border border-emerald-400/30 bg-emerald-600/80 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-600/20 text-xs py-2 h-10 px-4"
+              onClick={() => { setFeedbackDecision('selected'); setFeedbackText(''); setZoomResult(null); setShowFeedbackModal(true); }}
+            >
+              <Mail className="w-3.5 h-3.5 mr-2" /> Feedback
+            </Button>
+            <Button
+              variant="ghost"
+              className="border border-sky-400/30 bg-sky-600/80 hover:bg-sky-600 text-white shadow-sm shadow-sky-600/20 text-xs py-2 h-10 px-4"
+              onClick={async () => {
+                setSchedulingZoom(true);
+                setZoomResult(null);
+                try {
+                  const res = await fetch('/api/zoom/schedule-interview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      candidateEmail: candidate.email,
+                      candidateName: candidate.fullName,
+                      jobTitle: job?.title || 'Technical',
+                      zoomAccountId: profile?.zoomAccountId || '',
+                      zoomClientId: profile?.zoomClientId || '',
+                      zoomClientSecret: profile?.zoomClientSecret || '',
+                    })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setZoomResult(data.meeting);
+                    await updateDoc(doc(db, 'candidates', candidate.id), { zoomMeetingUrl: data.meeting.joinUrl, interviewStatus: 'invited' });
+                    notify('Zoom interview scheduled!', 'success');
+                  } else {
+                    notify(data.error || 'Failed to schedule Zoom meeting', 'error');
+                  }
+                } catch (err: any) {
+                  notify(err.message || 'Failed to schedule Zoom', 'error');
+                } finally {
+                  setSchedulingZoom(false);
+                }
+              }}
+              disabled={schedulingZoom}
+            >
+              {schedulingZoom ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" /> : <Video className="w-3.5 h-3.5 mr-2" />}
+              {schedulingZoom ? 'Scheduling...' : 'Schedule Zoom'}
             </Button>
           </div>
         </div>
@@ -10240,6 +10291,115 @@ function CandidateDetail() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Feedback Email Modal */}
+      <Modal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        title="Send Feedback to Candidate"
+      >
+        <div className="space-y-6">
+          <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-brand rounded-full" />
+              <span className="text-[9px] font-black uppercase text-white/50 tracking-[0.15em]">Candidate</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center font-black text-white shadow-lg">
+                {candidate?.fullName?.charAt(0) || '?'}
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-white">{candidate?.fullName}</h4>
+                <p className="text-[11px] text-white/40 font-medium">{candidate?.email}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-[8px] font-black uppercase text-white/40 tracking-[0.15em] block">Decision</label>
+            <div className="flex gap-2">
+              <button
+                className={cn(
+                  "flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider border transition-all",
+                  feedbackDecision === 'selected'
+                    ? "bg-emerald-600/80 border-emerald-400/30 text-white shadow-sm shadow-emerald-600/20"
+                    : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
+                )}
+                onClick={() => setFeedbackDecision('selected')}
+              >
+                <Check className="w-3 h-3 inline mr-1" /> Selected
+              </button>
+              <button
+                className={cn(
+                  "flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider border transition-all",
+                  feedbackDecision === 'rejected'
+                    ? "bg-rose-600/80 border-rose-400/30 text-white shadow-sm shadow-rose-600/20"
+                    : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"
+                )}
+                onClick={() => setFeedbackDecision('rejected')}
+              >
+                <Ban className="w-3 h-3 inline mr-1" /> Rejected
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[8px] font-black uppercase text-white/40 tracking-[0.15em] block">Personalized Feedback</label>
+            <textarea
+              className="w-full text-xs font-semibold px-3.5 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/50 text-white placeholder:text-white/20 transition-all resize-none"
+              rows={4}
+              placeholder={feedbackDecision === 'selected' ? "Congratulate the candidate and explain why they stood out..." : "Provide constructive feedback to help the candidate improve..."}
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              className="px-5 py-2.5 text-[8px] font-black uppercase tracking-wider text-white/50 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-all"
+              onClick={() => setShowFeedbackModal(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-5 py-2.5 text-[8px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-brand to-violet-600 hover:opacity-90 rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 shadow-lg shadow-brand/20"
+              disabled={sendingFeedback}
+              onClick={async () => {
+                setSendingFeedback(true);
+                try {
+                  const res = await fetch('/api/candidate/send-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      candidateEmail: candidate?.email,
+                      candidateName: candidate?.fullName,
+                      jobTitle: job?.title || 'the position',
+                      decision: feedbackDecision,
+                      feedback: feedbackText,
+                      customSmtp: organization?.emailSettings || null,
+                    })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    notify(`Feedback email sent!${data.previewUrl ? ` Preview: ${data.previewUrl}` : ''}`, 'success');
+                  } else {
+                    notify(data.error || 'Failed to send feedback', 'error');
+                  }
+                } catch (err: any) {
+                  notify(err.message || 'Failed to send feedback', 'error');
+                } finally {
+                  setSendingFeedback(false);
+                  setShowFeedbackModal(false);
+                }
+              }}
+            >
+              {sendingFeedback ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+              {sendingFeedback ? 'Sending...' : `Send ${feedbackDecision === 'selected' ? 'Selection' : 'Feedback'} Email`}
+            </button>
+          </div>
+
+        </div>
       </Modal>
 
       <footer className="border-t border-white/5 pt-6 mt-12 text-center">

@@ -2164,7 +2164,9 @@ app.post("/api/ai/chat", async (req, res) => {
       throw new Error("AI Key missing");
     }
 
-    const systemInstruction = `You are "Alex from HireNow", a warm and attentive professional interviewer conducting a structured screening interview with ${candidateName} for ${role} at ${company}. Today's date is ${new Date().toISOString().split('T')[0]}.
+    const now = new Date();
+const dateTimeStr = now.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+const systemInstruction = `You are "Alex from HireNow", a warm and attentive professional interviewer conducting a structured screening interview with ${candidateName} for ${role} at ${company}. Current date and time: ${dateTimeStr}.
 
 DIFFICULTY CALIBRATION: This candidate's seniority appears to be "${seniorityLevel}". Calibrate your question difficulty to "${diffLevel}" level:
 - ${diffLevel === 'hard' ? 'Ask about trade-offs, architectural decisions, leadership impact, mentoring, and strategic thinking. Expect deep technical or strategic depth.' : diffLevel === 'moderate' ? 'Ask about implementation details, team collaboration, problem-solving approaches, and independent contribution.' : 'Ask about fundamentals, learning ability, team fit, and growth potential. Be supportive and encouraging.'}

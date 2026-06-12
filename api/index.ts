@@ -2078,7 +2078,9 @@ app.post("/api/ai/chat", async (req, res) => {
       throw new Error("AI Key missing");
     }
 
-    const systemInstruction = `You are "Alex from HireNow", a warm and attentive professional interviewer conducting a structured screening interview with ${candidateName} for ${role} at ${company}. Today's date is ${new Date().toISOString().split('T')[0]}.
+    const now = new Date();
+const dateTimeStr = now.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+const systemInstruction = `You are "Alex from HireNow", a warm and attentive professional interviewer conducting a structured screening interview with ${candidateName} for ${role} at ${company}. Current date and time: ${dateTimeStr}.
 
 DIFFICULTY CALIBRATION: This candidate's seniority appears to be "${seniorityLevel}". Calibrate your question difficulty to "${diffLevel}" level:
 - ${diffLevel === 'hard' ? 'Ask about trade-offs, architectural decisions, leadership impact, mentoring, and strategic thinking. Expect deep technical or strategic depth.' : diffLevel === 'moderate' ? 'Ask about implementation details, team collaboration, problem-solving approaches, and independent contribution.' : 'Ask about fundamentals, learning ability, team fit, and growth potential. Be supportive and encouraging.'}
@@ -2520,8 +2522,10 @@ app.post("/api/nvidia/interview", async (req, res) => {
       throw new Error("NVIDIA_API_KEY is not configured.");
     }
 
+    const now = new Date();
+    const dateTimeStr = now.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
     const systemMessage = `You are "Alex from HireNow", a warm and attentive professional interviewer. 
-You are conducting a structured professional screening interview with ${candidateName || "the candidate"} for the position of ${role || "open"} at ${company || "the company"}.
+You are conducting a structured professional screening interview with ${candidateName || "the candidate"} for the position of ${role || "open"} at ${company || "the company"}. Current date and time: ${dateTimeStr}.
 
 JOB DESCRIPTION:
 ${jd || "Not provided"}
@@ -3223,7 +3227,159 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // In production, the bundled server is at dist/server.cjs
+    // ── Email Helper (reusable sendEmail) ──────────────────────────────
+  async function sendEmail({ to, subject, html, customSmtp }: { to: string; subject: string; html: string; customSmtp?: any }): Promise<{ sent: boolean; previewUrl?: string; method?: string }> {
+    let emailSent = false;
+    let previewUrl = "";
+    let method = "";
+
+    // 1. Try custom SMTP
+    if (customSmtp && (customSmtp.smtpUser || customSmtp.user) && (customSmtp.smtpPass || customSmtp.pass)) {
+      try {
+        const host = customSmtp.smtpHost || customSmtp.host || "smtp.gmail.com";
+        const port = parseInt(customSmtp.smtpPort || customSmtp.port || "465");
+        const secure = (customSmtp.smtpSecure !== undefined ? customSmtp.smtpSecure : customSmtp.secure) !== false;
+        const user = customSmtp.smtpUser || customSmtp.user;
+        const pass = customSmtp.smtpPass || customSmtp.pass;
+        const fromName = customSmtp.smtpFromName || customSmtp.fromName || "HireNow";
+        const fromEmail = customSmtp.smtpFromEmail || customSmtp.fromEmail || user;
+        const transporter = nodemailer.createTransport({ host, port, secure, auth: { user, pass } });
+        await transporter.sendMail({ from: `"${fromName}" <${fromEmail}>`, to, subject, html });
+        emailSent = true; method = "Custom SMTP";
+      } catch (_) { console.warn("Custom SMTP failed, trying fallbacks..."); }
+    }
+
+    // 2. Try env SMTP
+    if (!emailSent && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST || "smtp.gmail.com",
+          port: parseInt(process.env.SMTP_PORT || "465"),
+          secure: process.env.SMTP_SECURE !== "false",
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+        });
+        const fromName = process.env.SMTP_FROM_NAME || "HireNow";
+        const fromEmail = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+        await transporter.sendMail({ from: `"${fromName}" <${fromEmail}>`, to, subject, html });
+        emailSent = true; method = "SMTP";
+      } catch (_) { console.warn("Env SMTP failed, trying Ethereal..."); }
+    }
+
+    // 3. Fallback to Ethereal
+    if (!emailSent) {
+      try {
+        const testAccount = await nodemailer.createTestAccount();
+        const transporter = nodemailer.createTransport({ host: "smtp.ethereal.email", port: 587, secure: false, auth: { user: testAccount.user, pass: testAccount.pass } });
+        const info = await transporter.sendMail({ from: '"HireNow" <noreply@hirenow.com>', to, subject, html });
+        previewUrl = nodemailer.getTestMessageUrl(info) || "";
+        emailSent = true; method = "Ethereal";
+      } catch (_) { console.error("All email methods failed."); }
+    }
+
+    return { sent: emailSent, previewUrl, method };
+  }
+
+  // ── POST /api/candidate/send-feedback ────────────────────────────
+  app.post("/api/candidate/send-feedback", async (req, res) => {
+    const { candidateEmail, candidateName, jobTitle, decision, feedback, customSmtp } = req.body;
+    if (!candidateEmail || !decision) {
+      return res.status(400).json({ success: false, error: "candidateEmail and decision are required" });
+    }
+
+    const subject = decision === "selected"
+      ? `Congratulations! You've been shortlisted for ${jobTitle || "the position"}`
+      : `Update on your application for ${jobTitle || "the position"}`;
+
+    const html = decision === "selected"
+      ? `
+        <div style="font-family: 'Inter', sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; background: #0f172a; border-radius: 16px; border: 1px solid #1e293b;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px;">🎉</div>
+          </div>
+          <h1 style="color: #f8fafc; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -0.02em;">You're Shortlisted!</h1>
+          <p style="color: #94a3b8; text-align: center; font-size: 14px; margin-bottom: 24px;">${candidateName}, your application stood out.</p>
+          <div style="background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0;">${feedback || "Your skills and experience align well with our requirements. We'd like to move forward with your application."}</p>
+          </div>
+          <div style="text-align: center;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-weight: 700; font-size: 13px; padding: 12px 28px; border-radius: 10px; letter-spacing: 0.03em;">Next Steps Coming Soon</div>
+          </div>
+          <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 24px; border-top: 1px solid #1e293b; padding-top: 16px;">HireNow AI Recruitment Team</p>
+        </div>`
+      : `
+        <div style="font-family: 'Inter', sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; background: #0f172a; border-radius: 16px; border: 1px solid #1e293b;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 56px; height: 56px; background: #1e293b; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 28px;">💡</div>
+          </div>
+          <h1 style="color: #f8fafc; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -0.02em;">Application Update</h1>
+          <p style="color: #94a3b8; text-align: center; font-size: 14px; margin-bottom: 24px;">Thank you for your interest, ${candidateName}.</p>
+          <div style="background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <p style="color: #e2e8f0; font-size: 14px; line-height: 1.6; margin: 0;">${feedback || "After careful review, we've decided to move forward with other candidates whose qualifications more closely match the current requirements."}</p>
+          </div>
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; text-align: center;">We encourage you to apply for future positions that match your profile.</p>
+          <p style="color: #64748b; font-size: 12px; text-align: center; margin-top: 24px; border-top: 1px solid #1e293b; padding-top: 16px;">HireNow AI Recruitment Team</p>
+        </div>`;
+
+    const result = await sendEmail({ to: candidateEmail, subject, html, customSmtp });
+    return res.json({ success: result.sent, previewUrl: result.previewUrl, method: result.method, message: result.sent ? "Feedback email sent." : "Failed to send email." });
+  });
+
+  // ── POST /api/zoom/schedule-interview ────────────────────────────
+  app.post("/api/zoom/schedule-interview", async (req, res) => {
+    const { candidateEmail, candidateName, jobTitle, zoomAccountId, zoomClientId, zoomClientSecret } = req.body;
+    if (!zoomAccountId || !zoomClientId || !zoomClientSecret) {
+      return res.status(400).json({ success: false, error: "Zoom credentials required (accountId, clientId, clientSecret)" });
+    }
+
+    try {
+      // Get access token via Server-to-Server OAuth
+      const tokenRes = await axios.post("https://zoom.us/oauth/token", new URLSearchParams({ grant_type: "account_credentials", account_id: zoomAccountId }), {
+        auth: { username: zoomClientId, password: zoomClientSecret },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      });
+      const accessToken = tokenRes.data.access_token;
+
+      // Schedule meeting for tomorrow at 11:00 AM IST
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(11, 0, 0, 0);
+      const startTime = tomorrow.toISOString().replace(/\.\d{3}Z$/, "Z");
+
+      const meetingRes = await axios.post("https://api.zoom.us/v2/users/me/meetings", {
+        topic: `${jobTitle || "Technical"} Interview - ${candidateName || "Candidate"}`,
+        type: 2,
+        start_time: startTime,
+        duration: 60,
+        timezone: "Asia/Kolkata",
+        settings: {
+          host_video: true,
+          participant_video: true,
+          join_before_host: true,
+          mute_upon_entry: false,
+          waiting_room: false,
+          email_notification: true
+        }
+      }, { headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" } });
+
+      const meeting = meetingRes.data;
+      return res.json({
+        success: true,
+        meeting: {
+          id: meeting.id,
+          topic: meeting.topic,
+          startTime: meeting.start_time,
+          duration: meeting.duration,
+          joinUrl: meeting.join_url,
+          password: meeting.password || ""
+        }
+      });
+    } catch (err: any) {
+      console.error("Zoom scheduling error:", err.response?.data || err.message);
+      return res.status(500).json({ success: false, error: err.response?.data?.message || err.message || "Failed to schedule Zoom meeting" });
+    }
+  });
+
+  // In production, the bundled server is at dist/server.cjs
     // We check multiple possible locations for the static assets
     const possiblePaths = [
       path.resolve(__dirname),
