@@ -3617,81 +3617,112 @@ function ResumeBank() {
     <div className="space-y-8 animate-in fade-in duration-500 text-left">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Resume Bank</h1>
-          <p className="text-white text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
+              <Database className="w-3.5 h-3.5 text-white" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tighter uppercase leading-none">Resume Bank</h1>
+          </div>
+          <p className="text-white/50 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl"
+          <button
+            className={cn(
+              "h-9 px-4 text-[9px] font-black uppercase tracking-[0.12em] rounded-xl border transition-all flex items-center gap-2",
+              selectedResumes.length > 0
+                ? "border-white/20 text-white/60 hover:border-white/40 hover:text-white bg-white/5"
+                : "border-white/10 text-white/20 cursor-not-allowed"
+            )}
             onClick={() => setSelectedResumes([])}
             disabled={selectedResumes.length === 0}
           >
             Clear Selection
-          </Button>
-          <Button
-            variant="primary"
-            className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl"
+          </button>
+          <button
+            className={cn(
+              "h-9 px-4 text-[9px] font-black uppercase tracking-[0.12em] rounded-xl transition-all flex items-center gap-2",
+              selectedResumes.length > 0
+                ? "bg-gradient-to-r from-brand to-violet-600 text-white shadow-lg shadow-brand/20 hover:opacity-90"
+                : "bg-white/10 text-white/30 cursor-not-allowed"
+            )}
             onClick={handleBulkReScreen}
             disabled={selectedResumes.length === 0}
           >
-            <Zap className="w-3.5 h-3.5" /> Re-screen Selected ({selectedResumes.length})
-          </Button>
+            <Zap className="w-3 h-3" /> Re-screen ({selectedResumes.length})
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
-          <div className="p-3 bg-brand/10 text-brand rounded-2xl">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest block">Total Candidates</span>
-            <span className="text-2xl font-black">{stats.totalUnique}</span>
-          </div>
-        </Card>
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
-          <div className="p-3 bg-cyan-50 text-cyan-600 rounded-2xl">
-            <Database className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest block">Screenings Run</span>
-            <span className="text-2xl font-black">{stats.totalScreenings}</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <Card className="group relative p-5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-brand/10 to-transparent rounded-bl-full -z-0" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-2.5 bg-gradient-to-br from-brand/20 to-brand/5 rounded-xl ring-1 ring-brand/20 shadow-lg shadow-brand/5">
+              <Users className="w-5 h-5 text-brand" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.15em] block">Total Candidates</span>
+              <span className="text-2xl font-black tracking-tight">{stats.totalUnique}</span>
+              <span className="text-[9px] text-white/40 ml-1.5 font-semibold">unique</span>
+            </div>
           </div>
         </Card>
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-            <Award className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest block">Avg. Best Fit</span>
-            <span className="text-2xl font-black">{stats.avgScore}%</span>
+        <Card className="group relative p-5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-cyan-500/10 to-transparent rounded-bl-full -z-0" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-500/5 rounded-xl ring-1 ring-cyan-500/20 shadow-lg shadow-cyan-500/5">
+              <Database className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.15em] block">Screenings Run</span>
+              <span className="text-2xl font-black tracking-tight">{stats.totalScreenings}</span>
+              <span className="text-[9px] text-white/40 ml-1.5 font-semibold">total</span>
+            </div>
           </div>
         </Card>
-        <Card className="p-6 glass-premium border border-white/10 shadow-sm flex items-center gap-4 rounded-2xl">
-          <div className="p-3 bg-violet-50 text-violet-650 rounded-2xl">
-            <Brain className="w-6 h-6" />
+        <Card className="group relative p-5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-bl-full -z-0" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-2.5 bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 rounded-xl ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/5">
+              <Award className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.15em] block">Avg. Best Fit</span>
+              <span className="text-2xl font-black tracking-tight">{stats.avgScore}%</span>
+              <span className="text-[9px] text-white/40 ml-1.5 font-semibold">score</span>
+            </div>
           </div>
-          <div>
-            <span className="text-[10px] font-black text-white uppercase tracking-widest block">Top Domain Track</span>
-            <span className="text-xs font-black truncate max-w-[150px] block mt-1 uppercase tracking-tight text-violet-750 bg-violet-50/50 px-2 py-0.5 rounded-lg border border-violet-100/50">{stats.topTag}</span>
+        </Card>
+        <Card className="group relative p-5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:border-violet-500/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-violet-500/10 to-transparent rounded-bl-full -z-0" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="p-2.5 bg-gradient-to-br from-violet-500/20 to-violet-500/5 rounded-xl ring-1 ring-violet-500/20 shadow-lg shadow-violet-500/5">
+              <Brain className="w-5 h-5 text-violet-400" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[9px] font-black text-white/60 uppercase tracking-[0.15em] block">Top Domain Track</span>
+              <span className="text-[11px] font-black truncate max-w-[140px] block mt-0.5 uppercase tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{stats.topTag}</span>
+            </div>
           </div>
         </Card>
       </div>
 
       <div className="grid grid-cols-12 gap-8 items-start">
-        <aside className="col-span-12 lg:col-span-3 space-y-6">
-          <Card className="p-6 glass-premium border border-white/10 shadow-sm rounded-2xl">
-            <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6">Filter Resumes</h3>
+        <aside className="col-span-12 lg:col-span-3 space-y-5">
+          <Card className="p-5 border border-white/10 rounded-2xl">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-1 h-5 bg-brand rounded-full" />
+              <h3 className="text-xs font-black text-white uppercase tracking-[0.15em]">Filter Resumes</h3>
+            </div>
             
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-white tracking-wider">Search</label>
+                <label className="text-[9px] font-black uppercase text-white/50 tracking-[0.15em]">Search</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 text-white absolute left-3 top-3.5" />
+                  <Search className="w-3.5 h-3.5 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    className="w-full text-xs font-bold pl-9 pr-4 py-2.5 transparent border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand text-white"
+                    className="w-full text-xs font-semibold pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/50 text-white placeholder:text-white/20 transition-all"
                     placeholder="Name, role, company..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -3701,7 +3732,17 @@ function ResumeBank() {
 
               {allUniqueTags.length > 0 && (
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase text-white tracking-wider">Filter by Tags</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[9px] font-black uppercase text-white/50 tracking-[0.15em]">Filter by Tags</label>
+                    {selectedTags.length > 0 && (
+                      <button
+                        onClick={() => setSelectedTags([])}
+                        className="text-[8px] font-black uppercase text-brand tracking-wider hover:text-brand-light transition-colors"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
                   <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                     {allUniqueTags.map(tag => {
                       const isSelected = selectedTags.includes(tag);
@@ -3716,10 +3757,10 @@ function ResumeBank() {
                             }
                           }}
                           className={cn(
-                            "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border",
+                            "px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-wider transition-all border",
                             isSelected
-                              ? "bg-brand-dark border-brand-dark text-white shadow-sm"
-                              : "transparent border-white/10 text-white hover:bg-transparent hover:border-slate-350"
+                              ? "bg-brand border-brand text-white shadow-lg shadow-brand/20"
+                              : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:border-white/20 hover:text-white"
                           )}
                         >
                           {tag}
@@ -3734,27 +3775,32 @@ function ResumeBank() {
         </aside>
 
         <div className="col-span-12 lg:col-span-9">
-          <Card className="overflow-hidden glass-premium border border-white/10 shadow-sm rounded-2xl">
+          <Card className="overflow-hidden border border-white/10 rounded-2xl">
             {loading ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="w-10 h-10 text-brand animate-spin" />
-                <p className="text-white text-xs font-bold uppercase tracking-widest animate-pulse">Loading Resume Bank...</p>
+                <div className="relative">
+                  <Loader2 className="w-10 h-10 text-brand animate-spin" />
+                  <div className="absolute inset-0 w-10 h-10 bg-brand/20 blur-xl rounded-full animate-pulse" />
+                </div>
+                <p className="text-white text-xs font-bold uppercase tracking-[0.15em] animate-pulse">Loading Resume Bank...</p>
               </div>
             ) : filteredResumes.length === 0 ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
-                <Database className="w-12 h-12 text-white animate-pulse" />
-                <h3 className="text-sm font-black text-white uppercase tracking-widest">No Resumes Found</h3>
-                <p className="text-white text-xs">Adjust your search parameters to find profiles.</p>
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <Database className="w-10 h-10 text-white/30" />
+                </div>
+                <h3 className="text-sm font-black text-white uppercase tracking-[0.15em]">No Resumes Found</h3>
+                <p className="text-white/50 text-xs font-medium">Adjust your search parameters to find profiles.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left min-w-[850px] table-fixed">
-                  <thead className="transparent border-b border-white/10">
-                    <tr>
-                      <th className="w-12 px-6 py-4">
+                <table className="w-full text-left min-w-[900px]">
+                  <thead>
+                    <tr className="border-b border-white/5">
+                      <th className="w-12 px-5 py-4">
                         <input
                           type="checkbox"
-                          className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer"
+                          className="w-4 h-4 rounded bg-white/5 border-white/20 text-brand focus:ring-brand/30 cursor-pointer"
                           checked={filteredResumes.length > 0 && filteredResumes.every(r => {
                             const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
                             return selectedResumes.includes(key);
@@ -3769,33 +3815,45 @@ function ResumeBank() {
                           }}
                         />
                       </th>
-                      <th className="w-1/4 px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Candidate</th>
-                      <th className="w-1/3 px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Tags & Career Track</th>
-                      <th className="w-1/5 px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Original Campaign</th>
-                      <th className="w-24 px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Screenings</th>
-                      <th className="w-32 px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Actions</th>
+                      <th className="px-5 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Candidate</th>
+                      <th className="px-5 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Tags & Career Track</th>
+                      <th className="px-5 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Campaign</th>
+                      <th className="px-5 py-4 text-center text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Score</th>
+                      <th className="px-5 py-4 text-right text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-white/5">
                     {filteredResumes.map(candidate => {
                       const candKey = candidate.resumeHash || `${(candidate.fullName || '').toLowerCase()}_${(candidate.email || '').toLowerCase()}`;
                       const isSelected = selectedResumes.includes(candKey);
+
+                      const avatarGradients = [
+                        'from-brand to-violet-500',
+                        'from-cyan-500 to-blue-500',
+                        'from-emerald-500 to-teal-500',
+                        'from-amber-500 to-orange-500',
+                        'from-rose-500 to-pink-500',
+                        'from-fuchsia-500 to-purple-500',
+                      ];
+                      const avatarGrad = avatarGradients[(candidate.fullName?.length || 0) % avatarGradients.length];
+                      const scoreColor = candidate.bestScore >= 80 ? 'text-emerald-400' : candidate.bestScore >= 60 ? 'text-amber-400' : 'text-rose-400';
+                      const scoreBarColor = candidate.bestScore >= 80 ? 'bg-emerald-500' : candidate.bestScore >= 60 ? 'bg-amber-500' : 'bg-rose-500';
                       
                       return (
                         <tr
                           key={candidate.id}
                           className={cn(
-                            "transition-colors hover:transparent/50 cursor-pointer",
-                            isSelected && "bg-brand/10"
+                            "transition-all duration-200 cursor-pointer",
+                            isSelected ? "bg-brand/5" : "hover:bg-white/[0.03]"
                           )}
                           onClick={() => {
                             if (candidate.id) navigate(`/candidates/${candidate.id}`);
                           }}
                         >
-                          <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
-                              className="w-4 h-4 rounded text-brand focus:ring-brand border-white/20 cursor-pointer"
+                              className="w-4 h-4 rounded bg-white/5 border-white/20 text-brand focus:ring-brand/30 cursor-pointer"
                               checked={isSelected}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -3806,62 +3864,80 @@ function ResumeBank() {
                               }}
                             />
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-5 py-3.5">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-transparent border border-white/10 flex items-center justify-center font-black text-white text-xs shrink-0">
+                              <div className={cn(
+                                "w-9 h-9 rounded-xl bg-gradient-to-br shrink-0 flex items-center justify-center font-black text-white text-sm shadow-lg",
+                                avatarGrad
+                              )}>
                                 {candidate.fullName?.charAt(0) || '?'}
                               </div>
                               <div className="min-w-0">
-                                <h4 className="text-xs font-extrabold text-white truncate">{candidate.fullName}</h4>
-                                <p className="text-[10px] text-white font-bold truncate">{candidate.email}</p>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-sm font-bold text-white truncate max-w-[160px]">{candidate.fullName}</h4>
+                                  {candidate.screeningsCount > 1 && (
+                                    <span className="text-[7px] font-black bg-white/10 text-white/60 px-1.5 py-0.5 rounded uppercase tracking-wider">{candidate.screeningsCount}x</span>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-white/40 font-medium truncate">{candidate.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-5 py-3.5">
                             <div className="space-y-1.5">
-                              <p className="text-[10px] text-white font-black uppercase tracking-wide truncate">
-                                {candidate.currentRole} {candidate.currentCompany ? `@ ${candidate.currentCompany}` : ''}
+                              <p className="text-[10px] text-white/60 font-semibold truncate max-w-[220px]">
+                                {candidate.currentRole || 'No role listed'}
+                                {candidate.currentCompany && (
+                                  <span className="text-white/30"> @ {candidate.currentCompany}</span>
+                                )}
                               </p>
-                              <div className="flex flex-wrap gap-1 max-h-12 overflow-hidden">
-                                {candidate.profileTags?.map((tag: string, i: number) => (
-                                  <span key={i} className="px-1.5 py-0.5 bg-violet-50 text-violet-600 rounded-md border border-violet-100/50 text-[8px] font-bold tracking-tight">
+                              <div className="flex flex-wrap gap-1 max-h-[28px] overflow-hidden">
+                                {candidate.profileTags?.slice(0, 3).map((tag: string, i: number) => (
+                                  <span key={i} className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded-md text-[7px] font-bold text-white/50 tracking-tight uppercase">
                                     {tag}
                                   </span>
                                 ))}
+                                {(candidate.profileTags?.length || 0) > 3 && (
+                                  <span className="px-1.5 py-0.5 text-[7px] font-bold text-brand/60">+{candidate.profileTags!.length - 3}</span>
+                                )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <p className="text-[10px] text-white font-extrabold truncate">
-                              {getJobTitle(candidate.jobId)}
-                            </p>
-                            <p className="text-[8px] text-white mt-0.5 uppercase tracking-widest font-black">
-                              {formatDate(candidate.createdAt)}
-                            </p>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="inline-flex flex-col items-center">
-                              <span className="text-[10px] font-black text-white bg-transparent border border-white/10/50 px-2 py-0.5 rounded-full leading-none mb-1">
-                                {candidate.screeningsCount}x
-                              </span>
-                              <span className={cn(
-                                "text-[9px] font-black leading-none uppercase",
-                                candidate.bestScore >= 80 ? "text-green-600" :
-                                candidate.bestScore >= 60 ? "text-amber-600" : "text-red-600"
-                              )}>
-                                Best: {candidate.bestScore}%
-                              </span>
+                          <td className="px-5 py-3.5">
+                            <div className="space-y-0.5">
+                              <p className="text-[10px] text-white font-semibold truncate max-w-[140px]">
+                                {getJobTitle(candidate.jobId)}
+                              </p>
+                              <p className="text-[8px] text-white/30 font-medium">
+                                {formatDate(candidate.createdAt)}
+                              </p>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 px-2 text-[8px] font-black uppercase tracking-widest text-white hover:text-brand hover:bg-brand/10 border border-white/10 hover:border-brand/10 flex items-center gap-1.5 ml-auto"
-                              onClick={() => handleSingleReScreen(candidate)}
-                            >
-                              <Zap className="w-3 h-3 text-brand fill-brand/20" /> Re-Screen
-                            </Button>
+                          <td className="px-5 py-3.5">
+                            <div className="flex flex-col items-center gap-1.5">
+                              <span className={cn(
+                                "text-sm font-black tracking-tight",
+                                scoreColor
+                              )}>
+                                {candidate.bestScore}%
+                              </span>
+                              <div className="w-full max-w-[60px] h-1 bg-white/10 rounded-full overflow-hidden">
+                                <div
+                                  className={cn("h-full rounded-full transition-all duration-500", scoreBarColor)}
+                                  style={{ width: `${candidate.bestScore}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleSingleReScreen(candidate)}
+                                className="h-7 px-2.5 bg-white/5 hover:bg-brand/20 border border-white/10 hover:border-brand/30 rounded-lg text-[7px] font-black uppercase tracking-wider text-white/50 hover:text-brand transition-all flex items-center gap-1"
+                              >
+                                <Zap className="w-2.5 h-2.5" /> Re-Screen
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -3883,67 +3959,75 @@ function ResumeBank() {
       >
         {screeningInProgress ? (
           <div className="p-6 space-y-6 text-center">
-            <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full -rotate-90">
-                <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-white" />
-                <circle 
-                  cx="40" cy="40" r="36" 
-                  stroke="currentColor" strokeWidth="4" 
-                  strokeDasharray={226.2} 
-                  strokeDashoffset={226.2 - (screeningProgress / 100) * 226.2} 
-                  strokeLinecap="round" 
-                  fill="transparent" 
+                <circle cx="48" cy="48" r="44" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-white/10" />
+                <circle
+                  cx="48" cy="48" r="44"
+                  stroke="currentColor" strokeWidth="3"
+                  strokeDasharray={276.5}
+                  strokeDashoffset={276.5 - (screeningProgress / 100) * 276.5}
+                  strokeLinecap="round"
+                  fill="transparent"
                   className="text-brand"
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(99,102,241,0.5))' }}
                 />
               </svg>
-              <div className="w-14 h-14 bg-brand/10 rounded-2xl flex flex-col items-center justify-center shadow-inner">
-                <Loader2 className="w-6 h-6 animate-spin text-brand" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-lg font-black text-brand">{screeningProgress}%</span>
               </div>
             </div>
             
             <div className="space-y-1">
-              <h4 className="text-sm font-black text-white uppercase tracking-widest">Analyzing Candidate Files</h4>
-              <p className="text-xs text-white">Executing LLM scoring engine against target job profile.</p>
+              <h4 className="text-sm font-black text-white uppercase tracking-[0.1em]">Analyzing Candidate Files</h4>
+              <p className="text-xs text-white/50 font-medium">Executing LLM scoring engine against target job profile.</p>
             </div>
 
-            <div className="transparent rounded-xl p-4 font-mono text-[9px] text-white h-40 overflow-y-auto border border-[#161b22] space-y-1 text-left">
+            <div className="bg-white/[0.03] rounded-xl p-4 font-mono text-[9px] text-white h-40 overflow-y-auto border border-white/10 space-y-1 text-left">
               {screeningLogs.map((log, i) => (
-                <div key={i} className={cn(log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-slate-350")}>
-                  <span className="text-cyan-400">➜</span> {log}
+                <div key={i} className={cn(
+                  "leading-relaxed",
+                  log.includes('✅') ? "text-emerald-400" : log.includes('❌') ? "text-rose-400" : "text-white/50"
+                )}>
+                  <span className="text-brand/60">$</span> {log}
                 </div>
               ))}
             </div>
           </div>
         ) : (
           <div className="p-6 space-y-6 text-left">
-            <div className="transparent border border-slate-150 p-4 rounded-xl space-y-1 text-left">
-              <h5 className="text-[10px] font-black uppercase text-slate-450 tracking-wider">Candidate Scope</h5>
-              <p className="text-xs font-bold text-white">
-                {reScreeningCandidate ? `Re-screening candidate: ${reScreeningCandidate.fullName}` : `Bulk screening: ${selectedResumes.length} selected resumes`}
-              </p>
-              <p className="text-[10px] text-brand font-semibold mt-1">
-                Cost: {reScreeningCandidate ? '1 credit' : `${selectedResumes.length} credits`}
-              </p>
+            <div className="bg-white/[0.03] border border-white/10 p-4 rounded-xl space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-brand rounded-full" />
+                <h5 className="text-[9px] font-black uppercase text-white/50 tracking-[0.15em]">Candidate Scope</h5>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-white">
+                  {reScreeningCandidate ? `Re-screening: ${reScreeningCandidate.fullName}` : `Bulk screening: ${selectedResumes.length} selected`}
+                </p>
+                <span className="text-[10px] font-black text-brand bg-brand/10 px-2.5 py-1 rounded-lg border border-brand/20">
+                  {reScreeningCandidate ? '1 credit' : `${selectedResumes.length} credits`}
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-2 text-left">
-              <label className="text-[9px] font-black uppercase text-white tracking-wider block">Target Job Position</label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-brand rounded-full" />
+                <label className="text-[9px] font-black uppercase text-white/50 tracking-[0.15em]">Target Job Position</label>
+              </div>
               {jobs.length === 0 ? (
-                <div className="p-4 border border-white/10 rounded-xl transparent text-center">
-                  <p className="text-xs text-white font-medium">No active jobs. Please post a job first.</p>
-                  <Button
-                    variant="outline"
-                    className="mt-3 text-[10px] uppercase font-bold tracking-wider"
-                    onClick={() => {
-                      setIsReScreenModalOpen(false);
-                      navigate('/jobs/new');
-                    }}
+                <div className="p-5 border border-white/10 rounded-xl bg-white/[0.02] text-center space-y-3">
+                  <p className="text-xs text-white/50 font-medium">No active jobs. Post a job first.</p>
+                  <button
+                    onClick={() => { setIsReScreenModalOpen(false); navigate('/jobs/new'); }}
+                    className="px-4 py-2 bg-brand hover:bg-brand/90 text-white text-[9px] font-black uppercase tracking-wider rounded-lg transition-all"
                   >
                     Post New Job
-                  </Button>
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                   {jobs.map(job => {
                     const alreadyScreened = reScreeningCandidate?.versions?.some((v: any) => v.jobId === job.id);
                     return (
@@ -3955,28 +4039,45 @@ function ResumeBank() {
                         className={cn(
                           "w-full text-left p-3.5 border rounded-xl flex items-center justify-between transition-all group",
                           selectedJobId === job.id
-                            ? "border-brand-dark bg-brand/10 shadow-sm"
+                            ? "border-brand/50 bg-brand/[0.08] shadow-[0_0_15px_rgba(99,102,241,0.1)]"
                             : alreadyScreened
-                              ? "border-white/10 transparent/60 opacity-60 cursor-not-allowed"
-                              : "border-white/10 hover:border-brand-light glass-premium hover:transparent/20"
+                              ? "border-white/5 bg-white/[0.01] opacity-50 cursor-not-allowed"
+                              : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
                         )}
                       >
-                        <div className="min-w-0">
-                          <h4 className={cn("text-xs font-bold truncate", selectedJobId === job.id ? "text-brand" : "text-white")}>
-                            {job.title}
-                          </h4>
-                          <p className="text-[9px] text-white font-semibold uppercase tracking-wider mt-0.5">{job.requirements?.role_type || 'General'}</p>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0",
+                            selectedJobId === job.id
+                              ? "bg-brand/20 text-brand"
+                              : "bg-white/5 text-white/30"
+                          )}>
+                            {job.title?.charAt(0) || 'J'}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className={cn(
+                              "text-xs font-bold truncate",
+                              selectedJobId === job.id ? "text-brand" : "text-white"
+                            )}>
+                              {job.title}
+                            </h4>
+                            <p className="text-[8px] text-white/30 font-medium uppercase tracking-wider mt-0.5">
+                              {job.requirements?.role_type || 'General Position'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           {alreadyScreened && (
-                            <span className="text-[8px] font-black bg-transparent text-white border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider">Already Screened</span>
+                            <span className="text-[7px] font-black bg-white/5 text-white/30 border border-white/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              Already Screened
+                            </span>
                           )}
                           {!alreadyScreened && (
                             <div className={cn(
-                              "w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center shrink-0",
-                              selectedJobId === job.id ? "border-brand-dark bg-brand-dark" : "border-white/10 group-hover:border-brand-light"
+                              "w-5 h-5 rounded-full border-2 transition-all flex items-center justify-center",
+                              selectedJobId === job.id ? "border-brand bg-brand" : "border-white/20 group-hover:border-white/30"
                             )}>
-                              {selectedJobId === job.id && <div className="w-1.5 h-1.5 glass-premium rounded-full" />}
+                              {selectedJobId === job.id && <div className="w-2 h-2 bg-white rounded-full" />}
                             </div>
                           )}
                         </div>
@@ -3988,21 +4089,19 @@ function ResumeBank() {
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
-              <Button
-                variant="outline"
-                className="text-xs uppercase tracking-wider h-9 px-4 rounded-xl"
+              <button
+                className="px-5 py-2.5 text-[9px] font-black uppercase tracking-wider text-white/50 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-all"
                 onClick={() => setIsReScreenModalOpen(false)}
               >
                 Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="text-xs uppercase tracking-wider flex items-center gap-2 h-9 px-4 rounded-xl"
+              </button>
+              <button
+                className="px-5 py-2.5 text-[9px] font-black uppercase tracking-wider text-white bg-gradient-to-r from-brand to-violet-600 hover:opacity-90 rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 shadow-lg shadow-brand/20"
                 onClick={executeReScreening}
                 disabled={!selectedJobId}
               >
-                <Play className="w-3.5 h-3.5" /> Execute Screening
-              </Button>
+                <Play className="w-3 h-3" /> Execute Screening
+              </button>
             </div>
           </div>
         )}
@@ -14882,146 +14981,163 @@ function ScreeningReports() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="border-b border-white/10 pb-6">
-        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Screening Reports</h1>
-        <p className="text-xs text-white font-medium">Resume match scores and AI assessment results across all job pipelines.</p>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
+            <BarChart3 className="w-3.5 h-3.5 text-white" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">Screening Reports</h1>
+        </div>
+        <p className="text-white/50 text-xs font-medium">Resume match scores and AI assessment results across all job pipelines.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { label: 'Total Screened', value: stats.total, color: 'text-brand' },
-          { label: 'Average Match', value: `${stats.avgScore}%`, color: 'text-blue-500' },
-          { label: 'Top Score', value: `${stats.topScore}%`, color: 'text-green-500' },
-          { label: 'Below Threshold', value: stats.failed, color: 'text-red-500' },
-        ].map(s => (
-          <Card key={s.label} className="p-6 border-white/10 rounded-2xl flex items-center gap-4">
-            <div>
-              <p className="text-2xl font-black mb-1">{s.value}</p>
-              <p className="text-[10px] font-black text-white uppercase tracking-widest">{s.label}</p>
+          { label: 'Total Screened', value: stats.total, icon: 'Users', gradient: 'from-brand to-violet-500', color: 'text-brand' },
+          { label: 'Average Match', value: `${stats.avgScore}%`, icon: 'Target', gradient: 'from-blue-500 to-cyan-500', color: 'text-blue-400' },
+          { label: 'Top Score', value: `${stats.topScore}%`, icon: 'Award', gradient: 'from-emerald-500 to-teal-500', color: 'text-emerald-400' },
+          { label: 'Below Threshold', value: stats.failed, icon: 'AlertTriangle', gradient: 'from-rose-500 to-pink-500', color: 'text-rose-400' },
+        ].map((s, idx) => (
+          <Card key={s.label} className="group relative p-5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:border-white/20">
+            <div className={cn(
+              "absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl to-transparent rounded-bl-full -z-0 opacity-40 group-hover:opacity-60 transition-opacity",
+              s.gradient
+            )} />
+            <div className="relative z-10">
+              <p className={cn(
+                "text-3xl font-black tracking-tight mb-1",
+                s.color
+              )}>{s.value}</p>
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">{s.label}</p>
             </div>
           </Card>
         ))}
       </div>
 
-      <Card className="overflow-hidden border-white/10 rounded-2xl">
+      <Card className="overflow-hidden border border-white/10 rounded-2xl">
         {loading ? (
-          <div className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" /></div>
+          <div className="p-16 text-center">
+            <div className="relative inline-flex">
+              <Loader2 className="w-8 h-8 animate-spin text-brand" />
+              <div className="absolute inset-0 w-8 h-8 bg-brand/20 blur-xl rounded-full animate-pulse" />
+            </div>
+          </div>
         ) : candidates.length === 0 ? (
-          <div className="p-12 text-center">
-            <BarChart3 className="w-12 h-12 text-white mx-auto mb-3 opacity-40" />
-            <h3 className="text-sm font-black text-white uppercase tracking-widest">No Screening Data</h3>
+          <div className="p-16 text-center space-y-3">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/10 inline-flex">
+              <BarChart3 className="w-10 h-10 text-white/30" />
+            </div>
+            <h3 className="text-sm font-black text-white uppercase tracking-[0.15em]">No Screening Data</h3>
+            <p className="text-xs text-white/40 font-medium">Screen candidates to see results here.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[700px]">
-              <thead className="transparent border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Candidate</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-white uppercase tracking-widest">Job</th>
-                  <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Score</th>
-                  <th className="px-6 py-4 text-center text-[10px] font-black text-white uppercase tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Invite</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-black text-white uppercase tracking-widest">Report</th>
+            <table className="w-full text-left min-w-[800px]">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="px-5 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Candidate</th>
+                  <th className="px-5 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Job</th>
+                  <th className="px-5 py-4 text-center text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Score</th>
+                  <th className="px-5 py-4 text-center text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Status</th>
+                  <th className="px-5 py-4 text-right text-[9px] font-black text-white/40 uppercase tracking-[0.15em]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {candidates.sort((a, b) => (b.scorecard?.compositeScore || 0) - (a.scorecard?.compositeScore || 0)).map(c => (
-                  <tr key={c.id} className="hover:bg-white/5 transition-colors cursor-pointer" onClick={() => navigate(`/candidates/${c.id}`)}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center font-black text-white text-xs">
-                          {c.fullName.charAt(0)}
+                {candidates.sort((a, b) => (b.scorecard?.compositeScore || 0) - (a.scorecard?.compositeScore || 0)).map(c => {
+                  const score = c.scorecard?.compositeScore || 0;
+                  const scoreColor = score >= 80 ? 'text-emerald-400' : score >= 40 ? 'text-amber-400' : 'text-rose-400';
+                  const scoreBarColor = score >= 80 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-rose-500';
+                  const statusColors: Record<string, string> = {
+                    processed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                    shortlisted: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                    rejected: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+                  };
+                  return (
+                    <tr key={c.id} className="group transition-all duration-200 hover:bg-white/[0.03] cursor-pointer" onClick={() => navigate(`/candidates/${c.id}`)}>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm shadow-lg bg-gradient-to-br",
+                            score >= 80 ? 'from-emerald-500 to-teal-600' :
+                            score >= 40 ? 'from-amber-500 to-orange-600' :
+                            'from-rose-500 to-pink-600'
+                          )}>
+                            {c.fullName.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-white truncate max-w-[160px]">{c.fullName}</p>
+                            <p className="text-[10px] text-white/40 font-medium truncate">{c.currentRole || 'Applicant'}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">{c.fullName}</p>
-                          <p className="text-[10px] text-white">{c.currentRole}</p>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="text-xs text-white/60 font-semibold truncate max-w-[140px]">{jobMap[c.jobId] || 'Unknown'}</div>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <span className={cn("text-sm font-black tracking-tight", scoreColor)}>{score}%</span>
+                          <div className="w-full max-w-[56px] h-1 bg-white/10 rounded-full overflow-hidden">
+                            <div className={cn("h-full rounded-full transition-all duration-500", scoreBarColor)} style={{ width: `${score}%` }} />
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-white font-medium">{jobMap[c.jobId] || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={cn(
-                        "text-xs font-black",
-                        (c.scorecard?.compositeScore || 0) >= 80 ? 'text-green-500' :
-                        (c.scorecard?.compositeScore || 0) >= 40 ? 'text-amber-500' : 'text-red-500'
-                      )}>
-                        {c.scorecard?.compositeScore || 0}%
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={cn(
-                        "text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider",
-                        c.status === 'processed' ? 'bg-green-50 text-green-600 border border-green-100' :
-                        c.status === 'shortlisted' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                        'bg-red-50 text-red-600 border border-red-100'
-                      )}>
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[9px] font-black uppercase tracking-widest border border-brand/30 bg-brand/10 hover:bg-brand/20"
-                        disabled={sendingInvite}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveInviteCandidate(c);
-                          const emailVal = c.email || c.parsedData?.email || c.parsedData?.contactInfo?.email || extractEmailFromText(c.resumeText || '') || '';
-                          setInviteEmailInput(emailVal);
-                          setShowInviteModal(true);
-                        }}
-                      >
-                        {sendingInvite && activeInviteCandidate?.id === c.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                        ) : (
-                          <Send className="w-3 h-3 mr-1" />
-                        )}
-                        {sendingInvite && activeInviteCandidate?.id === c.id ? 'Sending...' : 'Re-Invite'}
-                      </Button>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-[9px] font-black uppercase tracking-widest border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-white"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            try {
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={cn(
+                          "text-[8px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider border",
+                          statusColors[c.status] || 'bg-white/5 text-white/40 border-white/10'
+                        )}>
+                          {c.status || 'pending'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            className="h-7 px-2.5 bg-brand/10 hover:bg-brand/20 border border-brand/20 rounded-lg text-[7px] font-black uppercase tracking-wider text-brand transition-all flex items-center gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveInviteCandidate(c);
+                              const emailVal = c.email || extractEmailFromText(c.resumeText || '') || '';
+                              setInviteEmailInput(emailVal);
+                              setShowInviteModal(true);
+                            }}
+                          >
+                            <Send className="w-2.5 h-2.5" /> Invite
+                          </button>
+                          <button
+                            className="h-7 px-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg text-[7px] font-black uppercase tracking-wider text-amber-400 transition-all flex items-center gap-1"
+                            onClick={async (e) => {
+                              e.stopPropagation();
                               await updateDoc(doc(db, 'candidates', c.id), { status: 'shortlisted' });
                               notify('Shortlisted!', 'success');
-                            } catch (err) {
-                              handleFirestoreError(err, OperationType.UPDATE, `candidates/${c.id}`);
-                            }
-                          }}
-                        >
-                          <Star className="w-3 h-3 mr-1" /> Shortlist
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-[9px] font-black uppercase tracking-widest bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const ok = await confirm(`Delete screening report for ${c.fullName}?`);
-                            if (!ok) return;
-                            try {
+                            }}
+                          >
+                            <Star className="w-2.5 h-2.5" /> Shortlist
+                          </button>
+                          <button
+                            className="h-7 px-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[7px] font-black uppercase tracking-wider text-white/50 hover:text-white transition-all flex items-center gap-1"
+                            onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c.id}`); }}
+                          >
+                            <FileText className="w-2.5 h-2.5" /> View
+                          </button>
+                          <button
+                            className="h-7 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-[7px] font-black uppercase tracking-wider text-rose-400 transition-all flex items-center gap-1"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const ok = await confirm(`Delete screening report for ${c.fullName}?`);
+                              if (!ok) return;
                               await deleteDoc(doc(db, 'candidates', c.id));
                               notify('Report deleted.', 'success');
-                            } catch (err) {
-                              handleFirestoreError(err, OperationType.DELETE, `candidates/${c.id}`);
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-3 h-3 mr-1" /> Delete
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-[9px] font-black uppercase tracking-widest" onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c.id}`); }}>
-                          <FileText className="w-3 h-3 mr-1" /> View
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                            }}
+                          >
+                            <Trash2 className="w-2.5 h-2.5" /> Delete
+                          </button>
+                        </div>
+                        <div className="group-hover:hidden flex items-center justify-end gap-1">
+                          <span className="text-[8px] text-white/20 font-medium">Click to view</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -15038,84 +15154,80 @@ function ScreeningReports() {
       >
         {activeInviteCandidate && (
           <div className="space-y-6">
-            <div className="p-4 transparent border border-white/10 rounded-2xl text-left space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase text-white tracking-wider">Candidate Profile</span>
+            <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-brand rounded-full" />
+                  <span className="text-[9px] font-black uppercase text-white/50 tracking-[0.15em]">Candidate Profile</span>
+                </div>
                 {inviteEmailInput ? (
-                  <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                    <Check className="w-2.5 h-2.5" /> Email Extracted
+                  <span className="text-[8px] font-bold px-2 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                    <Check className="w-2.5 h-2.5" /> Email Found
                   </span>
                 ) : (
-                  <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">
+                  <span className="text-[8px] font-bold px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-full border border-amber-500/20">
                     Missing Email
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-extrabold text-white">{activeInviteCandidate.fullName}</h4>
-                <p className="text-xs text-white font-medium">{activeInviteCandidate.currentRole || 'Applicant'} {activeInviteCandidate.currentCompany ? `at ${activeInviteCandidate.currentCompany}` : ''}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center font-black text-white shadow-lg">
+                  {activeInviteCandidate.fullName.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-white">{activeInviteCandidate.fullName}</h4>
+                  <p className="text-[11px] text-white/40 font-medium">
+                    {activeInviteCandidate.currentRole || 'Applicant'}
+                    {activeInviteCandidate.currentCompany ? ` at ${activeInviteCandidate.currentCompany}` : ''}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-5">
-              <div className="p-4 border border-white/10/60 rounded-2xl text-left space-y-4 hover:border-brand/10 transition-all shadow-sm glass-premium">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-brand/10 text-white rounded-xl mt-0.5">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <h5 className="text-xs font-black text-white uppercase tracking-wider">Option 1: Send Email Invite</h5>
-                    <p className="text-[11px] text-white font-semibold leading-normal">Send a premium, responsive invitation email directly to the applicant's inbox.</p>
-                  </div>
+            <div className="p-5 border border-white/10 rounded-xl bg-white/[0.02] space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-brand/10 rounded-xl">
+                  <Mail className="w-4 h-4 text-brand" />
                 </div>
-
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase text-white tracking-wider block">Recipient Email Address</label>
-                    <input
-                      type="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
-                      placeholder="Enter candidate email address"
-                      value={inviteEmailInput}
-                      onChange={(e) => setInviteEmailInput(e.target.value)}
-                    />
-                  </div>
+                <div className="space-y-0.5">
+                  <h5 className="text-xs font-black text-white uppercase tracking-[0.1em]">Send Email Invite</h5>
+                  <p className="text-[10px] text-white/40 font-medium leading-relaxed">
+                    Send an interview invitation to the candidate's email inbox.
+                  </p>
                 </div>
-
-                <Button
-                  variant="primary"
-                  type="button"
-                  className="w-full h-11 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] text-[10px] uppercase font-black tracking-widest text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/10 disabled:opacity-50"
-                  disabled={!inviteEmailInput.trim() || sendingInvite}
-                  onClick={() => handleSendInvite(inviteEmailInput)}
-                >
-                  {sendingInvite ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Sending Invitation...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5" />
-                      Send Invite via Email
-                    </>
-                  )}
-                </Button>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[8px] font-black uppercase text-white/40 tracking-[0.15em] block">Recipient Email</label>
+                <input
+                  type="email"
+                  className="w-full text-xs font-semibold px-3.5 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/50 text-white placeholder:text-white/20 transition-all"
+                  placeholder="Enter candidate email"
+                  value={inviteEmailInput}
+                  onChange={(e) => setInviteEmailInput(e.target.value)}
+                />
+              </div>
+
+              <button
+                className="w-full h-11 bg-gradient-to-r from-brand to-violet-600 hover:opacity-90 text-[9px] uppercase font-black tracking-[0.12em] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-brand/20 disabled:opacity-50 transition-all"
+                disabled={!inviteEmailInput.trim() || sendingInvite}
+                onClick={() => handleSendInvite(inviteEmailInput)}
+              >
+                {sendingInvite ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Sending Invitation...</>
+                ) : (
+                  <><Send className="w-3.5 h-3.5" /> Send Invite via Email</>
+                )}
+              </button>
             </div>
 
             <div className="pt-4 border-t border-white/10 flex justify-end">
-              <Button
-                variant="outline"
-                type="button"
-                className="px-6 h-10 text-[10px] uppercase font-black tracking-widest text-white border-white/10 rounded-xl"
-                onClick={() => {
-                  setShowInviteModal(false);
-                  setActiveInviteCandidate(null);
-                }}
+              <button
+                className="px-6 h-10 text-[9px] font-black uppercase tracking-[0.12em] text-white/50 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-all"
+                onClick={() => { setShowInviteModal(false); setActiveInviteCandidate(null); }}
               >
                 Close
-              </Button>
+              </button>
             </div>
           </div>
         )}
