@@ -1,0 +1,5 @@
+pipecat-ai[daily,openai,riva,silero]
+python-dotenv==1.1.0
+noaa-sdk==1.2.1
+loguru==0.7.3
+aiohttp>=3.9.0

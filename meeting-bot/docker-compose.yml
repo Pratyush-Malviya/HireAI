@@ -11,9 +11,20 @@ services:
       - .:/usr/src/app
       - ./assets/screenshots:/usr/src/app/assets/screenshots
       - ./debug-videos:/usr/src/app/debug-videos
-      - /usr/src/app/node_modules  # Persist node_modules
+      - /usr/src/app/node_modules
     command: ["/bin/bash", "./start.sh"]
 
+  pipecat-bot:
+    build:
+      context: ./pipecat-bot
+      dockerfile: Dockerfile
+    env_file:
+      - ./pipecat-bot/.env
+    environment:
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY}
+      - DAILY_API_KEY=${DAILY_API_KEY}
+    ports:
+      - "3001:3001"
 
 volumes:
   cache:
