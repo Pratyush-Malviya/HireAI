@@ -3324,61 +3324,6 @@ async function startServer() {
     return res.json({ success: result.sent, previewUrl: result.previewUrl, method: result.method, message: result.sent ? "Feedback email sent." : "Failed to send email." });
   });
 
-  // ── POST /api/zoom/schedule-interview ────────────────────────────
-  app.post("/api/zoom/schedule-interview", async (req, res) => {
-    const { candidateEmail, candidateName, jobTitle, zoomAccountId, zoomClientId, zoomClientSecret } = req.body;
-    if (!zoomAccountId || !zoomClientId || !zoomClientSecret) {
-      return res.status(400).json({ success: false, error: "Zoom credentials required (accountId, clientId, clientSecret)" });
-    }
-
-    try {
-      // Get access token via Server-to-Server OAuth
-      const tokenRes = await axios.post("https://zoom.us/oauth/token", new URLSearchParams({ grant_type: "account_credentials", account_id: zoomAccountId }), {
-        auth: { username: zoomClientId, password: zoomClientSecret },
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-      });
-      const accessToken = tokenRes.data.access_token;
-
-      // Schedule meeting for tomorrow at 11:00 AM IST
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(11, 0, 0, 0);
-      const startTime = tomorrow.toISOString().replace(/\.\d{3}Z$/, "Z");
-
-      const meetingRes = await axios.post("https://api.zoom.us/v2/users/me/meetings", {
-        topic: `${jobTitle || "Technical"} Interview - ${candidateName || "Candidate"}`,
-        type: 2,
-        start_time: startTime,
-        duration: 60,
-        timezone: "Asia/Kolkata",
-        settings: {
-          host_video: true,
-          participant_video: true,
-          join_before_host: true,
-          mute_upon_entry: false,
-          waiting_room: false,
-          email_notification: true
-        }
-      }, { headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" } });
-
-      const meeting = meetingRes.data;
-      return res.json({
-        success: true,
-        meeting: {
-          id: meeting.id,
-          topic: meeting.topic,
-          startTime: meeting.start_time,
-          duration: meeting.duration,
-          joinUrl: meeting.join_url,
-          password: meeting.password || ""
-        }
-      });
-    } catch (err: any) {
-      console.error("Zoom scheduling error:", err.response?.data || err.message);
-      return res.status(500).json({ success: false, error: err.response?.data?.message || err.message || "Failed to schedule Zoom meeting" });
-    }
-  });
-
   // In production, the bundled server is at dist/server.cjs
     // We check multiple possible locations for the static assets
     const possiblePaths = [

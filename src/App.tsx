@@ -7059,9 +7059,6 @@ function CandidateDetail() {
   const [feedbackDecision, setFeedbackDecision] = useState<'selected' | 'rejected'>('selected');
   const [feedbackText, setFeedbackText] = useState('');
   const [sendingFeedback, setSendingFeedback] = useState(false);
-  const [schedulingZoom, setSchedulingZoom] = useState(false);
-  const [zoomResult, setZoomResult] = useState<{joinUrl: string; password: string} | null>(null);
-
   // Offer Letter Generation OS States
   const [offerSalary, setOfferSalary] = useState(1200000);
   const [offerCurrency, setOfferCurrency] = useState('INR');
@@ -7861,47 +7858,9 @@ function CandidateDetail() {
             <Button
               variant="ghost"
               className="border border-emerald-400/30 bg-emerald-600/80 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-600/20 text-xs py-2 h-10 px-4"
-              onClick={() => { setFeedbackDecision('selected'); setFeedbackText(''); setZoomResult(null); setShowFeedbackModal(true); }}
+              onClick={() => { setFeedbackDecision('selected'); setFeedbackText(''); setShowFeedbackModal(true); }}
             >
               <Mail className="w-3.5 h-3.5 mr-2" /> Feedback
-            </Button>
-            <Button
-              variant="ghost"
-              className="border border-sky-400/30 bg-sky-600/80 hover:bg-sky-600 text-white shadow-sm shadow-sky-600/20 text-xs py-2 h-10 px-4"
-              onClick={async () => {
-                setSchedulingZoom(true);
-                setZoomResult(null);
-                try {
-                  const res = await fetch('/api/zoom/schedule-interview', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      candidateEmail: candidate.email,
-                      candidateName: candidate.fullName,
-                      jobTitle: job?.title || 'Technical',
-                      zoomAccountId: profile?.zoomAccountId || '',
-                      zoomClientId: profile?.zoomClientId || '',
-                      zoomClientSecret: profile?.zoomClientSecret || '',
-                    })
-                  });
-                  const data = await res.json();
-                  if (data.success) {
-                    setZoomResult(data.meeting);
-                    await updateDoc(doc(db, 'candidates', candidate.id), { zoomMeetingUrl: data.meeting.joinUrl, interviewStatus: 'invited' });
-                    notify('Zoom interview scheduled!', 'success');
-                  } else {
-                    notify(data.error || 'Failed to schedule Zoom meeting', 'error');
-                  }
-                } catch (err: any) {
-                  notify(err.message || 'Failed to schedule Zoom', 'error');
-                } finally {
-                  setSchedulingZoom(false);
-                }
-              }}
-              disabled={schedulingZoom}
-            >
-              {schedulingZoom ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" /> : <Video className="w-3.5 h-3.5 mr-2" />}
-              {schedulingZoom ? 'Scheduling...' : 'Schedule Zoom'}
             </Button>
           </div>
         </div>
