@@ -953,7 +953,11 @@ function InterviewRoom() {
       });
       
       notify(`Interview concluded automatically: ${reason}`, 'error');
-      speak(`The interview has been concluded automatically because of ${reason}.`);
+      speak(`The interview has been concluded automatically because of ${reason}.`, () => {
+        setTimeout(() => {
+          navigate(`/candidates/${candidate.id}`);
+        }, 2000);
+      });
     } catch (err) {
       console.error(err);
       notify('Error concluding interview automatically.', 'error');
@@ -1089,11 +1093,11 @@ function InterviewRoom() {
       const thinking = isThinkingRef.current;
       const listening = isListeningRef.current;
 
-      if (vol > 30 && (speaking || thinking || !listening)) {
+      if (vol > 60 && !speaking && !thinking && listening) {
         noiseTimeRef.current += 1;
         setNoiseStatus('noise_detected');
         
-        if (noiseTimeRef.current >= 3) {
+        if (noiseTimeRef.current >= 8) {
           noiseTimeRef.current = 0;
           setNoiseStatus('quiet');
           handleViolation('noise');
@@ -1653,8 +1657,8 @@ function InterviewRoom() {
           : `${aiResponse} Thank you.`;
         speak(stripInterviewTags(thankYouMessage), () => {
           setTimeout(() => {
-            window.close();
-          }, 1000);
+            navigate(`/candidates/${candidate.id}`);
+          }, 2000);
         });
 
         const [feedback, localEval] = await Promise.all([
@@ -1745,7 +1749,11 @@ function InterviewRoom() {
       });
       
       notify('Interview session forcibly concluded.', 'success');
-      speak("The interview has been ended. Thank you for your time.");
+      speak("The interview has been ended. Thank you for your time.", () => {
+        setTimeout(() => {
+          navigate(`/candidates/${candidate.id}`);
+        }, 2000);
+      });
     } catch (err) {
       console.error(err);
       notify('Error concluding interview.', 'error');
