@@ -373,6 +373,7 @@ export function LandingPage() {
             <span>© 2026 HireNow. All rights reserved.</span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
+            <a href="mailto:support@hirenow.com?subject=Platform Feedback" className="hover:text-brand transition-colors">Provide Feedback</a>
           </div>
         </div>
       </footer>

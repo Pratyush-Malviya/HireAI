@@ -10340,7 +10340,7 @@ function CandidateDetail() {
         </div>
       </Modal>
 
-      <footer className="border-t border-white/5 pt-6 mt-12 text-center">
+      <footer className="border-t border-white/5 pt-6 mt-12 text-center space-y-2">
         <p className="text-[10px] text-white/40 font-medium tracking-wide">
           Developed by{' '}
           <a
@@ -10350,6 +10350,14 @@ function CandidateDetail() {
             className="text-brand hover:text-white transition-colors"
           >
             Pratyush Malviya
+          </a>
+        </p>
+        <p className="text-[10px] text-white/40 font-medium tracking-wide">
+          <a
+            href="mailto:support@hirenow.com?subject=Platform Feedback"
+            className="hover:text-white transition-colors"
+          >
+            Provide Feedback
           </a>
         </p>
       </footer>
