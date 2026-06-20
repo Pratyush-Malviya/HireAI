@@ -271,5 +271,11 @@ service cloud.firestore {
       );
       allow write: if false; // Written by Cloud Functions
     }
+
+    // Feedbacks
+    match /feedbacks/{feedbackId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isSuperAdmin();
+    }
   }
 }

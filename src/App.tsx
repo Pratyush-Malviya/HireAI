@@ -45,6 +45,8 @@ import { SAHealthPage } from './components/superadmin/SAHealthPage';
 import { SALLMPage } from './components/superadmin/SALLMPage';
 import { SAWhiteLabelPage } from './components/superadmin/SAWhiteLabelPage';
 import { SAManualPage } from './components/superadmin/SAManualPage';
+import { FeedbackPage } from './components/FeedbackPage';
+import { SAFeedbackPage } from './components/superadmin/SAFeedbackPage';
 
 const ROLE_WEIGHTS = {
   'Technical / Engineering': { skillsMatch: 0.35, experienceFit: 0.25, education: 0.15, achievements: 0.20, culturalRoleFit: 0.05 },
@@ -15687,6 +15689,7 @@ export default function App() {
                       <Route path="/interview-reports" element={<InterviewReports />} />
                       <Route path="/org-admin" element={<OrgAdminPanel />} />
                       <Route path="/resume-bank" element={<ResumeBank />} />
+                      <Route path="/feedback" element={<FeedbackPage />} />
                       {/* Super Admin — nested routes with shared layout */}
                       <Route path="/admin" element={<SuperAdminLayout />}>
                         <Route index element={<Navigate to="/admin/overview" replace />} />
@@ -15697,6 +15700,7 @@ export default function App() {
                         <Route path="llm" element={<SALLMPage />} />
                         <Route path="white-label" element={<SAWhiteLabelPage />} />
                         <Route path="manual" element={<SAManualPage />} />
+                        <Route path="feedback" element={<SAFeedbackPage />} />
                       </Route>
                       <Route path="/pricing" element={<PricingPage />} />
                       <Route path="*" element={<Navigate to="/" replace />} />

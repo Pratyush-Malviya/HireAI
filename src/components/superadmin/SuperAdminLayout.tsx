@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ShieldCheck, LayoutGrid, Globe, CreditCard, Activity, Cpu, Palette, BookOpen, ChevronLeft, Loader2, Trash2 } from 'lucide-react';
+import { ShieldCheck, LayoutGrid, Globe, CreditCard, Activity, Cpu, Palette, BookOpen, ChevronLeft, Loader2, Trash2, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { useProfile, useNotification } from '../../lib/appContext';
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/admin/llm',           label: 'LLM Playground',  icon: Cpu },
   { to: '/admin/white-label',   label: 'White-Label',     icon: Palette },
   { to: '/admin/manual',        label: 'User Manual',     icon: BookOpen },
+  { to: '/admin/feedback',      label: 'User Feedback',   icon: MessageSquare },
 ];
 
 export function SuperAdminLayout() {
