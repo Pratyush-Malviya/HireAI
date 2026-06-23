@@ -3017,8 +3017,8 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
       <div className="flex h-screen transparent font-sans text-white selection:bg-brand/10 overflow-hidden relative">
         {/* Global Animated Background Effects */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <Particles className="absolute inset-0 opacity-40" quantity={80} color="#818cf8" size={0.6} />
-          <Meteors number={10} />
+          <Particles className="absolute inset-0 opacity-40" quantity={40} color="#818cf8" size={0.6} />
+          <Meteors number={6} />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-dark/20 via-slate-950 to-[#030712] opacity-80" />
         </div>
 
@@ -3259,12 +3259,12 @@ function Dashboard() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-12">
-          {jobs.map(job => (
+          {jobs.map((job, index) => (
             <motion.div
               key={job.id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: jobs.indexOf(job) * 0.05 }}
+              transition={{ delay: index * 0.05 }}
               whileHover={{ y: -8 }}
               className="cursor-pointer"
               onClick={() => navigate(`/jobs/${job.id}`)}
@@ -3333,6 +3333,8 @@ function ResumeBank() {
   const [screeningProgress, setScreeningProgress] = useState(0);
   const { confirm, notify } = useNotification();
   const navigate = useNavigate();
+  // Guard: only run tag backfill once per mount, not on every Firestore snapshot update
+  const backfillDoneRef = useRef(false);
 
   useEffect(() => {
     if (!auth.currentUser || !profile?.organizationId) return;
@@ -3355,22 +3357,26 @@ function ResumeBank() {
     const unsubCandidates = onSnapshot(candidatesQuery, async (snap) => {
       const candData = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Candidate[];
       
-      const candsToBackfill = candData.filter(c => c.resumeText && (!c.profileTags || c.profileTags.length === 0));
-      if (candsToBackfill.length > 0) {
-        console.log(`[ResumeBank] Retroactively backfilling tags for ${candsToBackfill.length} candidates...`);
-        const batch = writeBatch(db);
-        let count = 0;
-        for (const c of candsToBackfill.slice(0, 20)) {
-          const derivedTags = generateProfileTags(c);
-          batch.update(doc(db, 'candidates', c.id), { profileTags: derivedTags });
-          count++;
-        }
-        if (count > 0) {
-          try {
-            await batch.commit();
-            console.log(`[ResumeBank] Backfilled tags for ${count} candidates.`);
-          } catch (e) {
-            console.error('[ResumeBank] Failed backfilling tags:', e);
+      // Only backfill tags once per mount — not on every subsequent live snapshot
+      if (!backfillDoneRef.current) {
+        backfillDoneRef.current = true;
+        const candsToBackfill = candData.filter(c => c.resumeText && (!c.profileTags || c.profileTags.length === 0));
+        if (candsToBackfill.length > 0) {
+          console.log(`[ResumeBank] Retroactively backfilling tags for ${candsToBackfill.length} candidates...`);
+          const batch = writeBatch(db);
+          let count = 0;
+          for (const c of candsToBackfill.slice(0, 20)) {
+            const derivedTags = generateProfileTags(c);
+            batch.update(doc(db, 'candidates', c.id), { profileTags: derivedTags });
+            count++;
+          }
+          if (count > 0) {
+            try {
+              await batch.commit();
+              console.log(`[ResumeBank] Backfilled tags for ${count} candidates.`);
+            } catch (e) {
+              console.error('[ResumeBank] Failed backfilling tags:', e);
+            }
           }
         }
       }

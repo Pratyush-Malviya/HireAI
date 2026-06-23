@@ -23,9 +23,13 @@ export default defineConfig(({mode}) => {
             if (id.includes('node_modules')) {
               if (id.includes('firebase')) return 'firebase';
               if (id.includes('recharts')) return 'recharts';
+              if (id.includes('pdfjs-dist')) return 'pdfjs';
+              if (id.includes('mammoth')) return 'mammoth';
+              if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype') || id.includes('micromark') || id.includes('mdast')) return 'markdown';
               if (id.includes('jspdf') || id.includes('html2canvas')) return 'pdf-utils';
               if (id.includes('lucide-react')) return 'lucide';
               if (id.includes('motion')) return 'motion';
+              if (id.includes('openai') || id.includes('@google/genai')) return 'ai-sdk';
               return 'vendor'; // all other node_modules
             }
           }
