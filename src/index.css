@@ -134,6 +134,10 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply font-sans bg-[#030712] text-white antialiased selection:bg-brand/30;
     background-image: 
