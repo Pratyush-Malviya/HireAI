@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Card } from './ui/Card';
-import { Button } from './ui/Button';
-import { useProfile } from '../lib/auth';
+import { useProfile } from '../lib/appContext';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useNotification } from '../lib/notifications';
+import { useNotification } from '../lib/appContext';
 import { MessageSquare, Send, Loader2, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -62,7 +60,7 @@ export function FeedbackPage() {
         </div>
       </div>
 
-      <Card className="p-6 glass-premium">
+      <div className="p-6 glass-premium rounded-2xl border border-white/10">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-wider text-slate-400">Subject</label>
@@ -103,27 +101,26 @@ export function FeedbackPage() {
           </div>
 
           <div className="pt-4 border-t border-white/5 flex justify-end">
-            <Button
+            <button
               type="submit"
-              variant="primary"
               disabled={isSubmitting}
-              className="h-11 px-8"
+              className="h-11 px-8 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-brand to-brand-light hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Submitting...
                 </>
               ) : (
                 <>
-                  <Send className="w-4 h-4 mr-2" />
+                  <Send className="w-4 h-4" />
                   Submit Feedback
                 </>
               )}
-            </Button>
+            </button>
           </div>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }
