@@ -1,5 +1,6 @@
 import { LogOut, Sun, Moon } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
+import { AnimatePresence } from 'framer-motion';
 import { Briefcase, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook, Eye } from 'lucide-react';
 import { useEffect, useState, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
@@ -5163,7 +5164,7 @@ function JobDetail() {
           customSmtp: organization?.emailSettings || null,
           subject: subjectOverride,
           emailBody: bodyOverride,
-          useComposio: composioConnected,
+          useComposio: false,
           userId: profile?.uid
         })
       });
@@ -5228,7 +5229,7 @@ function JobDetail() {
             interviewLink: link,
             jobTitle: job?.title || 'Applied Position',
             customSmtp: organization?.emailSettings || null,
-            useComposio: composioConnected,
+            useComposio: false,
             userId: profile?.uid
           })
         });
@@ -7476,7 +7477,7 @@ function CandidateDetail() {
       } catch (error) {
         console.error('Firestore save failed for research:', error);
         localStorage.setItem(`research_fallback_${candidate.id}`, JSON.stringify(result));
-        notify('Research complete but could not sync to cloud. Data saved locally.', 'warning');
+        notify('Research complete but could not sync to cloud. Data saved locally.', 'info');
       }
       setResearchStep('');
       notify('Deep Research Complete: Multi-source verification synced.', 'success');
@@ -8049,7 +8050,7 @@ function CandidateDetail() {
               "text-xl font-black mt-1",
               (candidate as any).preInterviewFitScore >= 75 ? "text-emerald-400" :
               (candidate as any).preInterviewFitScore >= 50 ? "text-amber-400" : "text-red-400"
-            )}>{candidate.preInterviewFitScore ?? (candidate as any).preInterviewFitScore ?? 50}%</p>
+            )}>{(candidate as any).preInterviewFitScore ?? 50}%</p>
           </div>
           <div className="glass-premium p-3 rounded-xl border border-white/10 text-center">
             <p className="text-[9px] font-black text-white uppercase tracking-wider">Qualification</p>
@@ -15066,7 +15067,7 @@ function ScreeningReports() {
           interviewLink: link,
           jobTitle: jobMap[c.jobId] || 'Applied Position',
           customSmtp: organization?.emailSettings || null,
-          useComposio: composioConnected,
+          useComposio: false,
           userId: profile?.uid,
         })
       });
