@@ -29,14 +29,13 @@ try {
 }
 
 export const db = firestore;
-let firebaseAuth;
+let firebaseAuth: any;
 try {
   firebaseAuth = getAuth(app);
 } catch (error) {
   console.error("Firebase Auth failed to initialize. Please check your VITE_FIREBASE_API_KEY in .env.local:", error);
-  // Provide a dummy proxy to prevent immediate crashes if auth is used, or let it be null.
-  // We'll export null so the app can at least render the ErrorBoundary or offline state.
-  firebaseAuth = null;
+  // Provide a dummy proxy to prevent immediate crashes if auth is used.
+  firebaseAuth = { currentUser: null, isDummy: true };
 }
 
 export const auth = firebaseAuth;

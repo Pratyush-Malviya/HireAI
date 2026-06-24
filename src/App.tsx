@@ -15597,8 +15597,8 @@ export default function App() {
       setLoading(false);
     }, 10000);
 
-    if (!auth) {
-      console.warn("Firebase auth is null. Skipping onAuthStateChanged listener.");
+    if (!auth || auth.isDummy) {
+      console.warn("Firebase auth is null or dummy. Skipping onAuthStateChanged listener.");
       setLoading(false);
       return;
     }
