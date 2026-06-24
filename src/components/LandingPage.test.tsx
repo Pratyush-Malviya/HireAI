@@ -4,6 +4,25 @@ import { BrowserRouter } from 'react-router-dom';
 import { LandingPage } from './LandingPage';
 import { vi } from 'vitest';
 
+class IntersectionObserverMock {
+  constructor(callback, options) {}
+  disconnect() {}
+  observe() {}
+  takeRecords() { return []; }
+  unobserve() {}
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: IntersectionObserverMock
+});
+Object.defineProperty(global, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: IntersectionObserverMock
+});
+
 // Mock components that might use heavy animations or external libraries
 vi.mock('./magic-ui/particles', () => ({
   Particles: () => <div data-testid="mock-particles" />
