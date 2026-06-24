@@ -15597,6 +15597,11 @@ export default function App() {
       setLoading(false);
     }, 10000);
 
+    if (!auth) {
+      console.warn("Firebase auth is null. Skipping onAuthStateChanged listener.");
+      setLoading(false);
+      return;
+    }
     const unsub = onAuthStateChanged(auth, async (u) => {
       clearTimeout(timeout);
       setUser(u);
