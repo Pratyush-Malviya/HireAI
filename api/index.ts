@@ -247,7 +247,7 @@ app.post("/api/calendar/schedule", async (req, res) => {
         }
       });
       console.log("Composio GOOGLECALENDAR_CREATE_EVENT response:", response);
-      const eventData = response.data || response;
+      const eventData = (response.data || response) as any;
 
       // Generate Google Meet link if tokens are available (Composio may not return one)
       let meetLink = eventData.hangoutLink || eventData.htmlLink || '';
@@ -362,7 +362,7 @@ app.post("/api/candidate/send-invite", async (req, res) => {
   if (!inviteMeetLink && composio && userId) {
     try {
       const compResp = await composio.tools.execute("GOOGLEMEET_CREATE_MEET", { userId, arguments: { config: { accessType: "OPEN", entryPointAccess: "ALL" } } });
-      const rd = compResp.data || compResp;
+      const rd = (compResp.data || compResp) as any;
       const cl = rd.meetingUri || rd.meeting_uri || rd.meetLink || rd.meet_link || '';
       if (cl) inviteMeetLink = cl;
     } catch (compErr) {
@@ -2972,8 +2972,8 @@ app.get("/api/composio/status", async (req, res) => {
     res.json({
       connected: !!activeGoogleConn,
       connectionId: activeGoogleConn?.id || null,
-      accountEmail: activeGoogleConn?.state?.val?.email || activeGoogleConn?.email || null,
-      lastSynced: activeGoogleConn?.updatedAt || activeGoogleConn?.updated_at || null
+      accountEmail: (activeGoogleConn as any)?.state?.val?.email || (activeGoogleConn as any)?.email || null,
+      lastSynced: (activeGoogleConn as any)?.updatedAt || null
     });
   } catch (err: any) {
     console.error("Composio status check error:", err.message);
@@ -3002,8 +3002,8 @@ app.get("/api/integrations/google-calendar/status", async (req, res) => {
       connected: !!activeGoogleConn,
       configured: true,
       connectionId: activeGoogleConn?.id || null,
-      accountEmail: activeGoogleConn?.state?.val?.email || activeGoogleConn?.email || null,
-      lastSynced: activeGoogleConn?.updatedAt || activeGoogleConn?.updated_at || null,
+      accountEmail: (activeGoogleConn as any)?.state?.val?.email || (activeGoogleConn as any)?.email || null,
+      lastSynced: (activeGoogleConn as any)?.updatedAt || null,
       status: activeGoogleConn?.status || null
     });
   } catch (err: any) {
@@ -3112,8 +3112,8 @@ app.get("/api/composio/meet/status", async (req, res) => {
     res.json({
       connected: !!activeMeetConn,
       connectionId: activeMeetConn?.id || null,
-      accountEmail: activeMeetConn?.state?.val?.email || activeMeetConn?.email || null,
-      lastSynced: activeMeetConn?.updatedAt || activeMeetConn?.updated_at || null
+      accountEmail: (activeMeetConn as any)?.state?.val?.email || (activeMeetConn as any)?.email || null,
+      lastSynced: (activeMeetConn as any)?.updatedAt || null
     });
   } catch (err: any) {
     console.error("Composio Google Meet status check error:", err.message);
@@ -3184,9 +3184,10 @@ app.post("/api/composio/meet/create-link", async (req, res) => {
         meetLink = respData;
       }
     } else if (typeof respData === 'object') {
-      meetLink = respData.meetingUri || respData.meeting_uri || respData.meetLink || respData.meet_link || '';
-      if (!meetLink && respData.meetingCode) {
-        meetLink = `https://meet.google.com/${respData.meetingCode}`;
+      const rd = respData as any;
+      meetLink = rd.meetingUri || rd.meeting_uri || rd.meetLink || rd.meet_link || '';
+      if (!meetLink && rd.meetingCode) {
+        meetLink = `https://meet.google.com/${rd.meetingCode}`;
       }
     }
 

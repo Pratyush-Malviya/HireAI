@@ -75,7 +75,7 @@ export function SAHealthPage() {
           <div key={chart.title} className="glass-premium rounded-2xl border border-white/10 p-6 space-y-4">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-white/60 border-b border-white/10 pb-2">{chart.title}</h3>
             <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={chart.data}>
+              <BarChart data={chart.data as any}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff15" />
                 <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#94a3b8' }} />
                 <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} unit={chart.unit} />

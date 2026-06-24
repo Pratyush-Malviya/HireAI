@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Brain, Target, MessageSquare, Video, Clock, LayoutGrid, Zap, CheckCircle2, ChevronRight, BarChart3, Users, Star, ArrowRight, Search, Building2, Lightbulb, Shield, Globe, Cpu, FileText, Menu, X } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from "motion/react"
+import { motion } from "framer-motion"
 import { Particles } from "./magic-ui/particles"
 import { BorderBeam } from "./magic-ui/border-beam"
 import { Meteors } from "./magic-ui/meteors"

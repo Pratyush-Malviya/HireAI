@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { motion, useMotionTemplate, useMotionValue, useSpring } from "motion/react"
+import { motion, useMotionTemplate, useMotionValue, useSpring } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface MagicCardProps {

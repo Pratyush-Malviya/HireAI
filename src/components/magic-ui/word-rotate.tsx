@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { AnimatePresence, motion, type MotionProps } from "motion/react"
+import { AnimatePresence, motion, type MotionProps } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface WordRotateProps {
