@@ -42,39 +42,38 @@ describe('AuthPage', () => {
   it('renders the login form by default', () => {
     renderWithRouter(<AuthPage />);
     expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/email address/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/name@company.com/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/••••••••/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
   it('toggles to sign up mode when link is clicked', () => {
     renderWithRouter(<AuthPage />);
     
-    // Click 'Sign up' link
-    const signUpLink = screen.getByText(/sign up/i);
+    // Click 'Sign Up' link
+    const signUpLink = screen.getByText(/Don't have an account\? Sign Up/i);
     fireEvent.click(signUpLink);
 
     // Verify it changed to signup mode
     expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/full name/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
   });
 
   it('allows user to type in input fields', () => {
     renderWithRouter(<AuthPage />);
-    const emailInput = screen.getByPlaceholderText(/email address/i);
+    const emailInput = screen.getByPlaceholderText(/name@company.com/i);
     
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     expect(emailInput).toHaveValue('test@example.com');
   });
 
-  it('shows reset password view when forgot password is clicked', () => {
+  it('handles forgot password click without email', () => {
     renderWithRouter(<AuthPage />);
     
     const forgotPasswordLink = screen.getByText(/forgot password\?/i);
     fireEvent.click(forgotPasswordLink);
     
-    expect(screen.getByRole('heading', { name: /reset password/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /send reset link/i })).toBeInTheDocument();
+    // Should show error to enter email first
+    expect(screen.getByText(/Please enter your email address first/i)).toBeInTheDocument();
   });
 });

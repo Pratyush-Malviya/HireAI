@@ -14,6 +14,9 @@ export default defineConfig(({mode}) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        'firebase/app': path.resolve(__dirname, './node_modules/firebase/app/dist/index.cjs.js'),
+        'firebase/auth': path.resolve(__dirname, './node_modules/firebase/auth/dist/index.cjs.js'),
+        'firebase/firestore': path.resolve(__dirname, './node_modules/firebase/firestore/dist/index.cjs.js')
       },
     },
     build: {
@@ -41,6 +44,11 @@ export default defineConfig(({mode}) => {
       environment: 'jsdom',
       setupFiles: ['./src/setupTests.ts'],
       globals: true,
+      server: {
+        deps: {
+          inline: ['firebase']
+        }
+      }
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

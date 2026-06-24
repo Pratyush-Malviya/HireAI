@@ -44,24 +44,25 @@ describe('LandingPage', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     
     // Check for CTA buttons
-    const ctaButtons = screen.getAllByText(/Start Free Trial/i);
+    const ctaButtons = screen.getAllByText(/Get Started/i);
     expect(ctaButtons.length).toBeGreaterThan(0);
     
-    // Check for View Demo button
-    expect(screen.getByText(/Watch Demo/i)).toBeInTheDocument();
+    // Check for View Demo button or secondary CTA
+    expect(screen.getAllByText(/Start Screening Now/i).length).toBeGreaterThan(0);
   });
 
   it('renders feature sections', () => {
     renderWithRouter(<LandingPage />);
     
     // Features should be visible
-    expect(screen.getByText(/AI-Powered Screening/i)).toBeInTheDocument();
-    expect(screen.getByText(/Deep Candidate Research/i)).toBeInTheDocument();
-    expect(screen.getByText(/Enterprise Grade/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/AI-Powered Screening/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Autonomous Interviews/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Integrity Monitoring/i).length).toBeGreaterThan(0);
   });
 
-  it('renders the trusted by section', () => {
+  it('renders the stats section', () => {
     renderWithRouter(<LandingPage />);
-    expect(screen.getByText(/TRUSTED BY INNOVATIVE TEAMS WORLDWIDE/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Candidates Screened/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Accuracy Rate/i).length).toBeGreaterThan(0);
   });
 });
