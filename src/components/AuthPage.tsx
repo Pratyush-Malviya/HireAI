@@ -20,6 +20,9 @@ export function AuthPage() {
     setLoading(true);
 
     try {
+      if ((auth as any).isDummy) {
+        throw new Error('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
+      }
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
@@ -55,6 +58,9 @@ export function AuthPage() {
     }
     setError(null);
     try {
+      if ((auth as any).isDummy) {
+        throw new Error('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
+      }
       await sendPasswordResetEmail(auth, email);
       setError('Password reset email sent! Please check your inbox.');
     } catch (err: any) {

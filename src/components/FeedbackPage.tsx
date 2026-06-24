@@ -23,6 +23,9 @@ export function FeedbackPage() {
 
     setIsSubmitting(true);
     try {
+      if ((db as any).isDummy) {
+        throw new Error('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
+      }
       await addDoc(collection(db, 'feedbacks'), {
         userId: profile?.uid || 'unknown',
         userEmail: profile?.email || 'unknown',

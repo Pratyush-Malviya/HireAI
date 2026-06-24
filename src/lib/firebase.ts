@@ -12,29 +12,38 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID?.trim(),
 };
 
-const app = initializeApp(firebaseConfig);
+const isConfigured = !!firebaseConfig.projectId && !!firebaseConfig.apiKey;
+const app = isConfigured ? initializeApp(firebaseConfig) : ({} as any);
 
 // Initialize Firestore with persistence
 // We use a try-catch because persistentLocalCache can fail in certain environments (like some private modes or restricted contexts)
-let firestore;
-try {
-  firestore = initializeFirestore(app, {
-    localCache: persistentLocalCache({ 
-      tabManager: persistentMultipleTabManager(),
-    }),
-  });
-} catch (error) {
-  console.warn("Firestore persistence failed to initialize, falling back to memory cache:", error);
-  firestore = initializeFirestore(app, {});
+let firestore: any;
+if (isConfigured) {
+  try {
+    firestore = initializeFirestore(app, {
+      localCache: persistentLocalCache({ 
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } catch (error) {
+    console.warn("Firestore persistence failed to initialize, falling back to memory cache:", error);
+    firestore = initializeFirestore(app, {});
+  }
+} else {
+  firestore = { isDummy: true };
 }
 
 export const db = firestore;
 let firebaseAuth: any;
-try {
-  firebaseAuth = getAuth(app);
-} catch (error) {
-  console.error("Firebase Auth failed to initialize. Please check your VITE_FIREBASE_API_KEY in .env.local:", error);
-  // Provide a dummy proxy to prevent immediate crashes if auth is used.
+if (isConfigured) {
+  try {
+    firebaseAuth = getAuth(app);
+  } catch (error) {
+    console.error("Firebase Auth failed to initialize. Please check your VITE_FIREBASE_API_KEY in .env.local:", error);
+    // Provide a dummy proxy to prevent immediate crashes if auth is used.
+    firebaseAuth = { currentUser: null, isDummy: true };
+  }
+} else {
   firebaseAuth = { currentUser: null, isDummy: true };
 }
 

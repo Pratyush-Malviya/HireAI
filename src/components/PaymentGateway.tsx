@@ -23,26 +23,38 @@ export function PaymentGateway() {
   useEffect(() => {
     if (!orgId) return;
     
-    getDoc(doc(db, 'organizations', orgId))
-      .then(docSnap => {
-        if (docSnap.exists()) {
-          const data = docSnap.data() as Organization;
-          if (data.status === 'pending_payment') {
-            setOrg({ id: docSnap.id, ...data });
+    if ((db as any).isDummy) {
+      setErrorMsg('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      getDoc(doc(db, 'organizations', orgId))
+        .then(docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data() as Organization;
+            if (data.status === 'pending_payment') {
+              setOrg({ id: docSnap.id, ...data });
+            } else {
+              setErrorMsg('This invoice has already been paid or is invalid.');
+              setTimeout(() => navigate('/'), 3000);
+            }
           } else {
-            setErrorMsg('This invoice has already been paid or is invalid.');
+            setErrorMsg('Organization invoice not found.');
             setTimeout(() => navigate('/'), 3000);
           }
-        } else {
-          setErrorMsg('Organization invoice not found.');
-          setTimeout(() => navigate('/'), 3000);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        setErrorMsg('Failed to load invoice.');
-      })
-      .finally(() => setLoading(false));
+        })
+        .catch(err => {
+          console.error(err);
+          setErrorMsg('Failed to load invoice.');
+        })
+        .finally(() => setLoading(false));
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Failed to load invoice.');
+      setLoading(false);
+    }
   }, [orgId, navigate]);
 
   const getTierPrice = (tier?: string) => {
@@ -98,6 +110,10 @@ export function PaymentGateway() {
     if (e) e.preventDefault();
     try {
       setProcessingPayment(true);
+      if ((auth as any).isDummy || (db as any).isDummy) {
+        throw new Error('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
+      }
+      
       let user = auth.currentUser;
       
       if (!user) {

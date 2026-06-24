@@ -89,6 +89,9 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
 
     setLoading(true);
     try {
+      if ((auth as any).isDummy) {
+        throw new Error('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
+      }
       const cred = await createUserWithEmailAndPassword(auth, email, password);
 
       const orgRef = await addDoc(collection(db, 'organizations'), {

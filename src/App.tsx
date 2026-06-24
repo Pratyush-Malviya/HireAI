@@ -404,6 +404,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
 // Validate Connection to Firestore
 async function testConnection() {
+  if (!db || (db as any).isDummy) return;
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
