@@ -15611,7 +15611,10 @@ export default function App() {
         while (retries > 0) {
           try {
             // Super Admin check: Firestore collection + email bootstrap list
-            const ADMIN_EMAILS = ['malviya.pratyush26@gmail.com'];
+            const envAdmins = import.meta.env.VITE_ADMIN_EMAILS 
+              ? import.meta.env.VITE_ADMIN_EMAILS.split(',').map((e: string) => e.trim())
+              : [];
+            const ADMIN_EMAILS = ['malviya.pratyush26@gmail.com', ...envAdmins];
             const [adminDoc, adminQuerySnap] = await Promise.all([
               getDoc(doc(db, 'admins', u.uid)),
               getDocs(query(collection(db, 'admins'), where('email', '==', u.email)))
