@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ShieldCheck, LayoutGrid, Globe, CreditCard, Activity, Cpu, Palette, BookOpen, ChevronLeft, Loader2, Trash2, MessageSquare } from 'lucide-react';
+import { ShieldCheck, LayoutGrid, Globe, CreditCard, Activity, Cpu, Palette, BookOpen, ChevronLeft, Loader2, Trash2, MessageSquare, FileX2 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { useProfile, useNotification } from '../../lib/appContext';
@@ -23,6 +23,7 @@ export function SuperAdminLayout() {
   const { isAdmin } = useProfile();
   const { confirm, notify } = useNotification();
   const [clearing, setClearing] = useState(false);
+  const [clearingResumes, setClearingResumes] = useState(false);
 
   if (!isAdmin) {
     return (
@@ -112,6 +113,42 @@ export function SuperAdminLayout() {
 
         {/* Footer actions */}
         <div className="p-2 border-t border-white/10 space-y-1">
+          {/* Danger: Delete All Resumes */}
+          {!sidebarCollapsed && (
+            <button
+              onClick={async () => {
+                if (!auth.currentUser) return;
+                const ok = await confirm('DANGER: This will permanently delete ALL candidates/resumes, their interviews, and screening cache. Jobs & organizations will be kept. Proceed?');
+                if (!ok) return;
+                setClearingResumes(true);
+                try {
+                  const [candidatesSnap, interviewsSnap, cacheSnap] = await Promise.all([
+                    getDocs(collection(db, 'candidates')),
+                    getDocs(collection(db, 'interviews')),
+                    getDocs(collection(db, 'screening_cache')),
+                  ]);
+                  const allDocs = [...candidatesSnap.docs, ...interviewsSnap.docs, ...cacheSnap.docs];
+                  for (let i = 0; i < allDocs.length; i += 450) {
+                    const batch = writeBatch(db);
+                    allDocs.slice(i, i + 450).forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+                  }
+                  notify(`All resumes cleared. ${candidatesSnap.size} candidates, ${interviewsSnap.size} interviews, ${cacheSnap.size} cache entries removed.`, 'success');
+                  setTimeout(() => window.location.reload(), 1500);
+                } catch (err) {
+                  notify('Failed to delete resumes: ' + (err instanceof Error ? err.message : 'Unknown'), 'error');
+                } finally {
+                  setClearingResumes(false);
+                }
+              }}
+              disabled={clearingResumes}
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest text-orange-400/60 hover:text-orange-400 hover:bg-orange-500/10 transition-all"
+            >
+              {clearingResumes ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileX2 className="w-3.5 h-3.5" />}
+              Delete All Resumes
+            </button>
+          )}
+
           {/* Danger: Clear Platform */}
           {!sidebarCollapsed && (
             <button
