@@ -15,6 +15,9 @@ const firebaseConfig = {
 const isConfigured = !!firebaseConfig.projectId && !!firebaseConfig.apiKey;
 const app = isConfigured ? initializeApp(firebaseConfig) : ({} as any);
 
+// The Firestore database ID for this project (named database, not the default)
+const FIRESTORE_DATABASE_ID = 'ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68';
+
 // Initialize Firestore with persistence
 // We use a try-catch because persistentLocalCache can fail in certain environments (like some private modes or restricted contexts)
 let firestore: any;
@@ -24,10 +27,10 @@ if (isConfigured) {
       localCache: persistentLocalCache({ 
         tabManager: persistentMultipleTabManager(),
       }),
-    });
+    }, FIRESTORE_DATABASE_ID);
   } catch (error) {
     console.warn("Firestore persistence failed to initialize, falling back to memory cache:", error);
-    firestore = initializeFirestore(app, {});
+    firestore = initializeFirestore(app, {}, FIRESTORE_DATABASE_ID);
   }
 } else {
   firestore = { isDummy: true };
