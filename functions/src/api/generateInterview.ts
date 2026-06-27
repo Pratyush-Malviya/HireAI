@@ -23,7 +23,7 @@ export const generateInterviewQuestions = onCall(
 
     try {
       const genAI = new GoogleGenerativeAI(await geminiApiKey.value());
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
 
       const prompt = `
 You are an expert technical interviewer. Generate a comprehensive set of interview questions tailored to the following job description and candidate resume.
@@ -110,7 +110,7 @@ export const evaluateInterviewResponse = onCall(
 
     try {
       const genAI = new GoogleGenerativeAI(await geminiApiKey.value());
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-pro-preview' });
 
       const prompt = `
 You are an expert interview evaluator. Evaluate the following candidate response to an interview question.

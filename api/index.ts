@@ -909,6 +909,7 @@ const ai = new GoogleGenAI({
 async function generateContentWithRetry(params: any, maxRetries = 3, initialDelay = 1000) {
   const modelsToTry = [
     params.model,
+    "gemini-3.1-pro-preview",
     "gemini-flash-latest",
     "gemini-3.5-flash",
     "gemini-3.1-flash-lite"
@@ -1510,7 +1511,7 @@ app.post("/api/ai/parse-job", async (req, res) => {
       throw new Error("AI Key missing");
     }
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
       
       FOCUS AREAS:
@@ -1578,7 +1579,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 
     // Stage 1: Adversarial Auditor
     const auditorResponse = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: `You are an Adversarial Talent Auditor. Your task is to audit the candidate's resume for any red flags, gaps, anomalies, or stability concerns.
       CURRENT DATE: ${currentDate} (Year: ${currentYear}).
       Use this as your reference date when evaluating employment timelines. Do NOT flag dates in the current year as "future-dated" — they are valid.
@@ -1601,7 +1602,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 
     // Stage 2: Technical/Ecosystem Screener
     const technicalResponse = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: `You are a Technical and Stack Screener. Your task is to perform an objective evaluation of the candidate's technical skills, tool stack, and experience depth against the job requirements.
       CURRENT DATE: ${currentDate} (Year: ${currentYear}). Use this as reference for evaluating experience timelines.
       Assess:
@@ -1664,7 +1665,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
          - 50: Significant job hopping (average tenure < 1 year per job) or substantial employment gaps (> 12 months).`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: `You are a Principal Talent Solutions Architect. Your mission is to perform a forensic, high-fidelity compilation of the candidate's screening report by synthesizing detailed evaluations from an Adversarial Auditor and a Technical Screener.
       CURRENT DATE: ${currentDate} (Year: ${currentYear}). Use this as reference for all date-related evaluations.
       
@@ -1823,7 +1824,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     Output exactly 3 plain text queries, one per line. Do not include numbering, formatting, or introduction.`;
 
     const plannerResponse = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: plannerPrompt,
       config: { temperature: 0.1 }
     });
@@ -1856,7 +1857,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     let collectorResponse;
     try {
       collectorResponse = await generateContentWithRetry({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.1-pro-preview",
         contents: collectorPrompt,
         config: {
           tools: [{ googleSearch: {} }],
@@ -1866,7 +1867,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     } catch (groundingError) {
       console.warn("OSINT Collector with Grounding failed. Retrying without Search Grounding tool:", groundingError);
       collectorResponse = await generateContentWithRetry({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.1-pro-preview",
         contents: collectorPrompt,
         config: { temperature: 0.2 }
       });
@@ -1906,7 +1907,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     Output a verification report detailing your logical audits. Be specific about which skills could be verified and which could not.`;
 
     const auditResponse = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: auditorPrompt,
       config: { temperature: 0.1 }
     });
@@ -1985,7 +1986,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     }`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: prompt,
       config: {
         temperature: 0,
@@ -2168,7 +2169,7 @@ COGNITIVE Speaking Guidelines (ENFORCE RIGIDLY):
     }
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash", 
+      model: "gemini-3.1-pro-preview", 
       contents,
       config: {
         systemInstruction,
@@ -2195,7 +2196,7 @@ app.post("/api/ai/summarize", async (req, res) => {
       throw new Error("AI Key missing");
     }
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: `You are an elite principal technical recruiter with 20 years of experience. Analyze the following interview transcript and provide a highly detailed, objective evaluation.
       
       EVALUATION DEPTH MANDATE:
@@ -2283,7 +2284,7 @@ ${JSON.stringify(pairs.map((p, i) => ({ index: i, question: p.question, answer: 
 Return ONLY valid JSON.`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-pro-preview",
       contents: evaluationPrompt,
       config: { responseMimeType: "application/json" }
     });
