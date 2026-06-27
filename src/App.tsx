@@ -11912,7 +11912,7 @@ function SuperAdminPanel() {
 
   // LLM Prompt Playground & Config States
   const [systemPrompt, setSystemPrompt] = useState(() => localStorage.getItem('sa_system_prompt') || "You are an elite, unscripted AI recruiter. Evaluate the candidate's core technical experience. Ask situational and depth questions targeting weak spots. Keep it conversational.");
-  const [selectedModel, setSelectedModel] = useState<'gemini-1.5-pro' | 'gemini-1.5-flash' | 'gemini-2.0-flash'>('gemini-1.5-pro');
+  const [selectedModel, setSelectedModel] = useState<'gemini-3.1-pro-preview' | 'gemini-3.5-flash' | 'gemini-2.0-flash'>('gemini-3.1-pro-preview');
   const [temperature, setTemperature] = useState(0.7);
   const [safetyFilter, setSafetyFilter] = useState<'standard' | 'strict' | 'relaxed'>('standard');
   const [playgroundInput, setPlaygroundInput] = useState("Walk me through your experience building high-throughput distributed message queues.");
@@ -13861,8 +13861,8 @@ function SuperAdminPanel() {
                             onChange={e => setSelectedModel(e.target.value as any)} 
                             className="mt-1 block w-full rounded-xl border border-white/10 p-2 text-xs focus:outline-none glass-premium min-h-[38px]"
                           >
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                            <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
+                            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
                             <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                           </select>
                         </div>
@@ -13901,10 +13901,10 @@ function SuperAdminPanel() {
                     <h3 className="text-xs font-bold uppercase tracking-widest text-white border-b border-white/10 pb-2">Live Cost Calculator</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {[
-                        { label: 'Input Token Cost', val: selectedModel === 'gemini-1.5-flash' ? '$0.075/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.10/1M' : '$1.25/1M' },
-                        { label: 'Output Token Cost', val: selectedModel === 'gemini-1.5-flash' ? '$0.30/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.40/1M' : '$5.00/1M' },
+                        { label: 'Input Token Cost', val: selectedModel === 'gemini-3.5-flash' ? '$0.075/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.10/1M' : '$1.25/1M' },
+                        { label: 'Output Token Cost', val: selectedModel === 'gemini-3.5-flash' ? '$0.30/1M' : selectedModel === 'gemini-2.0-flash' ? '$0.40/1M' : '$5.00/1M' },
                         { label: 'Est. Input Tokens', val: '1,842' },
-                        { label: 'Est. Cost / Call', val: selectedModel === 'gemini-1.5-flash' ? '$0.0007' : selectedModel === 'gemini-2.0-flash' ? '$0.0009' : '$0.0115' },
+                        { label: 'Est. Cost / Call', val: selectedModel === 'gemini-3.5-flash' ? '$0.0007' : selectedModel === 'gemini-2.0-flash' ? '$0.0009' : '$0.0115' },
                       ].map((item, i) => (
                         <div key={i} className="transparent border border-white/10 rounded-xl p-3 text-center">
                           <p className="text-[9px] font-black uppercase text-white tracking-wider">{item.label}</p>

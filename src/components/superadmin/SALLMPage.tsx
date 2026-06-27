@@ -8,7 +8,7 @@ export function SALLMPage() {
     localStorage.getItem('sa_system_prompt') ||
     'You are an elite, unscripted AI recruiter. Evaluate the candidate\'s core technical experience. Ask situational and depth questions targeting weak spots. Keep it conversational.'
   );
-  const [selectedModel, setSelectedModel] = useState<'gemini-1.5-pro' | 'gemini-1.5-flash' | 'gemini-2.0-flash'>('gemini-1.5-pro');
+  const [selectedModel, setSelectedModel] = useState<'gemini-3.1-pro-preview' | 'gemini-3.5-flash' | 'gemini-2.0-flash'>('gemini-3.1-pro-preview');
   const [temperature, setTemperature] = useState(0.7);
   const [safetyFilter, setSafetyFilter] = useState<'standard' | 'strict' | 'relaxed'>('standard');
   const [playgroundInput, setPlaygroundInput] = useState('Walk me through your experience building high-throughput distributed message queues.');
@@ -17,9 +17,9 @@ export function SALLMPage() {
   const [isTesting, setIsTesting] = useState(false);
 
   const MODEL_COSTS = {
-    'gemini-1.5-flash': { input: '$0.075/1M', output: '$0.30/1M', perCall: '$0.0007' },
+    'gemini-3.5-flash': { input: '$0.075/1M', output: '$0.30/1M', perCall: '$0.0007' },
     'gemini-2.0-flash': { input: '$0.10/1M', output: '$0.40/1M', perCall: '$0.0009' },
-    'gemini-1.5-pro': { input: '$1.25/1M', output: '$5.00/1M', perCall: '$0.0115' },
+    'gemini-3.1-pro-preview': { input: '$1.25/1M', output: '$5.00/1M', perCall: '$0.0115' },
   };
   const costs = MODEL_COSTS[selectedModel];
 
@@ -61,8 +61,8 @@ export function SALLMPage() {
                 <label className="text-[9px] font-black text-white/50 uppercase tracking-widest">Model Version</label>
                 <select value={selectedModel} onChange={e => setSelectedModel(e.target.value as any)}
                   className="mt-1.5 block w-full border border-white/10 bg-[#0d1117] rounded-xl px-3 py-2.5 text-xs text-white focus:border-indigo-500/50 focus:outline-none min-h-[44px]">
-                  <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                  <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                  <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro</option>
+                  <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
                   <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                 </select>
               </div>

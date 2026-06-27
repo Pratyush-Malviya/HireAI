@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
+    "lint": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui"
   },
