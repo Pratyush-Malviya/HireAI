@@ -5450,7 +5450,7 @@ function JobDetail() {
   if (!job) return <div className="p-20 text-center">Job sequence not found.</div>;
 
   return (
-    <div className="space-y-12 pb-20 overflow-x-hidden w-full max-w-[100vw]">
+    <div className="space-y-12 pb-20 overflow-x-hidden w-full max-w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-4">
@@ -5795,11 +5795,11 @@ function JobDetail() {
             </div>
           )}
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="px-4 w-full break-words">
-                <h2 className="text-2xl font-black">Candidates ({filteredCandidates.length})</h2>
-                <p className="text-white text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+            <div className="flex items-center justify-between gap-4 w-full md:w-auto">
+              <div className="flex-1 min-w-0 break-words">
+                <h2 className="text-2xl font-black truncate sm:whitespace-normal">Candidates ({filteredCandidates.length})</h2>
+                <p className="text-white/70 text-sm whitespace-normal">Refined, sortable shortlist with action-ready interview workflows.</p>
               </div>
               {candidates.length > 0 && (
                 <Button 
@@ -5841,30 +5841,30 @@ function JobDetail() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-brand/10 text-white border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9 flex-1 sm:flex-none"
+                    className="bg-brand/10 text-white border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[9px] sm:text-[10px] px-2 sm:px-4 h-9 flex-1 min-w-0"
                     onClick={() => handleResearchAll(false)}
                     disabled={researchingAll || uploading}
                   >
-                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Globe className="w-3 h-3 mr-2" />}
-                    Research Pipeline
+                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-1 sm:mr-2 shrink-0" /> : <Globe className="w-3 h-3 mr-1 sm:mr-2 shrink-0" />}
+                    <span className="truncate">Research</span>
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="text-white border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 font-black uppercase tracking-widest text-[10px] h-9 flex-1 sm:flex-none"
+                    className="text-white border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 font-black uppercase tracking-widest text-[9px] sm:text-[10px] px-2 sm:px-4 h-9 flex-1 min-w-0"
                     onClick={() => handleResearchAll(true)}
                     disabled={researchingAll || uploading}
                   >
-                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <RotateCcw className="w-3 h-3 mr-2" />}
-                    Refresh All
+                    {researchingAll ? <Loader2 className="w-3 h-3 animate-spin mr-1 sm:mr-2 shrink-0" /> : <RotateCcw className="w-3 h-3 mr-1 sm:mr-2 shrink-0" />}
+                    <span className="truncate">Refresh</span>
                   </Button>
                 </>
               )}
-              <div className="flex flex-wrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10 w-full lg:w-auto">
-                <div className="flex flex-1 min-w-[100px] items-center gap-2 px-2 border-r border-white/10 h-7">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Sort</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-transparent p-2 rounded-xl border border-white/10 w-full lg:w-auto">
+                <div className="flex items-center gap-2 px-2 border-b sm:border-b-0 sm:border-r border-white/10 h-8 sm:h-7 pb-2 sm:pb-0">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest w-12 sm:w-auto shrink-0">Sort</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full min-w-0" 
                     value={sortBy} 
                     onChange={(e) => setSortBy(e.target.value)}
                   >
@@ -5873,10 +5873,10 @@ function JobDetail() {
                     <option>Recent</option>
                   </select>
                 </div>
-                <div className="flex flex-1 min-w-[100px] items-center gap-2 px-2 border-r border-white/10 h-7">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Status</span>
+                <div className="flex items-center gap-2 px-2 border-b sm:border-b-0 sm:border-r border-white/10 h-8 sm:h-7 pb-2 sm:pb-0">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest w-12 sm:w-auto shrink-0">Status</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full min-w-0" 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
@@ -5886,10 +5886,10 @@ function JobDetail() {
                     <option value="rejected">Rejected (under 40)</option>
                   </select>
                 </div>
-                <div className="flex flex-1 min-w-[100px] items-center gap-2 px-2 h-7">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Role</span>
+                <div className="flex items-center gap-2 px-2 h-8 sm:h-7">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest w-12 sm:w-auto shrink-0">Role</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[120px] truncate" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full min-w-0 truncate" 
                     value={roleFilter} 
                     onChange={(e) => setRoleFilter(e.target.value)}
                   >
