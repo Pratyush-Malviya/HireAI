@@ -538,7 +538,7 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md overflow-hidden border border-white/10"
+        className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col border border-white/10 overscroll-contain"
       >
         <div className="p-8 border-b border-white/10 flex items-center justify-between transparent/50">
           <h3 className="font-display font-bold text-xl text-white tracking-tight">{title}</h3>
@@ -546,7 +546,7 @@ function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose:
             <Plus className="w-5 h-5 rotate-45 text-white group-hover:text-white" />
           </button>
         </div>
-        <div className="p-8">
+        <div className="p-8 overflow-y-auto overscroll-contain">
           {children}
         </div>
       </motion.div>
@@ -2604,7 +2604,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
           </button>
         </div>
 
-        <div className="p-8 overflow-y-auto flex-1 space-y-6">
+        <div className="p-8 overflow-y-auto flex-1 space-y-6 overscroll-contain">
           {step === 'checkout' && (
             <form onSubmit={handlePay} className="space-y-6">
               {/* Plan selector */}
@@ -6689,7 +6689,7 @@ function JobDetail() {
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black uppercase text-white tracking-wider block">Recipient Email Address</label>
                     <input
-                      type="email"
+                      type="email" inputMode="email" autoComplete="email"
                       className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
@@ -10154,7 +10154,7 @@ function CandidateDetail() {
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black uppercase text-white tracking-wider block">Recipient Email Address</label>
                     <input
-                      type="email"
+                      type="email" inputMode="email" autoComplete="email"
                       className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
@@ -11804,7 +11804,7 @@ function OrgAdminPanel() {
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-white uppercase tracking-widest">Sender Email (From)</label>
                   <input
-                    type="email"
+                    type="email" inputMode="email" autoComplete="email"
                     disabled={isReadOnly}
                     value={smtpFromEmail}
                     onChange={e => setSmtpFromEmail(e.target.value)}
@@ -11819,7 +11819,7 @@ function OrgAdminPanel() {
                 <span className="text-[9px] font-black text-white uppercase tracking-widest block leading-none">Connection Verification Test</span>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input
-                    type="email"
+                    type="email" inputMode="email" autoComplete="email"
                     id="testSmtpEmailRecipient"
                     placeholder="Test recipient email (e.g. yours)"
                     className="flex-1 glass-premium border border-white/10 rounded-xl px-4 py-2 font-semibold text-white focus:border-brand outline-none transition-all text-xs"
@@ -13034,7 +13034,7 @@ function SuperAdminPanel() {
                  <div className="space-y-1">
                     <label className="text-[10px] font-black text-white uppercase tracking-widest">Admin Email</label>
                     <input 
-                      type="email"
+                      type="email" inputMode="email" autoComplete="email"
                       required
                       value={newOrgAdminEmail}
                       onChange={e => setNewOrgAdminEmail(e.target.value)}
@@ -14890,7 +14890,7 @@ function TeamManagementTab({ organization }: { organization: Organization | null
           <div>
             <label className="text-[9px] font-black uppercase text-white tracking-wider block mb-1">Email Address</label>
             <input
-              type="email"
+              type="email" inputMode="email" autoComplete="email"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="jane@company.com"
@@ -15327,7 +15327,7 @@ function ScreeningReports() {
               <div className="space-y-2">
                 <label className="text-[8px] font-black uppercase text-white/40 tracking-[0.15em] block">Recipient Email</label>
                 <input
-                  type="email"
+                  type="email" inputMode="email" autoComplete="email"
                   className="w-full text-xs font-semibold px-3.5 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand/50 text-white placeholder:text-white/20 transition-all"
                   placeholder="Enter candidate email"
                   value={inviteEmailInput}
@@ -15767,7 +15767,7 @@ export default function App() {
         </Modal>
 
         {/* Toast Notification Layer */}
-        <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+        <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none mb-[env(safe-area-inset-bottom)]">
           <AnimatePresence>
             {notifications.map(n => (
               <motion.div

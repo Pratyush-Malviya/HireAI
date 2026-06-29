@@ -87,10 +87,12 @@
 
 .animate-aurora {
   animation: aurora 22s infinite linear;
+  will-change: transform;
 }
 
 .animate-aurora-delayed {
   animation: aurora-delayed 28s infinite linear;
+  will-change: transform;
 }
 
 .animate-video-breathing {
@@ -138,6 +140,10 @@
     @apply overflow-x-hidden w-full;
   }
 
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -148,6 +154,8 @@
       radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
       radial-gradient(circle at bottom left, rgba(217, 70, 239, 0.1), transparent 40%);
     background-attachment: fixed;
+    overscroll-behavior-y: none;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -156,6 +164,18 @@
 
   *:focus-visible {
     @apply outline-2 outline-brand outline-offset-2;
+  }
+}
+
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }
 
