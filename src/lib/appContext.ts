@@ -42,3 +42,18 @@ export function useProfile() {
   if (!context) throw new Error('useProfile must be used within a ProfileProvider');
   return context;
 }
+
+// ─── Page Title Context ──────────────────────────────────────────────────────
+
+export interface PageTitleContextType {
+  pageTitle: string;
+  setPageTitle: (title: string) => void;
+}
+
+export const PageTitleContext = createContext<PageTitleContextType | null>(null);
+
+export function usePageTitle() {
+  const context = useContext(PageTitleContext);
+  if (!context) throw new Error('usePageTitle must be used within a PageTitleProvider');
+  return context;
+}

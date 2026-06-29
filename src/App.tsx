@@ -16,8 +16,10 @@ import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, N
 import {
   NotificationContext,
   ProfileContext,
+  PageTitleContext,
   useNotification,
   useProfile,
+  usePageTitle,
 } from './lib/appContext';
 import { SuperAdminLayout } from './components/superadmin/SuperAdminLayout';
 import { SAOverviewPage } from './components/superadmin/SAOverviewPage';
@@ -2918,6 +2920,7 @@ function PublicSharedScorecard() {
 
 function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.ReactNode; user: any; isAdmin: boolean }) {
   const { whiteLabelBrandingName, setStripeModalOpen, profile, theme, setTheme } = useProfile();
+  const { pageTitle } = usePageTitle();
   const location = useLocation();
   const [clearing, setClearing] = useState(false);
   const navigate = useNavigate();
@@ -3142,6 +3145,9 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                    </div>
                    <span className="font-display font-light text-xl tracking-tight uppercase text-white">{whiteLabelBrandingName || "HireAI"}</span>
                 </Link>
+                <div className="hidden lg:flex items-center">
+                  <h1 className="text-xl font-black text-white uppercase tracking-tight">{pageTitle}</h1>
+                </div>
              </div>
              <div className="flex items-center gap-3">
              </div>
@@ -3253,7 +3259,7 @@ function Dashboard() {
     <div className="space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tighter uppercase leading-none">Active Pipelines</h1>
+          <SetPageTitle title="Active Pipelines" />
           <p className="text-white max-w-2xl text-xs sm:text-lg leading-relaxed font-black uppercase tracking-widest opacity-60">
             Autonomous Talent Orchestration
           </p>
@@ -3639,7 +3645,7 @@ function ResumeBank() {
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
               <Database className="w-3.5 h-3.5 text-white" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tighter uppercase leading-none">Resume Bank</h1>
+            <SetPageTitle title="Resume Bank" />
           </div>
           <p className="text-white/50 text-xs sm:text-sm font-medium">Search, filter, and re-screen your organization's historical talent pool.</p>
         </div>
@@ -4248,7 +4254,7 @@ function NewJob() {
           <ChevronRight className="w-4 h-4 rotate-180 mr-2" /> Back to Dashboard
         </Button>
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Initialize Campaign</h1>
+          <SetPageTitle title="Initialize Campaign" />
           <p className="text-white text-sm sm:text-lg leading-relaxed font-medium">Input your requirements and customize screening dimensions for precise candidate fit evaluation.</p>
         </div>
       </div>
@@ -5512,7 +5518,7 @@ function JobDetail() {
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-2xl font-black tracking-tight">{job.title}</h1>
+                <SetPageTitle title={job.title} />
                 <span className="px-2 py-0.5 bg-brand/10 text-white text-[10px] font-black uppercase tracking-widest rounded-lg border border-brand/10 flex items-center gap-1">
                    <RotateCcw className="w-3 h-3" /> Autonomous
                 </span>
@@ -8083,7 +8089,7 @@ function CandidateDetail() {
                 {candidate.totalExperience} Years Experience
               </span>
             </div>
-            <h1 className="text-4xl font-black text-white tracking-tight">{candidate.fullName}</h1>
+            <SetPageTitle title={candidate.fullName} />
             <p className="text-[11px] text-white font-extrabold uppercase tracking-widest">
               Applied for: {job?.title || 'Unknown Position'}
             </p>
@@ -11203,14 +11209,15 @@ function OrgAdminPanel() {
       <div className="glass-premium rounded-[2rem] border border-slate-105 p-8 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-brand/10 to-transparent rounded-full -mr-16 -mt-16 blur-2xl" />
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 relative">
+          <SetPageTitle title={`${activeOrgName} Admin Panel`} />
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-white text-[10px] font-black uppercase tracking-widest">
               <span className="text-white">◀</span>
               <span>{activeOrgName} Admin Panel</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+            <p className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
               Manage everything about {activeOrgName}.ai
-            </h1>
+            </p>
           </div>
         </div>
       </div>
@@ -15156,14 +15163,16 @@ function ScreeningReports() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="border-b border-white/10 pb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
-            <BarChart3 className="w-3.5 h-3.5 text-white" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-6">
+        <div>
+          <SetPageTitle title="Screening Reports" />
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand to-violet-600 flex items-center justify-center shadow-lg shadow-brand/20">
+              <BarChart3 className="w-3.5 h-3.5 text-white" />
+            </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">Screening Reports</h1>
+          <p className="text-white/50 text-xs font-medium">Resume match scores and AI assessment results across all job pipelines.</p>
         </div>
-        <p className="text-white/50 text-xs font-medium">Resume match scores and AI assessment results across all job pipelines.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -15454,7 +15463,7 @@ function InterviewReports() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="border-b border-white/10 pb-6">
-        <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2">Interview Reports</h1>
+        <SetPageTitle title="Interview Reports" />
         <p className="text-xs text-white font-medium">AI voice interview scorecards, transcripts, and completion status.</p>
       </div>
 
@@ -15570,7 +15579,16 @@ function InterviewReports() {
 
 
 
+export function SetPageTitle({ title }: { title: string }) {
+  const { setPageTitle } = usePageTitle();
+  useEffect(() => {
+    setPageTitle(title);
+  }, [title, setPageTitle]);
+  return null;
+}
+
 export default function App() {
+  const [pageTitle, setPageTitle] = useState('HireAI');
   // Global Reseller & White-Label Settings (Context Bindings)
   const [whiteLabelBrandingName, setWhiteLabelBrandingName] = useState(() => localStorage.getItem('wl_brand_name') || 'HireAI');
   const [whiteLabelMarkupFactor, setWhiteLabelMarkupFactor] = useState(() => parseFloat(localStorage.getItem('wl_markup') || '1.0'));
@@ -15737,7 +15755,8 @@ export default function App() {
     <Router>
       <NotificationContext.Provider value={{ confirm, notify }}>
         <ProfileContext.Provider value={{ profile, organization, isAdmin, refreshProfile, whiteLabelBrandingName, setWhiteLabelBrandingName, whiteLabelMarkupFactor, setWhiteLabelMarkupFactor, whiteLabelLogoUrl, setWhiteLabelLogoUrl, stripeModalOpen, setStripeModalOpen, theme, setTheme }}>
-          <Layout user={user} isAdmin={isAdmin}>
+          <PageTitleContext.Provider value={{ pageTitle, setPageTitle }}>
+            <Layout user={user} isAdmin={isAdmin}>
             {user ? (
               <Suspense fallback={<GlobalLoader />}>
                 <Routes>
@@ -15837,8 +15856,9 @@ export default function App() {
             ))}
           </AnimatePresence>
         </div>
-      </ProfileContext.Provider>
-    </NotificationContext.Provider>
+          </PageTitleContext.Provider>
+        </ProfileContext.Provider>
+      </NotificationContext.Provider>
   </Router>
 );
 }
