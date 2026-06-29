@@ -5860,11 +5860,11 @@ function JobDetail() {
                   </Button>
                 </>
               )}
-              <div className="flex flex-nowrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10 overflow-x-auto w-full lg:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7 shrink-0">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">Sort</span>
+              <div className="flex flex-wrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10 w-full lg:w-auto">
+                <div className="flex flex-1 sm:flex-none items-center gap-2 px-2 border-r border-white/10 h-7 min-w-[100px]">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Sort</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer whitespace-nowrap" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full" 
                     value={sortBy} 
                     onChange={(e) => setSortBy(e.target.value)}
                   >
@@ -5873,10 +5873,10 @@ function JobDetail() {
                     <option>Recent</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7 shrink-0">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">Status</span>
+                <div className="flex flex-1 sm:flex-none items-center gap-2 px-2 border-r sm:border-r border-white/10 h-7 min-w-[100px]">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Status</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer whitespace-nowrap" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full" 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
@@ -5886,10 +5886,10 @@ function JobDetail() {
                     <option value="rejected">Rejected (under 40)</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 px-2 h-7 shrink-0">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">Role</span>
+                <div className="flex flex-1 sm:flex-none items-center gap-2 px-2 h-7 min-w-[100px]">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Role</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[120px] truncate" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[120px] truncate" 
                     value={roleFilter} 
                     onChange={(e) => setRoleFilter(e.target.value)}
                   >
