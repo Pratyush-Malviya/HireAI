@@ -1518,11 +1518,12 @@ app.post("/api/ai/generate-job-description", async (req, res) => {
       CONTEXT/BRIEF DETAILS: ${description || "Not specified"}
       
       Requirements:
-      1. Use a modern, professional tone.
-      2. Format the response entirely in Markdown.
-      3. Include standard sections: About the Role, Key Responsibilities, Must-Have Skills, Nice-to-Have Skills, and What We Offer.
-      4. Make realistic assumptions based on the title and brief details.
-      5. Output ONLY the raw Markdown text (no JSON, no intro).`,
+      1. Use a modern, professional, yet very human and conversational tone.
+      2. Write it as plain text paragraphs without any markdown formatting.
+      3. DO NOT use asterisks (*), hashtags (#), or em dashes (—).
+      4. Include standard sections (About the Role, Key Responsibilities, Must-Have Skills, Nice-to-Have Skills, What We Offer) but format them as plain text paragraphs.
+      5. Make realistic assumptions based on the title and brief details.
+      6. Output ONLY the raw human-readable text (no JSON, no intro).`,
       config: {
         temperature: 0.7,
       },
