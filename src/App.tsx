@@ -5450,7 +5450,7 @@ function JobDetail() {
   if (!job) return <div className="p-20 text-center">Job sequence not found.</div>;
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-20 overflow-x-hidden w-full max-w-[100vw]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-4">
@@ -5797,7 +5797,7 @@ function JobDetail() {
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div>
+              <div className="px-4 w-full break-words">
                 <h2 className="text-2xl font-black">Candidates ({filteredCandidates.length})</h2>
                 <p className="text-white text-sm">Refined, sortable shortlist with action-ready interview workflows.</p>
               </div>
@@ -5861,7 +5861,7 @@ function JobDetail() {
                 </>
               )}
               <div className="flex flex-wrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10 w-full lg:w-auto">
-                <div className="flex flex-1 sm:flex-none items-center gap-2 px-2 border-r border-white/10 h-7 min-w-[100px]">
+                <div className="flex flex-1 min-w-[100px] items-center gap-2 px-2 border-r border-white/10 h-7">
                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Sort</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full" 
@@ -5873,7 +5873,7 @@ function JobDetail() {
                     <option>Recent</option>
                   </select>
                 </div>
-                <div className="flex flex-1 sm:flex-none items-center gap-2 px-2 border-r sm:border-r border-white/10 h-7 min-w-[100px]">
+                <div className="flex flex-1 min-w-[100px] items-center gap-2 px-2 border-r border-white/10 h-7">
                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Status</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full" 
@@ -5886,7 +5886,7 @@ function JobDetail() {
                     <option value="rejected">Rejected (under 40)</option>
                   </select>
                 </div>
-                <div className="flex flex-1 sm:flex-none items-center gap-2 px-2 h-7 min-w-[100px]">
+                <div className="flex flex-1 min-w-[100px] items-center gap-2 px-2 h-7">
                   <span className="text-[10px] font-black text-white uppercase tracking-widest">Role</span>
                   <select 
                     className="bg-transparent text-xs font-black focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[120px] truncate" 
@@ -5901,7 +5901,7 @@ function JobDetail() {
                 </div>
               </div>
               <div className="flex flex-1 w-full sm:w-auto gap-2">
-                <div className="relative group flex-1 min-w-0">
+                <div className="relative group flex-grow min-w-0">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white group-focus-within:text-brand transition-colors" />
                   <input 
                     type="text" 
