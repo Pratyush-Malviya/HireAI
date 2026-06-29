@@ -534,13 +534,13 @@ function PlaceholderScoreCircle({ isProcessing }: { isProcessing: boolean }) {
 function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 transparent/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/5 backdrop-blur-sm animate-in fade-in duration-300">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="glass-premium rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col border border-white/10 overscroll-contain"
       >
-        <div className="p-8 border-b border-white/10 flex items-center justify-between transparent/50">
+        <div className="p-8 border-b border-white/10 flex items-center justify-between bg-white/5">
           <h3 className="font-display font-bold text-xl text-white tracking-tight">{title}</h3>
           <button onClick={onClose} className="p-2 hover:glass-premium hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-white/10 group">
             <Plus className="w-5 h-5 rotate-45 text-white group-hover:text-white" />
@@ -558,7 +558,7 @@ function Button({ className, variant = 'primary', size = 'md', as: Component = '
   const variants = {
     primary: 'glass-premium text-white hover:bg-white/5 shadow-sm',
     secondary: 'bg-brand-dark text-white hover:bg-brand-dark shadow-sm',
-    outline: 'border border-white/10 hover:border-white/20 hover:transparent text-white font-medium',
+    outline: 'border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-medium',
     ghost: 'hover:bg-transparent text-white font-medium',
     brand: 'bg-brand-dark text-white hover:bg-brand-dark font-medium tracking-tight',
   };
@@ -722,7 +722,7 @@ function AudioWaveform({ analyserRef, isListening }: { analyserRef: React.RefObj
         ref={canvasRef} 
         width={192} 
         height={32} 
-        className="w-48 h-8 rounded-full transparent/40 border border-[#161b22] shadow-inner px-2"
+        className="w-48 h-8 rounded-full bg-white/5 border border-[#161b22] shadow-inner px-2"
       />
     </div>
   );
@@ -1889,7 +1889,7 @@ function InterviewRoom() {
         <div className="w-full lg:w-80 flex flex-col glass-premium/60 border border-white/10/80 rounded-3xl overflow-hidden shrink-0 shadow-2xl relative">
           
           {/* Header Tabs Navigation */}
-          <div className="flex border-b border-white/10/80 transparent/40 p-1.5 rounded-t-3xl shrink-0">
+          <div className="flex border-b border-white/10/80 bg-white/5 p-1.5 rounded-t-3xl shrink-0">
             <button
               onClick={() => setSidebarTab('monitor')}
               className={cn("flex-1 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer", 
@@ -1960,7 +1960,7 @@ function InterviewRoom() {
                   </div>
 
                   {/* Tab Tracking Pill */}
-                  <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
+                  <div className="bg-white/5 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
                       <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Tab Focus</span>
                       <span className="text-[9px] text-white font-medium">Warnings: {tabWarnings} / 3</span>
@@ -1980,7 +1980,7 @@ function InterviewRoom() {
                   </div>
 
                   {/* Face Presence Pill */}
-                  <div className="transparent/40 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
+                  <div className="bg-white/5 border border-slate-855 rounded-2xl p-3.5 flex justify-between items-center">
                     <div>
                       <span className="block text-[10px] font-black text-white uppercase tracking-wider mb-0.5">Face Tracking</span>
                       <span className={cn("text-[9px] font-black uppercase tracking-wider", 
@@ -2120,7 +2120,7 @@ function InterviewRoom() {
           
           {/* Dashboard Header Overlay */}
           <div className="absolute top-0 left-0 w-full p-5 flex items-center justify-between z-20 pointer-events-none">
-            <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 shadow-2xl pointer-events-auto">
+            <div className="bg-white/5 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 shadow-2xl pointer-events-auto">
               <div className="w-2 h-2 rounded-full bg-red-655 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
               <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Room</span>
               <div className="h-3 w-px bg-white/5" />
@@ -2128,7 +2128,7 @@ function InterviewRoom() {
             </div>
             
             {!concluded && (
-              <div className="transparent/80 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-3.5 shadow-2xl pointer-events-auto">
+              <div className="bg-white/5 backdrop-blur-xl border border-slate-855 px-3.5 py-1.5 rounded-xl flex items-center gap-3.5 shadow-2xl pointer-events-auto">
                 <div className="flex flex-col items-end">
                   <span className="text-[8px] font-black text-white uppercase tracking-widest leading-none mb-1">Room Signal</span>
                   <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
@@ -2522,7 +2522,7 @@ function InterviewRoom() {
                           </Button>
                         </motion.div>
                       ) : (
-                        <div className="text-center py-1 transparent/40 rounded-full border border-[#161b22]/60 max-w-[200px] mx-auto">
+                        <div className="text-center py-1 bg-white/5 rounded-full border border-[#161b22]/60 max-w-[200px] mx-auto">
                           <span className="text-[8px] font-black text-white uppercase tracking-[0.2em]">
                              {isSpeaking ? "Receiving Data" : isListening ? "Listening" : "Idle mic status"}
                           </span>
@@ -2610,9 +2610,9 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 transparent/50 backdrop-blur-xs animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-white/5 backdrop-blur-xs animate-in fade-in duration-300">
       <div className="glass-premium rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/10 flex flex-col max-h-[90vh]">
-        <div className="p-6 border-b border-white/10 flex items-center justify-between transparent/50">
+        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center shrink-0 shadow-sm">
               <CreditCard className="w-4 h-4 text-white" />
@@ -2638,7 +2638,7 @@ function StripeCheckoutModal({ isOpen, onClose, defaultPlan, onPaymentSuccess }:
                       onClick={() => setSelectedPlan(planKey)}
                       className={cn(
                         "p-4 rounded-2xl border text-left flex justify-between items-center transition-all min-h-[44px]",
-                        selectedPlan === planKey ? "border-[#161b22] transparent ring-1 ring-[#161b22]" : "border-white/10 hover:transparent"
+                        selectedPlan === planKey ? "border-[#161b22] transparent ring-1 ring-[#161b22]" : "border-white/10 hover:bg-white/5"
                       )}
                     >
                       <div>
@@ -2876,7 +2876,7 @@ function PublicSharedScorecard() {
               {Object.entries(candidate.scorecard?.dimensions || {}).map(([key, value]: any) => {
                 if (key === 'redFlags' || key === 'signalDensity') return null;
                 return (
-                  <div key={key} className="transparent/50 border border-white/10/40 p-4 rounded-2xl text-center">
+                  <div key={key} className="bg-white/5 border border-white/10/40 p-4 rounded-2xl text-center">
                     <p className="text-[10px] font-bold text-white uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
                     <p className="text-lg font-display text-white font-medium mt-1">{value?.score}%</p>
                   </div>
@@ -2889,7 +2889,7 @@ function PublicSharedScorecard() {
           {candidate.scorecard?.recommendation?.summary && (
             <div className="pt-6 border-t border-white/10 space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-widest text-white">Executive Summary</h3>
-              <p className="text-sm leading-relaxed text-white transparent/40 p-4 rounded-2xl border border-white/10/30">{candidate.scorecard.recommendation.summary}</p>
+              <p className="text-sm leading-relaxed text-white bg-white/5 p-4 rounded-2xl border border-white/10/30">{candidate.scorecard.recommendation.summary}</p>
             </div>
           )}
 
@@ -2897,7 +2897,7 @@ function PublicSharedScorecard() {
           {interview && (
             <div className="pt-6 border-t border-white/10 space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-white">Conversation Transcripts</h3>
-              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-white/10/50 rounded-2xl p-4 transparent/30">
+              <div className="space-y-4 max-h-[300px] overflow-y-auto border border-white/10/50 rounded-2xl p-4 bg-white/5">
                 {interview.messages?.map((msg: any, i: number) => (
                   <div key={i} className="text-xs leading-relaxed">
                     <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-white")}>
@@ -3106,7 +3106,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                 </div>
                 <button 
                   onClick={() => setStripeModalOpen(true)}
-                  className="w-full py-1 glass-premium hover:transparent text-white rounded text-[8px] font-bold uppercase tracking-wider transition-colors border border-slate-750"
+                  className="w-full py-1 glass-premium hover:bg-white/5 text-white rounded text-[8px] font-bold uppercase tracking-wider transition-colors border border-slate-750"
                 >
                   Buy Credits
                 </button>
@@ -4297,7 +4297,7 @@ function NewJob() {
             </button>
 
             {showConfig && (
-              <div className="mt-6 space-y-8 p-6 transparent/50 rounded-3xl border border-white/10/50 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="mt-6 space-y-8 p-6 bg-white/5 rounded-3xl border border-white/10/50 animate-in fade-in slide-in-from-top-2 duration-300">
                 {/* Threshold Section */}
                 <div className="space-y-4">
                   <h3 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
@@ -5500,7 +5500,7 @@ function JobDetail() {
             variant="outline"
             id="scoring-settings-btn"
             onClick={() => setShowSettingsDrawer(true)}
-            className="px-5 h-12 rounded-xl text-sm font-bold border-brand/10 hover:transparent transition-all text-white flex items-center gap-1.5"
+            className="px-5 h-12 rounded-xl text-sm font-bold border-brand/10 hover:bg-white/5 transition-all text-white flex items-center gap-1.5"
           >
             <Sliders className="w-4 h-4" />
             Evaluation Settings
@@ -5509,7 +5509,7 @@ function JobDetail() {
           <Button
             variant="outline"
             onClick={() => setIsSelectResumeModalOpen(true)}
-            className="px-5 h-12 rounded-xl text-sm font-bold border-white/10 hover:transparent transition-all text-white flex items-center gap-1.5"
+            className="px-5 h-12 rounded-xl text-sm font-bold border-white/10 hover:bg-white/5 transition-all text-white flex items-center gap-1.5"
           >
             <Database className="w-4 h-4 text-brand" />
             Screen Pre-uploaded Resumes
@@ -5530,7 +5530,7 @@ function JobDetail() {
         <button
           type="button"
           onClick={() => setIsJobDescCollapsed(!isJobDescCollapsed)}
-          className="w-full flex items-center justify-between p-5 transparent/50 hover:transparent transition-all font-bold text-sm text-white"
+          className="w-full flex items-center justify-between p-5 bg-white/5 hover:bg-white/5 transition-all font-bold text-sm text-white"
         >
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-brand" />
@@ -5556,7 +5556,7 @@ function JobDetail() {
               <div className="p-6 space-y-6">
                 {/* Requirements Grid */}
                 {job.requirements && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transparent/30 p-5 rounded-2xl border border-white/10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-white/5 p-5 rounded-2xl border border-white/10">
                     <div className="space-y-1">
                       <span className="text-[9px] font-black uppercase text-white tracking-wider block">Role Type</span>
                       <span className="text-xs font-bold text-white">{job.requirements.role_type || 'N/A'}</span>
@@ -5621,7 +5621,7 @@ function JobDetail() {
                 {/* Job Description Text */}
                 <div className="space-y-2 border-t border-white/10 pt-5">
                   <span className="text-[9px] font-black uppercase text-white tracking-wider block">Full Job Description Context</span>
-                  <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words font-medium max-h-80 overflow-y-auto overflow-x-hidden transparent/20 p-4 rounded-xl border border-white/10/50 custom-scrollbar w-full">
+                  <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words font-medium max-h-80 overflow-y-auto overflow-x-hidden bg-white/5 p-4 rounded-xl border border-white/10/50 custom-scrollbar w-full">
                     {job.description}
                   </div>
                 </div>
@@ -6270,7 +6270,7 @@ function JobDetail() {
                           key={candidate.id} 
                           className={cn(
                             "transition-colors cursor-pointer group relative",
-                            isSelected ? "bg-brand/10" : isBestMatch ? "bg-brand/10 hover:bg-brand/10" : "hover:transparent"
+                            isSelected ? "bg-brand/10" : isBestMatch ? "bg-brand/10 hover:bg-brand/10" : "hover:bg-white/5"
                           )} 
                           onClick={() => navigate(`/candidates/${candidate.id}`)}
                         >
@@ -6710,7 +6710,7 @@ function JobDetail() {
                     <label className="text-[9px] font-black uppercase text-white tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email" inputMode="email" autoComplete="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
@@ -6767,7 +6767,7 @@ function JobDetail() {
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-white hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-white hover:bg-white/5 rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -6882,7 +6882,7 @@ function JobDetail() {
                       }}
                       className={cn(
                         "p-3 flex items-center justify-between gap-4 transition-colors cursor-pointer",
-                        candidate.alreadyScreened ? "transparent/60 opacity-60 cursor-not-allowed" : "hover:transparent/50"
+                        candidate.alreadyScreened ? "bg-white/5 opacity-60 cursor-not-allowed" : "hover:bg-white/10"
                       )}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1" onClick={(e) => e.stopPropagation()}>
@@ -8163,7 +8163,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'core' 
               ? "glass-premium text-white shadow-md scale-102 font-extrabold" 
-              : "text-white hover:text-white hover:transparent"
+              : "text-white hover:text-white hover:bg-white/5"
           )}
         >
           <FileText className="w-4 h-4" />
@@ -8176,7 +8176,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'offer' 
               ? "glass-premium text-white shadow-md scale-102 font-extrabold" 
-              : "text-white hover:text-white hover:transparent"
+              : "text-white hover:text-white hover:bg-white/5"
           )}
         >
           <Award className="w-4 h-4" />
@@ -8189,7 +8189,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'campaign' 
               ? "glass-premium text-white shadow-md scale-102 font-extrabold" 
-              : "text-white hover:text-white hover:transparent"
+              : "text-white hover:text-white hover:bg-white/5"
           )}
         >
           <Send className="w-4 h-4" />
@@ -8202,7 +8202,7 @@ function CandidateDetail() {
             "flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
             activeDetailTab === 'proctoring' 
               ? "glass-premium text-white shadow-md scale-102 font-extrabold" 
-              : "text-white hover:text-white hover:transparent"
+              : "text-white hover:text-white hover:bg-white/5"
           )}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -9019,7 +9019,7 @@ function CandidateDetail() {
                   <label className="text-[9px] font-black uppercase text-white tracking-wider block">Meeting URL (Google Meet/Zoom/Teams)</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     placeholder="Paste meeting link here"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
@@ -9030,7 +9030,7 @@ function CandidateDetail() {
                   <label className="text-[9px] font-black uppercase text-white tracking-wider block">Bot Display Name</label>
                   <input
                     type="text"
-                    className="w-full text-xs font-extrabold px-3.5 py-2.5 transparent/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
+                    className="w-full text-xs font-extrabold px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-brand focus:glass-premium transition-all shadow-sm"
                     value={botName}
                     onChange={(e) => setBotName(e.target.value)}
                   />
@@ -9327,7 +9327,7 @@ function CandidateDetail() {
                             )}
                           </div>
                         ) : (
-                          <div className="py-4 text-center border-2 border-dashed border-white/10 rounded-2xl transparent/30">
+                          <div className="py-4 text-center border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
                             <p className="text-xs text-white italic">No analysis data available for this dimension.</p>
                           </div>
                         )}
@@ -9507,7 +9507,7 @@ function CandidateDetail() {
                     <button 
                       key={type}
                       type="button"
-                      className="p-2.5 rounded-xl border border-white/10 text-center text-[10px] font-extrabold uppercase tracking-wider text-white/70 hover:transparent"
+                      className="p-2.5 rounded-xl border border-white/10 text-center text-[10px] font-extrabold uppercase tracking-wider text-white/70 hover:bg-white/5"
                     >
                       {type}
                     </button>
@@ -9758,7 +9758,7 @@ function CandidateDetail() {
                           "p-3 rounded-xl border flex items-center gap-2 text-left text-xs font-bold transition-all flex-1 min-w-[200px]",
                             campaignTemplate === temp.id 
                               ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" 
-                              : "glass-premium border-white/10 text-white/60 hover:transparent"
+                              : "glass-premium border-white/10 text-white/60 hover:bg-white/5"
                         )}
                       >
                         <TIcon className="w-4 h-4 text-emerald-500" />
@@ -10117,7 +10117,7 @@ function CandidateDetail() {
                   </div>
                 )}
                 {!cameraAnomalyMock && !gazeDeviationMock && tabSwitchCountMock === 0 && (
-                  <div className="py-6 text-center border-2 border-dashed border-white/10 rounded-2xl transparent/50">
+                  <div className="py-6 text-center border-2 border-dashed border-white/10 rounded-2xl bg-white/5">
                     <p className="text-xs text-white italic">No violation blocks detected.</p>
                   </div>
                 )}
@@ -10175,7 +10175,7 @@ function CandidateDetail() {
                     <label className="text-[9px] font-black uppercase text-white tracking-wider block">Recipient Email Address</label>
                     <input
                       type="email" inputMode="email" autoComplete="email"
-                      className="w-full text-xs font-extrabold px-3.5 py-3 transparent/50 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
+                      className="w-full text-xs font-extrabold px-3.5 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand-dark text-white transition-all shadow-sm focus:glass-premium"
                       placeholder="Enter candidate email address"
                       value={inviteEmailInput}
                       onChange={(e) => setInviteEmailInput(e.target.value)}
@@ -10232,7 +10232,7 @@ function CandidateDetail() {
                   <Button
                     variant="outline"
                     type="button"
-                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-white hover:transparent rounded-xl flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 text-[10px] font-black uppercase tracking-wider border-white/10 text-white hover:bg-white/5 rounded-xl flex items-center gap-1.5 whitespace-nowrap"
                     onClick={() => {
                       const link = `${window.location.origin}/interview/${activeInviteCandidate.id}`;
                       navigator.clipboard.writeText(link);
@@ -11243,7 +11243,7 @@ function OrgAdminPanel() {
         <Button
           variant="outline"
           onClick={() => setFiltersOpen(true)}
-          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-white/10 text-white hover:transparent shrink-0 shadow-sm rounded-xl"
+          className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest px-5 h-11 glass-premium border-white/10 text-white hover:bg-white/5 shrink-0 shadow-sm rounded-xl"
         >
           <Filter className="w-4 h-4 text-white" />
           Filters
@@ -13313,7 +13313,7 @@ function SuperAdminPanel() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {recentCandidates.map(c => (
-                          <tr key={c.id} className="hover:transparent transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
+                          <tr key={c.id} className="hover:bg-white/5 transition-colors cursor-pointer group" onClick={() => navigate(`/candidates/${c.id}`)}>
                             <td className="px-6 py-4">
                               <div className="font-bold text-sm group-hover:text-white transition-colors uppercase tracking-tight">{c.fullName}</div>
                               <div className="text-[10px] text-white font-mono italic">{c.email}</div>
@@ -13364,7 +13364,7 @@ function SuperAdminPanel() {
                     <div 
                       key={c.id} 
                       onClick={() => navigate(`/candidates/${c.id}`)}
-                      className="p-4 hover:transparent transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-transparent"
+                      className="p-4 hover:bg-white/5 transition-all flex flex-col gap-3 relative group cursor-pointer active:bg-transparent"
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -13447,8 +13447,8 @@ function SuperAdminPanel() {
                                 key={org.id} 
                                 onClick={() => setSelectedOrgId(selectedOrgId === org.id ? null : org.id)}
                                 className={cn(
-                                  "hover:transparent/50 cursor-pointer transition-colors",
-                                  selectedOrgId === org.id ? "transparent/80" : ""
+                                  "hover:bg-white/10 cursor-pointer transition-colors",
+                                  selectedOrgId === org.id ? "bg-white/5" : ""
                                 )}
                               >
                                 <td className="px-4 py-3">
@@ -13653,7 +13653,7 @@ function SuperAdminPanel() {
                                 { name: "Sarah Chen", email: "sarah.chen@" + (org.domain || "example.com"), role: "Owner" },
                                 { name: "Marcus Aurelius", email: "marcus.aurelius@" + (org.domain || "example.com"), role: "Recruiter" }
                               ].map(u => (
-                                <div key={u.email} className="flex justify-between items-center transparent/50 p-2.5 rounded-xl border border-white/10">
+                                <div key={u.email} className="flex justify-between items-center bg-white/5 p-2.5 rounded-xl border border-white/10">
                                   <div>
                                     <p className="text-xs font-bold text-white">{u.name}</p>
                                     <p className="text-[10px] text-white font-mono">{u.email}</p>
@@ -13666,7 +13666,7 @@ function SuperAdminPanel() {
                         </Card>
                       );
                     })() : (
-                      <Card className="p-8 border-dashed border-white/10 transparent/20 text-center flex flex-col items-center justify-center space-y-4">
+                      <Card className="p-8 border-dashed border-white/10 bg-white/5 text-center flex flex-col items-center justify-center space-y-4">
                         <Users className="w-12 h-12 text-white" />
                         <h4 className="font-bold text-xs uppercase tracking-wider text-white">Select an Organization</h4>
                         <p className="text-[10px] text-white max-w-[200px] leading-relaxed">Click any row in the registry to inspect tenant workspace settings, assign credits, and list corporate recruiters.</p>
@@ -13734,7 +13734,7 @@ function SuperAdminPanel() {
                          { inv: "Inv-9813", name: "Stellar Tech Labs", credits: 1000, amount: "$1,299.00", date: "May 28, 2026", status: "Paid" },
                          { inv: "Inv-9814", name: "Infinity Healthcare Corp", credits: 200, amount: "$250.00", date: "May 20, 2026", status: "Manual" }
                        ].map(i => (
-                         <div key={i.inv} className="transparent/50 p-3 rounded-xl border border-white/10 space-y-1.5 text-[11px]">
+                         <div key={i.inv} className="bg-white/5 p-3 rounded-xl border border-white/10 space-y-1.5 text-[11px]">
                            <div className="flex justify-between font-bold">
                              <span className="text-white">{i.inv} • {i.name}</span>
                              <span className="text-white">{i.amount}</span>
@@ -14127,7 +14127,7 @@ function SuperAdminPanel() {
                   <h3 className="text-xs font-bold uppercase tracking-widest text-white">Client Tenants</h3>
                   <div className="space-y-3">
                     {clientTenants.map(ct => (
-                      <div key={ct.id} className="transparent/50 p-3 rounded-xl border border-white/10 space-y-1.5">
+                      <div key={ct.id} className="bg-white/5 p-3 rounded-xl border border-white/10 space-y-1.5">
                         {editingTenantId === ct.id ? (
                           <>
                             <input
