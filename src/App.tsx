@@ -3009,7 +3009,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     if (isImmersive) {
       return (
         <div className="flex h-[100dvh] w-full transparent font-sans text-white overflow-hidden">
-          <main className="flex-1 overflow-y-auto transparent w-full h-full">
+          <main className="flex-1 overflow-y-auto transparent w-full h-full min-w-0">
             {children}
           </main>
         </div>
@@ -3155,7 +3155,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
             )}
           </AnimatePresence>
           
-          <main className="flex-1 overflow-y-auto transparent p-4 sm:p-6 lg:p-8">
+          <main className="flex-1 overflow-y-auto transparent p-4 sm:p-6 lg:p-8 min-w-0">
             {children}
           </main>
         </div>
@@ -3706,7 +3706,7 @@ function ResumeBank() {
       </div>
 
       <div className="grid grid-cols-12 gap-8 items-start">
-        <aside className="col-span-12 lg:col-span-3 space-y-5">
+        <aside className="col-span-12 lg:col-span-3 space-y-5 min-w-0">
           <Card className="p-5 border border-white/10 rounded-2xl">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-1 h-5 bg-brand rounded-full" />
@@ -3772,7 +3772,7 @@ function ResumeBank() {
           </Card>
         </aside>
 
-        <div className="col-span-12 lg:col-span-9">
+        <div className="col-span-12 lg:col-span-9 min-w-0">
           <Card className="overflow-hidden border border-white/10 rounded-2xl">
             {loading ? (
               <div className="p-20 text-center flex flex-col items-center justify-center space-y-4">
@@ -5724,7 +5724,7 @@ function JobDetail() {
         </aside>
 
         {/* Main Content */}
-        <div className="col-span-12 lg:col-span-9 space-y-8">
+        <div className="col-span-12 lg:col-span-9 space-y-8 min-w-0">
           {uploadProgress && (
             <div className="glass-premium border border-white/10 rounded-2xl p-6 shadow-sm space-y-4 animate-in fade-in-50 slide-in-from-top-4 duration-300">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
