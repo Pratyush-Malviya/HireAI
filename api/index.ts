@@ -1519,9 +1519,9 @@ app.post("/api/ai/generate-job-description", async (req, res) => {
       
       Requirements:
       1. Use a modern, professional, yet very human and conversational tone.
-      2. Write it as plain text paragraphs without any markdown formatting.
-      3. DO NOT use asterisks (*), hashtags (#), or em dashes (—).
-      4. Include standard sections (About the Role, Key Responsibilities, Must-Have Skills, Nice-to-Have Skills, What We Offer) but format them as plain text paragraphs.
+      2. DO NOT use asterisks (*) or hashtags (#). You may use standard hyphens (-) or bullet characters (•) for lists.
+      3. Structure the output into standard sections (About the Role, Key Responsibilities, Must-Have Skills, Nice-to-Have Skills, What We Offer).
+      4. Use bullet points for the responsibilities, skills, and offerings sections to make it easy to read.
       5. Make realistic assumptions based on the title and brief details.
       6. Output ONLY the raw human-readable text (no JSON, no intro).`,
       config: {
