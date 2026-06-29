@@ -5814,12 +5814,12 @@ function JobDetail() {
                 </Button>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               {selectedCandidates.length > 0 && (
                 <Button 
                   variant="brand" 
                   size="sm" 
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] h-9 px-4 flex items-center gap-1.5 shadow-md shadow-emerald-100"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-widest text-[10px] h-9 px-4 flex items-center gap-1.5 shadow-md shadow-emerald-100 w-full sm:w-auto"
                   onClick={handleBulkInvite}
                   disabled={bulkInviting}
                 >
@@ -5841,7 +5841,7 @@ function JobDetail() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-brand/10 text-white border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9"
+                    className="bg-brand/10 text-white border-brand/10 hover:bg-brand/10 font-black uppercase tracking-widest text-[10px] h-9 flex-1 sm:flex-none"
                     onClick={() => handleResearchAll(false)}
                     disabled={researchingAll || uploading}
                   >
@@ -5851,7 +5851,7 @@ function JobDetail() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="text-white border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 font-black uppercase tracking-widest text-[10px] h-9"
+                    className="text-white border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 font-black uppercase tracking-widest text-[10px] h-9 flex-1 sm:flex-none"
                     onClick={() => handleResearchAll(true)}
                     disabled={researchingAll || uploading}
                   >
@@ -5860,11 +5860,11 @@ function JobDetail() {
                   </Button>
                 </>
               )}
-              <div className="flex flex-wrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10">
-                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Sort</span>
+              <div className="flex flex-nowrap items-center gap-2 bg-transparent p-1 rounded-xl border border-white/10 overflow-x-auto w-full lg:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7 shrink-0">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">Sort</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer whitespace-nowrap" 
                     value={sortBy} 
                     onChange={(e) => setSortBy(e.target.value)}
                   >
@@ -5873,10 +5873,10 @@ function JobDetail() {
                     <option>Recent</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Status</span>
+                <div className="flex items-center gap-2 px-2 border-r border-white/10 h-7 shrink-0">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">Status</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer whitespace-nowrap" 
                     value={statusFilter} 
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
@@ -5886,10 +5886,10 @@ function JobDetail() {
                     <option value="rejected">Rejected (under 40)</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-2 px-2 h-7">
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Role</span>
+                <div className="flex items-center gap-2 px-2 h-7 shrink-0">
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest whitespace-nowrap">Role</span>
                   <select 
-                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[80px] sm:max-w-[120px] truncate" 
+                    className="bg-transparent text-xs font-black focus:outline-none cursor-pointer max-w-[120px] truncate" 
                     value={roleFilter} 
                     onChange={(e) => setRoleFilter(e.target.value)}
                   >
@@ -5900,29 +5900,31 @@ function JobDetail() {
                   </select>
                 </div>
               </div>
-              <div className="relative group flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white group-focus-within:text-brand transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Search candidates..." 
-                  className="pl-10 pr-4 py-2 transparent border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex bg-transparent p-1 rounded-xl border border-white/10 h-9 shrink-0">
-                <button 
-                  onClick={() => setViewMode('list')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
-                >
-                  <List className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => setViewMode('grid')} 
-                  className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
+              <div className="flex flex-1 w-full sm:w-auto gap-2">
+                <div className="relative group flex-1 min-w-0">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white group-focus-within:text-brand transition-colors" />
+                  <input 
+                    type="text" 
+                    placeholder="Search candidates..." 
+                    className="pl-10 pr-4 py-2 transparent border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-all w-full"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div className="flex bg-transparent p-1 rounded-xl border border-white/10 h-9 shrink-0">
+                  <button 
+                    onClick={() => setViewMode('list')} 
+                    className={cn("p-1.5 rounded-lg transition-all", viewMode === 'list' ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => setViewMode('grid')} 
+                    className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "glass-premium shadow-sm text-white" : "text-white hover:text-white")}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
