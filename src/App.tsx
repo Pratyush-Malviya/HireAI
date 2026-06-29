@@ -5969,10 +5969,10 @@ function JobDetail() {
                                 <Sparkles className="w-2.5 h-2.5 animate-pulse" /> Forensic Screening
                               </span>
                             </div>
-                            <p className="text-[10px] text-white font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 ">
-                              {candidate.currentRole} 
-                              <span className="w-1 h-1 rounded-full bg-[#c9d1d9]" />
-                              Active Session
+                            <p className="text-[10px] text-white font-black uppercase tracking-widest mt-1 flex items-center gap-1.5 truncate">
+                              <span className="truncate">{candidate.currentRole}</span>
+                              <span className="w-1 h-1 rounded-full bg-[#c9d1d9] shrink-0" />
+                              <span className="shrink-0">Active Session</span>
                             </p>
                           </div>
                         </div>
@@ -5984,7 +5984,7 @@ function JobDetail() {
                           <div className="h-6 w-24 bg-slate-150 bg-transparent rounded-lg animate-pulse" />
                         </div>
                         
-                        <div className="flex items-center justify-between pt-5 border-t border-slate-50">
+                        <div className="flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-slate-50">
                           <div className="px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 bg-brand/10 text-white border border-brand/10">
                             <div className="w-2 h-2 rounded-full bg-brand animate-ping" />
                             Analyzing Resume Stack
@@ -6076,11 +6076,11 @@ function JobDetail() {
                              <span className="text-[8px] font-black bg-brand-dark text-white px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm">Best Match</span>
                            )}
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] text-white font-black uppercase tracking-widest flex items-center gap-1.5 ">
-                            {candidate.currentRole} 
-                            <span className="w-1 h-1 rounded-full bg-white/5" />
-                            {formatDate(candidate.createdAt)}
+                        <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                          <p className="text-[10px] text-white font-black uppercase tracking-widest flex items-center gap-1.5 truncate">
+                            <span className="truncate">{candidate.currentRole}</span>
+                            <span className="w-1 h-1 rounded-full bg-white/5 shrink-0" />
+                            <span className="shrink-0">{formatDate(candidate.createdAt)}</span>
                           </p>
                           {candidate.research && (
                             <div className="flex items-center gap-1 text-brand bg-brand/10 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter border border-brand/10">
@@ -6111,7 +6111,7 @@ function JobDetail() {
                          </span>
                        )}
                     </div>
-                    <div className="flex items-center justify-between pt-5 border-t border-slate-50">
+                    <div className="flex flex-wrap items-center justify-between gap-4 pt-5 border-t border-slate-50">
                       <div className={cn(
                         "px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2",
                         candidate.status === 'processed' ? "bg-green-50 text-green-600 border border-green-100" :
@@ -6124,7 +6124,7 @@ function JobDetail() {
                         )} />
                         {candidate.status === 'processed' ? 'Vetted' : candidate.status}
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <Button 
                           variant="ghost" 
                           size="sm"
