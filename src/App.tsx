@@ -34,7 +34,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
 import { cn, formatDate, formatDateTime, getScoreColor } from './lib/utils';
 import { Job, Candidate, Organization, UserProfile, TeamMember, InterviewEvaluation } from './types';
-import { parseJobDescription, screenCandidate, researchCandidate } from './services/geminiService';
+import { parseJobDescription, screenCandidate, researchCandidate, generateJobDescription } from './services/geminiService';
 const LandingPage = lazy(() => import('./components/LandingPage').then(m => ({ default: m.LandingPage })));
 const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
 const ComposioCallback = lazy(() => import('./components/ComposioCallback').then(m => ({ default: m.ComposioCallback })));
@@ -4133,6 +4133,7 @@ function NewJob() {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [parsingFile, setParsingFile] = useState(false);
+  const [isGeneratingJD, setIsGeneratingJD] = useState(false);
   const [interviewDurationMinutes, setInterviewDurationMinutes] = useState(15);
   const navigate = useNavigate();
   const { notify } = useNotification();
@@ -4175,6 +4176,23 @@ function NewJob() {
       notify(err.message || 'Error processing protocol document', 'error');
     } finally {
       setParsingFile(false);
+    }
+  };
+
+  const handleGenerateJD = async () => {
+    if (!title) {
+      notify('Please enter a Campaign Title first to auto-generate context.', 'error');
+      return;
+    }
+    setIsGeneratingJD(true);
+    try {
+      const res = await generateJobDescription(title, description);
+      setDescription(res.text);
+      notify('Job description auto-generated successfully!', 'success');
+    } catch (err: any) {
+      notify(err.message || 'Failed to auto-generate job description', 'error');
+    } finally {
+      setIsGeneratingJD(false);
     }
   };
 
@@ -4251,11 +4269,22 @@ function NewJob() {
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1 mb-2">
               <label className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Requirement Context</label>
-              <label className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest">
-                <Plus className="w-3.5 h-3.5" />
-                <span>Upload PDF/DOCX</span>
-                <input type="file" theme-target-id="job-file-input" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile} />
-              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleGenerateJD}
+                  disabled={isGeneratingJD || parsingFile}
+                  className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {isGeneratingJD ? 'Generating...' : 'Auto Generate'}
+                </button>
+                <label className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/10 transition-all hover:scale-105 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Upload PDF/DOCX</span>
+                  <input type="file" theme-target-id="job-file-input" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile || isGeneratingJD} />
+                </label>
+              </div>
             </div>
             <textarea
               required

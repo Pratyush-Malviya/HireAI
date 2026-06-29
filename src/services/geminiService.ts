@@ -56,3 +56,18 @@ export async function researchCandidate(
 
   return response.json();
 }
+
+export async function generateJobDescription(title: string, description: string) {
+  const response = await fetch("/api/ai/generate-job-description", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, description }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to generate job description");
+  }
+
+  return response.json();
+}

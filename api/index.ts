@@ -1503,6 +1503,38 @@ const CANDIDATE_SCREENING_SCHEMA = {
   required: ["fullName", "oneLineSummary", "scorecard"],
 };
 
+app.post("/api/ai/generate-job-description", async (req, res) => {
+  const { title, description } = req.body;
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("AI Key missing");
+    }
+    const response = await generateContentWithRetry({
+      model: "gemini-3.1-pro-preview",
+      contents: `You are an expert HR copywriter for a modern tech company. 
+      Generate a professional, comprehensive, and engaging Job Description.
+      
+      JOB TITLE: ${title || "Not specified"}
+      CONTEXT/BRIEF DETAILS: ${description || "Not specified"}
+      
+      Requirements:
+      1. Use a modern, professional tone.
+      2. Format the response entirely in Markdown.
+      3. Include standard sections: About the Role, Key Responsibilities, Must-Have Skills, Nice-to-Have Skills, and What We Offer.
+      4. Make realistic assumptions based on the title and brief details.
+      5. Output ONLY the raw Markdown text (no JSON, no intro).`,
+      config: {
+        temperature: 0.7,
+      },
+    });
+
+    res.json({ text: response.text || "" });
+  } catch (error: any) {
+    console.error("Generate Job Description failed:", error);
+    res.status(500).json({ error: "Failed to generate job description." });
+  }
+});
+
 app.post("/api/ai/parse-job", async (req, res) => {
   const { text } = req.body;
 
