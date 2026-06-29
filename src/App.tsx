@@ -5601,7 +5601,7 @@ function JobDetail() {
                 {/* Job Description Text */}
                 <div className="space-y-2 border-t border-white/10 pt-5">
                   <span className="text-[9px] font-black uppercase text-white tracking-wider block">Full Job Description Context</span>
-                  <div className="text-xs text-white leading-relaxed whitespace-pre-wrap font-medium max-h-80 overflow-y-auto transparent/20 p-4 rounded-xl border border-white/10/50 custom-scrollbar">
+                  <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words font-medium max-h-80 overflow-y-auto overflow-x-hidden transparent/20 p-4 rounded-xl border border-white/10/50 custom-scrollbar w-full">
                     {job.description}
                   </div>
                 </div>

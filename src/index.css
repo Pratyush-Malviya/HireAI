@@ -177,7 +177,7 @@
   }
 
   .saas-button {
-    @apply relative overflow-hidden active:scale-95 transition-all duration-300 rounded-xl font-bold tracking-tight shadow-md text-white bg-gradient-to-r from-brand to-brand-light;
+    @apply relative overflow-hidden active:scale-95 transition-all duration-300 rounded-xl font-bold tracking-tight shadow-md text-white bg-gradient-to-r from-brand to-brand-light min-h-[44px] md:min-h-0;
   }
 }
 
