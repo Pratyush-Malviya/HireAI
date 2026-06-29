@@ -3008,7 +3008,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     const isImmersive = location.pathname.includes('/interview/') || location.pathname.includes('/join/');
     if (isImmersive) {
       return (
-        <div className="flex h-screen w-screen transparent font-sans text-white overflow-hidden">
+        <div className="flex h-[100dvh] w-full transparent font-sans text-white overflow-hidden">
           <main className="flex-1 overflow-y-auto transparent w-full h-full">
             {children}
           </main>
@@ -3017,7 +3017,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
     }
 
     return (
-      <div className="flex h-screen transparent font-sans text-white selection:bg-brand/10 overflow-hidden relative">
+      <div className="flex h-[100dvh] w-full transparent font-sans text-white selection:bg-brand/10 overflow-hidden relative">
         {/* Global Animated Background Effects */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <Particles className="absolute inset-0 opacity-40" quantity={40} color="#818cf8" size={0.6} />
