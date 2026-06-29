@@ -5474,8 +5474,8 @@ function JobDetail() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-4">
-          <Button variant="ghost" className="-ml-2 w-fit px-0" onClick={() => navigate('/')}>
-            <ChevronRight className="w-4 h-4 rotate-180" /> Back to Agents
+          <Button variant="ghost" className="-ml-2 w-fit px-0 hover:bg-white/5" onClick={() => navigate('/')}>
+            <ChevronRight className="w-4 h-4 rotate-180" /> Back
           </Button>
           <div className="flex items-start gap-4">
             <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center text-white border border-brand/10 shadow-sm">
