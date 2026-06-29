@@ -567,24 +567,44 @@ function Button({ className, variant = 'primary', size = 'md', as: Component = '
     md: 'px-4 py-2 text-sm rounded-lg',
     lg: 'px-6 py-3 text-base rounded-xl',
   };
+  
+  const combinedClassName = cn(
+    'font-sans inline-flex items-center justify-center gap-2 transition-all duration-200 saas-button disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1',
+    variants[variant as keyof typeof variants],
+    sizes[size as keyof typeof sizes],
+    className
+  );
+
+  if (Component === 'button') {
+    return (
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className={combinedClassName}
+        {...props}
+      />
+    );
+  }
+
   return (
     <Component
-      className={cn(
-        'font-sans inline-flex items-center justify-center gap-2 transition-all duration-200 saas-button disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1',
-        variants[variant as keyof typeof variants],
-        sizes[size as keyof typeof sizes],
-        className
-      )}
+      className={combinedClassName}
       {...props}
     />
   );
 }
 
-function Card({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function Card({ children, className, ...props }: any) {
   return (
-    <div className={cn('saas-card', !className?.includes('overflow-') && 'overflow-hidden', className)} {...props}>
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={cn('saas-card', !className?.includes('overflow-') && 'overflow-hidden', className)} 
+      {...props}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 

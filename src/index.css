@@ -14,9 +14,10 @@
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand: #6366f1;
-  --color-brand-dark: #4f46e5;
-  --color-brand-light: #d946ef;
+  /* Deep Space Theme */
+  --color-brand: #0ea5e9;
+  --color-brand-dark: #0284c7;
+  --color-brand-light: #8b5cf6;
 
   @keyframes aurora {
     0% { transform: translate(0, 0) scale(1); }
@@ -149,10 +150,15 @@
   }
 
   body {
-    @apply font-sans bg-[#030712] text-white antialiased selection:bg-brand/30 min-h-[100dvh];
+    @apply font-sans bg-[#02040a] text-white antialiased min-h-[100dvh];
+    /* Better typography rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Deep space gradient */
     background-image: 
-      radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
-      radial-gradient(circle at bottom left, rgba(217, 70, 239, 0.1), transparent 40%);
+      radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 50%),
+      radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.12), transparent 50%);
     background-attachment: fixed;
     overscroll-behavior-y: none;
     padding-bottom: env(safe-area-inset-bottom);
@@ -181,23 +187,37 @@
 
 @layer components {
   .glass {
-    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+    @apply bg-[#0f172a]/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)];
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
   }
   
   .glass-dark {
-    @apply bg-[#030712]/80 backdrop-blur-2xl border border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.6)];
+    @apply bg-[#02040a]/80 backdrop-blur-3xl shadow-[0_16px_48px_rgba(0,0,0,0.7)];
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
   }
 
   .glass-premium {
-    @apply bg-gradient-to-b from-slate-800/40 to-slate-900/40 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-2xl relative overflow-hidden;
+    @apply bg-gradient-to-br from-[#0f172a]/70 to-[#02040a]/90 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl relative overflow-hidden;
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.15), 0 8px 32px rgba(0,0,0,0.5);
   }
 
   .saas-card {
-    @apply bg-[#0f172a]/60 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-2xl relative overflow-hidden hover:shadow-lg hover:shadow-brand/20 hover:border-white/20 transition-all duration-500;
+    @apply bg-gradient-to-b from-[#0a0f1a]/80 to-[#030712]/90 backdrop-blur-2xl rounded-2xl relative overflow-hidden transition-all duration-500;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 4px 24px rgba(0,0,0,0.4);
+  }
+  
+  .saas-card:hover {
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2), 0 12px 40px rgba(14, 165, 233, 0.15);
+    transform: translateY(-2px);
   }
 
   .saas-button {
-    @apply relative overflow-hidden active:scale-95 transition-all duration-300 rounded-xl font-bold tracking-tight shadow-md text-white bg-gradient-to-r from-brand to-brand-light min-h-[44px] md:min-h-0;
+    @apply relative overflow-hidden active:scale-95 transition-all duration-300 rounded-xl font-bold tracking-tight text-white bg-gradient-to-r from-brand to-brand-light min-h-[44px] md:min-h-0;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3), 0 4px 14px 0 rgba(14, 165, 233, 0.39);
+  }
+  
+  .saas-button:hover {
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.4), 0 6px 20px rgba(14, 165, 233, 0.5);
   }
 }
 

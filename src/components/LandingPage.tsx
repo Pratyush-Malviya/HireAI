@@ -73,7 +73,7 @@ export function LandingPage() {
     <div className="relative min-h-screen bg-transparent overflow-hidden">
       {/* Hero Background Effects */}
       <div className="absolute inset-0 z-0">
-        <Particles className="absolute inset-0" quantity={100} color="#818cf8" size={0.6} />
+        <Particles className="absolute inset-0" quantity={100} color="#0ea5e9" size={0.6} />
         <Meteors number={15} />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-dark/30 via-slate-950 to-slate-950" />
       </div>
@@ -112,7 +112,7 @@ export function LandingPage() {
 
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-800/50 bg-[#030712]/95 backdrop-blur-xl absolute top-full left-0 w-full shadow-2xl">
+          <div className="md:hidden border-t border-slate-800/50 bg-[#02040a]/95 backdrop-blur-xl absolute top-full left-0 w-full shadow-2xl">
             <div className="px-4 py-6 flex flex-col gap-4">
               <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
               <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Pricing</Link>
@@ -133,7 +133,7 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-brand/20 bg-brand/5 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-[0.2em] mb-6 shadow-2xl shadow-brand/10">
-              <SparklesText sparklesCount={5} colors={{ first: "#818cf8", second: "#c084fc" }}>
+              <SparklesText sparklesCount={5} colors={{ first: "#0ea5e9", second: "#8b5cf6" }}>
                 <span className="text-[10px]">AI-Powered Talent Intelligence</span>
               </SparklesText>
             </div>
@@ -143,7 +143,7 @@ export function LandingPage() {
             <h1 className="text-5xl sm:text-6xl md:text-8xl font-black text-white leading-[1.05] tracking-tighter mb-8 font-display drop-shadow-2xl">
               Autonomous Hiring
               <br />
-              <AnimatedGradientText speed={1.5} colorFrom="#818cf8" colorTo="#c084fc">
+              <AnimatedGradientText speed={1.5} colorFrom="#0ea5e9" colorTo="#8b5cf6">
                 <span className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter">Powered by AI</span>
               </AnimatedGradientText>
             </h1>
@@ -164,8 +164,8 @@ export function LandingPage() {
                 Start Screening Now
               </RainbowButton>
               <ShimmerButton
-                shimmerColor="rgba(99, 102, 241, 0.6)"
-                background="rgba(30, 27, 75, 0.8)"
+                shimmerColor="rgba(14, 165, 233, 0.6)"
+                background="rgba(2, 4, 10, 0.8)"
                 borderRadius="12px"
                 className="px-8 py-3.5 text-base font-bold"
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
@@ -226,7 +226,7 @@ export function LandingPage() {
           <BlurFade inView className="text-center mb-24">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6 tracking-tighter">
               Everything You Need to{" "}
-              <AnimatedGradientText colorFrom="#818cf8" colorTo="#c084fc">
+              <AnimatedGradientText colorFrom="#0ea5e9" colorTo="#8b5cf6">
                 Hire Smarter
               </AnimatedGradientText>
             </h2>
@@ -239,13 +239,13 @@ export function LandingPage() {
             {features.map((feature, i) => (
               <BlurFade key={i} delay={0.1 * i} inView>
                 <div className="relative group h-full">
-                  <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#0a0a0a]/40 backdrop-blur-xl p-10 h-full transition-all duration-500 hover:border-brand/30 hover:bg-white/[0.02] hover:shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+                  <div className="relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#0a0a0a]/40 backdrop-blur-xl p-10 h-full transition-all duration-500 hover:border-brand/30 hover:bg-white/[0.02] hover:shadow-[0_0_40px_rgba(14,165,233,0.15)]">
                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-8 shadow-xl`}>
                       <feature.icon className="w-7 h-7 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{feature.title}</h3>
                     <p className="text-slate-400 text-base leading-relaxed font-light">{feature.description}</p>
-                    <BorderBeam size={100} duration={12} delay={i * 2} colorFrom="#6366f1" colorTo="#a855f7" />
+                    <BorderBeam size={100} duration={12} delay={i * 2} colorFrom="#0ea5e9" colorTo="#8b5cf6" />
                   </div>
                 </div>
               </BlurFade>
@@ -294,7 +294,7 @@ export function LandingPage() {
           <BlurFade inView className="text-center">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6 tracking-tighter">
               Trusted by{" "}
-              <AnimatedGradientText colorFrom="#60a5fa" colorTo="#a78bfa">
+              <AnimatedGradientText colorFrom="#0ea5e9" colorTo="#8b5cf6">
                 Industry Leaders
               </AnimatedGradientText>
             </h2>
