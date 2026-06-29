@@ -20,7 +20,7 @@ vi.mock('firebase/firestore', () => ({
   updateDoc: vi.fn(),
   setDoc: vi.fn(),
   serverTimestamp: vi.fn()
-}), { virtual: true });
+});
 
 vi.mock('../lib/firebase', () => ({
   db: {},
