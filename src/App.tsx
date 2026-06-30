@@ -4250,7 +4250,7 @@ function NewJob() {
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-4">
-        <Button variant="ghost" className="w-fit px-0 text-white/70 hover:text-white hover:bg-transparent transition-colors" onClick={() => navigate('/')}>
+        <Button variant="ghost" className="w-fit px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 hover:text-white transition-all text-xs" onClick={() => navigate('/')}>
           <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> Back to Dashboard
         </Button>
         <div>
@@ -5509,7 +5509,7 @@ function JobDetail() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-4">
-          <Button variant="ghost" className="w-fit px-0 hover:bg-transparent text-white/70 hover:text-white transition-colors" onClick={() => navigate('/')}>
+          <Button variant="ghost" className="w-fit px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 hover:text-white transition-all text-xs" onClick={() => navigate('/')}>
             <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> Back
           </Button>
           <div className="flex items-start gap-4">
@@ -7826,7 +7826,7 @@ function CandidateDetail() {
     <div className="max-w-6xl mx-auto space-y-8 pb-20">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" className="px-0 text-white/70 hover:text-white hover:bg-transparent transition-colors" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
+          <Button variant="ghost" className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 hover:text-white transition-all text-xs" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
             <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> <span className="hidden sm:inline">Pipeline</span>
           </Button>
           <div className="w-px h-6 bg-white/5" />

@@ -387,11 +387,9 @@ export function PricingStep({ onPaymentComplete }: PricingStepProps) {
             transition={{ delay: 0.2 }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2"
           >
-            <button type="button" onClick={() => setStep('plans')}
-              className="px-6 py-3.5 rounded-2xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 font-bold text-sm transition-all flex items-center justify-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back
-            </button>
+            <Button variant="ghost" className="w-fit px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 hover:text-white transition-all text-xs" onClick={() => setStep('plans')}>
+              <ArrowLeft className="w-4 h-4 mr-1" /> Back
+            </Button>
             <RainbowButton type="submit" disabled={loading} className="flex-1 py-3.5 font-bold text-sm">
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
