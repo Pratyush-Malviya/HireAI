@@ -561,8 +561,8 @@ function Button({ className, variant = 'primary', size = 'md', as: Component = '
     primary: 'glass-premium text-white hover:bg-white/5 shadow-sm',
     secondary: 'bg-brand-dark text-white hover:bg-brand-dark shadow-sm',
     outline: 'border border-white/10 hover:border-white/20 hover:bg-white/5 text-white font-medium',
-    ghost: 'hover:bg-transparent text-white font-medium',
-    brand: 'bg-brand-dark text-white hover:bg-brand-dark font-medium tracking-tight',
+    ghost: 'hover:bg-white/5 text-white font-medium bg-transparent',
+    brand: 'saas-button',
   };
   const sizes = {
     sm: 'px-3 py-1.5 text-xs rounded-md',
@@ -571,7 +571,7 @@ function Button({ className, variant = 'primary', size = 'md', as: Component = '
   };
   
   const combinedClassName = cn(
-    'font-sans inline-flex items-center justify-center gap-2 transition-all duration-200 saas-button disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1',
+    'font-sans inline-flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1',
     variants[variant as keyof typeof variants],
     sizes[size as keyof typeof sizes],
     className
