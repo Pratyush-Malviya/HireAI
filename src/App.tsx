@@ -4250,8 +4250,8 @@ function NewJob() {
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-4">
-        <Button variant="ghost" className="-ml-2 w-fit px-0" onClick={() => navigate('/')}>
-          <ChevronRight className="w-4 h-4 rotate-180 mr-2" /> Back to Dashboard
+        <Button variant="ghost" className="w-fit px-0 text-white/70 hover:text-white hover:bg-transparent transition-colors" onClick={() => navigate('/')}>
+          <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> Back to Dashboard
         </Button>
         <div>
           <SetPageTitle title="Initialize Campaign" />
@@ -5509,8 +5509,8 @@ function JobDetail() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-4">
-          <Button variant="ghost" className="-ml-2 w-fit px-0 hover:bg-white/5" onClick={() => navigate('/')}>
-            <ChevronRight className="w-4 h-4 rotate-180" /> Back
+          <Button variant="ghost" className="w-fit px-0 hover:bg-transparent text-white/70 hover:text-white transition-colors" onClick={() => navigate('/')}>
+            <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> Back
           </Button>
           <div className="flex items-start gap-4">
             <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center text-white border border-brand/10 shadow-sm">
@@ -7826,8 +7826,8 @@ function CandidateDetail() {
     <div className="max-w-6xl mx-auto space-y-8 pb-20">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" className="-ml-2 px-2 text-white/70 hover:text-white" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
-            <ChevronRight className="w-4 h-4 rotate-180" /> <span className="hidden sm:inline">Pipeline</span>
+          <Button variant="ghost" className="px-0 text-white/70 hover:text-white hover:bg-transparent transition-colors" onClick={() => navigate(`/jobs/${candidate.jobId}`)}>
+            <ChevronRight className="w-4 h-4 rotate-180 mr-1" /> <span className="hidden sm:inline">Pipeline</span>
           </Button>
           <div className="w-px h-6 bg-white/5" />
           <Button
