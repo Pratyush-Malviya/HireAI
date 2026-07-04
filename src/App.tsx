@@ -31,6 +31,8 @@ import { SAWhiteLabelPage } from './components/superadmin/SAWhiteLabelPage';
 import { SAManualPage } from './components/superadmin/SAManualPage';
 import { FeedbackPage } from './components/FeedbackPage';
 import { SAFeedbackPage } from './components/superadmin/SAFeedbackPage';
+import { PipelineManagementTab } from './components/PipelineManagementTab';
+import { ClientReportsTab } from './components/ClientReportsTab';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
@@ -4137,6 +4139,10 @@ function ResumeBank() {
 function NewJob() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [company, setCompany] = useState('');
+  const [feeSize, setFeeSize] = useState<number | ''>('');
+  const [deadline, setDeadline] = useState('');
+  const [urgency, setUrgency] = useState<'low' | 'medium' | 'high'>('medium');
   const [loading, setLoading] = useState(false);
   const [parsingFile, setParsingFile] = useState(false);
   const [isGeneratingJD, setIsGeneratingJD] = useState(false);
@@ -4227,6 +4233,10 @@ function NewJob() {
         const docRef = await addDoc(collection(db, 'jobs'), {
           title: requirements.title || title,
           description,
+          company: company.trim() || undefined,
+          feeSize: feeSize !== '' ? Number(feeSize) : undefined,
+          deadline: deadline || undefined,
+          urgency,
           requirements,
           organizationId: profile?.organizationId,
           createdBy: auth.currentUser.uid,
@@ -4301,6 +4311,53 @@ function NewJob() {
               onChange={(e) => setDescription(e.target.value)}
               disabled={parsingFile}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Client / Company Name</label>
+              <input
+                type="text"
+                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/50"
+                placeholder="e.g. Acme Corp"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Estimated Fee Size ($)</label>
+              <input
+                type="number"
+                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/50"
+                placeholder="e.g. 15000"
+                value={feeSize}
+                onChange={(e) => setFeeSize(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Target Deadline</label>
+              <input
+                type="date"
+                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/50 [color-scheme:dark]"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Urgency Level</label>
+              <select
+                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white"
+                value={urgency}
+                onChange={(e) => setUrgency(e.target.value as 'low' | 'medium' | 'high')}
+              >
+                <option value="low" className="text-black">Low - Standard Sourcing</option>
+                <option value="medium" className="text-black">Medium - Active Search</option>
+                <option value="high" className="text-black">High - Urgent / Retained</option>
+              </select>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -7008,32 +7065,40 @@ function parseD6Sections(markdown: string): {
   executiveSummary: string;
   performanceLedger: string;
   auditingAnomalies: string;
+  careerTrajectory: string;
+  technicalArchitecture: string;
   interviewStrategy: string;
 } {
   const sections = {
     executiveSummary: '',
     performanceLedger: '',
     auditingAnomalies: '',
+    careerTrajectory: '',
+    technicalArchitecture: '',
     interviewStrategy: '',
   };
 
   if (!markdown) return sections;
 
   const lines = markdown.split('\n');
-  let currentSection: 'executiveSummary' | 'performanceLedger' | 'auditingAnomalies' | 'interviewStrategy' | null = null;
+  let currentSection: keyof typeof sections | null = null;
   let currentContent: string[] = [];
 
   for (const line of lines) {
     const cleanLine = line.toLowerCase().replace(/[*#_]/g, '').trim();
     
-    let matchedSection: 'executiveSummary' | 'performanceLedger' | 'auditingAnomalies' | 'interviewStrategy' | null = null;
-    if (cleanLine.includes('executive summary') || cleanLine.includes('match narrative')) {
+    let matchedSection: keyof typeof sections | null = null;
+    if (cleanLine.includes('executive summary') || cleanLine.includes('match narrative') || cleanLine.includes('core synthesis')) {
       matchedSection = 'executiveSummary';
-    } else if (cleanLine.includes('performance ledger')) {
+    } else if (cleanLine.includes('performance ledger') || cleanLine.includes('dimensional')) {
       matchedSection = 'performanceLedger';
-    } else if (cleanLine.includes('auditing, penalties') || cleanLine.includes('auditing penalties') || cleanLine.includes('anomalies') || cleanLine.includes('penalties') || cleanLine.includes('audit')) {
+    } else if (cleanLine.includes('auditing') || cleanLine.includes('anomalies') || cleanLine.includes('penalties') || cleanLine.includes('risk profile')) {
       matchedSection = 'auditingAnomalies';
-    } else if (cleanLine.includes('interview strategy') || cleanLine.includes('hiring recommendation')) {
+    } else if (cleanLine.includes('career trajectory') || cleanLine.includes('leadership footprint')) {
+      matchedSection = 'careerTrajectory';
+    } else if (cleanLine.includes('technical architecture') || cleanLine.includes('engineering depth') || cleanLine.includes('stack mastery')) {
+      matchedSection = 'technicalArchitecture';
+    } else if (cleanLine.includes('interview strategy') || cleanLine.includes('hiring recommendation') || cleanLine.includes('panel evaluation')) {
       matchedSection = 'interviewStrategy';
     }
 
@@ -7058,7 +7123,7 @@ function parseD6Sections(markdown: string): {
   }
 
   // If we couldn't split anything (e.g. no headings matched), put everything into executiveSummary as fallback
-  if (!sections.executiveSummary && !sections.performanceLedger && !sections.auditingAnomalies && !sections.interviewStrategy) {
+  if (!sections.executiveSummary && !sections.performanceLedger && !sections.auditingAnomalies && !sections.careerTrajectory && !sections.technicalArchitecture && !sections.interviewStrategy) {
     sections.executiveSummary = markdown;
   }
 
@@ -8367,39 +8432,59 @@ function CandidateDetail() {
                         <h4 className="text-xs font-black uppercase tracking-widest text-white">1. Verified Profiles</h4>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {verifiedProfiles.map((p: any, idx: number) => {
-                          const isVer = p.status === 'Verified';
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                        {(() => {
+                          const foundProfiles = verifiedProfiles.filter((p: any) => p.status !== 'Not Found' && p.url && p.url !== '#' && p.url !== '');
+                          const notFoundCount = verifiedProfiles.filter((p: any) => p.status === 'Not Found' || !p.url || p.url === '' || p.url === '#').length;
                           return (
-                            <a 
-                              key={idx}
-                              href={p.url && p.url !== '#' ? p.url : undefined}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
-                                isVer 
-                                  ? 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/50' 
-                                  : 'bg-white/5 border-white/10 hover:border-white/20'
-                              } ${!p.url || p.url === '#' ? 'pointer-events-none cursor-default' : ''}`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${isVer ? 'bg-emerald-400' : 'bg-white/30'}`} />
-                                <span className="text-xs font-black text-white">{p.name}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-bold uppercase ${isVer ? 'text-emerald-400' : 'text-white/50'}`}>
-                                  {isVer ? 'Verified' : 'Unverified'}
-                                </span>
-                                {isVer ? (
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                                ) : (
-                                  <AlertCircle className="w-3.5 h-3.5 text-white/50 shrink-0" />
-                                )}
-                              </div>
-                            </a>
+                            <>
+                              {foundProfiles.map((p: any, idx: number) => {
+                                const isVerified = p.status === 'Verified';
+                                const isProbable = p.status === 'Probable';
+                                return (
+                                  <a 
+                                    key={idx}
+                                    href={p.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                                      isVerified 
+                                        ? 'bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-500/15' 
+                                        : isProbable
+                                        ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/15'
+                                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span className={`w-2 h-2 rounded-full ${isVerified ? 'bg-emerald-400' : isProbable ? 'bg-amber-400' : 'bg-white/30'}`} />
+                                      <span className="text-xs font-black text-white">{p.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className={`text-[9px] font-bold uppercase ${isVerified ? 'text-emerald-400' : isProbable ? 'text-amber-400' : 'text-white/50'}`}>
+                                        {isVerified ? 'Verified' : isProbable ? 'Probable' : p.status}
+                                      </span>
+                                      {isVerified ? (
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                      ) : isProbable ? (
+                                        <ExternalLink className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                      ) : (
+                                        <AlertCircle className="w-3.5 h-3.5 text-white/50 shrink-0" />
+                                      )}
+                                    </div>
+                                  </a>
+                                );
+                              })}
+                              {notFoundCount > 0 && (
+                                <div className="p-3 rounded-xl border border-white/5 bg-white/3 flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-white/20" />
+                                  <span className="text-[10px] font-bold text-white/40">{notFoundCount} platform{notFoundCount > 1 ? 's' : ''} not found</span>
+                                </div>
+                              )}
+                            </>
                           );
-                        })}
+                        })()}
                       </div>
+
                     </div>
                   </div>
 
@@ -8735,9 +8820,45 @@ function CandidateDetail() {
                 </Card>
               )}
 
+              {/* Career Trajectory & Leadership Footprint */}
+              {d6Sections.careerTrajectory && (
+                <Card id="d6-career-trajectory" className="p-6 border-l-4 border-l-purple-500 glass-premium shadow-md shadow-purple-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                  <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
+                    <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg shrink-0">
+                      <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wider">Career Trajectory & Leadership Footprint</h3>
+                      <p className="text-[10px] text-white font-bold uppercase tracking-tight">GROWTH VECTORS & IMPACT SCALE</p>
+                    </div>
+                  </div>
+                  <div className="text-white text-xs sm:text-sm leading-relaxed prose prose-purple max-w-none flex-1">
+                    <Markdown>{d6Sections.careerTrajectory}</Markdown>
+                  </div>
+                </Card>
+              )}
+
+              {/* Technical Architecture & Stack Mastery */}
+              {d6Sections.technicalArchitecture && (
+                <Card id="d6-technical-architecture" className="p-6 border-l-4 border-l-cyan-500 glass-premium shadow-md shadow-cyan-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                  <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
+                    <div className="p-2 bg-cyan-500/20 text-cyan-400 rounded-lg shrink-0">
+                      <Cpu className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wider">Technical Architecture & Stack Mastery</h3>
+                      <p className="text-[10px] text-white font-bold uppercase tracking-tight">ENGINEERING DEPTH & SYSTEM DESIGN</p>
+                    </div>
+                  </div>
+                  <div className="text-white text-xs sm:text-sm leading-relaxed prose prose-cyan max-w-none flex-1">
+                    <Markdown>{d6Sections.technicalArchitecture}</Markdown>
+                  </div>
+                </Card>
+              )}
+
               {/* Hiring Recommendation & Interview Strategy */}
               {d6Sections.interviewStrategy && (
-                <Card id="d6-interview-strategy" className="p-6 border-l-4 border-l-emerald-500 glass-premium shadow-md shadow-emerald-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start">
+                <Card id="d6-interview-strategy" className="p-6 border-l-4 border-l-emerald-500 glass-premium shadow-md shadow-emerald-500/10 hover:shadow-lg transition-all duration-300 rounded-2xl flex flex-col justify-start md:col-span-2">
                   <div className="flex items-center gap-3 border-b pb-3 mb-4 shrink-0">
                     <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg shrink-0">
                       <Lightbulb className="w-5 h-5" />
@@ -10765,7 +10886,7 @@ function OrgAdminPanel() {
   };
 
   // Custom states for Workspace settings editing
-  const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace' | 'team'>('analytics');
+  const [activePanelTab, setActivePanelTab] = useState<'analytics' | 'workspace' | 'team' | 'pipeline' | 'reports'>('analytics');
 
   const [orgName, setOrgName] = useState('');
   const [orgDomain, setOrgDomain] = useState('');
@@ -11260,10 +11381,38 @@ function OrgAdminPanel() {
           <Users className="w-4 h-4" />
           Team Management
         </button>
+        <button 
+          onClick={() => setActivePanelTab('pipeline')}
+          className={cn(
+            "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
+            activePanelTab === 'pipeline' 
+              ? "border-b-2 border-brand-dark text-white font-black pb-[11px]" 
+              : "border-transparent text-white hover:text-white"
+          )}
+        >
+          <List className="w-4 h-4" />
+          Pipeline Management
+        </button>
+        <button 
+          onClick={() => setActivePanelTab('reports')}
+          className={cn(
+            "pb-3 px-4 text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all relative border-b-2",
+            activePanelTab === 'reports' 
+              ? "border-b-2 border-brand-dark text-white font-black pb-[11px]" 
+              : "border-transparent text-white hover:text-white"
+          )}
+        >
+          <FileText className="w-4 h-4" />
+          Client Reports
+        </button>
       </div>
 
       {activePanelTab === 'team' ? (
         <TeamManagementTab organization={organization} />
+      ) : activePanelTab === 'pipeline' ? (
+        <PipelineManagementTab jobs={filteredJobs} />
+      ) : activePanelTab === 'reports' ? (
+        <ClientReportsTab jobs={filteredJobs} candidates={filteredCandidates} />
       ) : activePanelTab === 'analytics' ? (
         <>
           {/* Sub Header for Metrics Panel */}

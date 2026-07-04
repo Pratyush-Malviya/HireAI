@@ -110,6 +110,10 @@ export interface Job {
   createdBy: string;
   status: 'active' | 'closed';
   interviewDurationMinutes?: number;
+  feeSize?: number;
+  deadline?: string;
+  urgency?: 'low' | 'medium' | 'high';
+  closedAt?: any;
 }
 
 export type ConfidenceLevel = 'HIGH' | 'MED' | 'LOW';
@@ -221,7 +225,7 @@ export interface Candidate {
     stability_score?: number;
     growth_trajectory?: string;
     industry_visibility_score?: number;
-    verified_profiles?: { name: string; url: string; status: 'Verified' | 'Unverified' }[];
+    verified_profiles?: { name: string; url: string; status: 'Verified' | 'Probable' | 'Not Found' | 'Unverified' }[];
   };
   aiQuotaExceeded?: boolean;
 }
