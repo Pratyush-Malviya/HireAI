@@ -3,7 +3,7 @@ import { LogOut, Sun, Moon } from 'lucide-react';
 // @ts-ignore – AnimatePresence is exported at runtime but missing from motion/react's type defs
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, TrendingUp, ChevronRight, Plus, Search, Users, Trash2, CheckCircle2, CheckCircle, AlertCircle, BarChart3, ShieldCheck, Shield, Database, Settings, Globe, ExternalLink, Loader2, MoreHorizontal, RotateCcw, LayoutGrid, List, Filter, MessageSquare, Video, Play, Send, Calendar, Volume2, Mic, MicOff, Camera, CameraOff, Clock, Info, Heart, Brain, Award, Cpu, BookOpen, Terminal, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Copy, Mail, CreditCard, Zap, Star, Sparkles, ArrowRight, Check, Menu, X, FileText, Sliders, Target, Download, Printer, Keyboard, GitBranch, UserPlus, UserMinus, UserCheck, ShieldAlert, Palette, Ban, Radio, Webhook, Eye } from 'lucide-react';
-import { useEffect, useState, useRef, Component, useMemo, lazy, Suspense } from 'react';
+import React, { useEffect, useState, useRef, Component, useMemo, lazy, Suspense } from 'react';
 import { Particles } from './components/magic-ui/particles';
 import { Meteors } from './components/magic-ui/meteors';
 import { generateInterviewResponse, summarizeInterview, localEvaluateInterview } from './services/interviewService';
@@ -11,7 +11,7 @@ import { extractTextFromFile } from './services/fileService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Markdown from 'react-markdown';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { Link, Route, BrowserRouter as Router, Routes, useNavigate, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom';
 import {
   NotificationContext,
@@ -4158,6 +4158,9 @@ function NewJob() {
   const { notify } = useNotification();
   const { profile } = useProfile();
 
+  // Wizard Step State
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+
   // Custom Controls Core State
   const [passedThreshold, setPassedThreshold] = useState(80);
   const [lowThreshold, setLowThreshold] = useState(40);
@@ -4215,9 +4218,29 @@ function NewJob() {
     }
   };
 
+  const handleNextStep1 = () => {
+    if (!title.trim()) {
+      notify('Please enter a Campaign Title to proceed.', 'error');
+      return;
+    }
+    setWizardStep(2);
+  };
+
+  const handleNextStep2 = () => {
+    if (!description.trim()) {
+      notify('Please supply or generate the Requirement Context.', 'error');
+      return;
+    }
+    setWizardStep(3);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth.currentUser) return;
+    if (!title.trim() || !description.trim()) {
+      notify('Please complete all steps before activating analysis.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       const requirements = await parseJobDescription(description);
@@ -4277,354 +4300,398 @@ function NewJob() {
       </div>
 
       <Card className="p-6 sm:p-10 border-white/10 shadow-2xl shadow-brand/10 rounded-[2.5rem] glass-premium/80 backdrop-blur-xl">
+        {/* Step Indicator Header */}
+        <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+          {[
+            { step: 1, label: "Basics", desc: "Campaign details" },
+            { step: 2, label: "Context", desc: "Job description" },
+            { step: 3, label: "Criteria", desc: "Screening settings" }
+          ].map((s, idx, arr) => (
+            <React.Fragment key={s.step}>
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black uppercase transition-all duration-300",
+                  wizardStep === s.step
+                    ? "bg-brand text-white shadow-lg shadow-brand/30 border border-brand"
+                    : wizardStep > s.step
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                    : "bg-white/5 text-white/40 border border-white/10"
+                )}>
+                  {wizardStep > s.step ? <Check className="w-4 h-4 text-emerald-400" /> : s.step}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className={cn("text-[10px] font-black uppercase tracking-wider", wizardStep === s.step ? "text-white" : "text-white/40")}>{s.label}</p>
+                  <p className="text-[9px] text-white/30 font-semibold">{s.desc}</p>
+                </div>
+              </div>
+              {idx < arr.length - 1 && (
+                <div className={cn(
+                  "flex-1 h-0.5 mx-4 rounded transition-all duration-300",
+                  wizardStep > s.step ? "bg-emerald-500/30" : "bg-white/5"
+                )} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Campaign Title</label>
-            <input
-              required
-              type="text"
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white"
-              placeholder="e.g. Senior Staff Engineer (Cloud Infrastructure)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center px-1 mb-2">
-              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Requirement Context</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleGenerateJD}
-                  disabled={isGeneratingJD || parsingFile}
-                  className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {isGeneratingJD ? 'Generating...' : 'Auto Generate'}
-                </button>
-                <label className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/10 transition-all hover:scale-105 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Upload PDF/DOCX</span>
-                  <input type="file" theme-target-id="job-file-input" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile || isGeneratingJD} />
-                </label>
+          {/* STEP 1: BASICS */}
+          {wizardStep === 1 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Campaign Title</label>
+                <input
+                  required
+                  type="text"
+                  className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30"
+                  placeholder="e.g. Senior Staff Engineer (Cloud Infrastructure)"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Client / Company Name</label>
+                  <input
+                    type="text"
+                    className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30"
+                    placeholder="e.g. Acme Corp"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Estimated Fee Size ($)</label>
+                  <input
+                    type="number"
+                    className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30"
+                    placeholder="e.g. 15000"
+                    value={feeSize}
+                    onChange={(e) => setFeeSize(e.target.value === '' ? '' : Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Target Deadline</label>
+                  <input
+                    type="date"
+                    className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 [color-scheme:dark]"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Urgency Level</label>
+                  <select
+                    className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white"
+                    value={urgency}
+                    onChange={(e) => setUrgency(e.target.value as 'low' | 'medium' | 'high')}
+                  >
+                    <option value="low" className="text-black">Low - Standard Sourcing</option>
+                    <option value="medium" className="text-black">Medium - Active Search</option>
+                    <option value="high" className="text-black">High - Urgent / Retained</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
+                <input
+                  required
+                  type="number"
+                  min="5"
+                  max="120"
+                  className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white"
+                  value={interviewDurationMinutes}
+                  onChange={(e) => setInterviewDurationMinutes(Number(e.target.value))}
+                />
+              </div>
+
+              <div className="pt-6 flex flex-col sm:flex-row gap-4 border-t border-white/5">
+                <Button type="button" variant="outline" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl order-2 sm:order-1" onClick={() => navigate('/')}>Abandon Sequence</Button>
+                <Button type="button" variant="secondary" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl bg-brand text-white hover:opacity-90 order-1 sm:order-2" onClick={handleNextStep1}>
+                  Continue to Context
+                </Button>
               </div>
             </div>
-            <textarea
-              required
-              rows={12}
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all text-sm leading-relaxed font-medium min-h-[250px] custom-scrollbar"
-              placeholder={parsingFile ? "Decrypting document layers..." : "Paste the full mission brief / job description here..."}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={parsingFile}
-            />
-          </div>
+          )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Client / Company Name</label>
-              <input
-                type="text"
-                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/50"
-                placeholder="e.g. Acme Corp"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Estimated Fee Size ($)</label>
-              <input
-                type="number"
-                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/50"
-                placeholder="e.g. 15000"
-                value={feeSize}
-                onChange={(e) => setFeeSize(e.target.value === '' ? '' : Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Target Deadline</label>
-              <input
-                type="date"
-                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/50 [color-scheme:dark]"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Urgency Level</label>
-              <select
-                className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white"
-                value={urgency}
-                onChange={(e) => setUrgency(e.target.value as 'low' | 'medium' | 'high')}
-              >
-                <option value="low" className="text-black">Low - Standard Sourcing</option>
-                <option value="medium" className="text-black">Medium - Active Search</option>
-                <option value="high" className="text-black">High - Urgent / Retained</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-white uppercase tracking-[0.2em] px-1">Interview Duration (Minutes)</label>
-            <input
-              required
-              type="number"
-              min="5"
-              max="120"
-              className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white"
-              value={interviewDurationMinutes}
-              onChange={(e) => setInterviewDurationMinutes(Number(e.target.value))}
-            />
-          </div>
-
-          {/* Advanced Configurations Expansion */}
-          <div className="border-t border-white/10 pt-6">
-            <button
-              type="button"
-              id="toggle-config-btn"
-              onClick={() => setShowConfig(!showConfig)}
-              className="flex items-center justify-between w-full p-4 transparent hover:bg-transparent/85 rounded-2xl transition-all border border-white/10 font-bold text-xs uppercase tracking-wider text-white shadow-sm"
-            >
-              <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-brand" />
-                <span>Scoring Matrix & Passing Thresholds Configuration ({showConfig ? 'Hide' : 'Customize'})</span>
+          {/* STEP 2: CONTEXT */}
+          {wizardStep === 2 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center px-1 mb-2">
+                  <label className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Requirement Context</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleGenerateJD}
+                      disabled={isGeneratingJD || parsingFile}
+                      className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-brand/10 rounded-full border border-brand/10 transition-all hover:scale-105 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {isGeneratingJD ? 'Generating...' : 'Auto Generate'}
+                    </button>
+                    <label className="text-[10px] font-black text-white hover:text-brand cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/10 transition-all hover:scale-105 uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Upload PDF/DOCX</span>
+                      <input type="file" theme-target-id="job-file-input" accept=".pdf,.docx" className="hidden" onChange={handleFileJD} disabled={parsingFile || isGeneratingJD} />
+                    </label>
+                  </div>
+                </div>
+                <textarea
+                  required
+                  rows={12}
+                  className="w-full px-6 py-4 transparent border-2 border-white/10 rounded-2xl focus:outline-none focus:border-brand transition-all text-sm leading-relaxed font-medium min-h-[250px] custom-scrollbar"
+                  placeholder={parsingFile ? "Decrypting document layers..." : "Paste the full mission brief / job description here..."}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={parsingFile}
+                />
               </div>
-              <ChevronDown className={cn("w-4 h-4 text-white transition-transform", showConfig && "rotate-180")} />
-            </button>
 
-            {showConfig && (
-              <div className="mt-6 space-y-8 p-6 bg-white/5 rounded-3xl border border-white/10/50 animate-in fade-in slide-in-from-top-2 duration-300">
-                {/* Threshold Section */}
-                <div className="space-y-4">
+              <div className="pt-6 flex flex-col sm:flex-row gap-4 border-t border-white/5">
+                <Button type="button" variant="outline" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl order-2 sm:order-1" onClick={() => setWizardStep(1)}>Back to Basics</Button>
+                <Button type="button" variant="secondary" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl bg-brand text-white hover:opacity-90 order-1 sm:order-2" onClick={handleNextStep2}>
+                  Continue to Criteria
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: CRITERIA */}
+          {wizardStep === 3 && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              {/* Threshold Section */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
+                  <Target className="w-4 h-4 text-brand" /> Screening Thresholds
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-black text-white uppercase tracking-widest">Passed Match</label>
+                      <span className="text-sm font-black text-green-600 bg-green-50 px-2.5 py-0.5 rounded-lg border border-green-100">{passedThreshold}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="50"
+                      max="95"
+                      theme-target-id="passed-threshold-range"
+                      className="w-full accent-green-500"
+                      value={passedThreshold}
+                      onChange={(e) => setPassedThreshold(Number(e.target.value))}
+                    />
+                    <p className="text-[9px] text-white font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
+                  </div>
+
+                  <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[10px] font-black text-white uppercase tracking-widest">Low Match (Failed)</label>
+                      <span className="text-sm font-black text-red-600 bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-100">{lowThreshold}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="20"
+                      max="60"
+                      theme-target-id="low-threshold-range"
+                      className="w-full accent-red-500"
+                      value={lowThreshold}
+                      onChange={(e) => setLowThreshold(Number(e.target.value))}
+                    />
+                    <p className="text-[9px] text-white font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Dimensions Section */}
+              <div className="space-y-6">
+                <div className="flex justify-between items-center border-b border-white/10 pb-2">
                   <h3 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
-                    <Target className="w-4 h-4 text-brand" /> Screening Thresholds
+                    <Briefcase className="w-4 h-4 text-brand" /> Screening Criteria Parameters
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
-                      <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-black text-white uppercase tracking-widest">Passed Match</label>
-                        <span className="text-sm font-black text-green-600 bg-green-50 px-2.5 py-0.5 rounded-lg border border-green-100">{passedThreshold}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="50"
-                        max="95"
-                        theme-target-id="passed-threshold-range"
-                        className="w-full accent-green-500"
-                        value={passedThreshold}
-                        onChange={(e) => setPassedThreshold(Number(e.target.value))}
-                      />
-                      <p className="text-[9px] text-white font-semibold">Candidates scoring at or above this progress are Top Matches.</p>
-                    </div>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-white">
+                    Cumulate Weights: {Number(d1Weight) + Number(d2Weight) + Number(d3Weight) + Number(d4Weight) + Number(d5Weight)}%
+                  </span>
+                </div>
 
-                    <div className="space-y-2 p-4 glass-premium rounded-2xl border border-white/10 shadow-sm">
-                      <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-black text-white uppercase tracking-widest">Low Match (Failed)</label>
-                        <span className="text-sm font-black text-red-600 bg-red-50 px-2.5 py-0.5 rounded-lg border border-red-100">{lowThreshold}%</span>
-                      </div>
+                {/* Dimension 1: skillsMatch */}
+                <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                    <div className="sm:col-span-8 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 1 Name</label>
                       <input
-                        type="range"
-                        min="20"
-                        max="60"
-                        theme-target-id="low-threshold-range"
-                        className="w-full accent-red-500"
-                        value={lowThreshold}
-                        onChange={(e) => setLowThreshold(Number(e.target.value))}
+                        type="text"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d1Name}
+                        onChange={(e) => setD1Name(e.target.value)}
                       />
-                      <p className="text-[9px] text-white font-semibold">Candidates scoring below this progress are flagged as Low Matches.</p>
                     </div>
+                    <div className="sm:col-span-4 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
+                      <input
+                        type="number"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d1Weight}
+                        onChange={(e) => setD1Weight(Math.max(0, Number(e.target.value)))}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
+                    <textarea
+                      rows={2}
+                      className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
+                      value={d1Desc}
+                      onChange={(e) => setD1Desc(e.target.value)}
+                    />
                   </div>
                 </div>
 
-                {/* Custom Dimensions Section */}
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                    <h3 className="text-xs font-black uppercase text-white tracking-wider flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-brand" /> Screening Criteria Parameters
-                    </h3>
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-brand/10 border border-brand/10 rounded text-white">
-                      Cumulate Weights: {Number(d1Weight) + Number(d2Weight) + Number(d3Weight) + Number(d4Weight) + Number(d5Weight)}%
-                    </span>
-                  </div>
-
-                  {/* Dimension 1: skillsMatch */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                      <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 1 Name (e.g. Technical Skills)</label>
-                        <input
-                          type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d1Name}
-                          onChange={(e) => setD1Name(e.target.value)}
-                        />
-                      </div>
-                      <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
-                        <input
-                          type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d1Weight}
-                          onChange={(e) => setD1Weight(Math.max(0, Number(e.target.value)))}
-                        />
-                      </div>
+                {/* Dimension 2: experienceFit */}
+                <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                    <div className="sm:col-span-8 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 2 Name</label>
+                      <input
+                        type="text"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d2Name}
+                        onChange={(e) => setD2Name(e.target.value)}
+                      />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
-                      <textarea
-                        rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
-                        value={d1Desc}
-                        onChange={(e) => setD1Desc(e.target.value)}
+                    <div className="sm:col-span-4 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
+                      <input
+                        type="number"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d2Weight}
+                        onChange={(e) => setD2Weight(Math.max(0, Number(e.target.value)))}
                       />
                     </div>
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
+                    <textarea
+                      rows={2}
+                      className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
+                      value={d2Desc}
+                      onChange={(e) => setD2Desc(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-                  {/* Dimension 2: experienceFit */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                      <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 2 Name (e.g. Leadership Quality)</label>
-                        <input
-                          type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d2Name}
-                          onChange={(e) => setD2Name(e.target.value)}
-                        />
-                      </div>
-                      <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
-                        <input
-                          type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d2Weight}
-                          onChange={(e) => setD2Weight(Math.max(0, Number(e.target.value)))}
-                        />
-                      </div>
+                {/* Dimension 3: education */}
+                <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                    <div className="sm:col-span-8 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 3 Name</label>
+                      <input
+                        type="text"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d3Name}
+                        onChange={(e) => setD3Name(e.target.value)}
+                      />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
-                      <textarea
-                        rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
-                        value={d2Desc}
-                        onChange={(e) => setD2Desc(e.target.value)}
+                    <div className="sm:col-span-4 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
+                      <input
+                        type="number"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d3Weight}
+                        onChange={(e) => setD3Weight(Math.max(0, Number(e.target.value)))}
                       />
                     </div>
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
+                    <textarea
+                      rows={2}
+                      className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
+                      value={d3Desc}
+                      onChange={(e) => setD3Desc(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-                  {/* Dimension 3: education */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                      <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 3 Name (e.g. Communication Skills)</label>
-                        <input
-                          type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d3Name}
-                          onChange={(e) => setD3Name(e.target.value)}
-                        />
-                      </div>
-                      <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
-                        <input
-                          type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d3Weight}
-                          onChange={(e) => setD3Weight(Math.max(0, Number(e.target.value)))}
-                        />
-                      </div>
+                {/* Dimension 4: achievements */}
+                <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                    <div className="sm:col-span-8 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 4 Name</label>
+                      <input
+                        type="text"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d4Name}
+                        onChange={(e) => setD4Name(e.target.value)}
+                      />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
-                      <textarea
-                        rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
-                        value={d3Desc}
-                        onChange={(e) => setD3Desc(e.target.value)}
+                    <div className="sm:col-span-4 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
+                      <input
+                        type="number"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d4Weight}
+                        onChange={(e) => setD4Weight(Math.max(0, Number(e.target.value)))}
                       />
                     </div>
                   </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
+                    <textarea
+                      rows={2}
+                      className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
+                      value={d4Desc}
+                      onChange={(e) => setD4Desc(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-                  {/* Dimension 4: achievements */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                      <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 4 Name (e.g. Key Achievements)</label>
-                        <input
-                          type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d4Name}
-                          onChange={(e) => setD4Name(e.target.value)}
-                        />
-                      </div>
-                      <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
-                        <input
-                          type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d4Weight}
-                          onChange={(e) => setD4Weight(Math.max(0, Number(e.target.value)))}
-                        />
-                      </div>
+                {/* Dimension 5: culturalRoleFit */}
+                <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                    <div className="sm:col-span-8 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 5 Name</label>
+                      <input
+                        type="text"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d5Name}
+                        onChange={(e) => setD5Name(e.target.value)}
+                      />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
-                      <textarea
-                        rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
-                        value={d4Desc}
-                        onChange={(e) => setD4Desc(e.target.value)}
+                    <div className="sm:col-span-4 space-y-2">
+                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
+                      <input
+                        type="number"
+                        className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
+                        value={d5Weight}
+                        onChange={(e) => setD5Weight(Math.max(0, Number(e.target.value)))}
                       />
                     </div>
                   </div>
-
-                  {/* Dimension 5: culturalRoleFit */}
-                  <div className="p-4 glass-premium border border-white/10 rounded-2xl space-y-4 shadow-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                      <div className="sm:col-span-8 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Metric 5 Name (e.g. Cultural Alignment)</label>
-                        <input
-                          type="text"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d5Name}
-                          onChange={(e) => setD5Name(e.target.value)}
-                        />
-                      </div>
-                      <div className="sm:col-span-4 space-y-2">
-                        <label className="text-[9px] font-black uppercase text-white tracking-wider">Weight (%)</label>
-                        <input
-                          type="number"
-                          className="w-full text-xs font-bold px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white"
-                          value={d5Weight}
-                          onChange={(e) => setD5Weight(Math.max(0, Number(e.target.value)))}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
-                      <textarea
-                        rows={2}
-                        className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
-                        value={d5Desc}
-                        onChange={(e) => setD5Desc(e.target.value)}
-                      />
-                    </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase text-white tracking-wider">Describe what AI should assess for this dimension</label>
+                    <textarea
+                      rows={2}
+                      className="w-full text-xs font-medium px-3 py-2 transparent border border-white/10 rounded-lg focus:outline-none focus:border-brand text-white leading-relaxed"
+                      value={d5Desc}
+                      onChange={(e) => setD5Desc(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          <div className="pt-6 flex flex-col sm:flex-row gap-4">
-            <Button type="button" variant="outline" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl order-2 sm:order-1" onClick={() => navigate('/')}>Abandon Sequence</Button>
-            <Button type="submit" variant="secondary" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] order-1 sm:order-2" disabled={loading || parsingFile}>
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Activate Analysis'}
-            </Button>
-          </div>
+              <div className="pt-6 flex flex-col sm:flex-row gap-4 border-t border-white/5">
+                <Button type="button" variant="outline" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl order-2 sm:order-1" onClick={() => setWizardStep(2)}>Back to Context</Button>
+                <Button type="submit" variant="secondary" className="h-14 flex-1 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-brand/20 bg-gradient-to-r from-[#6366f1] to-[#d946ef] hover:opacity-90 shadow-[0_0_20px_rgba(99,102,241,0.4)] order-1 sm:order-2" disabled={loading || parsingFile}>
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Activate Analysis'}
+                </Button>
+              </div>
+            </div>
+          )}
         </form>
       </Card>
     </div>
@@ -8392,54 +8459,85 @@ function CandidateDetail() {
 
               return (
                 <div className="space-y-8 font-sans">
-                  {/* Row 1: Section 7 - Confidence Meter Panel & Section 1: Verified Profiles */}
+                  {/* Row 1: Section 7 - Confidence Meter Panel, Competency Radar & Section 1: Verified Profiles */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* CONFIDENCE METER (Section 7) */}
-                    <div id="confidence-meter-card" className="p-6 rounded-2xl border transition-all transparent border-white/10">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                          <h4 className="text-xs font-black uppercase tracking-widest text-white">7. Confidence Meter</h4>
+                    <div id="confidence-meter-card" className="p-6 rounded-2xl border transition-all transparent border-white/10 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                            <h4 className="text-xs font-black uppercase tracking-widest text-white">7. Confidence Meter</h4>
+                          </div>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
+                            status === 'VERIFIED' ? 'bg-emerald-500/20 text-emerald-400' :
+                            status === 'HIGH_CONFIDENCE' ? 'bg-blue-500/20 text-blue-400' :
+                            status === 'MEDIUM_CONFIDENCE' ? 'bg-amber-500/20 text-amber-400' :
+                            'bg-red-500/20 text-red-400'
+                          }`}>
+                            {status.replace('_', ' ')}
+                          </span>
                         </div>
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider ${
-                          status === 'VERIFIED' ? 'bg-emerald-500/20 text-emerald-400' :
-                          status === 'HIGH_CONFIDENCE' ? 'bg-blue-500/20 text-blue-400' :
-                          status === 'MEDIUM_CONFIDENCE' ? 'bg-amber-500/20 text-amber-400' :
-                          'bg-red-500/20 text-red-400'
-                        }`}>
-                          {status.replace('_', ' ')}
-                        </span>
+                        
+                        <div className="flex items-center gap-4 py-3">
+                          <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                            <svg className="w-full h-full transform -rotate-90">
+                              <circle cx="32" cy="32" r="28" strokeWidth="6" stroke="rgba(255,255,255,0.1)" fill="transparent" />
+                              <circle cx="32" cy="32" r="28" strokeWidth="6" 
+                                stroke="#10b981" 
+                                strokeDasharray={175} 
+                                strokeDashoffset={175 - (175 * confidence) / 100}
+                                strokeLinecap="round" fill="transparent" />
+                            </svg>
+                            <span className="absolute text-sm font-black text-white">{confidence}%</span>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-white">Verified Identity Level</p>
+                            <p className="text-[11px] text-white mt-1">
+                              Identity resolution from verified professional social registries.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <div className="flex items-center gap-4 py-3">
-                        <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
-                          <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="32" cy="32" r="28" strokeWidth="6" stroke="rgba(255,255,255,0.1)" fill="transparent" />
-                            <circle cx="32" cy="32" r="28" strokeWidth="6" 
-                              stroke="#10b981" 
-                              strokeDasharray={175} 
-                              strokeDashoffset={175 - (175 * confidence) / 100}
-                              strokeLinecap="round" fill="transparent" />
-                          </svg>
-                          <span className="absolute text-sm font-black text-white">{confidence}%</span>
+                    </div>
+
+                    {/* COMPETENCY RADAR (Section 1.5) */}
+                    <div id="competency-radar-card" className="p-6 rounded-2xl border transition-all transparent border-white/10 flex flex-col justify-between min-h-[160px]">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Brain className="w-5 h-5 text-brand" />
+                            <h4 className="text-xs font-black uppercase tracking-widest text-white">Competency Radar</h4>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-white">Verified Identity Level</p>
-                          <p className="text-[11px] text-white mt-1">
-                            Identity resolution from verified professional social registries.
-                          </p>
+                        
+                        <div className="w-full h-[140px] flex items-center justify-center">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="75%" data={[
+                              { subject: 'Technical', A: techScore, fullMark: 100 },
+                              { subject: 'Depth', A: engDepth, fullMark: 100 },
+                              { subject: 'Solving', A: problemSolving, fullMark: 100 },
+                              { subject: 'Comm', A: communicationScore, fullMark: 100 },
+                              { subject: 'Leader', A: leadershipScore, fullMark: 100 }
+                            ]}>
+                              <PolarGrid stroke="rgba(255, 255, 255, 0.1)" />
+                              <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255, 255, 255, 0.5)', fontSize: 9, fontWeight: 'bold' }} />
+                              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: 'rgba(255, 255, 255, 0.3)', fontSize: 7 }} />
+                              <Radar name="Candidate" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} />
+                            </RadarChart>
+                          </ResponsiveContainer>
                         </div>
                       </div>
                     </div>
 
                     {/* VERIFIED PROFILES (Section 1) */}
-                    <div id="verified-profiles-card" className="lg:col-span-2 p-6 rounded-2xl transparent border border-white/10 flex flex-col justify-between">
+                    <div id="verified-profiles-card" className="p-6 rounded-2xl transparent border border-white/10 flex flex-col justify-between">
                       <div className="flex items-center gap-2 mb-4">
                         <Users className="w-5 h-5 text-brand" />
                         <h4 className="text-xs font-black uppercase tracking-widest text-white">1. Verified Profiles</h4>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 gap-2">
                         {(() => {
                           const foundProfiles = verifiedProfiles.filter((p: any) => p.status !== 'Not Found' && p.url && p.url !== '#' && p.url !== '');
                           const notFoundCount = verifiedProfiles.filter((p: any) => p.status === 'Not Found' || !p.url || p.url === '' || p.url === '#').length;
@@ -8491,7 +8589,6 @@ function CandidateDetail() {
                           );
                         })()}
                       </div>
-
                     </div>
                   </div>
 
