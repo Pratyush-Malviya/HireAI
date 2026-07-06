@@ -2547,6 +2547,13 @@ function InterviewRoom() {
                <Button onClick={() => navigate(`/candidates/${candidateId}`)} className="h-12 px-8 glass-premium hover:bg-white/5 text-slate-955 font-black uppercase tracking-widest rounded-xl text-xs shadow-2xl transition-transform hover:scale-102 active:scale-98 cursor-pointer">
                   Review Session Evaluation
                </Button>
+               <div className="flex flex-col items-center text-center max-w-sm mt-4 pt-4 border-t border-white/5 space-y-2">
+                 <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Are you hiring?</p>
+                 <p className="text-xs text-white/60 font-medium">Create automated AI screening interviews for your own team for free on HireNow.</p>
+                 <button onClick={() => navigate('/auth')} className="text-brand text-xs font-black hover:underline cursor-pointer">
+                    Create Free Recruiter Account →
+                 </button>
+               </div>
             </div>
           )}
         </div>
