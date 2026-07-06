@@ -152,11 +152,43 @@ export async function localEvaluateInterview(
     }
   }
 
-  const questionEvals: QuestionEvaluation[] = await Promise.all(pairs.map(async p => {
+  // Fetch the entire evaluation in a single batch request
+  let evaluationsList: any[] = [];
+  try {
+    const result = await fetch('/api/ai/evaluate-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history })
+    });
+    if (result.ok) {
+      const data = await result.json();
+      evaluationsList = data.evaluations || [];
+    }
+  } catch (e) {
+    console.error("Failed to run batch evaluation:", e);
+  }
+
+  // Map Q&A pairs, matching the batch response or falling back to heuristics
+  const questionEvals: QuestionEvaluation[] = pairs.map((p, idx) => {
     const category = categorizeQuestion(p.question);
-    const { overallScore, notes } = await geminiScoreResponse(p.question, p.response);
-    return { question: p.question, response: p.response, category, score: overallScore, notes };
-  }));
+    
+    // Find matching evaluation from batch result
+    const ev = evaluationsList.find((e: any) => e.questionIndex === idx);
+    let score = 3;
+    let notes = 'Evaluated by AI';
+    
+    if (ev) {
+      score = ev.overallScore || 3;
+      notes = ev.notes || 'Evaluated by AI';
+    } else {
+      // Heuristic fallback if batch match failed
+      const heur = heuristicScoreResponse(p.question, p.response);
+      score = heur.overallScore;
+      notes = heur.notes;
+    }
+    
+    return { question: p.question, response: p.response, category, score, notes };
+  });
 
   // Compute competency scores
   const byCategory: Record<QuestionCategory, number[]> = {
