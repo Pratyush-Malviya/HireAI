@@ -3048,6 +3048,181 @@ app.get("/api/meeting/recording-status/:candidateId", async (req, res) => {
   res.json({ exists: false, status });
 });
 
+// Endpoint to fetch candidate and job context for Pipecat bot
+app.get("/api/candidate/:id/context", async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (!admin.apps.length) {
+      return res.status(500).json({ error: "Firebase Admin is not initialized." });
+    }
+    const db = admin.firestore();
+    const candidateDoc = await db.collection("candidates").doc(id).get();
+    if (!candidateDoc.exists) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+    const candidateData = candidateDoc.data() || {};
+    
+    // Get job info if available
+    let jobData: any = {};
+    if (candidateData.jobId) {
+      const jobDoc = await db.collection("jobs").doc(candidateData.jobId).get();
+      if (jobDoc.exists) {
+        jobData = jobDoc.data() || {};
+      }
+    }
+    
+    res.json({
+      candidateName: candidateData.name || candidateData.candidateName || "Candidate",
+      role: candidateData.appliedRole || jobData.title || "Job Role",
+      jd: jobData.description || "Job Description not provided.",
+      resume: candidateData.resumeText || candidateData.candidateResume || "Resume not provided."
+    });
+  } catch (err: any) {
+    console.error("Failed to fetch candidate context:", err);
+    res.status(500).json({ error: "Failed to fetch candidate context: " + err.message });
+  }
+});
+
+// Helper for background transcript evaluation
+async function evaluateAndSaveScorecard(meetingId: string, candidateId: string, history: any[]) {
+  try {
+    if (!process.env.NVIDIA_API_KEY) {
+      console.warn("NVIDIA_API_KEY not found. Skipping background scorecard evaluation.");
+      return;
+    }
+    
+    const transcript = history
+      .map((h: any) => `${h.role === "model" || h.role === "assistant" || h.role === "system" ? "Interviewer" : "Candidate"}: ${h.text || h.content || ""}`)
+      .join("\n\n");
+
+    const systemPrompt = `You are a Principal HR Intelligence Analyst with 20 years of talent acquisition experience. Analyze the interview transcript and return ONLY a valid JSON object matching this exact schema:
+
+{
+  "rating": 82,
+  "summary": "Sophisticated executive summary with specific behavioral and technical evidence (2-3 paragraphs)",
+  "keyInsights": ["High-signal observation 1", "Risk or concern 2", "Competitive advantage 3"],
+  "categoryScores": {
+    "technical": 80,
+    "communication": 85,
+    "cultural": 78,
+    "experience": 82,
+    "problemSolving": 79
+  },
+  "verdict": "STRONG_CONTENDER",
+  "strengths": ["Demonstrated strength 1", "Strength 2"],
+  "developmentAreas": ["Area to develop 1"],
+  "hiringRecommendation": "Proceed to technical panel — strong alignment with core requirements.",
+  "nextSteps": ["Send technical assessment", "Schedule panel interview with engineering team"]
+}
+
+Rules:
+- verdict MUST be exactly one of: "HIKE", "STRONG_CONTENDER", "POTENTIAL", "PASS"
+- rating is weighted average of categoryScores
+- Be specific — cite actual things the candidate said
+- Return ONLY the JSON object, no other text`;
+
+    const completion = await getNvidiaClient().chat.completions.create({
+      model: NVIDIA_MODELS.hrAgent,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `INTERVIEW TRANSCRIPT:\n\n${transcript}\n\nReturn ONLY the JSON evaluation.` },
+      ],
+      temperature: 0.2,
+      max_tokens: 2048,
+      stream: false,
+    });
+
+    const raw = completion.choices[0]?.message?.content ?? "";
+    const scorecard = parseNvidiaJson(raw);
+    
+    // Save scorecard to Firestore
+    const db = admin.firestore();
+    await db.collection("candidates").doc(candidateId).update({
+      scorecard,
+      scorecardGeneratedAt: new Date().toISOString()
+    });
+    
+    const meetingsQuery = await db.collection("meetings").where("meetingId", "==", meetingId).get();
+    if (!meetingsQuery.empty) {
+      await meetingsQuery.docs[0].ref.update({
+        scorecard
+      });
+    }
+    
+    console.log(`[Background Evaluation] Successfully generated and saved scorecard for candidate ${candidateId}`);
+  } catch (err: any) {
+    console.error(`[Background Evaluation] Failed to generate scorecard for candidate ${candidateId}:`, err);
+  }
+}
+
+// Endpoint to save raw transcript on interview completion and trigger background evaluation
+app.post("/api/meeting/save-transcript", async (req, res) => {
+  const { meetingId, candidateId, history } = req.body;
+  if (!meetingId || !candidateId || !Array.isArray(history)) {
+    return res.status(400).json({ error: "meetingId, candidateId, and history array are required" });
+  }
+
+  try {
+    if (!admin.apps.length) {
+      return res.status(500).json({ error: "Firebase Admin is not initialized." });
+    }
+    const db = admin.firestore();
+    
+    const formattedTranscript = history
+      .map((h: any) => `${h.role === "model" || h.role === "assistant" ? "Interviewer" : "Candidate"}: ${h.text || h.content || ""}`)
+      .join("\n\n");
+
+    // Update meeting doc
+    const meetingQuery = await db.collection("meetings").where("meetingId", "==", meetingId).get();
+    let jobId = "";
+    let candidateName = "Candidate";
+    let candidateEmail = "";
+    
+    if (!meetingQuery.empty) {
+      const meetingDoc = meetingQuery.docs[0];
+      await meetingDoc.ref.update({
+        transcript: formattedTranscript,
+        history: history,
+        status: "completed",
+        completedAt: new Date().toISOString()
+      });
+      const meetingData = meetingDoc.data();
+      jobId = meetingData.jobId || "";
+    }
+    
+    // Fetch candidate info
+    const candidateDoc = await db.collection("candidates").doc(candidateId).get();
+    if (candidateDoc.exists) {
+      const cData = candidateDoc.data() || {};
+      candidateName = cData.name || cData.candidateName || "Candidate";
+      candidateEmail = cData.email || "";
+      
+      await candidateDoc.ref.update({
+        interviewStatus: "completed"
+      });
+    }
+    
+    // Create interview completion document to trigger existing notifyInterviewCompleted
+    await db.collection("interview_completions").add({
+      candidateId,
+      candidateEmail,
+      candidateName,
+      meetingId,
+      jobId,
+      transcript: formattedTranscript,
+      completedAt: new Date().toISOString()
+    });
+
+    // Run evaluation asynchronously in the background
+    evaluateAndSaveScorecard(meetingId, candidateId, history);
+    
+    res.json({ success: true, message: "Transcript saved and evaluation triggered." });
+  } catch (err: any) {
+    console.error("Failed to save transcript:", err);
+    res.status(500).json({ error: "Failed to save transcript: " + err.message });
+  }
+});
+
 // Bot status and log callbacks (called by meeting bot)
 app.patch("/api/meeting/app/bot/status", (req, res) => {
   const { eventId, botId, provider, status } = req.body;
