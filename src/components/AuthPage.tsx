@@ -3,6 +3,7 @@ import { Mail, Search, ArrowRight, ShieldCheck, Zap, Loader2, AlertCircle } from
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { cn } from '../lib/utils';
 import { RainbowButton } from './magic-ui/rainbow-button';
 
 export function AuthPage() {
@@ -11,14 +12,50 @@ export function AuthPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const validateEmail = (val: string) => {
+    if (!val.trim()) return 'Email is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return 'Invalid email format';
+    return '';
+  };
+
+  const validatePassword = (val: string) => {
+    if (!val) return 'Password is required';
+    if (!isLogin && val.length < 6) return 'Password must be at least 6 characters';
+    return '';
+  };
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    if (val) setFieldErrors(prev => ({ ...prev, email: validateEmail(val) }));
+    else setFieldErrors(prev => ({ ...prev, email: '' }));
+  };
+
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    if (val) setFieldErrors(prev => ({ ...prev, password: validatePassword(val) }));
+    else setFieldErrors(prev => ({ ...prev, password: '' }));
+  };
+
+  const isValid = () => {
+    const e = validateEmail(email);
+    const p = validatePassword(password);
+    setFieldErrors({ email: e, password: p });
+    return !e && !p;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
+    if (!isValid()) {
+      setLoading(false);
+      return;
+    }
     try {
       if ((auth as any).isDummy) {
         throw new Error('Firebase is not configured. Please check your VITE_FIREBASE_API_KEY.');
@@ -105,14 +142,19 @@ export function AuthPage() {
               <label className="text-[10px] font-black text-white/50 uppercase tracking-widest pl-1">Email</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 pl-12 text-white placeholder-white/30 focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/50 transition-all font-medium"
-                  placeholder="name@company.com"
-                />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => handleEmailChange(e.target.value)}
+                    onBlur={() => setFieldErrors(prev => ({ ...prev, email: validateEmail(email) }))}
+                    className={cn(
+                      "w-full bg-white/5 border rounded-xl px-4 py-3.5 pl-12 text-white placeholder-white/30 focus:outline-none focus:ring-1 transition-all font-medium",
+                      fieldErrors.email ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/50" : "border-white/10 focus:border-brand/50 focus:ring-brand/50"
+                    )}
+                    placeholder="name@company.com"
+                  />
+                  {fieldErrors.email && <p className="text-[10px] font-medium text-red-400 pl-1 mt-1">{fieldErrors.email}</p>}
               </div>
             </div>
 
@@ -131,14 +173,19 @@ export function AuthPage() {
               </div>
               <div className="relative">
                 <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 pl-12 text-white placeholder-white/30 focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/50 transition-all font-medium"
-                  placeholder="••••••••"
-                />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
+                    onBlur={() => setFieldErrors(prev => ({ ...prev, password: validatePassword(password) }))}
+                    className={cn(
+                      "w-full bg-white/5 border rounded-xl px-4 py-3.5 pl-12 text-white placeholder-white/30 focus:outline-none focus:ring-1 transition-all font-medium",
+                      fieldErrors.password ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/50" : "border-white/10 focus:border-brand/50 focus:ring-brand/50"
+                    )}
+                    placeholder="••••••••"
+                  />
+                  {fieldErrors.password && <p className="text-[10px] font-medium text-red-400 pl-1 mt-1">{fieldErrors.password}</p>}
               </div>
             </div>
 
@@ -161,7 +208,7 @@ export function AuthPage() {
 
           <div className="mt-6 text-center">
             <button
-              onClick={() => { setIsLogin(!isLogin); setError(null); }}
+              onClick={() => { setIsLogin(!isLogin); setError(null); setFieldErrors({}); }}
               className="text-sm font-bold text-slate-400 hover:text-white transition-colors"
             >
               {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
