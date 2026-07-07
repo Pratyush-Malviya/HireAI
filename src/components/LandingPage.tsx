@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Brain, Target, MessageSquare, Video, Clock, LayoutGrid, Zap, CheckCircle2, ChevronRight, BarChart3, Users, Star, ArrowRight, Search, Building2, Lightbulb, Shield, Globe, Cpu, FileText, Menu, X } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import { Particles } from "./magic-ui/particles"
 import { BorderBeam } from "./magic-ui/border-beam"
 import { Meteors } from "./magic-ui/meteors"
@@ -69,14 +69,32 @@ const testimonials = [
 export function LandingPage() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const { scrollY } = useScroll();
+  const yBg = useTransform(scrollY, [0, 1000], [0, 200]);
+  const yBlob1 = useTransform(scrollY, [0, 1000], [0, 150]);
+  const yBlob2 = useTransform(scrollY, [0, 1000], [0, 300]);
+  const yHero = useTransform(scrollY, [0, 800], [0, -80]);
+  const opacityHero = useTransform(scrollY, [0, 600], [1, 0.2]);
+
   return (
     <div className="relative min-h-screen bg-transparent overflow-x-hidden">
       {/* Hero Background Effects */}
-      <div className="absolute inset-0 z-0">
+      <motion.div style={{ y: yBg }} className="absolute inset-0 z-0 pointer-events-none">
         <Particles className="absolute inset-0" quantity={100} color="#0ea5e9" size={0.6} />
         <Meteors number={15} />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-dark/30 via-slate-950 to-slate-950" />
-      </div>
+      </motion.div>
+
+      {/* Floating Parallax Glowing Blobs */}
+      <motion.div 
+        style={{ y: yBlob1 }} 
+        className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-brand/10 rounded-full blur-[100px] pointer-events-none z-0" 
+      />
+      <motion.div 
+        style={{ y: yBlob2 }} 
+        className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-brand-light/10 rounded-full blur-[120px] pointer-events-none z-0" 
+      />
 
       {/* Navigation */}
       <nav className="relative z-50 border-b border-slate-800/50 bg-transparent/80 backdrop-blur-xl">
@@ -154,7 +172,7 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative z-10 pt-4 pb-40 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto text-center">
+        <motion.div style={{ y: yHero, opacity: opacityHero }} className="max-w-6xl mx-auto text-center">
           <BlurFade delay={0.1} inView>
             <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-brand/20 bg-brand/5 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-[0.2em] mb-6 shadow-2xl shadow-brand/10">
               <SparklesText sparklesCount={5} colors={{ first: "#0ea5e9", second: "#8b5cf6" }}>
@@ -216,7 +234,7 @@ export function LandingPage() {
               </div>
             </div>
           </BlurFade>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats Section */}
