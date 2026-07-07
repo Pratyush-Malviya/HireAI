@@ -70,7 +70,7 @@ export function LandingPage() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
-    <div className="relative min-h-screen bg-transparent overflow-hidden">
+    <div className="relative min-h-screen bg-transparent overflow-x-hidden">
       {/* Hero Background Effects */}
       <div className="absolute inset-0 z-0">
         <Particles className="absolute inset-0" quantity={100} color="#0ea5e9" size={0.6} />
@@ -90,9 +90,21 @@ export function LandingPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-8 mr-4">
-                <a href="#features" className="text-sm text-white hover:text-white transition-colors font-medium">Features</a>
+                <a 
+                  href="#features" 
+                  onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }} 
+                  className="text-sm text-white hover:text-white transition-colors font-medium"
+                >
+                  Features
+                </a>
                 <Link to="/pricing" className="text-sm text-white hover:text-white transition-colors font-medium">Pricing</Link>
-                <a href="#testimonials" className="text-sm text-white hover:text-white transition-colors font-medium">Testimonials</a>
+                <a 
+                  href="#testimonials" 
+                  onClick={(e) => { e.preventDefault(); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }} 
+                  className="text-sm text-white hover:text-white transition-colors font-medium"
+                >
+                  Testimonials
+                </a>
               </div>
               <Link to="/auth" className="hidden sm:block text-sm text-white/70 hover:text-white transition-colors font-medium">
                 Sign In
@@ -114,9 +126,21 @@ export function LandingPage() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-slate-800/50 bg-[#02040a]/95 backdrop-blur-xl absolute top-full left-0 w-full shadow-2xl">
             <div className="px-4 py-6 flex flex-col gap-4">
-              <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Features</a>
+              <a 
+                href="#features" 
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }} 
+                className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors"
+              >
+                Features
+              </a>
               <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Pricing</Link>
-              <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors">Testimonials</a>
+              <a 
+                href="#testimonials" 
+                onClick={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }} 
+                className="text-lg text-white font-medium p-2 hover:bg-white/5 rounded-lg transition-colors"
+              >
+                Testimonials
+              </a>
               <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-white/70 hover:text-white font-medium p-2 rounded-lg transition-colors">
                 Sign In
               </Link>
