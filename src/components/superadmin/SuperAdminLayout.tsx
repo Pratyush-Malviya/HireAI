@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ShieldCheck, LayoutGrid, Globe, CreditCard, Activity, Cpu, Palette, BookOpen, ChevronLeft, Loader2, Trash2, MessageSquare, FileX2 } from 'lucide-react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { ShieldCheck, LayoutGrid, Globe, CreditCard, Activity, Cpu, Palette, BookOpen, ChevronLeft, Loader2, Trash2, MessageSquare, FileX2, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { useProfile, useNotification } from '../../lib/appContext';
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
 
 export function SuperAdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { isAdmin } = useProfile();
   const { confirm, notify } = useNotification();
@@ -68,10 +69,10 @@ export function SuperAdminLayout() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)]">
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
       {/* Sidebar */}
       <aside className={cn(
-        "flex flex-col shrink-0 border-r border-white/10 transition-all duration-300 bg-[#0d1117]/40 backdrop-blur-sm",
+        "hidden lg:flex flex-col shrink-0 border-r border-white/10 transition-all duration-300 bg-[#0d1117]/40 backdrop-blur-sm",
         sidebarCollapsed ? "w-[60px]" : "w-56"
       )}>
         {/* Header */}
@@ -192,10 +193,37 @@ export function SuperAdminLayout() {
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 min-w-0 p-6 md:p-8 space-y-8 overflow-auto animate-in fade-in duration-300">
-        <Outlet />
-      </main>
+      {/* Main Content Area Wrapper */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Sub-Navigation Header / Selector */}
+        <div className="lg:hidden bg-[#0d1117]/80 border-b border-white/10 p-4 shrink-0 flex items-center justify-between gap-4 backdrop-blur-sm relative z-30">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-indigo-400" />
+            <span className="text-xs font-black uppercase tracking-widest text-white">System Admin</span>
+          </div>
+          <div className="relative flex-1 max-w-[200px]">
+            <select
+              value={location.pathname}
+              onChange={(e) => navigate(e.target.value)}
+              className="w-full bg-[#0d1117] border border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none appearance-none pr-8 cursor-pointer"
+            >
+              {NAV_ITEMS.map((item) => (
+                <option key={item.to} value={item.to}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-white/50">
+              <ChevronDown className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <main className="flex-1 min-w-0 p-6 md:p-8 space-y-8 overflow-auto animate-in fade-in duration-300">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

@@ -1930,7 +1930,7 @@ function InterviewRoom() {
       )}
 
       {/* Main Workspace Frame */}
-      <div className="w-full flex flex-col lg:flex-row gap-6 h-[calc(100vh-160px)] lg:h-[calc(100vh-140px)] flex-1 overflow-hidden">
+      <div className="w-full flex flex-col-reverse lg:flex-row gap-6 h-auto lg:h-[calc(100vh-140px)] min-h-[calc(100dvh-120px)] flex-1 overflow-y-auto lg:overflow-hidden">
         
         {/* Sleek Tabbed Sidebar (Replaces cluttered multi-card sidebar) */}
         <div className="w-full lg:w-80 flex flex-col glass-premium/60 border border-white/10/80 rounded-3xl overflow-hidden shrink-0 shadow-2xl relative">
@@ -2910,10 +2910,10 @@ function PublicSharedScorecard() {
               <div className="space-y-4 max-h-[300px] overflow-y-auto border border-white/10/50 rounded-2xl p-4 bg-white/5">
                 {interview.messages?.map((msg: any, i: number) => (
                   <div key={i} className="text-xs leading-relaxed">
-                    <p className={cn("font-bold uppercase tracking-wide", msg.role === 'assistant' ? "text-cyan-600" : "text-white")}>
-                      {msg.role === 'assistant' ? 'AI Screener' : 'Candidate'}
+                    <p className={cn("font-bold uppercase tracking-wide", (msg.role === 'model' || msg.role === 'assistant') ? "text-cyan-600" : "text-white")}>
+                      {(msg.role === 'model' || msg.role === 'assistant') ? 'AI Screener' : 'Candidate'}
                     </p>
-                    <p className="text-white mt-0.5">{msg.content}</p>
+                    <p className="text-white mt-0.5">{msg.text || msg.content}</p>
                   </div>
                 ))}
               </div>
