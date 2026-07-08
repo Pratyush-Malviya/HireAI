@@ -13,3 +13,7 @@ steps:
 images:
   - 'gcr.io/$PROJECT_ID/meeting-bot:latest'
 
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+
