@@ -1,0 +1,13 @@
+steps:
+  # Build the production Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/meeting-bot:latest'
+      - '-f'
+      - 'meeting-bot/Dockerfile.production'
+      - 'meeting-bot'
+
+images:
+  - 'gcr.io/$PROJECT_ID/meeting-bot:latest'

@@ -74,4 +74,4 @@ Link to any related issues, discussions, or pull requests.
 - [ ] Low - Nice to have
 - [ ] Medium - Important but not urgent
 - [ ] High - Critical for project success
-- [ ] Urgent - Blocking other development 
+- [ ] Urgent - Blocking other development

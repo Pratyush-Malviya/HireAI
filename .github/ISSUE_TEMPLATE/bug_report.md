@@ -60,4 +60,4 @@ Add any other context about the problem here, such as:
 - [ ] This issue is not a duplicate of an existing issue
 
 ## Related Issues
-Link to any related issues or pull requests. 
+Link to any related issues or pull requests.

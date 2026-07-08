@@ -16,14 +16,14 @@ jobs:
 
       - name: Get current version
         id: current
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "version=$(node -p "require('./meeting-bot/package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Checkout main branch
         run: git checkout origin/main
 
       - name: Get main version
         id: main
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "version=$(node -p "require('./meeting-bot/package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Compare versions
         run: |
@@ -31,8 +31,8 @@ jobs:
           echo "PR version: ${{ steps.current.outputs.version }}"
 
           if [ "${{ steps.main.outputs.version }}" == "${{ steps.current.outputs.version }}" ]; then
-            echo "❌ ERROR: Version not bumped!"
-            echo "Please update the version in package.json before merging."
+            echo "❌ ERROR: Version not bumped in meeting-bot/package.json!"
+            echo "Please update the version in meeting-bot/package.json before merging."
             echo "Current: ${{ steps.main.outputs.version }}"
             echo "Required: Must be greater than ${{ steps.main.outputs.version }}"
             exit 1

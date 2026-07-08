@@ -33,11 +33,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Get version/tag only on main push
-      - name: Get version from package.json
+      - name: Get version from meeting-bot/package.json
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: pkg
         run: |
-          VERSION=$(jq -r .version package.json)
+          VERSION=$(jq -r .version meeting-bot/package.json)
           TAG="v$VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG=$TAG" >> $GITHUB_ENV
@@ -78,8 +78,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile.production
+          context: meeting-bot
+          file: meeting-bot/Dockerfile.production
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
