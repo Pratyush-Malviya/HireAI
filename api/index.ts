@@ -21,7 +21,7 @@ const composio = COMPOSIO_API_KEY ? new Composio({ apiKey: COMPOSIO_API_KEY }) :
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // trust proxy setting so express-rate-limit can properly identify users behind the cloud proxy
 app.set("trust proxy", 1);
