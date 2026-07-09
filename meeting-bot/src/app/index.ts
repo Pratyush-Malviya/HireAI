@@ -24,6 +24,15 @@ app.get('/isbusy', async (req, res) => {
   return res.status(200).json({ success: true, data: jobStoreBusy });
 });
 
+app.get('/', async (req, res) => {
+  return res.status(200).json({
+    status: 'online',
+    service: 'HireNow Meeting Bot Service',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 app.get('/health', async (req, res) => {
   // Simple health check endpoint for Docker
   return res.status(200).json({ 
