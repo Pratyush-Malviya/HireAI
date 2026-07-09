@@ -13,7 +13,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "@composio/core": "^0.10.0",
+    "@composio/core": "^0.13.1",
     "@google/genai": "^1.29.0",
     "@stripe/stripe-js": "^9.5.0",
     "@tailwindcss/vite": "^4.1.14",
