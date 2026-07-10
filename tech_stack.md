@@ -81,31 +81,9 @@ AI services are distributed between Google Gemini, NVIDIA NIM, and local process
     *   `headroom-ai`: Used to automatically compress prompts, saving token usage and context size before sending payloads to LLMs.
 *   **Integrations**:
     *   `@composio/core`: For linking AI agents with third-party tools and workspaces.
-
 ---
 
-## 5. Meeting Bot System
-A dedicated service located in `meeting-bot/` that spins up automated browser instances to enter video calls (Google Meet, Zoom, MS Teams).
-
-*   **Automation Framework**:
-    *   **Puppeteer** & **Playwright** with stealth plugins (`puppeteer-extra-plugin-stealth` & `playwright-extra-plugin-stealth`) to bypass bot blockers on call platforms.
-    *   Virtual display integration using `Xvfb` running inside Docker.
-*   **Voice/Video Agent Pipeline (pipecat-bot)**:
-    *   Built on **Pipecat AI** (`pipecat-ai[daily,openai,riva,silero]`) for handling real-time conversational media pipelines.
-    *   **Daily.co** integration for WebRTC real-time audio and video transfer.
-    *   Silero Voice Activity Detection (VAD) and Riva integration.
-*   **Storage Services**:
-    *   Saves recordings and transcript archives using:
-        *   AWS S3 (`@aws-sdk/client-s3`)
-        *   Azure Blob Storage (`@azure/storage-blob`)
-        *   Google Cloud Storage (`@google-cloud/storage`)
-*   **Caching & Monitoring**:
-    *   **Redis** for tracking active bot states and session logs.
-    *   `prom-client` exporting performance metrics to Prometheus.
-
----
-
-## 6. Testing & Development Tooling
+## 5. Testing & Development Tooling
 *   **Unit & Integration Tests**: `vitest` configured to mock browser globals using `jsdom` and `@testing-library/react`.
 *   **Formatting/Linting**: ESLint, Prettier, and TypeScript Compiler (`tsc`).
 *   **Runners**: `tsx` (TypeScript Executor) and `nodemon`.
