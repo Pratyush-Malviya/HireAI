@@ -59,7 +59,7 @@ steps:
       - '--min-instances=0'
       - '--max-instances=10'
       - '--timeout=300'
-      - '--set-env-vars=NODE_ENV=production,GEMINI_API_KEY=AIzaSyDu6S3m8sFPl8-AmzWvm9CUOfeK42qKKVI,NVIDIA_API_KEY=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,SMTP_HOST=smtp.gmail.com,SMTP_PORT=465,SMTP_SECURE=true,SMTP_USER=malviya.pratyush26@gmail.com,SMTP_PASS=cwrtopqdphtkjjqc,SMTP_FROM_NAME=HireNow,SMTP_FROM_EMAIL=malviya.pratyush26@gmail.com'
+      - '--set-env-vars=NODE_ENV=production,GEMINI_API_KEY=$_GEMINI_API_KEY,NVIDIA_API_KEY=$_NVIDIA_API_KEY,SMTP_HOST=smtp.gmail.com,SMTP_PORT=465,SMTP_SECURE=true,SMTP_USER=malviya.pratyush26@gmail.com,SMTP_PASS=$_SMTP_PASS,SMTP_FROM_NAME=HireNow,SMTP_FROM_EMAIL=malviya.pratyush26@gmail.com'
       - '--project=gen-lang-client-0904823075'
 
 images:
