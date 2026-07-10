@@ -1,22 +1,37 @@
-# Cloud Build pipeline for HireAI
-# Triggered automatically on push to main branch (configure trigger in GCP Console)
-#
-# Prerequisites:
-#   1. Enable APIs: Cloud Build, Cloud Run, Artifact Registry
-#   2. Grant Cloud Build service account the Cloud Run Admin & Service Account User roles
-#   3. Create Artifact Registry repo:
-#      gcloud artifacts repositories create hireai \
-#        --repository-format=docker --location=$_REGION
+# Cloud Build pipeline for HireAI - One-shot manual deploy
+# Run with:
+#   gcloud builds submit --config cloudbuild-deploy.yaml --project=hireai-396ff .
 
 steps:
-  # Step 1: Build the Docker image
+  # Step 1: Build the Docker image with VITE_ build args so Firebase is embedded
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '--platform'
+      - 'linux/amd64'
       - '-t'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/hireai/hireai:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:$BUILD_ID'
       - '-t'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/hireai/hireai:latest'
+      - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:latest'
+      # Firebase config — baked into frontend bundle at build time by Vite
+      - '--build-arg'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyCZAG2a0JKmXE80tcYPwqZssnWn9rUtFJA'
+      - '--build-arg'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=gen-lang-client-0904823075.firebaseapp.com'
+      - '--build-arg'
+      - 'VITE_FIREBASE_PROJECT_ID=gen-lang-client-0904823075'
+      - '--build-arg'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=gen-lang-client-0904823075.firebasestorage.app'
+      - '--build-arg'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=461474414408'
+      - '--build-arg'
+      - 'VITE_FIREBASE_APP_ID=1:461474414408:web:de43a984b24cefaecb7d7d'
+      - '--build-arg'
+      - 'VITE_FIREBASE_MEASUREMENT_ID='
+      - '--build-arg'
+      - 'VITE_STRIPE_PUBLISHABLE_KEY='
+      - '--build-arg'
+      - 'VITE_ADMIN_EMAILS=malviya.pratyush26@gmail.com'
       - '.'
     timeout: '1200s'
 
@@ -25,17 +40,17 @@ steps:
     args:
       - 'push'
       - '--all-tags'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/hireai/hireai'
+      - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai'
 
-  # Step 3: Deploy to Cloud Run
+  # Step 3: Deploy to Cloud Run with runtime server-side env vars
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
       - 'hireai'
-      - '--image=$_REGION-docker.pkg.dev/$PROJECT_ID/hireai/hireai:$COMMIT_SHA'
-      - '--region=$_REGION'
+      - '--image=us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:$BUILD_ID'
+      - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--port=3000'
@@ -44,14 +59,12 @@ steps:
       - '--min-instances=0'
       - '--max-instances=10'
       - '--timeout=300'
-      - '--set-env-vars=NODE_ENV=production'
+      - '--set-env-vars=NODE_ENV=production,GEMINI_API_KEY=AIzaSyDu6S3m8sFPl8-AmzWvm9CUOfeK42qKKVI,NVIDIA_API_KEY=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,SMTP_HOST=smtp.gmail.com,SMTP_PORT=465,SMTP_SECURE=true,SMTP_USER=malviya.pratyush26@gmail.com,SMTP_PASS=cwrtopqdphtkjjqc,SMTP_FROM_NAME=HireNow,SMTP_FROM_EMAIL=malviya.pratyush26@gmail.com'
+      - '--project=gen-lang-client-0904823075'
 
 images:
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/hireai/hireai:$COMMIT_SHA'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/hireai/hireai:latest'
-
-substitutions:
-  _REGION: us-central1   # Override this in the Cloud Build trigger settings
+  - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:$BUILD_ID'
+  - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
