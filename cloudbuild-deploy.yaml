@@ -10,24 +10,24 @@ steps:
       - '--platform'
       - 'linux/amd64'
       - '-t'
-      - 'asia-south2-docker.pkg.dev/hireai-396ff/hireai/hireai:$BUILD_ID'
+      - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:$BUILD_ID'
       - '-t'
-      - 'asia-south2-docker.pkg.dev/hireai-396ff/hireai/hireai:latest'
+      - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:latest'
       # Firebase config — baked into frontend bundle at build time by Vite
       - '--build-arg'
-      - 'VITE_FIREBASE_API_KEY=AIzaSyA-az1hs8XPIcCYr1Dahf4tVW6133xVGxE'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyCZAG2a0JKmXE80tcYPwqZssnWn9rUtFJA'
       - '--build-arg'
-      - 'VITE_FIREBASE_AUTH_DOMAIN=hireai-396ff.firebaseapp.com'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=gen-lang-client-0904823075.firebaseapp.com'
       - '--build-arg'
-      - 'VITE_FIREBASE_PROJECT_ID=hireai-396ff'
+      - 'VITE_FIREBASE_PROJECT_ID=gen-lang-client-0904823075'
       - '--build-arg'
-      - 'VITE_FIREBASE_STORAGE_BUCKET=hireai-396ff.firebasestorage.app'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=gen-lang-client-0904823075.firebasestorage.app'
       - '--build-arg'
-      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=330630572915'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=461474414408'
       - '--build-arg'
-      - 'VITE_FIREBASE_APP_ID=1:330630572915:web:9af37f88e1ab32cf7df306'
+      - 'VITE_FIREBASE_APP_ID=1:461474414408:web:de43a984b24cefaecb7d7d'
       - '--build-arg'
-      - 'VITE_FIREBASE_MEASUREMENT_ID=G-TBB1WTKTZE'
+      - 'VITE_FIREBASE_MEASUREMENT_ID='
       - '--build-arg'
       - 'VITE_STRIPE_PUBLISHABLE_KEY='
       - '--build-arg'
@@ -40,17 +40,17 @@ steps:
     args:
       - 'push'
       - '--all-tags'
-      - 'asia-south2-docker.pkg.dev/hireai-396ff/hireai/hireai'
+      - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai'
 
-  # Step 3: Deploy to Cloud Run (asia-south2) with runtime server-side env vars
+  # Step 3: Deploy to Cloud Run with runtime server-side env vars
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
       - 'hireai'
-      - '--image=asia-south2-docker.pkg.dev/hireai-396ff/hireai/hireai:$BUILD_ID'
-      - '--region=asia-south2'
+      - '--image=us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:$BUILD_ID'
+      - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
       - '--port=3000'
@@ -59,12 +59,12 @@ steps:
       - '--min-instances=0'
       - '--max-instances=10'
       - '--timeout=300'
-      - '--set-env-vars=NODE_ENV=production,GEMINI_API_KEY=AIzaSyDu6S3m8sFPl8-AmzWvm9CUOfeK42qKKVI,NVIDIA_API_KEY=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,SMTP_HOST=smtp.gmail.com,SMTP_PORT=465,SMTP_SECURE=true,SMTP_USER=malviya.pratyush26@gmail.com,SMTP_PASS=cwrtopqdphtkjjqc,SMTP_FROM_NAME=HireNow,SMTP_FROM_EMAIL=malviya.pratyush26@gmail.com,APP_URL=https://hireai-3yg7toyg2a-em.a.run.app'
-      - '--project=hireai-396ff'
+      - '--set-env-vars=NODE_ENV=production,GEMINI_API_KEY=AIzaSyDu6S3m8sFPl8-AmzWvm9CUOfeK42qKKVI,NVIDIA_API_KEY=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,SMTP_HOST=smtp.gmail.com,SMTP_PORT=465,SMTP_SECURE=true,SMTP_USER=malviya.pratyush26@gmail.com,SMTP_PASS=cwrtopqdphtkjjqc,SMTP_FROM_NAME=HireNow,SMTP_FROM_EMAIL=malviya.pratyush26@gmail.com'
+      - '--project=gen-lang-client-0904823075'
 
 images:
-  - 'asia-south2-docker.pkg.dev/hireai-396ff/hireai/hireai:$BUILD_ID'
-  - 'asia-south2-docker.pkg.dev/hireai-396ff/hireai/hireai:latest'
+  - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:$BUILD_ID'
+  - 'us-central1-docker.pkg.dev/gen-lang-client-0904823075/hireai/hireai:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
