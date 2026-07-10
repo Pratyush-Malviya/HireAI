@@ -1,0 +1,40 @@
+# Dependencies & build output
+node_modules/
+dist/
+build/
+coverage/
+
+# Environment & secrets — NEVER bake into the image
+.env
+.env.*
+!.env.example
+
+# Git & IDE
+.git/
+.gitignore
+.vscode/
+.github/
+
+# Firebase service account key (never include in image)
+hireai-*.json
+*.json.key
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+*.log
+
+# Dev-only configs (not needed at runtime)
+vite.config.ts
+tsconfig.json
+vitest.config.*
+README.md
+tech_stack.md
+requirements.txt
+runtime.txt
+vercel.json
+firebase.json
+firestore.rules
+firestore.indexes.json
+cloudbuild.yaml
+deploy-cloudrun.sh

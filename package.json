@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:server": "esbuild api/index.ts --bundle --platform=node --target=node20 --outfile=dist/server.cjs --format=cjs --external:msedge-tts --external:canvas --external:@composio/core",
+    "build:all": "npm run build && npm run build:server",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist",
     "lint": "node --max-old-space-size=4096 node_modules/typescript/bin/tsc --noEmit",
