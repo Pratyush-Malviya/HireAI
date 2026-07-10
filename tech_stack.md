@@ -78,7 +78,7 @@ AI services are distributed between Google Gemini, NVIDIA NIM, and local process
 *   **Speech-to-Text (STT)**:
     *   `openai-whisper` (Whisper model) for local speech transcription, backed by `sounddevice`, `soundfile`, and `numpy` for audio processing.
 *   **Prompt Optimization**:
-    *   `headroom-ai`: Used to automatically compress prompts, saving token usage and context size before sending payloads to LLMs.
+    *   `lean-ctx-sdk`: Integrates with **LeanCTX** to automatically compress prompts, saving token usage and context size before sending payloads to LLMs.
 *   **Integrations**:
     *   `@composio/core`: For linking AI agents with third-party tools and workspaces.
 ---

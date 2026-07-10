@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
+import { ProxyClient } from 'lean-ctx-sdk';
 
-const HEADROOM_BASE_URL = process.env.HEADROOM_BASE_URL || 'http://localhost:8787';
 const IS_VERCEL = !!process.env.VERCEL;
-const HEADROOM_AVAILABLE = !IS_VERCEL && (!!process.env.HEADROOM_BASE_URL || !!process.env.HEADROOM_API_KEY);
+// LeanCTX is available locally if not on Vercel
+const LEAN_CTX_AVAILABLE = !IS_VERCEL;
 
 export function createHeadroomNvidiaClient(apiKey: string, baseURL: string): OpenAI {
   return new OpenAI({ apiKey, baseURL });
@@ -34,33 +35,33 @@ export async function maybeCompressContents(
   contents: any,
   model: string
 ): Promise<{ contents: any; compressed: boolean; tokensSaved?: number }> {
-  if (!HEADROOM_AVAILABLE) return { contents, compressed: false };
+  if (!LEAN_CTX_AVAILABLE) return { contents, compressed: false };
   if (!contents || (typeof contents === 'string' && contents.length < 500) || (Array.isArray(contents) && contents.length < 3)) {
     return { contents, compressed: false };
   }
 
   try {
-    const { compress } = require('headroom-ai');
-    const messages = geminiContentsToMessages(contents);
-    const result = await compress(messages, {
-      model,
-      baseUrl: HEADROOM_BASE_URL,
-      fallback: true,
-      timeout: 3000,
+    const client = new ProxyClient({
+      baseUrl: process.env.LEAN_CTX_PROXY_URL || undefined,
+      token: process.env.LEAN_CTX_PROXY_TOKEN || undefined,
+      timeoutMs: 3000,
     });
+    
+    const messages = geminiContentsToMessages(contents);
+    const result = await client.compress(messages as any[], model);
 
     if (result?.messages?.length) {
       const compressed: any = typeof contents === 'string'
-        ? result.messages.map((m: any) => m.content).join('\n')
-        : messagesToGeminiContents(result.messages);
-      const tokensSaved = result.tokensSaved || 0;
+        ? result.messages.map((m: any) => m.content as string).join('\n')
+        : messagesToGeminiContents(result.messages as any[]);
+      const tokensSaved = result.stats?.saved_tokens || 0;
       if (tokensSaved > 0) {
-        console.log(`[Headroom] Compressed ${tokensSaved} tokens (${model})`);
+        console.log(`[LeanCTX] Compressed ${tokensSaved} tokens (${model})`);
       }
       return { contents: compressed, compressed: tokensSaved > 0, tokensSaved };
     }
-  } catch {
-    // Headroom proxy unavailable — use original contents
+  } catch (error) {
+    // LeanCTX daemon unavailable or failed — use original contents
   }
 
   return { contents, compressed: false };

@@ -11,7 +11,7 @@ import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import axios from "axios";
-import { maybeCompressContents, createHeadroomNvidiaClient } from "../src/lib/headroom.js";
+import { maybeCompressContents, createHeadroomNvidiaClient } from "../src/lib/lean_ctx.js";
 
 dotenv.config({ path: ".env" });
 dotenv.config({ path: ".env.local", override: true });
