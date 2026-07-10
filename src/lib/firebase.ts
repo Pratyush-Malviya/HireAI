@@ -16,7 +16,7 @@ const isConfigured = !!firebaseConfig.projectId && !!firebaseConfig.apiKey;
 const app = isConfigured ? initializeApp(firebaseConfig) : ({} as any);
 
 // The Firestore database ID for this project (named database, not the default)
-const FIRESTORE_DATABASE_ID = 'ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68';
+const FIRESTORE_DATABASE_ID = '(default)';
 
 // Initialize Firestore with persistence
 // We use a try-catch because persistentLocalCache can fail in certain environments (like some private modes or restricted contexts)
