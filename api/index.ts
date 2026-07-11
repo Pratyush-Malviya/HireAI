@@ -947,11 +947,25 @@ async function generateContentWithRetry(params: any, maxRetries = 3, initialDela
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         console.log(`Sending API request using model: ${currentModel} (attempt ${attempt + 1}/${maxRetries + 1})`);
-        const compressed = await maybeCompressContents(modelParams.contents, currentModel);
-        if (compressed.compressed) {
-          modelParams.contents = compressed.contents;
+        const now = new Date();
+        const dateTimePreamble = `[SYSTEM CONTEXT — always accurate, injected at request time]
+Current UTC date/time: ${now.toUTCString()}
+Current ISO timestamp: ${now.toISOString()}
+Current year: ${now.getFullYear()}, month: ${now.getMonth() + 1}, day: ${now.getDate()}
+Use this as your authoritative reference for all date calculations, experience timeline evaluations, and temporal reasoning. Do NOT rely on your training data cutoff for "today's date".
+---\n\n`;
+
+        // Prepend date/time preamble to the prompt contents
+        let contentsWithDate = modelParams.contents;
+        if (typeof contentsWithDate === 'string') {
+          contentsWithDate = dateTimePreamble + contentsWithDate;
+        } else if (Array.isArray(contentsWithDate)) {
+          // For array-style contents, prepend to the first user text part
+          contentsWithDate = [{ role: 'user', parts: [{ text: dateTimePreamble }] }, ...contentsWithDate];
         }
-        return await ai.models.generateContent(modelParams);
+
+        const compressed = await maybeCompressContents(contentsWithDate, currentModel);
+        return await ai.models.generateContent({ ...modelParams, contents: compressed.compressed ? compressed.contents : contentsWithDate });
       } catch (error: any) {
         lastError = error;
         
