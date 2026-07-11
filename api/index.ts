@@ -2779,7 +2779,7 @@ Rules:
 - Be specific — cite actual things the candidate said
 - Return ONLY the JSON object, no other text`;
 
-    const completionStr = await generateContentWithRetry({
+    const response = await generateContentWithRetry({
       systemInstruction: systemPrompt,
       contents: [{ role: "user", parts: [{ text: "INTERVIEW TRANSCRIPT:\n\n" + transcript + "\n\nReturn ONLY the JSON evaluation." }] }],
       generationConfig: {
@@ -2789,6 +2789,7 @@ Rules:
       }
     });
 
+    const completionStr = response.text || "";
     let scorecard;
     try {
       scorecard = JSON.parse(completionStr);
