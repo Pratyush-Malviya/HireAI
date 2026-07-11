@@ -139,6 +139,123 @@ app.get("/api/debug", async (req, res) => {
   }
 });
 
+app.get("/api/debug/create-jobs", async (req, res) => {
+  try {
+    const db = admin.firestore('ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
+    const usersSnap = await db.collection('users').where('email', '==', 'malviya.pratyush26@gmail.com').get();
+    if (usersSnap.empty) {
+      return res.status(404).json({ error: "User malviya.pratyush26@gmail.com not found in users collection" });
+    }
+    
+    let uid = '';
+    let orgId = '';
+    usersSnap.forEach(d => {
+      uid = d.id;
+      orgId = d.data().organizationId || '';
+    });
+    
+    const dummyJobs = [
+      {
+        title: "Frontend Engineer (React/TypeScript)",
+        description: "We are looking for a Senior Frontend Engineer to build premium, modern React interfaces with TypeScript. Experience with TailwindCSS, modern bundlers (Vite/Webpack), and state management libraries is highly desirable. Candidates must have a strong sense of typography, spacing, and micro-interactions.",
+        company: "HireNow Tech",
+        urgency: "high",
+        interviewDurationMinutes: 15,
+        requirements: {
+          title: "Frontend Engineer (React/TypeScript)",
+          must_have_skills: ["React", "TypeScript", "JavaScript", "HTML5", "CSS3"],
+          nice_to_have_skills: ["TailwindCSS", "Vite", "Redux", "Zustand", "Webpack"],
+          min_experience_years: 5,
+          required_education: "Bachelor's degree in Computer Science or equivalent practical experience",
+          preferred_industries: ["Software", "Tech", "SaaS"],
+          role_seniority: "Senior",
+          role_type: "Technical / Engineering",
+          location_requirement: "Remote",
+          keywords: ["React", "TypeScript", "CSS", "Frontend", "Developer"],
+          customCriteria: {
+            skillsMatch: { name: "Skills Match", description: "Evaluates core React and TypeScript proficiency.", weight: 35 },
+            experienceFit: { name: "Experience Fit", description: "Assesses relevant years of frontend development.", weight: 25 },
+            education: { name: "Education", description: "Degree level and field relevance.", weight: 15 },
+            achievements: { name: "Achievements", description: "Quantifiable impacts and complexity of projects.", weight: 15 },
+            culturalRoleFit: { name: "Cultural Role Fit", description: "Tenure stability and growth trajectory.", weight: 10 }
+          },
+          thresholds: { passed: 70, low: 50 }
+        }
+      },
+      {
+        title: "Backend Engineer (Node.js/PostgreSQL)",
+        description: "Seeking a Backend Engineer to design and maintain scalable APIs, microservices, and database systems. You will work with Node.js, Express, and PostgreSQL. Familiarity with Docker, Redis, and GCP/AWS cloud services is a plus. Emphasis on performance tuning, database indexing, and secure design patterns.",
+        company: "HireNow Tech",
+        urgency: "medium",
+        interviewDurationMinutes: 20,
+        requirements: {
+          title: "Backend Engineer (Node.js/PostgreSQL)",
+          must_have_skills: ["Node.js", "Express", "PostgreSQL", "SQL", "REST APIs"],
+          nice_to_have_skills: ["Docker", "Redis", "Google Cloud", "AWS", "TypeScript"],
+          min_experience_years: 3,
+          required_education: "Bachelor's degree in Computer Science, Software Engineering, or equivalent",
+          preferred_industries: ["Software", "FinTech", "SaaS"],
+          role_seniority: "Mid-Level",
+          role_type: "Technical / Engineering",
+          location_requirement: "Hybrid (Bangalore)",
+          keywords: ["Node.js", "Express", "PostgreSQL", "Database", "Backend"],
+          customCriteria: {
+            skillsMatch: { name: "Skills Match", description: "Backend stack alignment and architecture patterns.", weight: 35 },
+            experienceFit: { name: "Experience Fit", description: "Relevant backend experience and API design.", weight: 25 },
+            education: { name: "Education", description: "CS degree or equivalent experience.", weight: 15 },
+            achievements: { name: "Achievements", description: "System scale, performance gains, and robustness.", weight: 15 },
+            culturalRoleFit: { name: "Cultural Role Fit", description: "Team communication and ownership.", weight: 10 }
+          },
+          thresholds: { passed: 70, low: 50 }
+        }
+      },
+      {
+        title: "Product Manager (SaaS)",
+        description: "Join us as a Product Manager for our core SaaS dashboard. You will define the product roadmap, collaborate with engineering and design, and translate user feedback into actionable requirements. Experience writing clear PRDs, working with analytics tools (Mixpanel, Amplitude), and driving agile team processes is required.",
+        company: "HireNow Tech",
+        urgency: "medium",
+        interviewDurationMinutes: 15,
+        requirements: {
+          title: "Product Manager (SaaS)",
+          must_have_skills: ["Product Roadmap", "PRD Writing", "Agile/Scrum", "User Analytics", "Wireframing"],
+          nice_to_have_skills: ["Mixpanel", "Figma", "Jira", "SQL", "SaaS Metrics"],
+          min_experience_years: 4,
+          required_education: "Bachelor's degree in Business, Computer Science, or related field",
+          preferred_industries: ["SaaS", "Product Tech"],
+          role_seniority: "Mid-to-Senior",
+          role_type: "Operations / Generalist",
+          location_requirement: "Remote",
+          keywords: ["Product Manager", "PM", "Roadmap", "SaaS", "Product Owner"],
+          customCriteria: {
+            skillsMatch: { name: "Skills Match", description: "Product management methodologies and execution skills.", weight: 35 },
+            experienceFit: { name: "Experience Fit", description: "Years in SaaS product management.", weight: 25 },
+            education: { name: "Education", description: "Degree level and relevant background.", weight: 15 },
+            achievements: { name: "Achievements", description: "Growth metrics, successful feature launches.", weight: 15 },
+            culturalRoleFit: { name: "Cultural Role Fit", description: "Collaborative mindset and communication.", weight: 10 }
+          },
+          thresholds: { passed: 70, low: 50 }
+        }
+      }
+    ];
+
+    const createdIds: string[] = [];
+    for (const job of dummyJobs) {
+      const docRef = await db.collection('jobs').add({
+        ...job,
+        organizationId: orgId,
+        createdBy: uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        status: 'active'
+      });
+      createdIds.push(docRef.id);
+    }
+
+    res.status(200).json({ message: "Successfully created 3 dummy jobs", createdIds });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
 app.get("/api/auth/google/url", (req, res) => {
   const oauth2Client = getOAuthClient();
   const url = oauth2Client.generateAuthUrl({
