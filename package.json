@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:server": "esbuild api/index.ts --bundle --platform=node --target=node20 --outfile=dist/server.cjs --format=cjs --external:msedge-tts --external:canvas --external:@composio/core",
+    "build:server": "esbuild api/index.ts --bundle --platform=node --target=node20 --outfile=dist/server.cjs --format=cjs --external:msedge-tts --external:canvas --external:@composio/core --external:jsdom --external:lightningcss",
     "build:all": "npm run build && npm run build:server",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist",
