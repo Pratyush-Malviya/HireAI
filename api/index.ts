@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import nodemailer from "nodemailer";
+import { JSDOM } from "jsdom";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
@@ -1488,6 +1489,53 @@ We recommend focusing the incoming Technical Panel on the following key operatio
   };
 }
 
+async function searchDuckDuckGo(query: string, maxResults = 8): Promise<{title: string, url: string, snippet: string}[]> {
+  try {
+    const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    const html = await response.text();
+    const dom = new JSDOM(html);
+    const doc = dom.window.document;
+    const results: {title: string, url: string, snippet: string}[] = [];
+    const links = doc.querySelectorAll('a.result__a');
+    const snippets = doc.querySelectorAll('.result__snippet');
+    for (let i = 0; i < Math.min(links.length, maxResults); i++) {
+      const link = links[i];
+      const snippet = snippets[i];
+      results.push({
+        title: link.textContent?.trim() || '',
+        url: link.getAttribute('href') || '',
+        snippet: snippet?.textContent?.trim() || ''
+      });
+    }
+    return results;
+  } catch (err) {
+    console.error('DuckDuckGo search failed:', err);
+    return [];
+  }
+}
+
+async function fetchPageText(url: string, maxChars = 4000): Promise<string> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
+      signal: AbortSignal.timeout(5000)
+    });
+    const html = await response.text();
+    const dom = new JSDOM(html);
+    const text = dom.window.document.body?.textContent || '';
+    return text.replace(/\s+/g, ' ').trim().substring(0, maxChars);
+  } catch {
+    return '';
+  }
+}
+
 function researchCandidateFallback(candidateName: string, role: string, company: string, details: string) {
   const summaryMarkdown = `## 🔍 Executive Intelligence Report: ${candidateName || "Candidate"}
 *Role: ${role || "Specialist"} at ${company || "Confidential Employer"} | Research Status: Fallback Mode*
@@ -2097,6 +2145,9 @@ app.post("/api/ai/research-candidate", async (req, res) => {
   const skillsList = skills || 'Not provided';
   const targetTitle = jobTitle || role;
 
+  let allFoundUrls: string[] = [];
+  let allFoundSnippets = '';
+
   try {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("AI Key missing");
@@ -2142,6 +2193,31 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       searchQueries.push(`${candidateName} ${company} ${role}`);
     }
 
+    // Real web search via DuckDuckGo (free, no API key needed)
+    const realSearchResults: {query: string, results: {title: string, url: string, snippet: string}[]}[] = [];
+    for (const q of searchQueries) {
+      const results = await searchDuckDuckGo(q, 6);
+      realSearchResults.push({ query: q, results });
+    }
+    allFoundUrls = [...new Set(realSearchResults.flatMap(r => r.results.map(rr => rr.url)))].filter(Boolean);
+    allFoundSnippets = realSearchResults.flatMap(r => r.results.map(rr => `- ${rr.title}: ${rr.snippet} (${rr.url})`)).join("\n");
+    console.log(`Real search found ${allFoundUrls.length} unique URLs`);
+
+    // Try to fetch actual content from top candidate profiles (LinkedIn, GitHub, portfolio)
+    let profileContent = '';
+    const profileDomains = ['linkedin.com', 'github.com', 'gitlab.com', 'medium.com', 'dev.to'];
+    for (const url of allFoundUrls) {
+      try {
+        const urlObj = new URL(url);
+        if (profileDomains.some(d => urlObj.hostname.includes(d))) {
+          const text = await fetchPageText(url);
+          if (text.length > 200) {
+            profileContent += `\n--- Content from ${url} ---\n${text.substring(0, 3000)}\n`;
+          }
+        }
+      } catch {}
+    }
+
     // Stage 2: OSINT Collector with Google Search Grounding
     const collectorPrompt = `You are an elite OSINT Intelligence Agent with deep expertise in professional background verification and digital footprint analysis.
     
@@ -2156,6 +2232,11 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     
     SEARCH EXECUTION PLAN (execute all 5 queries sequentially):
     ${searchQueries.map((q: string, idx: number) => `Query ${idx + 1}: ${q}`).join("\n")}
+    
+    REAL WEB SEARCH RESULTS (from DuckDuckGo live search — use these as your primary data source):
+    ${(allFoundSnippets || "No live search results were returned. Use your training data for assessment.").substring(0, 8000)}
+    
+    ${profileContent ? `FETCHED PROFILE PAGES:\n${profileContent.substring(0, 8000)}` : ''}
     
     FOR EACH QUERY, EXTRACT AND DOCUMENT THE FOLLOWING:
     
@@ -2532,6 +2613,43 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     console.warn("Research Candidate failed or rate-limited. Falling back gracefully:", error);
     try {
       const fallbackResult = researchCandidateFallback(candidateName, role, company, details);
+      // If real search results exist, augment the fallback with actual data
+      if (allFoundUrls?.length > 0) {
+        const urlItems = allFoundUrls.slice(0, 15).map((url: string, i: number) => `      ${i + 1}. ${url}`);
+        const urlList = urlItems.join("\n");
+        const enhancedSummary = `## 🔍 Executive Intelligence Report: ${candidateName || "Candidate"}
+*Role: ${role || "Specialist"} at ${company || "Confidential Employer"} | Live search: ${allFoundUrls.length} sources found*
+
+### 1. Identity & Verification Status
+Live search results were found for this candidate. The AI-powered analysis was unavailable due to rate limits, but the following public URLs were discovered via web search. Manual verification is recommended.
+
+### 2. Real Web Search Results
+The following ${allFoundUrls.length} URLs were found by searching for "${candidateName || "Candidate"}":
+
+${urlList}
+
+### 3. Professional Footprint Analysis
+${allFoundSnippets ? `Search snippets revealed: ${allFoundSnippets.substring(0, 3000)}` : "Snippets were not available from the search results."}
+
+### 4. Technical Depth Assessment
+Resume-based assessment only. For real verification, check the URLs found above.
+
+### 5. Hiring Intelligence Recommendation
+Conditional Proceed: Resume signals detected. Manually verify the candidate's profiles using the URLs discovered above before making a final decision.`;
+        fallbackResult.summary = enhancedSummary;
+        fallbackResult.sources = allFoundUrls.map((url: string) => ({ title: `Found URL: ${url.substring(0, 80)}`, uri: url }));
+        fallbackResult.verified_profiles = fallbackResult.verified_profiles || [];
+        // Mark profiles as "Potential" if their URLs appeared in search results
+        for (const fp of fallbackResult.verified_profiles) {
+          const name = fp.name.toLowerCase();
+          const matchingUrl = allFoundUrls.find((u: string) => u.toLowerCase().includes(name));
+          if (matchingUrl) {
+            fp.url = matchingUrl;
+            fp.status = "Potential";
+          }
+        }
+        fallbackResult.message = `Live search found ${allFoundUrls.length} URLs. AI analysis was unavailable — manual review recommended.`;
+      }
       res.json(fallbackResult);
     } catch (fallbackError) {
       res.status(500).json({ error: "Candidate research failed" });

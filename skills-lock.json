@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "deep-research-pro": {
+      "source": "parags/deep-research-pro",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "5a7e5d203c2262feed961ff65c994240e6e03f90f4c654679bd6a44d1bca4848"
+    }
+  }
+}
