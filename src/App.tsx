@@ -16033,20 +16033,46 @@ export default function App() {
               ? import.meta.env.VITE_ADMIN_EMAILS.split(',').map((e: string) => e.trim())
               : [];
             const ADMIN_EMAILS = ['malviya.pratyush26@gmail.com', ...envAdmins];
-            const [adminDoc, adminQuerySnap] = await Promise.all([
-              getDoc(doc(db, 'admins', u.uid)),
-              getDocs(query(collection(db, 'admins'), where('email', '==', u.email)))
-            ]);
-            if (adminDoc.exists() || !adminQuerySnap.empty || ADMIN_EMAILS.includes(u.email || '')) {
+            
+            let adminDocExists = false;
+            let adminQueryEmpty = true;
+            
+            try {
+              const adminDoc = await getDoc(doc(db, 'admins', u.uid));
+              adminDocExists = adminDoc.exists();
+            } catch (e) {
+              console.warn("getDoc admins/{uid} failed:", e);
+            }
+            
+            try {
+              const adminQuerySnap = await getDocs(query(collection(db, 'admins'), where('email', '==', u.email)));
+              adminQueryEmpty = adminQuerySnap.empty;
+            } catch (e) {
+              console.warn("getDocs admins query failed:", e);
+            }
+            
+            if (adminDocExists || !adminQueryEmpty || ADMIN_EMAILS.includes(u.email || '')) {
               setIsAdmin(true);
             }
             
-            const profileDoc = await getDoc(doc(db, 'users', u.uid));
+            let profileDoc;
+            try {
+              profileDoc = await getDoc(doc(db, 'users', u.uid));
+            } catch (e) {
+              console.warn("getDoc users/{uid} failed:", e);
+              throw e;
+            }
             if (profileDoc.exists()) {
               const p = { ...profileDoc.data(), uid: profileDoc.id } as UserProfile;
               setProfile(p);
               if (p.organizationId) {
-                const orgDoc = await getDoc(doc(db, 'organizations', p.organizationId));
+                let orgDoc;
+                try {
+                  orgDoc = await getDoc(doc(db, 'organizations', p.organizationId));
+                } catch (e) {
+                  console.warn(`getDoc organizations/${p.organizationId} failed:`, e);
+                  throw e;
+                }
                 if (orgDoc.exists()) {
                   setOrganization({ ...orgDoc.data(), id: orgDoc.id } as Organization);
                 }
