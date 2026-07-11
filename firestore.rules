@@ -15,7 +15,7 @@ service cloud.firestore {
     function isSuperAdmin() {
       return isSignedIn() && (
         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        request.auth.token.email in ['malviya.pratyush26@gmail.com']
+        request.auth.token.get('email', '') in ['malviya.pratyush26@gmail.com']
       );
     }
 
@@ -131,9 +131,15 @@ service cloud.firestore {
 
     // Jobs
     match /jobs/{jobId} {
-      allow read: if isSignedIn() && isNotCandidate() && (
+      allow list: if isSignedIn() && isNotCandidate() && (
         isSuperAdmin() ||
-        resource.data.organizationId == getUserOrgId()
+        getUserOrgId() != null ||
+        getTokenOrgId() != null
+      );
+      allow get: if isSignedIn() && isNotCandidate() && (
+        isSuperAdmin() ||
+        resource.data.organizationId == getUserOrgId() ||
+        resource.data.organizationId == getTokenOrgId()
       );
       allow create: if isSignedIn() && isNotCandidate() && (
         isSuperAdmin() ||
@@ -141,16 +147,22 @@ service cloud.firestore {
       ) && incoming().createdBy == request.auth.uid;
       allow update, delete: if isSignedIn() && isNotCandidate() && (
         isSuperAdmin() ||
-        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId()))
+        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
+        (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
       );
     }
 
     // Candidates
     match /candidates/{candidateId} {
-      allow read: if isSignedIn() && (
+      allow list: if isSignedIn() && (
+        isSuperAdmin() ||
+        isNotCandidate()
+      );
+      allow get: if isSignedIn() && (
         isSuperAdmin() ||
         resource.data.organizationId == getUserOrgId() ||
-        resource.data.email == request.auth.token.email
+        resource.data.organizationId == getTokenOrgId() ||
+        resource.data.get('email', '') == request.auth.token.get('email', '')
       );
       allow create: if isSignedIn() && (
         isSuperAdmin() ||
@@ -159,13 +171,15 @@ service cloud.firestore {
       allow update: if isSignedIn() && (
         isSuperAdmin() ||
         (resource.data.organizationId == getUserOrgId() && isHRStaff(getUserOrgId())) ||
+        (resource.data.organizationId == getTokenOrgId() && isHRStaff(getTokenOrgId())) ||
         // Allow candidates to update their own interview status
-        (resource.data.email == request.auth.token.email &&
+        (resource.data.get('email', '') == request.auth.token.get('email', '') &&
          incoming().diff(resource.data).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']))
       );
       allow delete: if isSignedIn() && isNotCandidate() && (
         isSuperAdmin() ||
-        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId()))
+        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
+        (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
       );
     }
 
