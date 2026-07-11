@@ -131,24 +131,27 @@ service cloud.firestore {
 
     // Jobs
     match /jobs/{jobId} {
-      allow list: if isSignedIn() && isNotCandidate() && (
+      allow list: if isSignedIn() && (
         isSuperAdmin() ||
-        getUserOrgId() != null ||
-        getTokenOrgId() != null
+        (isNotCandidate() && (getUserOrgId() != null || getTokenOrgId() != null))
       );
-      allow get: if isSignedIn() && isNotCandidate() && (
+      allow get: if isSignedIn() && (
         isSuperAdmin() ||
-        resource.data.organizationId == getUserOrgId() ||
-        resource.data.organizationId == getTokenOrgId()
+        (isNotCandidate() && (
+          resource.data.organizationId == getUserOrgId() ||
+          resource.data.organizationId == getTokenOrgId()
+        ))
       );
-      allow create: if isSignedIn() && isNotCandidate() && (
+      allow create: if isSignedIn() && (
         isSuperAdmin() ||
-        isInOrg(incoming().organizationId)
+        (isNotCandidate() && isInOrg(incoming().organizationId))
       ) && incoming().createdBy == request.auth.uid;
-      allow update, delete: if isSignedIn() && isNotCandidate() && (
+      allow update, delete: if isSignedIn() && (
         isSuperAdmin() ||
-        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
-        (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
+        (isNotCandidate() && (
+          (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
+          (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
+        ))
       );
     }
 
@@ -197,23 +200,33 @@ service cloud.firestore {
 
     // Interviews
     match /interviews/{interviewId} {
-      allow read, list: if isSignedIn() && (
+      allow list: if isSignedIn() && (
+        isSuperAdmin() ||
+        isNotCandidate()
+      );
+      allow get: if isSignedIn() && (
         isSuperAdmin() ||
         resource.data.organizationId == getUserOrgId() ||
-        get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.email == request.auth.token.email
+        resource.data.organizationId == getTokenOrgId() ||
+        get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.get('email', '') == request.auth.token.get('email', '')
       );
-      allow create: if isSignedIn() && isNotCandidate() && (
+      allow create: if isSignedIn() && (
         isSuperAdmin() ||
-        isInOrg(incoming().organizationId)
+        (isNotCandidate() && isInOrg(incoming().organizationId))
       );
       allow update: if isSignedIn() && (
         isSuperAdmin() ||
         (resource.data.organizationId == getUserOrgId() && isHRStaff(getUserOrgId())) ||
-        (get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.email == request.auth.token.email &&
+        (resource.data.organizationId == getTokenOrgId() && isHRStaff(getTokenOrgId())) ||
+        (get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.get('email', '') == request.auth.token.get('email', '') &&
          incoming().diff(resource.data).affectedKeys().hasAny(['messages', 'completed', 'feedback', 'completedAt']) &&
          isValidInterview(incoming()))
       );
-      allow delete: if isSuperAdmin() || (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId()));
+      allow delete: if isSignedIn() && (
+        isSuperAdmin() ||
+        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
+        (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
+      );
     }
 
     // Meetings (Google Meet links)
