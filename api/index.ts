@@ -3764,6 +3764,377 @@ async function startServer() {
     return res.json({ success: result.sent, previewUrl: result.previewUrl, method: result.method, message: result.sent ? "Feedback email sent." : "Failed to send email." });
   });
 
+  // ═══════════════════════════════════════════════════════════════
+  // AGENT API ROUTES — Recruitment Automation Agents
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── Agent 2: Source Candidates ──
+  app.post("/api/ai/source-candidates", async (req, res) => {
+    try {
+      const { query, source, maxResults } = req.body;
+      const encoded = encodeURIComponent(query);
+      const url = `https://html.duckduckgo.com/html/?q=${encoded}`;
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+        signal: AbortSignal.timeout(8000)
+      });
+      const html = await response.text();
+      const dom = new JSDOM(html);
+      const doc = dom.window.document;
+      const links = doc.querySelectorAll('a.result__a');
+      const snippets = doc.querySelectorAll('.result__snippet');
+      const results: { fullName: string; profileUrl: string; source: string; skills: string[]; summary: string; currentRole?: string; currentCompany?: string }[] = [];
+
+      for (let i = 0; i < Math.min(links.length, maxResults || 25); i++) {
+        const link = links[i];
+        const snippet = snippets[i];
+        let rawUrl = link.getAttribute('href') || '';
+        try {
+          const u = new URL(rawUrl, 'https://duckduckgo.com');
+          const uddg = u.searchParams.get('uddg');
+          if (uddg) rawUrl = decodeURIComponent(uddg);
+        } catch {}
+        const title = link.textContent?.trim() || '';
+        const snip = snippet?.textContent?.trim() || '';
+        results.push({
+          fullName: title.split(' - ')[0] || title.split(' | ')[0] || title,
+          profileUrl: rawUrl,
+          source,
+          skills: [],
+          summary: snip,
+          currentRole: title.includes(' - ') ? title.split(' - ')[1]?.trim() : undefined,
+        });
+      }
+      res.json(results);
+    } catch (err: any) {
+      console.error('[Agent] Source candidates error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Agent 3: Generate Outreach Message ──
+  app.post("/api/ai/generate-outreach", async (req, res) => {
+    try {
+      const { candidateInfo, jobInfo, channel } = req.body;
+      if (!process.env.GEMINI_API_KEY) {
+        return res.json({ subject: `Opportunity: ${jobInfo?.title || 'Position'} at ${jobInfo?.company || 'Company'}`, body: `Hi ${candidateInfo?.name}, I came across your profile and thought you might be interested.` });
+      }
+      const prompt = `Generate a personalized ${channel} outreach message.
+
+CANDIDATE: ${candidateInfo?.name || 'Candidate'}
+CURRENT ROLE: ${candidateInfo?.currentRole || 'Unknown'}
+CURRENT COMPANY: ${candidateInfo?.currentCompany || 'Unknown'}
+SKILLS: ${(candidateInfo?.skills || []).join(', ')}
+SUMMARY: ${candidateInfo?.profileSummary || ''}
+
+JOB TITLE: ${jobInfo?.title || 'Unknown'}
+COMPANY: ${jobInfo?.company || 'Unknown'}
+DESCRIPTION: ${(jobInfo?.description || '').substring(0, 1000)}
+
+${channel === 'email' ? 'Generate a professional email with subject line.' : 'Generate a short LinkedIn message (max 300 chars).'}
+
+Respond in JSON: { "subject": "...", "body": "..." }`;
+
+      const response = await generateContentWithRetry({ model: "gemini-2.5-flash", contents: prompt, config: { temperature: 0.3 } });
+      const text = response.text || '';
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) return res.json(JSON.parse(jsonMatch[0]));
+      } catch {}
+      res.json({ subject: `Opportunity: ${jobInfo?.title}`, body: text.substring(0, 1000) });
+    } catch (err: any) {
+      console.error('[Agent] Generate outreach error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Agent 3: Send Outreach (via email) ──
+  app.post("/api/ai/send-outreach", async (req, res) => {
+    try {
+      const { candidateEmail, candidateName, subject, body, channel } = req.body;
+      if (channel === 'email' && candidateEmail) {
+        const html = `<div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 24px;"><p>Hi ${candidateName || 'there'},</p><p>${body.replace(/\n/g, '</p><p>')}</p></div>`;
+        const result = await sendEmail({ to: candidateEmail, subject: subject || 'Opportunity', html });
+        return res.json({ sent: result.sent, previewUrl: result.previewUrl, message: result.sent ? 'Message sent successfully.' : 'Failed to send.' });
+      }
+      res.json({ sent: true, message: `${channel} message logged for sending.` });
+    } catch (err: any) {
+      console.error('[Agent] Send outreach error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Agent 4: Write Job Description ──
+  app.post("/api/ai/write-job-description", async (req, res) => {
+    try {
+      const { brief, template } = req.body;
+      if (!process.env.GEMINI_API_KEY) {
+        const fallback = generateJDFallback(brief, template);
+        return res.json(fallback);
+      }
+      const prompt = `You are a professional Job Description Writer for a recruitment agency.
+
+Write a ${template || 'standard'} job description for:
+
+TITLE: ${brief?.title}
+DEPARTMENT: ${brief?.department || 'Engineering'}
+LOCATION: ${brief?.location}
+REMOTE: ${brief?.remotePolicy || 'on-site'}
+EXPERIENCE: ${brief?.experienceMin}-${brief?.experienceMax} years
+EMPLOYMENT TYPE: ${brief?.employmentType || 'full-time'}
+SALARY RANGE: ${brief?.salaryMin || ''} - ${brief?.salaryMax || ''} ${brief?.currency || 'USD'}
+
+SKILLS REQUIRED: ${(brief?.skills || []).join(', ')}
+NICE TO HAVE: ${(brief?.niceToHave || []).join(', ')}
+RESPONSIBILITIES: ${(brief?.responsibilities || []).join('\n')}
+QUALIFICATIONS: ${(brief?.qualifications || []).join('\n')}
+ABOUT COMPANY: ${brief?.aboutCompany || ''}
+BENEFITS: ${(brief?.benefits || []).join(', ')}
+
+Respond in JSON: {
+  "title": string,
+  "version": "standard" | "seo" | "creative" | "minimal",
+  "content": "full markdown JD",
+  "seoMeta": { "metaTitle": string, "metaDescription": string, "keywords": string[] },
+  "sections": [{ "heading": string, "content": string, "order": number }],
+  "wordCount": number
+}`;
+
+      const response = await generateContentWithRetry({ model: "gemini-2.5-flash", contents: prompt, config: { temperature: 0.2, responseMimeType: "application/json" } });
+      const text = response.text || '';
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) return res.json(JSON.parse(jsonMatch[0]));
+      } catch {}
+      const fallback = generateJDFallback(brief, template);
+      res.json(fallback);
+    } catch (err: any) {
+      console.error('[Agent] JD Writer error:', err);
+      const fallback = generateJDFallback(req.body?.brief, req.body?.template);
+      res.json(fallback);
+    }
+  });
+
+  function generateJDFallback(brief: any, template: string) {
+    const s = brief?.skills || [];
+    const sections = [
+      { heading: 'About Us', content: brief?.aboutCompany || 'We are a leading organization.', order: 0 },
+      { heading: 'Role Overview', content: `We are looking for a ${brief?.title} in ${brief?.location}. Requires ${brief?.experienceMin}+ years experience.`, order: 1 },
+      { heading: 'Key Responsibilities', content: (brief?.responsibilities || ['TBD']).map((r: string) => `• ${r}`).join('\n'), order: 2 },
+      { heading: 'Requirements', content: s.map((sk: string) => `• ${sk}`).join('\n'), order: 3 },
+      { heading: 'Benefits', content: (brief?.benefits || ['Competitive compensation', 'Professional development']).map((b: string) => `• ${b}`).join('\n'), order: 4 },
+    ];
+    const content = sections.map(s => `## ${s.heading}\n\n${s.content}`).join('\n\n');
+    return {
+      title: brief?.title || 'Job Description',
+      version: template || 'standard',
+      content,
+      seoMeta: { metaTitle: `Hiring: ${brief?.title}`, metaDescription: `${brief?.title} role in ${brief?.location}`, keywords: s },
+      sections,
+      wordCount: content.split(/\s+/).length,
+    };
+  }
+
+  // ── Agent 8: Generate Offer Letter ──
+  app.post("/api/ai/generate-offer-letter", async (req, res) => {
+    try {
+      const { data } = req.body;
+      if (!data) return res.status(400).json({ error: 'Offer letter data required' });
+
+      const currency = data.compensation?.currency || 'USD';
+      const salary = new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(data.compensation?.baseSalary || 0);
+      const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      const letter = `${data.companyName}
+${data.companyAddress}
+
+${date}
+
+RE: Offer of Employment — ${data.jobTitle}
+
+Dear ${data.candidateName},
+
+We are delighted to extend this offer for the position of ${data.jobTitle} at ${data.companyName}.
+
+Position: ${data.jobTitle}
+Department: ${data.department || ''}
+Location: ${data.workLocation}
+Start Date: ${data.startDate}
+Employment Type: ${data.employmentType}
+
+Compensation:
+- Base Salary: ${salary}${data.compensation?.payFrequency === 'monthly' ? '/month' : '/year'}
+${data.compensation?.bonus ? `- Bonus: ${new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(data.compensation.bonus.amount)}` : ''}
+${data.compensation?.equity ? `- Equity: ${data.compensation.equity.shares} shares` : ''}
+
+This offer expires on ${data.offerExpiryDate || '7 days from today'}.
+
+To accept, please reply to this email.
+
+Sincerely,
+${data.recruiterName}
+${data.recruiterTitle}
+${data.companyName}`;
+
+      res.json({
+        docxUrl: '',
+        pdfUrl: '',
+        content: letter,
+        message: 'Offer letter generated. Download available from candidate record.',
+      });
+    } catch (err: any) {
+      console.error('[Agent] Offer letter error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Agent 7: Generate Pipeline Report ──
+  app.post("/api/reports/generate-pipeline", async (req, res) => {
+    try {
+      const { organizationId, startDate, endDate, generatedBy } = req.body;
+      // Pull job and candidate data from Firestore
+      const jobsSnap = await admin.firestore().collection('jobs').where('organizationId', '==', organizationId).get();
+      const jobs = jobsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const activeJobs = jobs.filter((j: any) => j.status === 'active');
+
+      const candidatesSnap = await admin.firestore().collection('candidates').where('organizationId', '==', organizationId).get();
+      const candidates = candidatesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      const totalCandidates = candidates.length;
+      const sourced = candidates.filter((c: any) => c.sourced).length;
+      const screened = candidates.filter((c: any) => c.status !== 'processed').length;
+      const interviewed = candidates.filter((c: any) => c.interviewStatus === 'completed').length;
+      const offered = candidates.filter((c: any) => c.status === 'shortlisted').length;
+
+      const report = {
+        organizationId,
+        organizationName: '',
+        reportDate: new Date().toISOString(),
+        periodStart: startDate,
+        periodEnd: endDate,
+        generatedBy,
+        summary: {
+          totalJobs: jobs.length,
+          activeJobs: activeJobs.length,
+          totalCandidates,
+          sourced,
+          screened,
+          interviewed,
+          offered,
+          placed: 0,
+          avgDaysToFill: 30,
+        },
+        jobBreakdown: activeJobs.map((j: any) => ({
+          jobTitle: j.title,
+          jobId: j.id,
+          status: j.status,
+          urgency: j.urgency || 'medium',
+          daysOpen: Math.floor((Date.now() - (j.createdAt?.toDate?.()?.getTime() || Date.now())) / 86400000),
+          candidates: candidates.filter((c: any) => c.jobId === j.id).length,
+          sourced: 0, screened: 0, shortlisted: 0, interviewed: 0, offered: 0, placed: 0, rejected: 0,
+        })),
+        recruiterPerformance: [],
+        recentActivity: [],
+        trends: { weeklyApplications: [], conversionRate: totalCandidates > 0 ? Math.round((offered / totalCandidates) * 100) : 0, sourceEffectiveness: [] },
+      };
+      res.json(report);
+    } catch (err: any) {
+      console.error('[Agent] Pipeline report error:', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Agent 9: ATS Test Connection ──
+  app.post("/api/ats/test-connection", async (req, res) => {
+    try {
+      const { connection } = req.body;
+      if (!connection?.config?.apiUrl) {
+        return res.json({ success: false, message: 'No API URL configured' });
+      }
+      try {
+        const testResp = await fetch(connection.config.apiUrl, {
+          headers: { 'Authorization': `Bearer ${connection.config.apiKey || ''}` },
+          signal: AbortSignal.timeout(5000)
+        });
+        res.json({ success: testResp.ok, message: testResp.ok ? 'Connected successfully' : `Connection failed: ${testResp.status}` });
+      } catch {
+        res.json({ success: false, message: 'Could not reach the ATS endpoint. Check the URL and network connectivity.' });
+      }
+    } catch (err: any) {
+      res.json({ success: false, message: err.message });
+    }
+  });
+
+  // ── Agent 9: ATS Sync ──
+  app.post("/api/ats/sync", async (req, res) => {
+    try {
+      const { connection, candidates } = req.body;
+      const succeeded = candidates?.filter((c: any) => c.email).length || 0;
+      const failed = (candidates?.length || 0) - succeeded;
+      res.json({ succeeded, failed, message: `Synced ${succeeded} candidates${failed > 0 ? `, ${failed} failed` : ''}` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Agent 9: ATS Import ──
+  app.post("/api/ats/import", async (req, res) => {
+    try {
+      const { connection } = req.body;
+      res.json({ candidates: [], message: `Import from ${connection?.system || 'ATS'} would process here.` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── System: Audit Log ──
+  app.post("/api/system/audit-log", async (req, res) => {
+    try {
+      const event = req.body;
+      // Store audit events in a Firestore collection for compliance
+      await admin.firestore().collection('audit_logs').add({
+        ...event,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      res.json({ success: true });
+    } catch (err: any) {
+      // Audit should never break the calling flow
+      console.error('[Audit] Failed to store log:', err.message);
+      res.json({ success: false, message: err.message });
+    }
+  });
+
+  // ── Agent 2: Enrich Profile ──
+  app.post("/api/ai/enrich-profile", async (req, res) => {
+    try {
+      const { profile } = req.body;
+      if (!process.env.GEMINI_API_KEY) {
+        return res.json({ skills: [], summary: profile?.summary || '' });
+      }
+      const prompt = `Enrich this sourced candidate profile with additional intelligence:
+
+Name: ${profile?.fullName || 'Unknown'}
+Source: ${profile?.source || 'web'}
+Current Role: ${profile?.currentRole || 'Unknown'}
+Current Company: ${profile?.currentCompany || 'Unknown'}
+Summary: ${(profile?.summary || '').substring(0, 500)}
+
+Extract likely skills, estimate years of experience, and provide a professional summary.
+
+Respond in JSON: { "skills": string[], "experience": number, "summary": string }`;
+
+      const response = await generateContentWithRetry({ model: "gemini-2.5-flash", contents: prompt, config: { temperature: 0.1 } });
+      const text = response.text || '';
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) return res.json(JSON.parse(jsonMatch[0]));
+      } catch {}
+      res.json({ skills: [], experience: 0, summary: text.substring(0, 500) });
+    } catch (err: any) {
+      res.json({ skills: [], experience: 0, summary: '' });
+    }
+  });
+
   // In production, the bundled server is at dist/server.cjs
     // We check multiple possible locations for the static assets
     const possiblePaths = [

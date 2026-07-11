@@ -33,6 +33,7 @@ import { FeedbackPage } from './components/FeedbackPage';
 import { SAFeedbackPage } from './components/superadmin/SAFeedbackPage';
 import { PipelineManagementTab } from './components/PipelineManagementTab';
 import { ClientReportsTab } from './components/ClientReportsTab';
+import { AgentHub } from './components/agents/AgentHub';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, getDocs, writeBatch, setDoc, getDocFromServer, clearIndexedDbPersistence, terminate, enableNetwork, disableNetwork, deleteDoc } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, db } from './lib/firebase';
@@ -3075,8 +3076,9 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                { to: '/jobs/new', icon: Briefcase, label: 'Post Job' },
                { to: '/resume-bank', icon: Database, label: 'Resume Bank' },
                { to: '/screening-reports', icon: BarChart3, label: 'Screening Reports' },
-               { to: '/interview-reports', icon: Radio, label: 'Interview Reports' },
-               { to: '/org-admin', icon: Settings, label: 'HR Admin' },
+                { to: '/interview-reports', icon: Radio, label: 'Interview Reports' },
+                { to: '/agents', icon: Sparkles, label: 'Agent Hub' },
+                { to: '/org-admin', icon: Settings, label: 'HR Admin' },
              ].map(link => {
                const isActive = location.pathname === link.to || location.pathname.startsWith(link.to + '/');
                return (
@@ -3177,6 +3179,7 @@ function Layout({ children, user, isAdmin: isUserAdmin }: { children: React.Reac
                     <Link to="/resume-bank" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Resume Bank</Link>
                     <Link to="/screening-reports" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Screening Reports</Link>
                     <Link to="/interview-reports" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Interview Reports</Link>
+                    <Link to="/agents" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">Agent Hub</Link>
                     <Link to="/org-admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">HR Admin</Link>
                     {isUserAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2 text-sm font-medium text-white hover:text-white transition-colors">System Admin</Link>
@@ -16225,8 +16228,9 @@ export default function App() {
                       <Route path="/screening-reports" element={<ScreeningReports />} />
                       <Route path="/interview-reports" element={<InterviewReports />} />
                       <Route path="/org-admin" element={<OrgAdminPanel />} />
-                      <Route path="/resume-bank" element={<ResumeBank />} />
-                      <Route path="/feedback" element={<FeedbackPage />} />
+                       <Route path="/resume-bank" element={<ResumeBank />} />
+                       <Route path="/agents" element={<AgentHub organizationId={profile?.organizationId} userId={user?.uid} userEmail={user?.email} onNotify={notify} />} />
+                       <Route path="/feedback" element={<FeedbackPage />} />
                       {/* Super Admin — nested routes with shared layout */}
                       <Route path="/admin" element={<SuperAdminLayout />}>
                         <Route index element={<Navigate to="/admin/overview" replace />} />
