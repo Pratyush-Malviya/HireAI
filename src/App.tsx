@@ -8575,8 +8575,8 @@ function CandidateDetail() {
                           </div>
                         </div>
                         
-                        <div className="w-full h-[140px] flex items-center justify-center">
-                          <ResponsiveContainer width="100%" height="100%">
+                        <div className="w-full h-[140px] relative">
+                          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <RadarChart cx="50%" cy="50%" outerRadius="75%" data={[
                               { subject: 'Technical', A: techScore, fullMark: 100 },
                               { subject: 'Depth', A: engDepth, fullMark: 100 },
