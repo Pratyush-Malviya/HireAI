@@ -9370,7 +9370,6 @@ function CandidateDetail() {
                  </div>
                  <div>
                    <h4 className="font-extrabold text-white text-sm">AI Meeting Recorder Bot</h4>
-                   <p className="text-[10px] text-white font-semibold uppercase">External Meeting Capture</p>
                  </div>
               </div>
 
