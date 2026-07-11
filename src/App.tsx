@@ -3509,6 +3509,38 @@ function ResumeBank() {
     setIsReScreenModalOpen(true);
   };
 
+  const handleDeleteResumes = async (resumesToDelete: any[]) => {
+    const ok = await confirm(`Are you sure you want to delete the selected ${resumesToDelete.length} resume(s)? This will permanently remove all their associated candidate records.`);
+    if (!ok) return;
+    try {
+      const allDocs: any[] = [];
+      resumesToDelete.forEach(r => {
+        if (r.versions && Array.isArray(r.versions)) {
+          r.versions.forEach((v: any) => {
+            allDocs.push(doc(db, 'candidates', v.id));
+          });
+        } else if (r.id) {
+          allDocs.push(doc(db, 'candidates', r.id));
+        }
+      });
+      
+      for (let i = 0; i < allDocs.length; i += 450) {
+        const batch = writeBatch(db);
+        allDocs.slice(i, i + 450).forEach(ref => batch.delete(ref));
+        await batch.commit();
+      }
+
+      setSelectedResumes(prev => prev.filter(k => !resumesToDelete.some(r => {
+        const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
+        return key === k;
+      })));
+      notify(`Successfully deleted ${resumesToDelete.length} resume(s) (${allDocs.length} records).`, 'success');
+    } catch (err) {
+      console.error('Delete resumes error:', err);
+      notify('Failed to delete selected resumes. Verify permissions.', 'error');
+    }
+  };
+
   const handleSingleReScreen = (cand: any) => {
     setReScreeningCandidate(cand);
     setSelectedJobId('');
@@ -3686,6 +3718,20 @@ function ResumeBank() {
           >
             <Zap className="w-3 h-3" /> Re-screen ({selectedResumes.length})
           </button>
+          {selectedResumes.length > 0 && (
+            <button
+              className="h-9 px-4 text-[9px] font-black uppercase tracking-[0.12em] rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/30 transition-all flex items-center gap-2"
+              onClick={() => {
+                const toDelete = uniqueResumes.filter(r => {
+                  const key = r.resumeHash || `${(r.fullName || '').toLowerCase()}_${(r.email || '').toLowerCase()}`;
+                  return selectedResumes.includes(key);
+                });
+                handleDeleteResumes(toDelete);
+              }}
+            >
+              <Trash2 className="w-3 h-3" /> Delete Selected ({selectedResumes.length})
+            </button>
+          )}
         </div>
       </div>
 
@@ -3966,6 +4012,13 @@ function ResumeBank() {
                                 className="h-7 px-2.5 bg-white/5 hover:bg-brand/20 border border-white/10 hover:border-brand/30 rounded-lg text-[7px] font-black uppercase tracking-wider text-white/50 hover:text-brand transition-all flex items-center gap-1"
                               >
                                 <Zap className="w-2.5 h-2.5" /> Re-Screen
+                              </button>
+                              <button
+                                onClick={() => handleDeleteResumes([candidate])}
+                                className="p-1.5 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                title="Delete Resume"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
