@@ -1,5 +1,8 @@
-import { Download, FileText, Printer, BookOpen, Target } from 'lucide-react';
-import { useNotification } from '../../lib/appContext';
+import { Download, FileText, Printer, BookOpen, Target, Briefcase, RotateCcw } from 'lucide-react';
+import { useNotification, useProfile } from '../../lib/appContext';
+import { useState } from 'react';
+import { db, auth } from '../../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // ── Download helpers (from original App.tsx) ──────────────────────────────────
 
@@ -56,8 +59,126 @@ const STEPS = [
   { step: '4', title: 'Batch Ingestion Files', text: 'Drag and drop candidate resumes (.pdf, .docx). Parallel pipelines parse files simultaneously, caching texts for re-evaluation runs.' },
 ];
 
+const DUMMY_JOBS = [
+  {
+    title: "Frontend Engineer (React/TypeScript)",
+    description: "We are looking for a Senior Frontend Engineer to build premium, modern React interfaces with TypeScript. Experience with TailwindCSS, modern bundlers (Vite/Webpack), and state management libraries is highly desirable. Candidates must have a strong sense of typography, spacing, and micro-interactions.",
+    company: "HireNow Tech",
+    urgency: "high",
+    interviewDurationMinutes: 15,
+    requirements: {
+      title: "Frontend Engineer (React/TypeScript)",
+      must_have_skills: ["React", "TypeScript", "JavaScript", "HTML5", "CSS3"],
+      nice_to_have_skills: ["TailwindCSS", "Vite", "Redux", "Zustand", "Webpack"],
+      min_experience_years: 5,
+      required_education: "Bachelor's degree in Computer Science or equivalent practical experience",
+      preferred_industries: ["Software", "Tech", "SaaS"],
+      role_seniority: "Senior",
+      role_type: "Technical / Engineering",
+      location_requirement: "Remote",
+      keywords: ["React", "TypeScript", "CSS", "Frontend", "Developer"],
+      customCriteria: {
+        skillsMatch: { name: "Skills Match", description: "Evaluates core React and TypeScript proficiency.", weight: 35 },
+        experienceFit: { name: "Experience Fit", description: "Assesses relevant years of frontend development.", weight: 25 },
+        education: { name: "Education", description: "Degree level and field relevance.", weight: 15 },
+        achievements: { name: "Achievements", description: "Quantifiable impacts and complexity of projects.", weight: 15 },
+        culturalRoleFit: { name: "Cultural Role Fit", description: "Tenure stability and growth trajectory.", weight: 10 }
+      },
+      thresholds: { passed: 70, low: 50 }
+    }
+  },
+  {
+    title: "Backend Engineer (Node.js/PostgreSQL)",
+    description: "Seeking a Backend Engineer to design and maintain scalable APIs, microservices, and database systems. You will work with Node.js, Express, and PostgreSQL. Familiarity with Docker, Redis, and GCP/AWS cloud services is a plus. Emphasis on performance tuning, database indexing, and secure design patterns.",
+    company: "HireNow Tech",
+    urgency: "medium",
+    interviewDurationMinutes: 20,
+    requirements: {
+      title: "Backend Engineer (Node.js/PostgreSQL)",
+      must_have_skills: ["Node.js", "Express", "PostgreSQL", "SQL", "REST APIs"],
+      nice_to_have_skills: ["Docker", "Redis", "Google Cloud", "AWS", "TypeScript"],
+      min_experience_years: 3,
+      required_education: "Bachelor's degree in Computer Science, Software Engineering, or equivalent",
+      preferred_industries: ["Software", "FinTech", "SaaS"],
+      role_seniority: "Mid-Level",
+      role_type: "Technical / Engineering",
+      location_requirement: "Hybrid (Bangalore)",
+      keywords: ["Node.js", "Express", "PostgreSQL", "Database", "Backend"],
+      customCriteria: {
+        skillsMatch: { name: "Skills Match", description: "Backend stack alignment and architecture patterns.", weight: 35 },
+        experienceFit: { name: "Experience Fit", description: "Relevant backend experience and API design.", weight: 25 },
+        education: { name: "Education", description: "CS degree or equivalent experience.", weight: 15 },
+        achievements: { name: "Achievements", description: "System scale, performance gains, and robustness.", weight: 15 },
+        culturalRoleFit: { name: "Cultural Role Fit", description: "Team communication and ownership.", weight: 10 }
+      },
+      thresholds: { passed: 70, low: 50 }
+    }
+  },
+  {
+    title: "Product Manager (SaaS)",
+    description: "Join us as a Product Manager for our core SaaS dashboard. You will define the product roadmap, collaborate with engineering and design, and translate user feedback into actionable requirements. Experience writing clear PRDs, working with analytics tools (Mixpanel, Amplitude), and driving agile team processes is required.",
+    company: "HireNow Tech",
+    urgency: "medium",
+    interviewDurationMinutes: 15,
+    requirements: {
+      title: "Product Manager (SaaS)",
+      must_have_skills: ["Product Roadmap", "PRD Writing", "Agile/Scrum", "User Analytics", "Wireframing"],
+      nice_to_have_skills: ["Mixpanel", "Figma", "Jira", "SQL", "SaaS Metrics"],
+      min_experience_years: 4,
+      required_education: "Bachelor's degree in Business, Computer Science, or related field",
+      preferred_industries: ["SaaS", "Product Tech"],
+      role_seniority: "Mid-to-Senior",
+      role_type: "Operations / Generalist",
+      location_requirement: "Remote",
+      keywords: ["Product Manager", "PM", "Roadmap", "SaaS", "Product Owner"],
+      customCriteria: {
+        skillsMatch: { name: "Skills Match", description: "Product management methodologies and execution skills.", weight: 35 },
+        experienceFit: { name: "Experience Fit", description: "Years in SaaS product management.", weight: 25 },
+        education: { name: "Education", description: "Degree level and relevant background.", weight: 15 },
+        achievements: { name: "Achievements", description: "Growth metrics, successful feature launches.", weight: 15 },
+        culturalRoleFit: { name: "Cultural Role Fit", description: "Collaborative mindset and communication.", weight: 10 }
+      },
+      thresholds: { passed: 70, low: 50 }
+    }
+  }
+];
+
 export function SAManualPage() {
   const { notify } = useNotification();
+  const { profile } = useProfile();
+  const [creating, setCreating] = useState(false);
+  const [debugResult, setDebugResult] = useState<string | null>(null);
+
+  const handleCreateDummyJobs = async () => {
+    if (!auth.currentUser || !profile) {
+      notify('You must be logged in to create jobs.', 'error');
+      return;
+    }
+    setCreating(true);
+    setDebugResult(null);
+    const createdIds: string[] = [];
+    try {
+      for (const job of DUMMY_JOBS) {
+        const docRef = await addDoc(collection(db, 'jobs'), {
+          ...job,
+          organizationId: profile.organizationId || '',
+          createdBy: auth.currentUser.uid,
+          createdAt: serverTimestamp(),
+          status: 'active'
+        });
+        createdIds.push(docRef.id);
+      }
+      const msg = `Created ${createdIds.length} dummy jobs: ${createdIds.join(', ')}`;
+      setDebugResult(msg);
+      notify(msg, 'success');
+    } catch (err: any) {
+      const msg = `Failed: ${err.message || err}`;
+      setDebugResult(msg);
+      notify(msg, 'error');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handleDownloadHTML = () => {
     downloadFile(buildManualHTML(), 'HireAI-Operations-Manual.html', 'text/html');
@@ -94,6 +215,26 @@ export function SAManualPage() {
             <Printer className="w-3.5 h-3.5" /> Print
           </button>
         </div>
+      </div>
+
+      {/* Debug: Create Dummy Jobs */}
+      <div className="glass-premium rounded-3xl border border-emerald-500/20 p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <Briefcase className="w-5 h-5 text-emerald-400" />
+          <h2 className="text-sm font-black uppercase tracking-wider text-white">Debug: Create Dummy Jobs</h2>
+        </div>
+        <p className="text-xs text-white/50">Creates 3 sample job postings (Frontend, Backend, PM) linked to your organization. These are written directly to Firestore via the client SDK.</p>
+        <button
+          onClick={handleCreateDummyJobs}
+          disabled={creating}
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:opacity-90 shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
+        >
+          {creating ? <RotateCcw className="w-3.5 h-3.5 animate-spin" /> : <Briefcase className="w-3.5 h-3.5" />}
+          {creating ? 'Creating...' : 'Create 3 Dummy Jobs'}
+        </button>
+        {debugResult && (
+          <pre className="text-[10px] text-white/70 font-mono bg-white/5 rounded-xl p-3 border border-white/10 whitespace-pre-wrap max-h-32 overflow-y-auto">{debugResult}</pre>
+        )}
       </div>
 
       {/* Document preview */}

@@ -42,7 +42,15 @@ if (!admin.apps.length) {
 }
 
 export function getDb() {
-  return getFirestore(admin.apps.length ? admin.app() : undefined, 'ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
+  if (!admin.apps.length) {
+    try {
+      admin.initializeApp();
+      console.log("Firebase Admin initialized lazily via getDb()");
+    } catch (e) {
+      console.warn("getDb(): Could not initialize Firebase Admin:", e);
+    }
+  }
+  return getFirestore(admin.apps.length ? admin.app() : (undefined as any), 'ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
 }
 import { Composio } from "@composio/core";
 const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY;
@@ -171,9 +179,20 @@ app.get("/api/debug", async (req, res) => {
 app.get("/api/debug/create-jobs", async (req, res) => {
   try {
     const db = getDb();
-    const usersSnap = await db.collection('users').where('email', '==', 'malviya.pratyush26@gmail.com').get();
+    const email = (req.query.email as string) || 'malviya.pratyush26@gmail.com';
+    
+    // Check admin SDK state
+    const adminState = {
+      appsInitialized: admin.apps.length,
+      hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
+      hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+      hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+      databaseId: 'ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68'
+    };
+
+    const usersSnap = await db.collection('users').where('email', '==', email).get();
     if (usersSnap.empty) {
-      return res.status(404).json({ error: "User malviya.pratyush26@gmail.com not found in users collection" });
+      return res.status(404).json({ error: `User ${email} not found in users collection`, adminState });
     }
     
     let uid = '';
@@ -182,6 +201,10 @@ app.get("/api/debug/create-jobs", async (req, res) => {
       uid = d.id;
       orgId = d.data().organizationId || '';
     });
+
+    // Check existing active jobs count
+    const existingJobsSnap = await db.collection('jobs').where('status', '==', 'active').limit(100).get();
+    const existingCount = existingJobsSnap.size;
     
     const dummyJobs = [
       {
@@ -279,7 +302,35 @@ app.get("/api/debug/create-jobs", async (req, res) => {
       createdIds.push(docRef.id);
     }
 
-    res.status(200).json({ message: "Successfully created 3 dummy jobs", createdIds });
+    res.status(200).json({
+      message: "Successfully created 3 dummy jobs",
+      createdIds,
+      user: { uid, orgId, email },
+      adminState,
+      existingJobsBeforeCreate: existingCount
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
+app.get("/api/debug/verify-jobs", async (req, res) => {
+  try {
+    const db = getDb();
+    const jobsSnap = await db.collection('jobs').where('status', '==', 'active').get();
+    const jobs = jobsSnap.docs.map(d => ({
+      id: d.id,
+      title: d.data().title,
+      company: d.data().company,
+      organizationId: d.data().organizationId,
+      createdBy: d.data().createdBy,
+      createdAt: d.data().createdAt,
+      status: d.data().status
+    }));
+    res.json({
+      totalActive: jobs.length,
+      jobs
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message, stack: error.stack });
   }
