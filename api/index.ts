@@ -112,16 +112,31 @@ async function createGoogleMeetLink(oauth2Client: any, displayName: string): Pro
 }
 
 // Auth Routes
-app.get("/api/debug", (req, res) => {
-  res.status(200).json({
-    hasComposioKey: !!process.env.COMPOSIO_API_KEY,
-    hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
-    hasGeminiKey: !!process.env.GEMINI_API_KEY,
-    hasViteFirebase: !!process.env.VITE_FIREBASE_API_KEY,
-    nodeEnv: process.env.NODE_ENV,
-    vercelRegion: process.env.VERCEL_REGION || "local",
-    time: new Date().toISOString()
-  });
+app.get("/api/debug", async (req, res) => {
+  try {
+    const db = admin.firestore('ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
+    const usersSnap = await db.collection('users').where('email', '==', 'malviya.pratyush26@gmail.com').get();
+    const users: any[] = [];
+    usersSnap.forEach(d => users.push({ id: d.id, data: d.data() }));
+
+    const adminsSnap = await db.collection('admins').where('email', '==', 'malviya.pratyush26@gmail.com').get();
+    const admins: any[] = [];
+    adminsSnap.forEach(d => admins.push({ id: d.id, data: d.data() }));
+
+    res.status(200).json({
+      hasComposioKey: !!process.env.COMPOSIO_API_KEY,
+      hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+      hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      hasViteFirebase: !!process.env.VITE_FIREBASE_API_KEY,
+      nodeEnv: process.env.NODE_ENV,
+      vercelRegion: process.env.VERCEL_REGION || "local",
+      time: new Date().toISOString(),
+      users,
+      admins
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
 });
 
 app.get("/api/auth/google/url", (req, res) => {
