@@ -1002,6 +1002,13 @@ async function generateContentWithRetry(params: any, maxRetries = 3, initialDela
 // QUOTA-SAFE PROGRAMMATIC FALLBACK HANDLERS
 // ==========================================
 
+function getSkillRegex(skill: string) {
+  const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const leadingBoundary = /^\w/.test(skill) ? '\\b' : '(?<!\\w)';
+  const trailingBoundary = /\w$/.test(skill) ? '\\b' : '(?!\\w)';
+  return new RegExp(`${leadingBoundary}${escaped}${trailingBoundary}`, 'i');
+}
+
 function parseJobFallback(text: string) {
   const textLower = (text || "").toLowerCase();
   
@@ -1012,7 +1019,7 @@ function parseJobFallback(text: string) {
   ];
   
   const foundSkills = commonSkills.filter(skill => {
-    const regex = new RegExp(`\\b${skill.replace('.', '\\.')}\\b`, 'i');
+    const regex = getSkillRegex(skill);
     return regex.test(textLower);
   });
   
@@ -1092,7 +1099,7 @@ function screenCandidateFallback(resumeText: string, jobRequirements: any) {
   const inferred: string[] = [];
 
   mustHaves.forEach(skill => {
-    const regex = new RegExp(`\\b${skill.replace('.', '\\.')}\\b`, 'i');
+    const regex = getSkillRegex(skill);
     if (regex.test(resumeLower)) {
       confirmed.push(skill);
     } else {
@@ -1105,7 +1112,7 @@ function screenCandidateFallback(resumeText: string, jobRequirements: any) {
   });
 
   niceHaves.forEach(skill => {
-    const regex = new RegExp(`\\b${skill.replace('.', '\\.')}\\b`, 'i');
+    const regex = getSkillRegex(skill);
     if (regex.test(resumeLower)) {
       confirmed.push(skill);
     } else {
