@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Search, ArrowRight, ShieldCheck, Zap, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Search, ArrowRight, ShieldCheck, Zap, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../lib/firebase';
@@ -10,6 +10,7 @@ export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
@@ -172,20 +173,29 @@ export function AuthPage() {
                 )}
               </div>
               <div className="relative">
-                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                <div className="relative">
+                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     onBlur={() => setFieldErrors(prev => ({ ...prev, password: validatePassword(password) }))}
                     className={cn(
-                      "w-full bg-white/5 border rounded-xl px-4 py-3.5 pl-12 text-white placeholder-white/30 focus:outline-none focus:ring-1 transition-all font-medium",
+                      "w-full bg-white/5 border rounded-xl px-4 py-3.5 pl-12 pr-12 text-white placeholder-white/30 focus:outline-none focus:ring-1 transition-all font-medium",
                       fieldErrors.password ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/50" : "border-white/10 focus:border-brand/50 focus:ring-brand/50"
                     )}
                     placeholder="••••••••"
                   />
-                  {fieldErrors.password && <p className="text-[10px] font-medium text-red-400 pl-1 mt-1">{fieldErrors.password}</p>}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {fieldErrors.password && <p className="text-[10px] font-medium text-red-400 pl-1 mt-1">{fieldErrors.password}</p>}
               </div>
             </div>
 
