@@ -12,9 +12,38 @@ import OpenAI from "openai";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import axios from "axios";
 import { maybeCompressContents } from "../src/lib/lean_ctx.js";
+import admin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 
 dotenv.config({ path: ".env" });
 dotenv.config({ path: ".env.local", override: true });
+
+// Initialize Firebase Admin for Storage access if credentials are provided
+if (!admin.apps.length) {
+  try {
+    if (process.env.FIREBASE_PROJECT_ID) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          // Handle escaped newlines in environment variables
+          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+      });
+      console.log("Firebase Admin Initialized successfully with cert.");
+    } else {
+      admin.initializeApp();
+      console.log("Firebase Admin Initialized successfully with application default credentials.");
+    }
+  } catch (e) {
+    console.warn("Notice: Failed to initialize Firebase Admin:", e);
+  }
+}
+
+export function getDb() {
+  return getFirestore(admin.apps.length ? admin.app() : undefined, 'ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
+}
 import { Composio } from "@composio/core";
 const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY;
 const composio = COMPOSIO_API_KEY ? new Composio({ apiKey: COMPOSIO_API_KEY }) : null;
@@ -114,7 +143,7 @@ async function createGoogleMeetLink(oauth2Client: any, displayName: string): Pro
 // Auth Routes
 app.get("/api/debug", async (req, res) => {
   try {
-    const db = admin.firestore('ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
+    const db = getDb();
     const usersSnap = await db.collection('users').where('email', '==', 'malviya.pratyush26@gmail.com').get();
     const users: any[] = [];
     usersSnap.forEach(d => users.push({ id: d.id, data: d.data() }));
@@ -141,7 +170,7 @@ app.get("/api/debug", async (req, res) => {
 
 app.get("/api/debug/create-jobs", async (req, res) => {
   try {
-    const db = admin.firestore('ai-studio-21348cef-37c9-4a71-98ec-b3379889bf68');
+    const db = getDb();
     const usersSnap = await db.collection('users').where('email', '==', 'malviya.pratyush26@gmail.com').get();
     if (usersSnap.empty) {
       return res.status(404).json({ error: "User malviya.pratyush26@gmail.com not found in users collection" });
@@ -2783,30 +2812,6 @@ app.post("/api/tts", async (req, res) => {
 // START MEETING BOT & COMPOSIO ROUTES
 // ==========================================
 import { v4 as uuidv4 } from "uuid";
-import admin from "firebase-admin";
-
-// Initialize Firebase Admin for Storage access if credentials are provided
-if (!admin.apps.length) {
-  try {
-    if (process.env.FIREBASE_PROJECT_ID) {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          // Handle escaped newlines in environment variables
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-      });
-      console.log("Firebase Admin Initialized successfully with cert.");
-    } else {
-      admin.initializeApp();
-      console.log("Firebase Admin Initialized successfully with application default credentials.");
-    }
-  } catch (e) {
-    console.warn("Notice: Failed to initialize Firebase Admin:", e);
-  }
-}
 
 // Status map to track active meeting bot states locally
 const botStatusMap = new Map();
@@ -2872,7 +2877,7 @@ app.get("/api/candidate/:id/context", async (req, res) => {
     if (!admin.apps.length) {
       return res.status(500).json({ error: "Firebase Admin is not initialized." });
     }
-    const db = admin.firestore();
+    const db = getDb();
     const candidateDoc = await db.collection("candidates").doc(id).get();
     if (!candidateDoc.exists) {
       return res.status(404).json({ error: "Candidate not found" });
@@ -2955,7 +2960,7 @@ Rules:
     }
     
     // Save scorecard to Firestore
-    const db = admin.firestore();
+    const db = getDb();
     await db.collection("candidates").doc(candidateId).update({
       scorecard,
       scorecardGeneratedAt: new Date().toISOString()
@@ -2985,7 +2990,7 @@ app.post("/api/meeting/save-transcript", async (req, res) => {
     if (!admin.apps.length) {
       return res.status(500).json({ error: "Firebase Admin is not initialized." });
     }
-    const db = admin.firestore();
+    const db = getDb();
     
     const formattedTranscript = history
       .map((h: any) => `${h.role === "model" || h.role === "assistant" ? "Interviewer" : "Candidate"}: ${h.text || h.content || ""}`)
