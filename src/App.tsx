@@ -4280,6 +4280,37 @@ function NewJob() {
   const [d5Weight, setD5Weight] = useState(10);
 
   const [showConfig, setShowConfig] = useState(false);
+  const [jobUrl, setJobUrl] = useState('');
+  const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+
+  const handleFetchJobUrl = async () => {
+    if (!jobUrl.trim()) {
+      notify('Please paste a job posting URL first.', 'error');
+      return;
+    }
+    setIsFetchingUrl(true);
+    try {
+      const res = await fetch('/api/ai/fetch-job-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: jobUrl.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to fetch job posting');
+      }
+      const data = await res.json();
+      if (data.title) setTitle(data.title);
+      if (data.company) setCompany(data.company);
+      if (data.description) setDescription(data.description);
+      notify('Job posting fetched and populated successfully!', 'success');
+      setWizardStep(2);
+    } catch (err: any) {
+      notify(err.message || 'Failed to fetch job posting from URL', 'error');
+    } finally {
+      setIsFetchingUrl(false);
+    }
+  };
 
   const handleFileJD = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -4401,6 +4432,38 @@ function NewJob() {
       </div>
 
       <Card className="p-6 sm:p-10 border-white/10 shadow-2xl shadow-brand/10 rounded-[2.5rem] glass-premium/80 backdrop-blur-xl">
+        {/* Quick Import Section */}
+        <div className="mb-8 p-5 bg-white/5 rounded-2xl border border-white/10">
+          <div className="flex items-center gap-2 mb-3">
+            <ExternalLink className="w-4 h-4 text-brand" />
+            <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Import from URL</span>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              className="flex-1 px-5 py-3 transparent border-2 border-white/10 rounded-xl focus:outline-none focus:border-brand transition-all font-bold text-white placeholder:text-white/30 text-sm"
+              placeholder="Paste any job posting URL (LinkedIn, Indeed, etc.)"
+              value={jobUrl}
+              onChange={(e) => setJobUrl(e.target.value)}
+              disabled={isFetchingUrl}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              className="h-12 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl bg-brand text-white hover:opacity-90 flex items-center gap-2"
+              onClick={handleFetchJobUrl}
+              disabled={isFetchingUrl}
+            >
+              {isFetchingUrl ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Fetching...</>
+              ) : (
+                <><Download className="w-4 h-4" /> Fetch</>
+              )}
+            </Button>
+          </div>
+          <p className="text-[9px] text-white/30 font-semibold mt-2">Paste a link and we'll scrape the details automatically — no manual typing needed.</p>
+        </div>
+
         {/* Step Indicator Header */}
         <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
           {[

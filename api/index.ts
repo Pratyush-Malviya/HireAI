@@ -1915,6 +1915,124 @@ app.post("/api/ai/parse-job", async (req, res) => {
   }
 });
 
+app.post("/api/ai/fetch-job-url", async (req, res) => {
+  const { url } = req.body;
+  if (!url) {
+    return res.status(400).json({ error: "URL is required" });
+  }
+
+  try {
+    const page = await axios.get(url, {
+      timeout: 15000,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+
+    const dom = new JSDOM(page.data);
+    const doc = dom.window.document;
+
+    // Remove unwanted elements
+    doc.querySelectorAll("script, style, nav, footer, header, iframe, noscript, svg, .nav, .footer, .header, .sidebar, .menu, .breadcrumb").forEach(el => el.remove());
+
+    const body = doc.querySelector("body") || doc.querySelector("html");
+    const rawText = body?.textContent || "";
+
+    // Clean up whitespace
+    const cleaned = rawText
+      .replace(/\t/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/\n\s*\n/g, "\n")
+      .trim()
+      .slice(0, 15000);
+
+    if (!cleaned || cleaned.length < 100) {
+      return res.status(422).json({ error: "Could not extract meaningful text from the URL." });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: "AI Key missing" });
+    }
+
+    // Use Gemini to extract job info and parse into structured data
+    const extraction = await generateContentWithRetry({
+      model: "gemini-2.5-flash",
+      contents: `You are a job scraping expert. Extract the following from this job posting page text.
+
+Return valid JSON with exactly these fields:
+- title: the job title (string)
+- company: the company name (string, or null if not found)
+- description: a clean, well-formatted job description text (string)
+
+JOB PAGE TEXT:
+${cleaned.slice(0, 12000)}`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            company: { type: Type.STRING },
+            description: { type: Type.STRING },
+          },
+          required: ["title", "description"],
+        },
+      },
+    });
+
+    const rawText2 = extraction.text || "";
+    const jsonMatch = rawText2.match(/\{[\s\S]*\}/);
+    const jsonString = jsonMatch ? jsonMatch[0] : rawText2.trim();
+    const extracted = JSON.parse(jsonString);
+
+    // Now parse the extracted description into structured requirements
+    let requirements = null;
+    try {
+      const parseRes = await generateContentWithRetry({
+        model: "gemini-2.5-flash",
+        contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
+
+FOCUS AREAS:
+- Must-have skills: Technical stack primitives.
+- Nice-to-have skills: Ecosystem add-ons.
+- Quantitative markers: Years of experience, degree types.
+- Contextual markers: Seniority, location, industry.
+
+JOB DESCRIPTION:
+${(extracted.description || cleaned).slice(0, 10000)}`,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: JOB_PARSING_SCHEMA,
+        },
+      });
+
+      const rawText3 = parseRes.text || "";
+      const jsonMatch3 = rawText3.match(/\{[\s\S]*\}/);
+      const jsonString3 = jsonMatch3 ? jsonMatch3[0] : rawText3.trim();
+      requirements = JSON.parse(jsonString3);
+    } catch (parseErr) {
+      console.warn("Secondary parse failed, returning raw extraction only:", parseErr);
+    }
+
+    res.json({
+      title: extracted.title || "",
+      company: extracted.company || "",
+      description: extracted.description || cleaned.slice(0, 5000),
+      requirements,
+    });
+  } catch (error: any) {
+    console.error("fetch-job-url error:", error.message);
+    if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+      return res.status(504).json({ error: "Request to job URL timed out. The page may be blocked or too slow." });
+    }
+    if (error.response?.status === 403) {
+      return res.status(403).json({ error: "The website blocked our request. Try copying the text manually." });
+    }
+    res.status(500).json({ error: "Failed to fetch job posting. " + error.message });
+  }
+});
+
 app.post("/api/ai/screen-candidate", async (req, res) => {
   const { resumeText, jobRequirements } = req.body;
   const currentDate = new Date().toISOString().split('T')[0];
