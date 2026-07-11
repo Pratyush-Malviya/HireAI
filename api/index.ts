@@ -1109,39 +1109,37 @@ const ai = new GoogleGenAI({
   }
 });
 
-async function generateContentWithRetry(params: any, maxRetries = 3, initialDelay = 1000) {
+async function generateContentWithRetry(params: any, maxRetries = 1, initialDelay = 300) {
+  const primaryModel = params.model;
   const modelsToTry = [
-    params.model,
-    "gemini-3.5-flash",
+    primaryModel,
     "gemini-2.5-flash",
     "gemini-2.0-flash",
-    "gemini-1.5-flash",
     "gemini-2.5-pro",
+    "gemini-1.5-flash",
     "gemini-1.5-pro",
-    "gemini-3.1-pro-preview",
-    "gemini-flash-latest",
-    "gemini-3.1-flash-lite"
-  ].filter((m, i, arr) => m && arr.indexOf(m) === i); // Deduplicate & filter undefined
+  ].filter((m, i, arr) => m && arr.indexOf(m) === i && m !== primaryModel);
+  // Primary model first, then fallbacks
+  const orderedModels = [primaryModel, ...modelsToTry];
 
   let lastError: any;
+  const startTime = Date.now();
+  const TOTAL_TIMEOUT = 15000; // 15s max total for all retries
 
-  for (const currentModel of modelsToTry) {
-    const modelParams = { ...params, model: currentModel };
-    
-    // Automatically set thinking level to "MINIMAL" on gemini-3.1-flash-lite and gemini-3.5-flash to skip reasoning delay
-    if (currentModel === "gemini-3.1-flash-lite" || currentModel === "gemini-3.5-flash") {
-      modelParams.config = {
-        ...modelParams.config,
-        thinkingConfig: {
-          thinkingLevel: "MINIMAL",
-          ...modelParams.config?.thinkingConfig
-        }
-      };
+  for (const currentModel of orderedModels) {
+    if (Date.now() - startTime > TOTAL_TIMEOUT) {
+      console.warn(`generateContentWithRetry: total timeout (${TOTAL_TIMEOUT}ms) exceeded, stopping.`);
+      throw lastError || new Error("Total timeout exceeded");
     }
 
-    const hasMoreModels = modelsToTry.indexOf(currentModel) < modelsToTry.length - 1;
+    const modelParams = { ...params, model: currentModel };
+    const hasMoreModels = orderedModels.indexOf(currentModel) < orderedModels.length - 1;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (Date.now() - startTime > TOTAL_TIMEOUT) {
+        throw lastError || new Error("Total timeout exceeded");
+      }
+
       try {
         console.log(`Sending API request using model: ${currentModel} (attempt ${attempt + 1}/${maxRetries + 1})`);
         const now = new Date();
@@ -1152,12 +1150,10 @@ Current year: ${now.getFullYear()}, month: ${now.getMonth() + 1}, day: ${now.get
 Use this as your authoritative reference for all date calculations, experience timeline evaluations, and temporal reasoning. Do NOT rely on your training data cutoff for "today's date".
 ---\n\n`;
 
-        // Prepend date/time preamble to the prompt contents
         let contentsWithDate = modelParams.contents;
         if (typeof contentsWithDate === 'string') {
           contentsWithDate = dateTimePreamble + contentsWithDate;
         } else if (Array.isArray(contentsWithDate)) {
-          // For array-style contents, prepend to the first user text part
           contentsWithDate = [{ role: 'user', parts: [{ text: dateTimePreamble }] }, ...contentsWithDate];
         }
 
@@ -1166,19 +1162,15 @@ Use this as your authoritative reference for all date calculations, experience t
       } catch (error: any) {
         lastError = error;
         
-        // Handle the SDK's specialized error structure
         const errorText = error.message || String(error);
         let errorData: any = {};
         try {
-          // Many errors come as JSON strings in the message property
           if (errorText.includes('{')) {
             const jsonStart = errorText.indexOf('{');
             const jsonEnd = errorText.lastIndexOf('}') + 1;
             errorData = JSON.parse(errorText.substring(jsonStart, jsonEnd));
           }
-        } catch (e) {
-          // Fallback to simple string check
-        }
+        } catch (e) {}
 
         const status = error.status || error.code || errorData?.error?.code || errorData?.status;
         const message = errorData?.error?.message || errorText;
@@ -1187,39 +1179,26 @@ Use this as your authoritative reference for all date calculations, experience t
         
         if (isRateLimit || isUnavailable) {
           if (hasMoreModels) {
-            // Swap to next model immediately to avoid waiting-delay loops
-            console.warn(`Model ${currentModel} rate-limited or unavailable. Swapping immediately to next model.`);
-            break; // Break current retry loop to go to next model immediately
+            console.warn(`Model ${currentModel} rate-limited/unavailable. Swapping to next model.`);
+            break;
           }
-
-          // If this is the final model and we have retries left, do short delay with jitter
           if (attempt < maxRetries) {
-            if (message?.includes('PerDay') && !message?.includes('retry in')) {
-              console.log('Daily quota exceeded. Swapping/stopping.');
-              throw error;
-            } else {
-              let delay = initialDelay * Math.pow(2, attempt); // 1s, 2s, 4s
-              
-              const retryMatch = message?.match(/retry in ([\d.]+)s/);
-              if (retryMatch) {
-                const waitTime = parseFloat(retryMatch[1]);
-                delay = Math.max(delay, (waitTime + 0.5) * 1000); // minimal buffer
-              }
-              
-              const jitter = Math.random() * 500;
-              delay = Math.min(delay + jitter, 8000); // capped lower to prevent long delays
-
-              console.log(`Transient limit on final model ${currentModel}. Retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries + 1})...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue;
-            }
+            const delay = initialDelay * Math.pow(2, attempt);
+            console.log(`Final model ${currentModel} transient. Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, Math.min(delay, 2000)));
+            continue;
           }
         }
         
-        // If the specified model isn't supported, not found, or bad request, swap immediately
         if (hasMoreModels && (status === 404 || status === 400 || errorText.includes('not found') || errorText.includes('does not exist') || errorText.includes('not supported') || errorText.includes('invalid'))) {
-          console.warn(`Model ${currentModel} returned error: ${errorText} (Status: ${status}). Falling back immediately.`);
-          break; // Try next model
+          console.warn(`Model ${currentModel} not found: ${errorText}. Trying next model.`);
+          break;
+        }
+
+        // For other errors on the primary model, try next model
+        if (hasMoreModels && currentModel === primaryModel) {
+          console.warn(`Primary model ${currentModel} failed: ${errorText}. Trying fallback models.`);
+          break;
         }
 
         throw error;
@@ -1597,22 +1576,39 @@ function chatFallback(candidateName: string, role: string, company: string, jd: 
 
   const lastUserMsg = (history?.[history.length - 1]?.text || "").toLowerCase();
   
-  if (lastUserMsg.includes("yes") || lastUserMsg.includes("ready") || lastUserMsg.includes("sure") || lastUserMsg.includes("start")) {
+  if (turnCount === 1 && (lastUserMsg.includes("yes") || lastUserMsg.includes("ready") || lastUserMsg.includes("sure") || lastUserMsg.includes("start") || lastUserMsg.includes("begin") || lastUserMsg.includes("go ahead"))) {
     return {
-      text: `Got it, that's perfect! To kick off, walk me through your core background and some of the key systems or products you've built day-to-day.`,
+      text: `Great, let's get started. So ${candidateName || "first"} — walk me through your background. What have you been working on recently and what drew you to ${role || "this role"}?`,
       aiQuotaExceeded: true
     };
   }
-  
-  if (lastUserMsg.includes("thank") || lastUserMsg.includes("bye") || lastUserMsg.includes("exit")) {
+
+  if (lastUserMsg.includes("thank") || lastUserMsg.includes("bye") || lastUserMsg.includes("exit") || lastUserMsg.includes("nothing else") || lastUserMsg.includes("that's all")) {
     return {
       text: `That's everything on my end — really helpful conversation. Thanks again for your time — I really enjoyed learning about your background. We'll be in touch about next steps soon. Take care!`,
       aiQuotaExceeded: true
     };
   }
 
+  // Varied follow-up questions based on turn count
+  const followUps = [
+    `Got it. Can you tell me about a specific project where you had to work closely with a team to deliver something under pressure?`,
+    `That's helpful. Let's shift gears a bit — talk me through a technical challenge you faced and how you approached solving it.`,
+    `Makes sense. I'm curious — what part of ${role || "your work"} do you enjoy the most, and where do you think you add the most value?`,
+    `I appreciate you walking me through that. Can you give me an example of a time you had to adapt to a major change in priorities?`,
+    `Right. Thinking about your current role, what's one thing you'd change about how things are done if you had the chance?`,
+    `That gives me a clear picture. Tell me about a situation where you disagreed with a decision — how did you handle it?`,
+    `Noted. If you were to describe your working style in a few words, what would they be and why?`,
+    `I see. Let's talk about tools and tech — what's a stack or workflow you've enjoyed working with recently?`,
+    `Good stuff. How do you typically approach learning something new for a project? Walk me through your process.`,
+    `That's a solid approach. One more thing — where do you see yourself growing in the next year or two?`
+  ];
+
+  const idx = Math.min(turnCount - 1, followUps.length - 1);
+  const text = followUps[idx];
+
   return {
-    text: `That makes sense. I can see why you went that route. Staying with that theme, tell me a bit about a tough project challenge you faced recently and how you navigated it with your team.`,
+    text,
     aiQuotaExceeded: true
   };
 }
@@ -1773,7 +1769,7 @@ app.post("/api/ai/generate-job-description", async (req, res) => {
       throw new Error("AI Key missing");
     }
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: `You are an expert HR copywriter for a modern tech company. 
       Generate a professional, comprehensive, and engaging Job Description.
       
@@ -1807,7 +1803,7 @@ app.post("/api/ai/parse-job", async (req, res) => {
       throw new Error("AI Key missing");
     }
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: `You are a Senior Technical Analyst. Deconstruct the following job description into an atomic set of requirements for an AI screening agent.
       
       FOCUS AREAS:
@@ -1875,7 +1871,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 
     // Stage 1: Adversarial Auditor
     const auditorResponse = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: `You are an Adversarial Talent Auditor. Your task is to audit the candidate's resume for any red flags, gaps, anomalies, or stability concerns.
       CURRENT DATE: ${currentDate} (Year: ${currentYear}).
       Use this as your reference date when evaluating employment timelines. Do NOT flag dates in the current year as "future-dated" — they are valid.
@@ -1898,7 +1894,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 
     // Stage 2: Technical/Ecosystem Screener
     const technicalResponse = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: `You are a Technical and Stack Screener. Your task is to perform an objective evaluation of the candidate's technical skills, tool stack, and experience depth against the job requirements.
       CURRENT DATE: ${currentDate} (Year: ${currentYear}). Use this as reference for evaluating experience timelines.
       Assess:
@@ -1961,7 +1957,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
          - 50: Significant job hopping (average tenure < 1 year per job) or substantial employment gaps (> 12 months).`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: `You are a Principal Talent Solutions Architect. Your mission is to perform a forensic, high-fidelity compilation of the candidate's screening report by synthesizing detailed evaluations from an Adversarial Auditor and a Technical Screener.
       CURRENT DATE: ${currentDate} (Year: ${currentYear}). Use this as reference for all date-related evaluations.
       
@@ -2135,7 +2131,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     - Do NOT include numbering, labels, or any formatting — output exactly 5 plain text queries, one per line`;
 
     const plannerResponse = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: plannerPrompt,
       config: { temperature: 0.1 }
     });
@@ -2218,7 +2214,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     let collectorResponse;
     try {
       collectorResponse = await generateContentWithRetry({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-2.5-flash",
         contents: collectorPrompt,
         config: {
           tools: [{ googleSearch: {} }],
@@ -2228,7 +2224,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     } catch (groundingError) {
       console.warn("OSINT Collector with Grounding failed. Retrying without Search Grounding tool:", groundingError);
       collectorResponse = await generateContentWithRetry({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-2.5-flash",
         contents: collectorPrompt,
         config: { temperature: 0.1 }
       });
@@ -2314,7 +2310,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     Output this as a detailed, structured audit report. Be specific, cite evidence from the OSINT dossier, and never fabricate information not present in the dossier.`;
 
     const auditResponse = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: auditorPrompt,
       config: { temperature: 0.05 }
     });
@@ -2464,7 +2460,7 @@ app.post("/api/ai/research-candidate", async (req, res) => {
     }`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0,
@@ -2647,7 +2643,7 @@ COGNITIVE Speaking Guidelines (ENFORCE RIGIDLY):
     }
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview", 
+      model: "gemini-2.5-flash",
       contents,
       config: {
         systemInstruction,
@@ -2674,7 +2670,7 @@ app.post("/api/ai/summarize", async (req, res) => {
       throw new Error("AI Key missing");
     }
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: `You are an elite principal technical recruiter with 20 years of experience. Analyze the following interview transcript and provide a highly detailed, objective evaluation.
       
       EVALUATION DEPTH MANDATE:
@@ -2762,7 +2758,7 @@ ${JSON.stringify(pairs.map((p, i) => ({ index: i, question: p.question, answer: 
 Return ONLY valid JSON.`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-2.5-flash",
       contents: evaluationPrompt,
       config: { responseMimeType: "application/json" }
     });

@@ -8,19 +8,27 @@ export async function generateInterviewResponse(
   resume: string,
   history: { role: 'user' | 'model'; text: string }[]
 ) {
-  const response = await fetch('/api/ai/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ candidateName, role, company, jd, resume, history })
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000);
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'AI generation failed');
+  try {
+    const response = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidateName, role, company, jd, resume, history }),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'AI generation failed');
+    }
+
+    const data = await response.json();
+    return data.text || "";
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  const data = await response.json();
-  return data.text || "";
 }
 
 export async function summarizeInterview(history: { role: 'user' | 'model'; text: string }[]) {
