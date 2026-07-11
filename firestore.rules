@@ -104,7 +104,7 @@ service cloud.firestore {
     match /organizations/{organizationId} {
       allow get: if isSignedIn();
       allow list: if isSignedIn() && isNotCandidate();
-      allow create: if isSignedIn() && isValidOrganization(incoming());
+      allow create: if isSignedIn() && isValidOrganization(request.resource.data);
       allow update: if isSignedIn() && (
         isSuperAdmin() ||
         (organizationId == getUserOrgId() && isOrgAdmin(organizationId))
@@ -144,8 +144,8 @@ service cloud.firestore {
       );
       allow create: if isSignedIn() && (
         isSuperAdmin() ||
-        (isNotCandidate() && isInOrg(incoming().organizationId))
-      ) && incoming().createdBy == request.auth.uid;
+        (isNotCandidate() && isInOrg(request.resource.data.organizationId))
+      ) && request.resource.data.createdBy == request.auth.uid;
       allow update, delete: if isSignedIn() && (
         isSuperAdmin() ||
         (isNotCandidate() && (
@@ -169,7 +169,7 @@ service cloud.firestore {
       );
       allow create: if isSignedIn() && (
         isSuperAdmin() ||
-        (isInOrg(incoming().organizationId) && isNotCandidate())
+        (isInOrg(request.resource.data.organizationId) && isNotCandidate())
       );
       allow update: if isSignedIn() && (
         isSuperAdmin() ||
@@ -177,7 +177,7 @@ service cloud.firestore {
         (resource.data.organizationId == getTokenOrgId() && isHRStaff(getTokenOrgId())) ||
         // Allow candidates to update their own interview status
         (resource.data.get('email', '') == request.auth.token.get('email', '') &&
-         incoming().diff(resource.data).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']))
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']))
       );
       allow delete: if isSignedIn() && (
         isSuperAdmin() ||
@@ -192,8 +192,8 @@ service cloud.firestore {
     match /screening_cache/{cacheId} {
       allow read, list: if isSignedIn();
       allow create: if isSignedIn()
-        && incoming().keys().hasAll(['cacheHash', 'result', 'createdAt'])
-        && incoming().cacheHash is string;
+        && request.resource.data.keys().hasAll(['cacheHash', 'result', 'createdAt'])
+        && request.resource.data.cacheHash is string;
       allow update: if false;
       allow delete: if isSuperAdmin();
     }
@@ -212,15 +212,15 @@ service cloud.firestore {
       );
       allow create: if isSignedIn() && (
         isSuperAdmin() ||
-        (isNotCandidate() && isInOrg(incoming().organizationId))
+        (isNotCandidate() && isInOrg(request.resource.data.organizationId))
       );
       allow update: if isSignedIn() && (
         isSuperAdmin() ||
         (resource.data.organizationId == getUserOrgId() && isHRStaff(getUserOrgId())) ||
         (resource.data.organizationId == getTokenOrgId() && isHRStaff(getTokenOrgId())) ||
         (get(/databases/$(database)/documents/candidates/$(resource.data.candidateId)).data.get('email', '') == request.auth.token.get('email', '') &&
-         incoming().diff(resource.data).affectedKeys().hasAny(['messages', 'completed', 'feedback', 'completedAt']) &&
-         isValidInterview(incoming()))
+         request.resource.data.diff(resource.data).affectedKeys().hasAny(['messages', 'completed', 'feedback', 'completedAt']) &&
+         isValidInterview(request.resource.data))
       );
       allow delete: if isSignedIn() && (
         isSuperAdmin() ||
