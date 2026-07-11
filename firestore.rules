@@ -39,11 +39,11 @@ service cloud.firestore {
     }
 
     function getTokenRole() {
-      return request.auth.token.role;
+      return request.auth.token.get('role', null);
     }
 
     function getTokenOrgId() {
-      return request.auth.token.orgId;
+      return request.auth.token.get('orgId', null);
     }
 
     function isInOrg(orgId) {
