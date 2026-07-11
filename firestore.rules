@@ -176,10 +176,12 @@ service cloud.firestore {
         (resource.data.get('email', '') == request.auth.token.get('email', '') &&
          incoming().diff(resource.data).affectedKeys().hasOnly(['interviewStatus', 'messages', 'meetLink', 'status']))
       );
-      allow delete: if isSignedIn() && isNotCandidate() && (
+      allow delete: if isSignedIn() && (
         isSuperAdmin() ||
-        (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
-        (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
+        (isNotCandidate() && (
+          (resource.data.organizationId == getUserOrgId() && isOrgAdmin(getUserOrgId())) ||
+          (resource.data.organizationId == getTokenOrgId() && isOrgAdmin(getTokenOrgId()))
+        ))
       );
     }
 
