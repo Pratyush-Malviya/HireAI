@@ -2655,18 +2655,23 @@ import { v4 as uuidv4 } from "uuid";
 import admin from "firebase-admin";
 
 // Initialize Firebase Admin for Storage access if credentials are provided
-if (!admin.apps.length && process.env.FIREBASE_PROJECT_ID) {
+if (!admin.apps.length) {
   try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // Handle escaped newlines in environment variables
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-    });
-    console.log("Firebase Admin Initialized successfully.");
+    if (process.env.FIREBASE_PROJECT_ID) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          // Handle escaped newlines in environment variables
+          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+      });
+      console.log("Firebase Admin Initialized successfully with cert.");
+    } else {
+      admin.initializeApp();
+      console.log("Firebase Admin Initialized successfully with application default credentials.");
+    }
   } catch (e) {
     console.warn("Notice: Failed to initialize Firebase Admin:", e);
   }
