@@ -114,11 +114,7 @@ service cloud.firestore {
 
     // Users (profiles)
     match /users/{uid} {
-      allow read: if isSignedIn() && isNotCandidate() && (
-        isSuperAdmin() ||
-        uid == request.auth.uid ||
-        getUserOrgId() == get(/databases/$(database)/documents/users/$(uid)).data.organizationId
-      );
+      allow read: if isSignedIn();
       allow create: if isSignedIn() && uid == request.auth.uid;
       allow update: if isSignedIn() && isNotCandidate() && (
         isSuperAdmin() ||
