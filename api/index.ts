@@ -1125,7 +1125,7 @@ async function generateContentWithRetry(params: any, maxRetries = 1, initialDela
 
   let lastError: any;
   const startTime = Date.now();
-  const TOTAL_TIMEOUT = 15000; // 15s max total for all retries
+  const TOTAL_TIMEOUT = 120000; // 120s max total for all retries
 
   for (const currentModel of orderedModels) {
     if (Date.now() - startTime > TOTAL_TIMEOUT) {
@@ -1495,22 +1495,43 @@ async function searchDuckDuckGo(query: string, maxResults = 8): Promise<{title: 
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
+      },
+      signal: AbortSignal.timeout(10000)
     });
     const html = await response.text();
     const dom = new JSDOM(html);
     const doc = dom.window.document;
     const results: {title: string, url: string, snippet: string}[] = [];
-    const links = doc.querySelectorAll('a.result__a');
-    const snippets = doc.querySelectorAll('.result__snippet');
+
+    // Try primary selectors first
+    let links = doc.querySelectorAll('a.result__a');
+    let snippets = doc.querySelectorAll('.result__snippet');
+
+    // Fallback selectors if primary ones return nothing (DDG HTML changes)
+    if (links.length === 0) {
+      links = doc.querySelectorAll('a[class*="result"]');
+    }
+    if (snippets.length === 0) {
+      snippets = doc.querySelectorAll('[class*="snippet"]');
+    }
+
     for (let i = 0; i < Math.min(links.length, maxResults); i++) {
       const link = links[i];
       const snippet = snippets[i];
+      let rawUrl = link.getAttribute('href') || '';
+      try {
+        const u = new URL(rawUrl, 'https://duckduckgo.com');
+        const uddg = u.searchParams.get('uddg');
+        if (uddg) rawUrl = decodeURIComponent(uddg);
+      } catch {}
       results.push({
         title: link.textContent?.trim() || '',
-        url: link.getAttribute('href') || '',
+        url: rawUrl,
         snippet: snippet?.textContent?.trim() || ''
       });
+    }
+    if (results.length === 0) {
+      console.warn(`DDG search returned 0 results for query: ${query}`);
     }
     return results;
   } catch (err) {
@@ -1537,59 +1558,58 @@ async function fetchPageText(url: string, maxChars = 4000): Promise<string> {
 }
 
 function researchCandidateFallback(candidateName: string, role: string, company: string, details: string) {
-  const summaryMarkdown = `## 🔍 Executive Intelligence Report: ${candidateName || "Candidate"}
-*Role: ${role || "Specialist"} at ${company || "Confidential Employer"} | Research Status: Fallback Mode*
+  const summaryMarkdown = `## Research Report: ${candidateName || "Candidate"}
+*Role: ${role || "Specialist"} at ${company || "Confidential Employer"} | Research Status: FAILED - Live Search Unavailable*
 
 ### 1. Identity & Verification Status
-Live search grounding tools are temporarily unavailable (API rate limit reached). This report was constructed using local verification algorithms and resume data alignment. Identity confidence is estimated at **HIGH_CONFIDENCE** based on internal heuristics, but manual verification is recommended before final hiring decisions.
+Live search and AI analysis were unavailable. No public profile data was retrieved. Manual verification is required.
 
 ### 2. Professional Footprint Analysis
-Automated search scans could not be completed at this time. No live public profile data was retrieved from LinkedIn, GitHub, or other platforms. Recruiter should manually verify the candidate's professional profiles using the contact information provided on their resume.
+Automated research could not be completed. No live public profile data was retrieved from LinkedIn, GitHub, or other platforms.
 
 ### 3. Social Media & Digital Presence
-Live platform scans were not available during this research session. Please manually check:
-- **LinkedIn**: Search for "${candidateName || "Candidate"}" and confirm their role at ${company || "their listed company"}
+Platform scans were not available. Please manually verify:
+- **LinkedIn**: Search for "${candidateName || "Candidate"}" to confirm their role at ${company || "their listed company"}
 - **GitHub**: Search for their username if provided in the resume
-- Other platforms: Check for public content matching their listed skills
 
 ### 4. Technical Depth Assessment
-Based on resume analysis only. Live technical contribution audit (GitHub repositories, packages, articles) could not be completed. Claimed skills could not be cross-referenced against public work.
+Based on resume analysis only. Live technical contribution audit could not be completed.
 
 ### 5. Career & Leadership Intelligence
-Resume-based assessment only. Employment verification against company public records was not completed in this session.
+Resume-based assessment only. Employment verification could not be completed.
 
 ### 6. Reputation & Community Standing
-No reputation data could be retrieved from public sources. Manual reference checks are recommended.
+No reputation data could be retrieved.
 
 ### 7. Risk Analysis & Red Flags
-🟢 **Low** — No automated red flags detected from resume analysis. Note: live cross-verification was not available.
+Research unavailable — could not verify claims.
 
 ### 8. Hiring Intelligence Recommendation
-**Conditional Proceed**: Strong resume signals detected. Recommend proceeding to interview stage while manually verifying social profiles and employment history before final offer. Trigger a fresh Deep Research scan when API availability is restored.`;
+Manual verification required. Review the candidate's resume directly and verify profiles manually.`;
 
   return {
-    status: "HIGH_CONFIDENCE",
-    message: "Research constructed via local alignment fallback. Live search grounding was unavailable. Manual verification recommended.",
-    identity_confidence: 72,
-    technical_score: 75,
-    leadership_score: 70,
-    communication_score: 75,
-    reputation_score: 60,
-    risk_score: 10,
-    overall_recommendation: "GOOD_MATCH",
+    status: "LOW_CONFIDENCE",
+    message: "Research could not be completed. Live search and AI analysis were unavailable. Manual verification required.",
+    identity_confidence: 0,
+    technical_score: 0,
+    leadership_score: 0,
+    communication_score: 0,
+    reputation_score: 0,
+    risk_score: 50,
+    overall_recommendation: "NOT_RECOMMENDED",
     summary: summaryMarkdown,
-    career_narrative: "Demonstrates consistent career progression with steady roles across modern technology frameworks. Manual verification of employment history is recommended since live cross-referencing was unavailable for this research session.",
-    technical_depth: `Resume-based assessment only. Claimed skills in ${role} role appear consistent with standard industry expectations. Live codebase validation (GitHub, npm, publications) could not be completed — trigger a fresh research scan when available.`,
-    leadership_potential: "Able to drive features independently based on resume signals. Solid communication and collaborative indicators shown. Leadership evidence could not be cross-verified against public sources.",
-    communication_quality: "Resume-level assessment only. No public writing samples, blog posts, or talks could be retrieved for this session.",
-    hiring_recommendation: `Recommended for initial interview. Strong resume alignment for ${role} detected. Before final offer, manually verify: LinkedIn profile, employment history at ${company || "listed companies"}, and technical portfolio. Re-run Deep Research for live verification.`,
-    risk_signals: "No automated red flags detected from resume analysis. Note: live OSINT cross-verification was unavailable — manual checks recommended.",
-    seniority_estimate: "Senior",
-    engineering_depth_score: 75,
-    problem_solving_score: 75,
-    stability_score: 80,
-    growth_trajectory: "Resume indicates consistent advancement with progressive responsibilities. Live verification of promotion patterns was not available in this session.",
-    industry_visibility_score: 55,
+    career_narrative: "Research unavailable - could not verify employment history.",
+    technical_depth: `Research unavailable - could not verify technical skills for ${role}.`,
+    leadership_potential: "Research unavailable - could not assess leadership evidence.",
+    communication_quality: "Research unavailable - could not assess communication quality.",
+    hiring_recommendation: `Manual verification required for ${candidateName || "candidate"}. Review resume directly and verify LinkedIn, GitHub, and employment history manually.`,
+    risk_signals: "Research unavailable - could not identify risk signals.",
+    seniority_estimate: "Unknown",
+    engineering_depth_score: 0,
+    problem_solving_score: 0,
+    stability_score: 0,
+    growth_trajectory: "Research unavailable - could not analyze career trajectory.",
+    industry_visibility_score: 0,
     verified_profiles: [
       { name: "LinkedIn", url: "", status: "Not Found" },
       { name: "GitHub", url: "", status: "Not Found" },
@@ -2141,7 +2161,7 @@ app.post("/api/ai/screen-candidate", async (req, res) => {
 app.post("/api/ai/research-candidate", async (req, res) => {
   const { candidateName, role, company, details, resumeText, skills, jobTitle } = req.body;
 
-  const resumeSnippet = resumeText ? resumeText.substring(0, 4000) : 'Not provided';
+  const resumeSnippet = resumeText ? resumeText.substring(0, 8000) : 'Not provided';
   const skillsList = skills || 'Not provided';
   const targetTitle = jobTitle || role;
 
@@ -2591,8 +2611,8 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       growth_trajectory: jsonResult.growth_trajectory || "Progressive performance across employment positions.",
       industry_visibility_score: jsonResult.industry_visibility_score !== undefined ? jsonResult.industry_visibility_score : 60,
       verified_profiles: jsonResult.verified_profiles || [
-        { name: "LinkedIn", url: "#", status: "Unverified" },
-        { name: "GitHub", url: "#", status: "Unverified" }
+        { name: "LinkedIn", url: "", status: "Not Found" },
+        { name: "GitHub", url: "", status: "Not Found" }
       ]
     };
 
@@ -2604,9 +2624,12 @@ app.post("/api/ai/research-candidate", async (req, res) => {
         uri: c.web.uri
       })) : [];
 
+    const profileSources = (finalResult.verified_profiles || [])
+      .filter((vp: any) => vp.url && vp.url !== '')
+      .map((vp: any) => ({ title: `${vp.name} Profile (${vp.status})`, uri: vp.url }));
     res.json({
       ...finalResult,
-      sources: finalResult.verified_profiles?.map((vp: any) => ({ title: `${vp.name} Profile (${vp.status})`, uri: vp.url })).concat(sources) || sources,
+      sources: [...profileSources, ...sources],
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
@@ -2617,14 +2640,14 @@ app.post("/api/ai/research-candidate", async (req, res) => {
       if (allFoundUrls?.length > 0) {
         const urlItems = allFoundUrls.slice(0, 15).map((url: string, i: number) => `      ${i + 1}. ${url}`);
         const urlList = urlItems.join("\n");
-        const enhancedSummary = `## 🔍 Executive Intelligence Report: ${candidateName || "Candidate"}
-*Role: ${role || "Specialist"} at ${company || "Confidential Employer"} | Live search: ${allFoundUrls.length} sources found*
+        const enhancedSummary = `## Research Report: ${candidateName || "Candidate"}
+*Role: ${role || "Specialist"} at ${company || "Confidential Employer"} | Live search: ${allFoundUrls.length} URLs found, but AI analysis unavailable*
 
 ### 1. Identity & Verification Status
-Live search results were found for this candidate. The AI-powered analysis was unavailable due to rate limits, but the following public URLs were discovered via web search. Manual verification is recommended.
+Live search found ${allFoundUrls.length} URLs but AI-powered analysis was unavailable. Manual verification required.
 
-### 2. Real Web Search Results
-The following ${allFoundUrls.length} URLs were found by searching for "${candidateName || "Candidate"}":
+### 2. URLs Discovered via Web Search
+The following URLs were found by searching for "${candidateName || "Candidate"}":
 
 ${urlList}
 
@@ -2632,23 +2655,25 @@ ${urlList}
 ${allFoundSnippets ? `Search snippets revealed: ${allFoundSnippets.substring(0, 3000)}` : "Snippets were not available from the search results."}
 
 ### 4. Technical Depth Assessment
-Resume-based assessment only. For real verification, check the URLs found above.
+Resume-based assessment only. Check the URLs found above for real verification.
 
 ### 5. Hiring Intelligence Recommendation
-Conditional Proceed: Resume signals detected. Manually verify the candidate's profiles using the URLs discovered above before making a final decision.`;
+Manual verification required. Use the URLs discovered above to verify the candidate's profiles.`;
         fallbackResult.summary = enhancedSummary;
         fallbackResult.sources = allFoundUrls.map((url: string) => ({ title: `Found URL: ${url.substring(0, 80)}`, uri: url }));
         fallbackResult.verified_profiles = fallbackResult.verified_profiles || [];
-        // Mark profiles as "Potential" if their URLs appeared in search results
         for (const fp of fallbackResult.verified_profiles) {
           const name = fp.name.toLowerCase();
           const matchingUrl = allFoundUrls.find((u: string) => u.toLowerCase().includes(name));
           if (matchingUrl) {
             fp.url = matchingUrl;
-            fp.status = "Potential";
+            fp.status = "Probable";
           }
         }
-        fallbackResult.message = `Live search found ${allFoundUrls.length} URLs. AI analysis was unavailable — manual review recommended.`;
+        fallbackResult.message = `Live search discovered ${allFoundUrls.length} URLs. AI analysis was unavailable — manual review required.`;
+        fallbackResult.status = "MEDIUM_CONFIDENCE";
+        fallbackResult.identity_confidence = 30;
+        fallbackResult.overall_recommendation = "POTENTIAL_MATCH";
       }
       res.json(fallbackResult);
     } catch (fallbackError) {

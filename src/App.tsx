@@ -7783,10 +7783,14 @@ function CandidateDetail() {
       } catch (error) {
         console.error('Firestore save failed for research:', error);
         localStorage.setItem(`research_fallback_${candidate.id}`, JSON.stringify(result));
-        notify('Research complete but could not sync to cloud. Data saved locally.', 'info');
+        notify('Research saved locally (cloud sync failed).', 'info');
       }
       setResearchStep('');
-      notify('Deep Research Complete: Multi-source verification synced.', 'success');
+      if (result.aiQuotaExceeded || result.status === 'LOW_CONFIDENCE' || result.status === 'NOT_FOUND') {
+        notify(`Research incomplete: ${result.message || 'Live search unavailable. Manual verification required.'}`, 'warn');
+      } else {
+        notify('Deep research complete — profiles and skills verified against live sources.', 'success');
+      }
     } catch (error: any) {
       console.error('Deep Research Error:', error);
       const fallback = localStorage.getItem(`research_fallback_${candidate.id}`);
@@ -8567,15 +8571,34 @@ function CandidateDetail() {
               const riskSignals = res.risk_signals || 'No potential inconsistencies detected.';
               const overallRecommendation = res.overall_recommendation || 'GOOD_MATCH';
               const verifiedProfiles = res.verified_profiles || [
-                { name: 'LinkedIn', url: '#', status: 'Unverified' },
-                { name: 'GitHub', url: '#', status: 'Unverified' },
-                { name: 'StackOverflow', url: '#', status: 'Unverified' }
+                { name: 'LinkedIn', url: '', status: 'Not Found' },
+                { name: 'GitHub', url: '', status: 'Not Found' },
+                { name: 'StackOverflow', url: '', status: 'Not Found' }
               ];
               const summaryText = res.summary || '';
               const sources = res.sources || [];
 
               return (
                 <div className="space-y-8 font-sans">
+                  {(status === 'LOW_CONFIDENCE' || status === 'NOT_FOUND') && (
+                    <div className="p-4 rounded-2xl border border-red-500/30 bg-red-500/5 flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-black text-red-400 uppercase tracking-wider">Research Incomplete</p>
+                        <p className="text-xs text-white mt-1">{res.message || 'Live search and AI analysis were unavailable. No profiles could be verified automatically.'}</p>
+                        <p className="text-xs text-white mt-1 font-medium">Manually verify the candidate by searching their name on LinkedIn, GitHub, and other professional platforms.</p>
+                      </div>
+                    </div>
+                  )}
+                  {(status === 'MEDIUM_CONFIDENCE' && res.aiQuotaExceeded) && (
+                    <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-black text-amber-400 uppercase tracking-wider">Partial Research - URLs Found, AI Analysis Unavailable</p>
+                        <p className="text-xs text-white mt-1">Web search found some URLs but AI-powered verification could not be completed. Review the discovered URLs manually.</p>
+                      </div>
+                    </div>
+                  )}
                   {/* Row 1: Section 7 - Confidence Meter Panel, Competency Radar & Section 1: Verified Profiles */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* CONFIDENCE METER (Section 7) */}
@@ -16027,7 +16050,7 @@ export default function App() {
 
   // Notification State
   const [confirmState, setConfirmState] = useState<{ msg: string; resolve: (val: boolean) => void } | null>(null);
-  const [notifications, setNotifications] = useState<{ id: string; msg: string; type: 'success' | 'error' | 'info' }[]>([]);
+  const [notifications, setNotifications] = useState<{ id: string; msg: string; type: 'success' | 'error' | 'info' | 'warn' }[]>([]);
 
   const confirm = (msg: string): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -16035,7 +16058,7 @@ export default function App() {
     });
   };
 
-  const notify = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const notify = (msg: string, type: 'success' | 'error' | 'info' | 'warn' = 'info') => {
     const id = Math.random().toString(36).slice(2);
     setNotifications(prev => [...prev, { id, msg, type }]);
     setTimeout(() => {
@@ -16273,11 +16296,13 @@ export default function App() {
                 className={cn(
                   "px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 min-w-[280px] pointer-events-auto",
                   n.type === 'success' ? "glass-premium border-green-500/30 text-green-300" :
-                  n.type === 'error' ? "glass-premium border-red-500/30 text-red-300" : "glass-premium border-white/10 text-white"
+                  n.type === 'error' ? "glass-premium border-red-500/30 text-red-300" :
+                  n.type === 'warn' ? "glass-premium border-amber-500/30 text-amber-300" : "glass-premium border-white/10 text-white"
                 )}
               >
                 {n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : 
-                 n.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
+                 n.type === 'error' ? <AlertCircle className="w-5 h-5" /> : 
+                 n.type === 'warn' ? <AlertTriangle className="w-5 h-5" /> : <Loader2 className="w-5 h-5 animate-spin" />}
                 <span className="text-sm font-black uppercase tracking-tight">{n.msg}</span>
               </motion.div>
             ))}
